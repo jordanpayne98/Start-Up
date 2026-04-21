@@ -1,0 +1,23 @@
+.bankruptcy-warning {
+    background-color: rgba(251, 113, 133, 0.08);
+    border-width: 1px;
+    border-color: rgba(251, 113, 133, 0.35);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.bankruptcy-warning .btn-warning {
+    background-color: var(--accent-warning);
+    color: var(--text-dark);
+    border-width: 0;
+    border-radius: var(--radius-md);
+    padding: 6px 12px;
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    cursor: link;
+}
+
+.bankruptcy-warning .btn-warning:hover {
+    background-color: rgba(251, 191, 36, 0.85);
+}

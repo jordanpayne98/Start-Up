@@ -1,0 +1,18 @@
+.my-investments-screen {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.investments-summary-card {
+    flex-grow: 1;
+    padding: 12px;
+    margin-right: 8px;
+}
+
+.holdings-section {
+    margin-bottom: 16px;
+}
+
+.watchlist-section {
+    margin-top: 16px;
+}

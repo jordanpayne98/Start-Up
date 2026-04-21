@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 191ff352f86147f4c83110d915268705, type: 3}
+  m_Name: ToolMaker
+  m_EditorClassIdentifier: Assembly-CSharp::CompetitorArchetypeConfig
+  archetype: 1
+  releaseIntervalMonthsMin: 6
+  releaseIntervalMonthsMax: 12
+  personalityMin:
+    RiskTolerance: 0.3
+    RdSpeed: 0.45
+    BrandInvestment: 0.25
+    PricingAggression: 0.1
+    InnovationBias: 0.5
+  personalityMax:
+    RiskTolerance: 0.65
+    RdSpeed: 0.85
+    BrandInvestment: 0.6
+    PricingAggression: 0.5
+    InnovationBias: 0.9
+  primaryCategories: 0300000006000000
+  secondaryCategories: 0400000005000000
+  marketingBudgetRatio: 0.15
+  salaryBudgetRatio: 0.5
+  maintenanceBudgetRatio: 0.2
+  reserveBudgetRatio: 0.15
+  expansionCashThreshold: 250000
+  expansionRiskTolerance: 0.45
+  sunsetMonths: 18
+  maxSimultaneousProducts: 2
+  dateShiftReactivity: 0.4
+  prefersRush: 0
+  maxDateShiftFraction: 0.2
+  baseSkillRange: {x: 10, y: 15}
+  syntheticCARange: {x: 110, y: 150}
+  syntheticMoraleRange: {x: 55, y: 75}
+  syntheticWorkEthicRange: {x: 10, y: 14}
+  syntheticCreativeRange: {x: 10, y: 14}
+  syntheticAdaptabilityRange: {x: 9, y: 14}
+  roleFitRatio: 0.35
+  syntheticTeamSizeRange: {x: 5, y: 10}

@@ -1,0 +1,12 @@
+.disruption-modal {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: var(--bg-primary);
+}
+
+.disruption-modal .modal-footer {
+    padding: 12px 0 0 0;
+    border-top-width: 1px;
+    border-top-color: var(--border-subtle);
+    margin-top: 12px;
+}

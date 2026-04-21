@@ -1,0 +1,176 @@
+/* ── Competitor Detail Modal ─────────────────────────────── */
+
+.competitor-detail-modal {
+    flex-grow: 1;
+    padding: 0;
+    background-color: var(--bg-primary);
+    flex-direction: column;
+}
+
+.competitor-detail-modal .modal-header {
+    padding: 16px 20px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+    background-color: var(--bg-secondary);
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ── Tab bar ─────────────────────────────────────────────── */
+
+.detail-modal__tab-bar {
+    flex-direction: row;
+    background-color: var(--bg-secondary);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+}
+
+/* ── Body ────────────────────────────────────────────────── */
+
+.detail-modal__body {
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ── Tab panels ──────────────────────────────────────────── */
+
+.tab-panel {
+    display: none;
+    flex-grow: 1;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding: 16px 20px;
+}
+
+.tab-panel--active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Sections ────────────────────────────────────────────── */
+
+.detail-modal__section {
+    margin-bottom: 16px;
+}
+
+.detail-modal__section-header {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+    -unity-text-align: upper-left;
+}
+
+/* ── Info rows ───────────────────────────────────────────── */
+
+.info-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+/* ── Niche row ───────────────────────────────────────────── */
+
+.niche-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+/* ── Product rows ────────────────────────────────────────── */
+
+.product-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+}
+
+.product-row__left {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.product-row__right {
+    flex-direction: row;
+    flex-shrink: 0;
+    align-items: center;
+}
+
+.product-row__right Label {
+    margin-left: 12px;
+    min-width: 60px;
+    -unity-text-align: middle-right;
+}
+
+/* ── Employee rows ───────────────────────────────────────── */
+
+.employee-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+}
+
+.employee-row Label {
+    min-width: 80px;
+    -unity-text-align: middle-left;
+}
+
+/* ── Revenue / expense rows ──────────────────────────────── */
+
+.revenue-row,
+.expense-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+/* ── Summary bar (employees tab) ─────────────────────────── */
+
+.summary-bar {
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 12px 0;
+    margin-bottom: 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+}
+
+.summary-box {
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+}
+
+.summary-box Label {
+    -unity-text-align: middle-center;
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+
+.empty-state {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 13px;
+    -unity-text-align: middle-center;
+    padding: 16px;
+}
+
+.hidden {
+    display: none;
+}

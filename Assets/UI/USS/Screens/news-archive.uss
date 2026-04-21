@@ -1,0 +1,28 @@
+.news-archive-screen {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.news-report-row {
+    padding: 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255,255,255,0.05);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.news-report-row--selected {
+    background-color: rgba(80, 140, 220, 0.15);
+}
+
+.news-report-row--unread .news-title {
+    font-weight: bold;
+}
+
+.news-section-header {
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    margin-top: 8px;
+}

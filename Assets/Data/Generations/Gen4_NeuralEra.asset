@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4ac5cffc0c16be40a6975c82e50d48c, type: 3}
+  m_Name: Gen4_NeuralEra
+  m_EditorClassIdentifier: Assembly-CSharp::ArchitectureGenerationDefinition
+  generationId: 4
+  displayName: Gen 4 - Neural Era
+  description: Quantum computing, brain-computer interfaces, and holographic displays
+    transform human-machine interaction.
+  arrivalTickMin: 40296000
+  arrivalTickMax: 47304000
+  transitionDurationTicks: 4380000
+  marketGrowthMultiplier: 1.6
+  paradigms:
+  - {fileID: 11400000, guid: d0f1cfc2408345a4ba42deb2b306f2c4, type: 2}
+  - {fileID: 11400000, guid: 5f42d4c7fc7d1084eacde4e28fde79b2, type: 2}
+  - {fileID: 11400000, guid: 9eaa17e7bffa08541bfe0c15413a5409, type: 2}
+  - {fileID: 11400000, guid: 6c8c49c6c1d8b52419b17af4a7ee752c, type: 2}
+  - {fileID: 11400000, guid: ae9364ee0777500499d84183cd3139e9, type: 2}
+  - {fileID: 11400000, guid: 3b1dccf34b74c2b43aaa9c83e0fe1ce9, type: 2}
+  featureCapByProductType: 0f0000000e0000000c0000000d0000000c0000000c0000000c0000000e0000000c0000000c0000000c0000000c0000000c0000000d0000000d000000

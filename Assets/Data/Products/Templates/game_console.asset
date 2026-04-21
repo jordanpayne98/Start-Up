@@ -1,0 +1,133 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9cf6717fcc82f04cb10f6a4a76d9245, type: 3}
+  m_Name: game_console
+  m_EditorClassIdentifier: Assembly-CSharp::ProductTemplateDefinition
+  templateId: game_console
+  displayName: Game Console
+  description: Hardware+software platform for gaming
+  category: 1
+  layer: 0
+  baseUpfrontCost: 500000
+  difficultyTier: 5
+  validTargetPlatforms: 
+  validPlatformNiches: 
+  requiredToolTypes: 06000000
+  ownToolQualityBonus: 0.1
+  licensedToolQualityBonus: 0.05
+  optimalTeamSizePerPhase: 8
+  paradigmSensitivity: 0.8
+  nicheConfigs: []
+  revenueModelOptions:
+  - store_cut
+  - subscription
+  phases:
+  - phaseType: 0
+    primaryRole: 1
+    baseWorkUnits: 250
+    prerequisites: 
+    qualitySoftCapBase: 80
+  - phaseType: 1
+    primaryRole: 0
+    baseWorkUnits: 500
+    prerequisites: 00000000
+    qualitySoftCapBase: 80
+  - phaseType: 4
+    primaryRole: 3
+    baseWorkUnits: 200
+    prerequisites: 00000000
+    qualitySoftCapBase: 80
+  - phaseType: 6
+    primaryRole: 2
+    baseWorkUnits: 300
+    prerequisites: 01000000
+    qualitySoftCapBase: 80
+  availableFeatures:
+  - {fileID: 11400000, guid: c15a97b29f11b2d4993f312495db5132, type: 2}
+  - {fileID: 11400000, guid: 234f4407c5cb97c44858f8ee5bd25ff6, type: 2}
+  - {fileID: 11400000, guid: 0326cbdfadec16a49a8e9f5faa7070db, type: 2}
+  - {fileID: 11400000, guid: e34a2520a3c27094f855e68987f9d5d4, type: 2}
+  - {fileID: 11400000, guid: 32e29f62b58f22f4cad97a4439193534, type: 2}
+  - {fileID: 11400000, guid: cc9c89b9690f2ae4f8ff1fc9facbbe51, type: 2}
+  - {fileID: 11400000, guid: a9a283c87d651524aac3486e194d9bea, type: 2}
+  - {fileID: 11400000, guid: b9800f4be661f3347a606675a55afbcc, type: 2}
+  - {fileID: 11400000, guid: c3e468e19eecb1b4787db288eaeb70ea, type: 2}
+  - {fileID: 11400000, guid: d3506eb9a49d8da49ab1f567d414b6fe, type: 2}
+  - {fileID: 11400000, guid: 462153f356d59a04ca13f5cf226801ee, type: 2}
+  - {fileID: 11400000, guid: 1846d3323249e3540be0a7f1abc44f1a, type: 2}
+  - {fileID: 11400000, guid: afbf6b80d3fd2e743892948f9e420fe5, type: 2}
+  - {fileID: 11400000, guid: 52e8b8a00caa8894a854d3703528a383, type: 2}
+  - {fileID: 11400000, guid: a765aebe2c0880549b19b63a0bb38921, type: 2}
+  - {fileID: 11400000, guid: f8222add77514df4485eb342b6f3f99d, type: 2}
+  - {fileID: 11400000, guid: a2ad8ca6017fac746a84e35ad33040a6, type: 2}
+  - {fileID: 11400000, guid: 8c8d496bb865f4549bf981efd3906d7d, type: 2}
+  - {fileID: 11400000, guid: 5e64f5937350fbb4686cc6792d8be902, type: 2}
+  - {fileID: 11400000, guid: c58e7537cd4f381408dc42f438a99e5d, type: 2}
+  - {fileID: 11400000, guid: b615abfa801fef149b5c512fd360bf7c, type: 2}
+  - {fileID: 11400000, guid: 136f4cb6b9f8b4740a3437c9bb733765, type: 2}
+  - {fileID: 11400000, guid: e5819b2bd41bbe2439f523e52fa503d7, type: 2}
+  - {fileID: 11400000, guid: dc1c4d1d99c870447a401c72e2643d66, type: 2}
+  - {fileID: 11400000, guid: c0b1996ff110b6c46a0dd74ccc3312c1, type: 2}
+  - {fileID: 11400000, guid: 70f9cf104ebe7474b95cadc0a6b0a4e7, type: 2}
+  - {fileID: 11400000, guid: 4b94f64cec223cc4c89a36d1e6263acc, type: 2}
+  - {fileID: 11400000, guid: 3012317d9a6873a4db5ace946799be56, type: 2}
+  - {fileID: 11400000, guid: e2b55dcbee4a82444809906198f41127, type: 2}
+  - {fileID: 11400000, guid: 5bcb49e0bf2b8d9459144b5a10120d74, type: 2}
+  - {fileID: 11400000, guid: 77189e4a456892a40ba17bdf77835f79, type: 2}
+  - {fileID: 11400000, guid: 4151c8ffcf373a4499c8208914e52b7e, type: 2}
+  - {fileID: 11400000, guid: 66ac62365fbb0694695891b0b8b84b94, type: 2}
+  - {fileID: 11400000, guid: 29f159d894f63d14cbd48179a6e30422, type: 2}
+  - {fileID: 11400000, guid: 674435b46250edc4bb4d859f3ccc4466, type: 2}
+  - {fileID: 11400000, guid: 95e64124c7de48141bff3abd29b36981, type: 2}
+  - {fileID: 11400000, guid: cebf396e389b8b344aa269766313a389, type: 2}
+  - {fileID: 11400000, guid: 7f31a29f69466a04fa8dc390d7a88e48, type: 2}
+  - {fileID: 11400000, guid: 43db9a9f937e4be4bb239c6c3622be64, type: 2}
+  - {fileID: 11400000, guid: c0a043f171916cf478d105ab7abc4b03, type: 2}
+  - {fileID: 11400000, guid: e1ddb9f1dbecffc46b095da119e980e1, type: 2}
+  economyConfig:
+    isSubscriptionBased: 0
+    launchSalesBase: 8000
+    pricePerUnit: 400
+    tailDecayRate: 0.03
+    minTailFactor: 0.08
+    monthlySubscriptionPrice: 10
+    baseChurnRate: 0.01
+    maintenanceChurnReduction: 0.003
+    organicGrowthRate: 0.04
+    updateSalesSpikeMult: 1.5
+    updatePopularityBoost: 6
+    maintenancePopDecayReduction: 0.6
+    breakoutBaseChance: 0.03
+    breakoutMinMultiplier: 3
+    breakoutMaxMultiplier: 12
+    plateauDecayRatePerMonth: 0.01
+    declineDecayRatePerMonth: 0.03
+    ticksToGrowthStage: 432000
+    bugChurnMultiplier: 2
+    shipBugPopularityPenalty: 3
+    maxMonthlyBugPopularityPenalty: 6
+    unmaintainedBugGrowthBase: 0.08
+    sequelPopularityBoostMax: 30
+    maxUserPool: 200000000
+    basePricePerUnit: 400
+    baseSubscriptionPrice: 10
+    priceElasticityExponent: 1.2
+    nicheVolatility: 0.15
+    retentionMonths: 60
+    interestRate: 0.08
+    baseDemand: 25
+    demandFloor: 0
+    demandCeiling: 100
+    recoveryRateMin: 0.02
+    recoveryRateMax: 0.06
+    saturationThreshold: 3
+    saturationPenaltyPerProduct: 0.5

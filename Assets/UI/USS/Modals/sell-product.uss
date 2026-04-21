@@ -1,0 +1,22 @@
+.sell-product-modal {
+    flex-grow: 1;
+    padding: 0;
+    background-color: var(--bg-primary);
+}
+
+.sell-product-modal .modal-header {
+    padding: 16px 20px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+    background-color: var(--bg-secondary);
+}
+
+.sell-product-modal .modal-body {
+    padding: 16px 20px;
+}
+
+.sell-product-modal .modal-footer {
+    padding: 12px 20px;
+    border-top-width: 1px;
+    border-top-color: var(--border-subtle);
+}

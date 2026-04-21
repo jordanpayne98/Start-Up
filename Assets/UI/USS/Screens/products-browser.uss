@@ -1,0 +1,20 @@
+.products-browser-screen {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.filter-bar {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 4px 0;
+}
+
+.product-row--competitor {
+    opacity: 0.85;
+}
+
+.product-row--player {
+    border-left-width: 2px;
+    border-left-color: rgb(80, 160, 220);
+}

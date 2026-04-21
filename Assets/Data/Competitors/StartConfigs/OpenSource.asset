@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caad3ec2759eb6d43b48e6b034c131ed, type: 3}
+  m_Name: OpenSource
+  m_EditorClassIdentifier: Assembly-CSharp::CompetitorStartConfig
+  companyName: FreeForge Foundation
+  founderName: Erik Lindqvist
+  archetype: 4
+  personality:
+    RiskTolerance: 0.5
+    RdSpeed: 0.55
+    BrandInvestment: 0.3
+    PricingAggression: 0.1
+    InnovationBias: 0.6
+  specializations: 06000000
+  startingProducts:
+  - category: 0
+    niche: 2
+    productName: FreeForge Kernel
+    quality: 80
+    marketSharePercent: 40
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 72
+    licensingRate: 0
+  - category: 6
+    niche: -1
+    productName: FreeForge Toolkit
+    quality: 75
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 24
+    licensingRate: 0
+  - category: 4
+    niche: -1
+    productName: FreeForge Canvas
+    quality: 65
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 36
+    licensingRate: 0
+  - category: 5
+    niche: -1
+    productName: FreeForge Waveform
+    quality: 62
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 36
+    licensingRate: 0
+  - category: 9
+    niche: -1
+    productName: FreeForge Scribe
+    quality: 62
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 30
+    licensingRate: 0
+  - category: 9
+    niche: -1
+    productName: FreeForge Ledger
+    quality: 58
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 36
+    licensingRate: 0

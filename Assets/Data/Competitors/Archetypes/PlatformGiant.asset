@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 191ff352f86147f4c83110d915268705, type: 3}
+  m_Name: PlatformGiant
+  m_EditorClassIdentifier: Assembly-CSharp::CompetitorArchetypeConfig
+  archetype: 0
+  releaseIntervalMonthsMin: 8
+  releaseIntervalMonthsMax: 16
+  personalityMin:
+    RiskTolerance: 0.2
+    RdSpeed: 0.3
+    BrandInvestment: 0.6
+    PricingAggression: 0.4
+    InnovationBias: 0.3
+  personalityMax:
+    RiskTolerance: 0.55
+    RdSpeed: 0.65
+    BrandInvestment: 0.95
+    PricingAggression: 0.85
+    InnovationBias: 0.65
+  primaryCategories: 0000000001000000
+  secondaryCategories: 09000000
+  marketingBudgetRatio: 0.25
+  salaryBudgetRatio: 0.4
+  maintenanceBudgetRatio: 0.2
+  reserveBudgetRatio: 0.15
+  expansionCashThreshold: 750000
+  expansionRiskTolerance: 0.3
+  sunsetMonths: 36
+  maxSimultaneousProducts: 3
+  dateShiftReactivity: 0.15
+  prefersRush: 0
+  maxDateShiftFraction: 0.1
+  baseSkillRange: {x: 12, y: 16}
+  syntheticCARange: {x: 140, y: 190}
+  syntheticMoraleRange: {x: 60, y: 80}
+  syntheticWorkEthicRange: {x: 10, y: 14}
+  syntheticCreativeRange: {x: 8, y: 12}
+  syntheticAdaptabilityRange: {x: 8, y: 14}
+  roleFitRatio: 0.3
+  syntheticTeamSizeRange: {x: 8, y: 14}

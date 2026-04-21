@@ -1,0 +1,51 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <!-- Competitor Detail Modal: structure is built programmatically by CompetitorProfileView.Initialize() -->
+    <!-- This file documents the layout for reference only. -->
+    <ui:VisualElement name="competitor-detail-modal" class="competitor-detail-modal">
+        <!-- Header -->
+        <ui:VisualElement name="header" class="modal-header">
+            <ui:Label name="company-name" text="Company Name" class="text-xl text-bold" />
+            <ui:Label name="reputation-badge" text="Startup" class="badge badge--neutral" />
+            <ui:Button name="btn-close" text="✕" class="btn-sm" />
+        </ui:VisualElement>
+
+        <!-- Tab bar -->
+        <ui:VisualElement name="tab-bar" class="detail-modal__tab-bar">
+            <ui:Button name="tab-overview"  text="Overview"  class="tab-button tab-selected" />
+            <ui:Button name="tab-products"  text="Products"  class="tab-button" />
+            <ui:Button name="tab-employees" text="Employees" class="tab-button" />
+            <ui:Button name="tab-finance"   text="Finance"   class="tab-button" />
+        </ui:VisualElement>
+
+        <!-- Body: panels are shown/hidden via tab-panel--active USS class -->
+        <ui:VisualElement name="body" class="detail-modal__body">
+
+            <!-- Overview panel -->
+            <ui:ScrollView name="panel-overview" class="tab-panel tab-panel--active">
+                <!-- Info rows: Founder, Archetype, Employees, Products -->
+                <!-- Stock card -->
+                <!-- Niche presence card -->
+            </ui:ScrollView>
+
+            <!-- Products panel -->
+            <ui:ScrollView name="panel-products" class="tab-panel">
+                <!-- Active Products section header + pool -->
+                <!-- In Development section header + pool -->
+            </ui:ScrollView>
+
+            <!-- Employees panel -->
+            <ui:ScrollView name="panel-employees" class="tab-panel">
+                <!-- Summary bar: Headcount, Avg Skill, Avg Morale, Avg Salary -->
+                <!-- Employee list pool -->
+            </ui:ScrollView>
+
+            <!-- Finance panel -->
+            <ui:ScrollView name="panel-finance" class="tab-panel">
+                <!-- Finance summary card: Cash, Revenue, Expenses, Profit, Health -->
+                <!-- Revenue breakdown pool -->
+                <!-- Expense breakdown pool -->
+            </ui:ScrollView>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

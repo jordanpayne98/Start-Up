@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ed41949ba1de5342b77ec47c45d000b, type: 3}
+  m_Name: AppProductivity
+  m_EditorClassIdentifier: Assembly-CSharp::MarketNicheData
+  niche: 24
+  displayName: App Productivity
+  baseDemand: 55
+  volatility: 3
+  recoveryRate: 0.05
+  recoveryRateMin: 0.02
+  recoveryRateMax: 0.1
+  saturationThreshold: 5
+  saturationPenaltyPerProduct: 0.4
+  demandFloor: 0
+  demandCeiling: 100
+  maxUserPool: 25000000
+  interestRate: 0.15
+  basePricePerUnit: 5
+  baseSubscriptionPrice: 4
+  devTimeMultiplier: 1
+  coreAffinity: 1
+  technicalAffinity: 0.8
+  socialAffinity: 1
+  qualityOfLifeAffinity: 1.5
+  contentAffinity: 1

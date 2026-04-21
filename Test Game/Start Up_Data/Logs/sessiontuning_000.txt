@@ -1,0 +1,6 @@
+﻿=== TUNING LOG ===
+Started: 2026-04-02 12:09:45
+Session: 0
+============================================================
+
+[BOUND] TuningLogger bound to GameController

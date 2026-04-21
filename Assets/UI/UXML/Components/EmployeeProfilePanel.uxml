@@ -1,0 +1,65 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="False">
+  <ui:VisualElement name="employee-profile-panel" class="profile-panel">
+
+    <!-- Current Ability -->
+    <ui:VisualElement name="ability-section" class="profile-section">
+      <ui:Label name="ability-label" text="Current Ability" class="profile-section__title" />
+      <ui:VisualElement class="ability-gauge-row">
+        <ui:Label name="ca-value-label" text="--" class="ca-value" />
+        <ui:VisualElement name="ability-gauge-track" class="ability-gauge-track">
+          <ui:VisualElement name="ability-gauge-fill" class="ability-gauge-fill ability-gauge--low" />
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Potential Ability — star rating only -->
+    <ui:VisualElement name="potential-section" class="profile-section">
+      <ui:Label name="potential-label" text="Potential" class="profile-section__title" />
+      <ui:Label name="pa-stars-label" text="" class="pa-stars" />
+    </ui:VisualElement>
+
+    <!-- Candidate-only: fuzzy PA estimate -->
+    <ui:VisualElement name="est-section" class="profile-section profile-section--candidate">
+      <ui:Label text="CA Estimate" class="profile-section__title" />
+      <ui:Label name="est-ca-range-label" text="" class="est-value" />
+      <ui:Label text="Potential Estimate" class="profile-section__title" />
+      <ui:Label name="est-pa-range-label" text="" class="est-value" />
+      <ui:Label name="confidence-label" text="" class="confidence-label" />
+    </ui:VisualElement>
+
+    <!-- Hidden Attributes (hired employees only) -->
+    <ui:VisualElement name="hidden-attrs-section" class="profile-section">
+      <ui:Label text="Attributes" class="profile-section__title" />
+
+      <ui:VisualElement class="attr-row">
+        <ui:Label text="Learning Rate" class="attr-row__name" />
+        <ui:Label name="learning-rate-label" text="" class="attr-row__value" />
+      </ui:VisualElement>
+
+      <ui:VisualElement class="attr-row">
+        <ui:Label text="Creative" class="attr-row__name" />
+        <ui:Label name="creative-label" text="" class="attr-row__value" />
+      </ui:VisualElement>
+
+      <ui:VisualElement class="attr-row">
+        <ui:Label text="Work Ethic" class="attr-row__name" />
+        <ui:Label name="work-ethic-label" text="" class="attr-row__value" />
+      </ui:VisualElement>
+
+      <ui:VisualElement class="attr-row">
+        <ui:Label text="Adaptability" class="attr-row__name" />
+        <ui:Label name="adaptability-label" text="" class="attr-row__value" />
+      </ui:VisualElement>
+
+      <ui:VisualElement class="attr-row">
+        <ui:Label text="Ambition" class="attr-row__name" />
+        <ui:Label name="ambition-label" text="" class="attr-row__value" />
+      </ui:VisualElement>
+    </ui:VisualElement>
+
+  </ui:VisualElement>
+</ui:UXML>

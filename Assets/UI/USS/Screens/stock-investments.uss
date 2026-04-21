@@ -1,0 +1,18 @@
+.stock-investments-screen {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.stock-listing-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 8px;
+}
+
+.stock-owned-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgb(80, 200, 120);
+    margin-right: 6px;
+}

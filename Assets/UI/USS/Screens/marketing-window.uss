@@ -1,0 +1,133 @@
+/* Forecast entry layout */
+.forecast-entry {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.08);
+    border-left-color: rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(0, 0, 0, 0.20);
+    border-right-color: rgba(0, 0, 0, 0.20);
+}
+
+.forecast-entry__header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.forecast-entry__name {
+    font-size: var(--font-md);
+    -unity-font-style: bold;
+    color: var(--text-light);
+    flex-grow: 1;
+}
+
+.forecast-entry__text {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    white-space: normal;
+    margin-top: var(--spacing-xs);
+}
+
+.forecast-entry__warning {
+    font-size: var(--font-sm);
+    color: var(--accent-warning);
+    margin-top: var(--spacing-xs);
+    -unity-font-style: italic;
+}
+
+/* Time horizon selector */
+.horizon-selector {
+    flex-direction: row;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-xs);
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+.horizon-btn {
+    background-color: transparent;
+    color: var(--text-muted);
+    border-width: 0;
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-sm);
+    transition: background-color var(--transition-fast);
+}
+
+.horizon-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.horizon-btn--active {
+    background-color: var(--accent-primary);
+    color: var(--text-dark);
+    -unity-font-style: bold;
+}
+
+/* Confidence badges */
+.confidence-high {
+    color: var(--accent-success);
+    -unity-font-style: bold;
+}
+
+.confidence-moderate {
+    color: var(--accent-primary);
+}
+
+.confidence-low {
+    color: var(--accent-warning);
+}
+
+.confidence-very-low {
+    color: var(--accent-danger);
+    -unity-font-style: italic;
+}
+
+/* Trend indicators */
+.trend-rising {
+    color: var(--accent-success);
+}
+
+.trend-stable {
+    color: var(--text-muted);
+}
+
+.trend-falling {
+    color: var(--accent-danger);
+}
+
+/* Sale product row */
+.sale-row {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom-width: 1px;
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.sale-row__name {
+    flex-grow: 1;
+    font-size: var(--font-sm);
+    color: var(--text-light);
+}
+
+.sale-row__status {
+    font-size: var(--font-sm);
+    margin-right: var(--spacing-sm);
+}
+
+.sale-row__status--active {
+    color: var(--accent-success);
+    -unity-font-style: bold;
+}
+
+.sale-row__status--cooldown {
+    color: var(--text-muted);
+}
+
+.sale-row__status--ready {
+    color: var(--accent-primary);
+}

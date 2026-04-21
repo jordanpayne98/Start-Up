@@ -1,0 +1,181 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d8a5d98e717cdd4c96fa1c849893a09, type: 3}
+  m_Name: Games
+  m_EditorClassIdentifier: Assembly-CSharp::ContractCategoryDefinition
+  CategoryId: games
+  DisplayName: Games
+  Subjects:
+  - Puzzle Game
+  - Platform Game
+  - Racing Game
+  - Card Game
+  - Strategy Game
+  - Adventure Game
+  - Arcade Game
+  - Trivia Game
+  - Shooter Game
+  - Simulation Game
+  DifficultyContextHints:
+  - An indie creator wants a simple game with basic gameplay and a handful of levels.
+  - A small studio wants a polished game with decent graphics and audio.
+  - A games publisher wants a feature-complete game with smooth performance.
+  - A publisher wants a premium game with rich content and high production values.
+  - A major studio needs a flagship title with top-tier graphics, audio and gameplay.
+  MinDifficulty: 1
+  MaxDifficulty: 5
+  DifficultyWeights: 280000001e0000000f0000000a00000005000000
+  DifficultyTiers:
+  - Difficulty: 1
+    MinSkill: 2
+    TargetSkill: 5
+    ExcellenceSkill: 8
+    MinContributors: 1
+    OptimalContributors: 2
+    MaxContributors: 4
+    WorkMin: 2200
+    WorkMax: 4000
+    RewardMin: 10000
+    RewardMax: 25000
+    DeadlineDaysMin: 4
+    DeadlineDaysMax: 8
+    QualityThresholdMin: 35
+    QualityThresholdMax: 50
+  - Difficulty: 2
+    MinSkill: 4
+    TargetSkill: 8
+    ExcellenceSkill: 12
+    MinContributors: 1
+    OptimalContributors: 3
+    MaxContributors: 5
+    WorkMin: 9000
+    WorkMax: 16000
+    RewardMin: 30000
+    RewardMax: 60000
+    DeadlineDaysMin: 7
+    DeadlineDaysMax: 13
+    QualityThresholdMin: 45
+    QualityThresholdMax: 60
+  - Difficulty: 3
+    MinSkill: 7
+    TargetSkill: 11
+    ExcellenceSkill: 15
+    MinContributors: 2
+    OptimalContributors: 4
+    MaxContributors: 6
+    WorkMin: 22000
+    WorkMax: 40000
+    RewardMin: 75000
+    RewardMax: 140000
+    DeadlineDaysMin: 11
+    DeadlineDaysMax: 18
+    QualityThresholdMin: 55
+    QualityThresholdMax: 70
+  - Difficulty: 4
+    MinSkill: 9
+    TargetSkill: 14
+    ExcellenceSkill: 18
+    MinContributors: 2
+    OptimalContributors: 5
+    MaxContributors: 7
+    WorkMin: 44000
+    WorkMax: 75000
+    RewardMin: 170000
+    RewardMax: 300000
+    DeadlineDaysMin: 14
+    DeadlineDaysMax: 22
+    QualityThresholdMin: 65
+    QualityThresholdMax: 78
+  - Difficulty: 5
+    MinSkill: 12
+    TargetSkill: 17
+    ExcellenceSkill: 20
+    MinContributors: 3
+    OptimalContributors: 6
+    MaxContributors: 8
+    WorkMin: 80000
+    WorkMax: 150000
+    RewardMin: 350000
+    RewardMax: 600000
+    DeadlineDaysMin: 18
+    DeadlineDaysMax: 30
+    QualityThresholdMin: 72
+    QualityThresholdMax: 85
+  MilestonePaymentFraction: 0
+  HasStretchGoal: 1
+  StretchGoalBonusMultiplier: 1.4
+  StretchGoalWorkMultiplier: 1.3
+  DefaultQualityExpectation: 0
+  PhaseProfileVariants:
+  - Phases:
+    - PrimarySkill: 1
+      WorkFraction: 1
+      QualityWeight: 1
+  - Phases:
+    - PrimarySkill: 4
+      WorkFraction: 1
+      QualityWeight: 1
+  - Phases:
+    - PrimarySkill: 1
+      WorkFraction: 0.65
+      QualityWeight: 0.65
+    - PrimarySkill: 0
+      WorkFraction: 0.35
+      QualityWeight: 0.35
+  - Phases:
+    - PrimarySkill: 1
+      WorkFraction: 0.65
+      QualityWeight: 0.65
+    - PrimarySkill: 4
+      WorkFraction: 0.35
+      QualityWeight: 0.35
+  - Phases:
+    - PrimarySkill: 1
+      WorkFraction: 0.5
+      QualityWeight: 0.5
+    - PrimarySkill: 0
+      WorkFraction: 0.35
+      QualityWeight: 0.35
+    - PrimarySkill: 4
+      WorkFraction: 0.15
+      QualityWeight: 0.15
+  - Phases:
+    - PrimarySkill: 1
+      WorkFraction: 0.5
+      QualityWeight: 0.5
+    - PrimarySkill: 0
+      WorkFraction: 0.35
+      QualityWeight: 0.35
+    - PrimarySkill: 8
+      WorkFraction: 0.15
+      QualityWeight: 0.15
+  - Phases:
+    - PrimarySkill: 8
+      WorkFraction: 0.5
+      QualityWeight: 0.5
+    - PrimarySkill: 1
+      WorkFraction: 0.35
+      QualityWeight: 0.35
+    - PrimarySkill: 4
+      WorkFraction: 0.15
+      QualityWeight: 0.15
+  - Phases:
+    - PrimarySkill: 0
+      WorkFraction: 0.65
+      QualityWeight: 0.65
+    - PrimarySkill: 1
+      WorkFraction: 0.35
+      QualityWeight: 0.35
+  PhaseProfiles: []
+  RequiredUpgradeId: 
+  Adjectives: []
+  Verbs: []

@@ -1,0 +1,22 @@
+.industry-overview-screen {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.ranking-column {
+    flex-grow: 1;
+    padding: 12px;
+    margin-right: 8px;
+}
+
+.ranking-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.disruption-major {
+    border-left-width: 3px;
+    border-left-color: rgb(220, 80, 60);
+    padding-left: 8px;
+}

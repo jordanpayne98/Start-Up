@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9cf6717fcc82f04cb10f6a4a76d9245, type: 3}
+  m_Name: mobile_app
+  m_EditorClassIdentifier: Assembly-CSharp::ProductTemplateDefinition
+  templateId: mobile_app
+  displayName: Mobile App
+  description: "Apps for phones/tablets \u2014 targets mobile OS"
+  category: 8
+  layer: 2
+  baseUpfrontCost: 5000
+  difficultyTier: 2
+  validTargetPlatforms: 00000000
+  validPlatformNiches: 01000000
+  requiredToolTypes: 0600000004000000
+  ownToolQualityBonus: 0.1
+  licensedToolQualityBonus: 0.05
+  optimalTeamSizePerPhase: 3
+  paradigmSensitivity: 1.1
+  nicheConfigs:
+  - niche: 22
+    retentionMonths: 24
+    volatility: 0.25
+  - niche: 23
+    retentionMonths: 12
+    volatility: 0.5
+  - niche: 24
+    retentionMonths: 24
+    volatility: 0.25
+  revenueModelOptions:
+  - premium
+  - subscription
+  - free_to_play
+  phases:
+  - phaseType: 0
+    primaryRole: 1
+    baseWorkUnits: 60
+    prerequisites: 
+    qualitySoftCapBase: 80
+  - phaseType: 1
+    primaryRole: 0
+    baseWorkUnits: 120
+    prerequisites: 00000000
+    qualitySoftCapBase: 80
+  - phaseType: 6
+    primaryRole: 2
+    baseWorkUnits: 72
+    prerequisites: 01000000
+    qualitySoftCapBase: 80
+  availableFeatures:
+  - {fileID: 11400000, guid: 4bd01c9dcc5d5da4d8e3934bcd80bb4b, type: 2}
+  - {fileID: 11400000, guid: fc9f930fdf0fcf044a832071fcb75d9f, type: 2}
+  - {fileID: 11400000, guid: bd3d9c716bca12045851d1757479e750, type: 2}
+  - {fileID: 11400000, guid: f256b5454ecd3494aa66ae8f315de0d2, type: 2}
+  - {fileID: 11400000, guid: 5fecd37604b144f43b83dc3f7ec7d3e9, type: 2}
+  - {fileID: 11400000, guid: 6bc2849e73764614682b151dff845e77, type: 2}
+  - {fileID: 11400000, guid: dfcdca1da3f2b5249a451797720d4476, type: 2}
+  - {fileID: 11400000, guid: e90d58c004d847648932fd2293055501, type: 2}
+  - {fileID: 11400000, guid: f744b27bf5adddc4ab169b674f27be43, type: 2}
+  - {fileID: 11400000, guid: 7c7893a0f06fc7543b83b1c8908d650c, type: 2}
+  - {fileID: 11400000, guid: df24f6e99013d974faeff8bb6a3fd9f3, type: 2}
+  - {fileID: 11400000, guid: d1fc36e47e158864d926b1ea4c8e0fe6, type: 2}
+  - {fileID: 11400000, guid: 91fc65328ead2114d9d8d01aa702ffee, type: 2}
+  - {fileID: 11400000, guid: b3c8efd9bb20e3c4c94824eac365df4a, type: 2}
+  - {fileID: 11400000, guid: a7a908099af4f374eb8d68b8733bafb9, type: 2}
+  economyConfig:
+    isSubscriptionBased: 0
+    launchSalesBase: 5000
+    pricePerUnit: 4
+    tailDecayRate: 0.08
+    minTailFactor: 0.05
+    monthlySubscriptionPrice: 2
+    baseChurnRate: 0.05
+    maintenanceChurnReduction: 0.01
+    organicGrowthRate: 0.04
+    updateSalesSpikeMult: 1.3
+    updatePopularityBoost: 3
+    maintenancePopDecayReduction: 0.4
+    breakoutBaseChance: 0.03
+    breakoutMinMultiplier: 2
+    breakoutMaxMultiplier: 8
+    plateauDecayRatePerMonth: 0.04
+    declineDecayRatePerMonth: 0.08
+    ticksToGrowthStage: 72000
+    bugChurnMultiplier: 1.5
+    shipBugPopularityPenalty: 2
+    maxMonthlyBugPopularityPenalty: 5
+    unmaintainedBugGrowthBase: 0.1
+    sequelPopularityBoostMax: 15
+    maxUserPool: 0
+    basePricePerUnit: 0
+    baseSubscriptionPrice: 0
+    priceElasticityExponent: 0
+    nicheVolatility: 0
+    retentionMonths: 0
+    interestRate: 0
+    baseDemand: 0
+    demandFloor: 0
+    demandCeiling: 0
+    recoveryRateMin: 0
+    recoveryRateMax: 0
+    saturationThreshold: 0
+    saturationPenaltyPerProduct: 0

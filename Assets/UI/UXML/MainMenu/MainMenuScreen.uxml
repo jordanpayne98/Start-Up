@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="project://database/Assets/UI/USS/Common/variables.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Common/base.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Common/components.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/main-menu.uss" />
+    <ui:VisualElement name="main-menu-root" class="main-menu-root">
+        <ui:VisualElement name="menu-panel" class="menu-panel">
+            <ui:Label name="game-title" text="START UP" class="game-title" />
+            <ui:Label name="tagline" text="// BUILD. SCALE. DOMINATE." class="tagline" />
+            <ui:VisualElement class="menu-spacer" />
+            <ui:Button name="btn-new-game" text="New Game" class="btn-primary menu-btn" />
+            <ui:Button name="btn-continue" text="Continue" class="btn-secondary menu-btn" />
+            <ui:Button name="btn-load-game" text="Load Game" class="btn-secondary menu-btn" />
+            <ui:Button name="btn-settings" text="Settings" class="btn-secondary menu-btn" />
+            <ui:Button name="btn-exit" text="Exit" class="btn-ghost menu-btn" />
+            <ui:Label name="version-label" text="v0.0.188" class="version-label" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

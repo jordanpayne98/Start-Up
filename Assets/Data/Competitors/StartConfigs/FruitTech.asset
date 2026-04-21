@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caad3ec2759eb6d43b48e6b034c131ed, type: 3}
+  m_Name: FruitTech
+  m_EditorClassIdentifier: Assembly-CSharp::CompetitorStartConfig
+  companyName: PearByte
+  founderName: Marcus Ashford
+  archetype: 0
+  personality:
+    RiskTolerance: 0.4
+    RdSpeed: 0.5
+    BrandInvestment: 0.9
+    PricingAggression: 0.8
+    InnovationBias: 0.55
+  specializations: 00000000
+  startingProducts:
+  - category: 0
+    niche: 1
+    productName: PearByte Prism
+    quality: 85
+    marketSharePercent: 45
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 48
+    licensingRate: 0.15
+  - category: 0
+    niche: 0
+    productName: PearByte Orion
+    quality: 82
+    marketSharePercent: 25
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 60
+    licensingRate: 0
+  - category: 8
+    niche: 22
+    productName: PearByte Memo
+    quality: 72
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 30
+    licensingRate: 0
+  - category: 8
+    niche: 23
+    productName: PearByte Hive
+    quality: 68
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 18
+    licensingRate: 0
+  - category: 9
+    niche: -1
+    productName: PearByte Compose
+    quality: 65
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 24
+    licensingRate: 0

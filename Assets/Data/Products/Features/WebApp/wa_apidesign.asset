@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2502559550f61fd408209db370e24c4b, type: 3}
+  m_Name: wa_apidesign
+  m_EditorClassIdentifier: Assembly-CSharp::ProductFeatureDefinition
+  featureId: wa_apidesign
+  displayName: API Design
+  description: 
+  featureCategory: 31
+  availableFromGeneration: 1
+  nativeOnly: 0
+  paradigmAffinities:
+  - paradigmId: api_economy
+    affinity: 1.5
+  requiresPlatformFeature: 
+  requiresToolFeature: 
+  synergyFeatureIds:
+  - wa_caching
+  conflictFeatureIds: []
+  prerequisiteFeatureIds: []
+  synergyBonusPercent: 6
+  conflictPenaltyPercent: 0
+  constrainedByHardware: -1
+  minimumHardwareTier: -1
+  formFactorRequired: -1
+  requiredTotalSkillPoints: 0
+  requiredSkillType: 0
+  baseCost: 1500
+  devCostMultiplier: 0.8
+  qualityWeight: 1
+  demandIntroductionGen: 0
+  demandMaturitySpeed: 2
+  isFoundational: 0

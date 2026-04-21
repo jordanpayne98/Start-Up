@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2502559550f61fd408209db370e24c4b, type: 3}
+  m_Name: gc_remoteplay
+  m_EditorClassIdentifier: Assembly-CSharp::ProductFeatureDefinition
+  featureId: gc_remoteplay
+  displayName: Remote Play
+  description: Stream your console's gameplay to a phone, tablet, or PC over local
+    or internet connection.
+  featureCategory: 2
+  availableFromGeneration: 3
+  nativeOnly: 0
+  paradigmAffinities:
+  - paradigmId: streaming_media
+    affinity: 1.4
+  - paradigmId: edge_computing
+    affinity: 1.3
+  requiresPlatformFeature: 
+  requiresToolFeature: 
+  synergyFeatureIds:
+  - gc_screenshare
+  conflictFeatureIds: []
+  prerequisiteFeatureIds:
+  - gc_online
+  synergyBonusPercent: 6
+  conflictPenaltyPercent: 0
+  constrainedByHardware: 1
+  minimumHardwareTier: 2
+  formFactorRequired: -1
+  requiredTotalSkillPoints: 35
+  requiredSkillType: 0
+  baseCost: 32000
+  devCostMultiplier: 1
+  qualityWeight: 0.8
+  demandIntroductionGen: 3
+  demandMaturitySpeed: 3
+  isFoundational: 0

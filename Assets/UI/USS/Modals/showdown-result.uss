@@ -1,0 +1,16 @@
+.showdown-result-modal {
+    flex-grow: 1;
+    padding: 16px 20px;
+    background-color: var(--bg-primary);
+}
+
+.showdown-result-modal .modal-header {
+    margin-bottom: 0;
+}
+
+.showdown-result-modal .modal-footer {
+    padding: 12px 0 0 0;
+    border-top-width: 1px;
+    border-top-color: var(--border-subtle);
+    margin-top: 12px;
+}

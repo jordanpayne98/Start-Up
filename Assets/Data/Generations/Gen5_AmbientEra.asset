@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4ac5cffc0c16be40a6975c82e50d48c, type: 3}
+  m_Name: Gen5_AmbientEra
+  m_EditorClassIdentifier: Assembly-CSharp::ArchitectureGenerationDefinition
+  generationId: 5
+  displayName: Gen 5 - Ambient Era
+  description: General AI, biological computing, and zero-latency networks enable
+    ambient intelligent systems.
+  arrivalTickMin: 52560000
+  arrivalTickMax: 61320000
+  transitionDurationTicks: 4380000
+  marketGrowthMultiplier: 1.8
+  paradigms:
+  - {fileID: 11400000, guid: a068c622eda584a428d3a0e8be106f1d, type: 2}
+  - {fileID: 11400000, guid: 7bfcc81d55eba0443b4710f2cc054ef1, type: 2}
+  - {fileID: 11400000, guid: 4e804e4a2bb55d3409e356343c55cc52, type: 2}
+  - {fileID: 11400000, guid: bc45d26d156ea83488616c7fef801d32, type: 2}
+  - {fileID: 11400000, guid: 541909207cf85b445b86f178a0d47144, type: 2}
+  - {fileID: 11400000, guid: 4bac947584c9f5b409fb07c8c92c3749, type: 2}
+  featureCapByProductType: 12000000110000000e000000100000000f0000000f0000000f000000110000000e0000000e0000000e0000000f0000000e0000000f00000010000000

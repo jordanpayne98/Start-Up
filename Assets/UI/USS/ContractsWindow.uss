@@ -1,0 +1,873 @@
+.contracts-window-root {
+    flex-grow: 1;
+    background-color: var(--bg-primary);
+    padding: 20px;
+}
+
+.contracts-header {
+    background-color: var(--bg-secondary);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.header-label {
+    font-size: 14px;
+    color: var(--text-light);
+    -unity-font-style: bold;
+    margin-bottom: 10px;
+}
+
+.filter-controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.filter-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    min-width: 70px;
+}
+
+.difficulty-toggles {
+    flex-direction: row;
+    gap: 4px;
+}
+
+.difficulty-toggle {
+    background-color: var(--bg-tertiary);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    transition: background-color 0.15s;
+}
+
+.difficulty-toggle:hover {
+    background-color: var(--bg-secondary);
+    border-top-color:    rgba(76, 201, 176, 0.80);
+    border-left-color:   rgba(76, 201, 176, 0.80);
+    border-bottom-color: rgba(76, 201, 176, 0.40);
+    border-right-color:  rgba(76, 201, 176, 0.40);
+}
+
+.difficulty-toggle-active {
+    background-color: var(--accent-success);
+    border-top-color:    rgba(255, 255, 255, 0.22);
+    border-left-color:   rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+    color: var(--text-light);
+}
+
+.skill-type-dropdown,
+.sort-dropdown {
+    min-width: 150px;
+    background-color: var(--bg-secondary);
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    color: var(--text-light);
+}
+
+.search-field {
+    min-width: 200px;
+    background-color: var(--bg-secondary);
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    color: var(--text-light);
+}
+
+.contracts-main-content {
+    flex-direction: row;
+    flex-grow: 1;
+    gap: 20px;
+}
+
+.contracts-column {
+    flex: 1;
+    min-width: 400px;
+}
+
+.contracts-scroll {
+    flex-grow: 1;
+    background-color: var(--bg-floor);
+    border-width: 1px;
+    border-top-color:    rgba(0, 0, 0, 0.38);
+    border-left-color:   rgba(0, 0, 0, 0.38);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+    border-right-color:  rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.contract-card {
+    background-color: var(--bg-secondary);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    transition-property: border-color, background-color, transform;
+    transition-duration: 0.2s;
+}
+
+.contract-card:hover {
+    border-top-color:    rgba(76, 201, 176, 0.55);
+    border-left-color:   rgba(76, 201, 176, 0.55);
+    border-bottom-color: rgba(76, 201, 176, 0.25);
+    border-right-color:  rgba(76, 201, 176, 0.25);
+    background-color: var(--bg-tertiary);
+}
+
+.contract-card-safe {
+    border-left-color: rgba(100, 200, 100, 0.6);
+}
+
+.contract-card-warning {
+    border-left-color: rgba(255, 200, 50, 0.7);
+}
+
+.contract-card-urgent {
+    border-left-color: rgba(255, 80, 80, 0.9);
+    animation-name: pulse-urgent;
+    animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes pulse-urgent {
+    0% { border-color: rgba(255, 80, 80, 0.8); }
+    50% { border-color: rgba(255, 80, 80, 1); }
+    100% { border-color: rgba(255, 80, 80, 0.8); }
+}
+
+.contract-card-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.contract-name {
+    font-size: 16px;
+    color: var(--text-light);
+    -unity-font-style: bold;
+}
+
+.difficulty-stars {
+    flex-direction: row;
+    gap: 2px;
+}
+
+.difficulty-star {
+    font-size: 14px;
+    color: rgb(196, 154, 64);
+}
+
+.contract-difficulty {
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+}
+
+.difficulty-1 { background-color: rgba(100, 200, 100, 0.7); }
+.difficulty-2 { background-color: rgba(150, 200, 80, 0.7); }
+.difficulty-3 { background-color: rgba(255, 200, 50, 0.7); }
+.difficulty-4 { background-color: rgba(255, 150, 50, 0.7); }
+.difficulty-5 { background-color: rgba(255, 80, 80, 0.7); }
+
+.contract-description {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    white-space: normal;
+}
+
+.skill-badges-container {
+    flex-direction: row;
+    gap: 6px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.skill-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: white;
+    -unity-font-style: bold;
+}
+
+.skill-programming { background-color: rgba(100, 180, 255, 0.7); }
+.skill-design      { background-color: rgba(255, 120, 180, 0.7); }
+.skill-qa          { background-color: rgba(150, 255, 120, 0.7); }
+
+.contract-info-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 12px;
+}
+
+.contract-info-label { color: var(--text-muted); }
+.contract-info-value { color: var(--text-light); }
+.contract-requirements { color: var(--accent-info); }
+.contract-reward { color: var(--accent-success); -unity-font-style: bold; }
+.contract-deadline { color: var(--accent-warning); }
+
+.deadline-safe    { color: var(--accent-success); }
+.deadline-warning { color: var(--accent-warning); }
+.deadline-urgent  { color: var(--accent-danger); -unity-font-style: bold; }
+
+.contract-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: 10px;
+    gap: 8px;
+}
+
+.view-details-button {
+    background-color: var(--accent-info);
+    color: white;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.22);
+    border-left-color:   rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    -unity-text-align: middle-center;
+    transition: background-color 0.15s, scale 0.1s;
+}
+
+.view-details-button:hover {
+    background-color: rgb(90, 160, 250);
+    scale: 1.05;
+}
+
+.view-details-button:active {
+    background-color: rgb(50, 120, 210);
+    scale: 0.95;
+    border-top-color:    rgba(0, 0, 0, 0.20);
+    border-left-color:   rgba(0, 0, 0, 0.20);
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-right-color:  rgba(255, 255, 255, 0.10);
+}
+
+.accept-contract-button {
+    background-color: var(--accent-success);
+    color: white;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.22);
+    border-left-color:   rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    transition: background-color 0.15s, scale 0.1s;
+}
+
+.accept-contract-button:hover {
+    background-color: rgb(72, 203, 156);
+    scale: 1.05;
+}
+
+.accept-contract-button:active {
+    background-color: rgb(42, 163, 116);
+    scale: 0.95;
+    border-top-color:    rgba(0, 0, 0, 0.20);
+    border-left-color:   rgba(0, 0, 0, 0.20);
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-right-color:  rgba(255, 255, 255, 0.10);
+}
+
+.active-contract-card {
+    background-color: var(--bg-secondary);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    border-radius: 8px;
+    padding: 12px;
+    padding-left: 14px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.active-contract-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.contract-progress-section {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.contract-team-info {
+    font-size: 13px;
+    color: var(--accent-info);
+    margin-top: 4px;
+}
+
+.team-effectiveness-indicator {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 8px;
+    -unity-font-style: bold;
+}
+
+.effectiveness-high   { background-color: rgba(100, 255, 150, 0.18); color: rgb(100, 255, 150); }
+.effectiveness-medium { background-color: rgba(255, 200, 50, 0.18); color: rgb(255, 200, 50); }
+.effectiveness-low    { background-color: rgba(255, 80, 80, 0.18); color: rgb(255, 80, 80); }
+
+.contract-work-breakdown {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.unassign-team-button {
+    background-color: var(--accent-danger);
+    color: white;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.22);
+    border-left-color:   rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    -unity-text-align: middle-center;
+    transition: background-color 0.15s, scale 0.1s;
+}
+
+.unassign-team-button:hover {
+    background-color: rgb(250, 69, 80);
+    scale: 1.05;
+}
+
+.unassign-team-button:active {
+    background-color: rgb(200, 30, 40);
+    scale: 0.95;
+    border-top-color:    rgba(0, 0, 0, 0.20);
+    border-left-color:   rgba(0, 0, 0, 0.20);
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-right-color:  rgba(255, 255, 255, 0.10);
+}
+
+.contracts-empty-message {
+    font-size: 14px;
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+    padding: 40px;
+}
+
+.contract-detail-modal-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+.contract-detail-card {
+    background-color: var(--bg-secondary);
+    border-width: 2px;
+    border-top-color:    rgba(255, 255, 255, 0.16);
+    border-left-color:   rgba(255, 255, 255, 0.16);
+    border-bottom-color: rgba(0, 0, 0, 0.45);
+    border-right-color:  rgba(0, 0, 0, 0.45);
+    border-radius: 8px;
+    padding: 28px;
+    min-width: 640px;
+    max-width: 860px;
+    max-height: 85%;
+}
+
+.contract-detail-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(76, 201, 176, 0.22);
+}
+
+.contract-detail-name {
+    font-size: 24px;
+    color: var(--text-light);
+    -unity-font-style: bold;
+}
+
+.contract-detail-difficulty {
+    font-size: 18px;
+    color: rgb(196, 154, 64);
+}
+
+.contract-detail-description {
+    font-size: 15px;
+    color: var(--text-light);
+    white-space: normal;
+    margin-bottom: 15px;
+}
+
+.contract-detail-section {
+    margin-bottom: 15px;
+}
+
+.contract-detail-section-label {
+    font-size: 14px;
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.contract-detail-value {
+    font-size: 15px;
+    color: var(--text-light);
+}
+
+.contract-detail-estimate {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 15px;
+}
+
+.skill-bars-container { gap: 8px; }
+
+.skill-bar-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.skill-bar-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    min-width: 120px;
+}
+
+.skill-bar-container {
+    flex-grow: 1;
+    height: 16px;
+    background-color: var(--bg-tertiary);
+    border-radius: 3px;
+    overflow: hidden;
+    border-width: 1px;
+    border-top-color:    rgba(0, 0, 0, 0.38);
+    border-left-color:   rgba(0, 0, 0, 0.38);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+    border-right-color:  rgba(255, 255, 255, 0.06);
+}
+
+.skill-bar { height: 100%; }
+
+.contract-detail-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top-width: 1px;
+    border-top-color: rgba(76, 201, 176, 0.22);
+}
+
+.close-button {
+    background-color: var(--bg-tertiary);
+    color: var(--text-light);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 14px;
+    -unity-text-align: middle-center;
+    transition: background-color 0.15s, scale 0.1s;
+}
+
+.close-button:hover {
+    background-color: var(--bg-secondary);
+    scale: 1.05;
+}
+
+.close-button:active {
+    background-color: var(--bg-primary);
+    scale: 0.95;
+    border-top-color:    rgba(0, 0, 0, 0.20);
+    border-left-color:   rgba(0, 0, 0, 0.20);
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-right-color:  rgba(255, 255, 255, 0.10);
+}
+
+.team-assignment-dropdown {
+    min-width: 200px;
+    background-color: var(--bg-secondary);
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    color: var(--text-light);
+}
+
+.inline-team-dropdown {
+    min-width: 250px;
+    flex-grow: 1;
+    background-color: rgba(82, 183, 136, 0.08);
+    border-top-color:    rgba(82, 183, 136, 0.80);
+    border-left-color:   rgba(82, 183, 136, 0.80);
+    border-bottom-color: rgba(82, 183, 136, 0.40);
+    border-right-color:  rgba(82, 183, 136, 0.40);
+    color: var(--text-light);
+}
+
+.inline-team-dropdown:hover {
+    background-color: rgba(82, 183, 136, 0.16);
+}
+
+.toast-container {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    translate: -50% 0;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.toast {
+    padding: 12px 20px;
+    border-radius: 6px;
+    border-width: 1px;
+    min-width: 250px;
+    max-width: 400px;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.toast-fade-out { opacity: 0; }
+
+.toast-message {
+    font-size: 13px;
+    color: white;
+    -unity-text-align: middle-center;
+}
+
+.toast-success { background-color: rgba(60, 150, 60, 0.95); border-top-color: rgba(100,200,100,1); border-left-color: rgba(100,200,100,1); border-bottom-color: rgba(40,120,40,1); border-right-color: rgba(40,120,40,1); }
+.toast-warning { background-color: rgba(200, 150, 50, 0.95); border-top-color: rgba(220,170,80,1); border-left-color: rgba(220,170,80,1); border-bottom-color: rgba(160,120,30,1); border-right-color: rgba(160,120,30,1); }
+.toast-error   { background-color: rgba(200, 60, 60, 0.95); border-top-color: rgba(240,100,100,1); border-left-color: rgba(240,100,100,1); border-bottom-color: rgba(150,40,40,1); border-right-color: rgba(150,40,40,1); }
+.toast-info    { background-color: rgba(80, 120, 200, 0.95); border-top-color: rgba(120,160,240,1); border-left-color: rgba(120,160,240,1); border-bottom-color: rgba(50,90,160,1); border-right-color: rgba(50,90,160,1); }
+
+.simple-progress-container {
+    margin-top: 8px;
+    margin-bottom: 4px;
+}
+
+.progress-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.progress-bar-background {
+    height: 6px;
+    background-color: var(--bg-tertiary);
+    border-radius: 3px;
+    border-width: 1px;
+    border-top-color:    rgba(0, 0, 0, 0.38);
+    border-left-color:   rgba(0, 0, 0, 0.38);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+    border-right-color:  rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: rgba(100, 150, 255, 0.9);
+    transition: width 0.3s;
+}
+
+.quality-bar-container {
+    margin-top: 6px;
+    margin-bottom: 4px;
+}
+
+.quality-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.quality-bar-background {
+    height: 6px;
+    background-color: var(--bg-tertiary);
+    border-radius: 3px;
+    border-width: 1px;
+    border-top-color:    rgba(0, 0, 0, 0.38);
+    border-left-color:   rgba(0, 0, 0, 0.38);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+    border-right-color:  rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+}
+
+.quality-bar-fill { height: 100%; transition: width 0.3s; }
+
+.quality--high { background-color: rgba(100, 255, 150, 0.9); }
+.quality--med  { background-color: rgba(255, 200, 50, 0.9); }
+.quality--low  { background-color: rgba(255, 80, 80, 0.9); }
+
+.quality-high   { color: rgb(100, 255, 150); }
+.quality-medium { color: rgb(255, 200, 50); }
+.quality-low    { color: rgb(255, 100, 100); }
+
+.quality-threshold-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    margin-bottom: 4px;
+}
+
+.contract-quality-threshold {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+/* ============================================================
+   V3 Active Contract Card — Phase Bucket Bar
+   ============================================================ */
+
+@keyframes pulse-active {
+    0%   { opacity: 0.7; }
+    50%  { opacity: 1.0; }
+    100% { opacity: 0.7; }
+}
+
+.phase-bucket-section {
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.phase-bucket-bar {
+    flex-direction: row;
+    gap: 3px;
+    height: 10px;
+}
+
+.phase-bucket {
+    flex: 1;
+    border-radius: 3px;
+    overflow: hidden;
+    background-color: var(--bg-tertiary);
+}
+
+.phase-bucket--pending  { background-color: var(--bg-tertiary); }
+.phase-bucket--complete { opacity: 1; }
+.phase-bucket--current {
+    background-color: var(--bg-tertiary);
+    animation-name: pulse-active;
+    animation-duration: 1.8s;
+    animation-iteration-count: infinite;
+}
+
+.phase-bucket--active-pulse {
+    animation-name: pulse-active;
+    animation-duration: 1.8s;
+    animation-iteration-count: infinite;
+}
+
+.phase-bucket__fill {
+    height: 100%;
+    width: 0%;
+    transition-property: width;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
+}
+
+.phase-color-planning { background-color: rgba(100, 180, 255, 0.9); }
+.phase-color-design   { background-color: rgba(255, 120, 180, 0.9); }
+.phase-color-dev      { background-color: rgba(100, 180, 255, 0.9); }
+.phase-color-testing  { background-color: rgba(150, 255, 120, 0.9); }
+
+.phase-current-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ============================================================
+   V3 Active Contract Card — Status Chip
+   ============================================================ */
+
+.status-chip {
+    font-size: 10px;
+    -unity-font-style: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.status-chip--in-progress { background-color: rgba(100, 150, 255, 0.18); color: rgb(100, 180, 255); }
+.status-chip--needs-team  { background-color: rgba(107, 107, 95, 0.18);  color: var(--text-muted); }
+.status-chip--at-risk     { background-color: rgba(255, 200, 50, 0.18);  color: rgb(255, 200, 50); }
+.status-chip--overdue     { background-color: rgba(255, 80, 80, 0.18);   color: rgb(255, 80, 80); }
+
+/* ============================================================
+   V3 Active Contract Card — ETA Label
+   ============================================================ */
+
+.eta-label          { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.eta-label--overdue { color: rgb(255, 80, 80); -unity-font-style: bold; }
+.eta-label--soon    { color: var(--accent-success); }
+.eta-label--normal  { color: var(--text-muted); }
+
+/* ============================================================
+   V3 Active Contract Card — Team Avatar Strip
+   ============================================================ */
+
+.team-avatar-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.avatar-strip {
+    flex-direction: row;
+    gap: 3px;
+    align-items: center;
+}
+
+.avatar-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.18);
+    border-left-color:   rgba(255, 255, 255, 0.18);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+}
+
+.avatar-dot--programming { background-color: rgba(100, 180, 255, 0.8); }
+.avatar-dot--design      { background-color: rgba(255, 120, 180, 0.8); }
+.avatar-dot--qa          { background-color: rgba(150, 255, 120, 0.8); }
+.avatar-dot--empty       { background-color: transparent; border-top-color: var(--text-muted); border-left-color: var(--text-muted); border-bottom-color: var(--text-muted); border-right-color: var(--text-muted); border-style: dashed; }
+
+.avatar-overflow-label { font-size: 10px; color: var(--text-muted); }
+.team-name-label       { font-size: 12px; color: var(--accent-info); }
+.velocity-label        { font-size: 11px; color: var(--text-muted); }
+
+/* ============================================================
+   V3 Active Contract Card — Urgency Accent Strip
+   ============================================================ */
+
+.urgency-accent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.urgency-accent--safe    { background-color: rgba(100, 200, 100, 0.7); }
+.urgency-accent--warning { background-color: rgba(255, 200, 50, 0.8); }
+.urgency-accent--urgent  { background-color: rgba(255, 80, 80, 0.9); animation-name: pulse-urgent; animation-duration: 1.5s; animation-iteration-count: infinite; }
+
+/* ============================================================
+   Contract Detail — Skill Targets Section
+   ============================================================ */
+
+.contract-skill-target-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+    gap: 8px;
+}
+
+.contract-skill-target-name {
+    font-size: 12px;
+    color: var(--text-muted);
+    width: 90px;
+}
+
+.contract-skill-target-value {
+    font-size: 12px;
+    color: var(--text-light);
+    -unity-font-style: bold;
+    width: 32px;
+}
+
+.contract-target-bar-container {
+    flex-grow: 1;
+    height: 8px;
+    background-color: var(--bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+    border-width: 1px;
+    border-top-color:    rgba(0, 0, 0, 0.38);
+    border-left-color:   rgba(0, 0, 0, 0.38);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+    border-right-color:  rgba(255, 255, 255, 0.06);
+}
+
+.contract-target-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    width: 0%;
+    transition-property: width;
+    transition-duration: 0.3s;
+}
+
+.target-bar--green  { background-color: rgb(80, 160, 100); }
+.target-bar--yellow { background-color: rgb(200, 160, 50); }
+.target-bar--red    { background-color: rgb(200, 70, 70); }
+
+.contract-skill-coverage-value {
+    font-size: 11px;
+    color: var(--text-muted);
+    width: 52px;
+    -unity-text-align: middle-right;
+}

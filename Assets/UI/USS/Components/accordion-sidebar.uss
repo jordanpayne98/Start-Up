@@ -1,0 +1,211 @@
+/* ── Accordion Sidebar ── */
+
+/* Top-level group container */
+.sidebar-group {
+    flex-direction: column;
+}
+
+/* Group header row: icon + label + hotkey + badge + arrow */
+.sidebar-group__header {
+    flex-direction: row;
+    align-items: center;
+    padding: 7px 12px;
+    margin: 1px 0;
+    min-height: 34px;
+    border-left-width: 2px;
+    border-left-color: transparent;
+    transition: background-color 0.12s;
+    cursor: link;
+}
+
+.sidebar-group__header:hover {
+    background-color: var(--bg-hover);
+}
+
+.sidebar-group--active > .sidebar-group__header {
+    border-left-color: var(--accent-primary);
+    background-color: var(--bg-selected);
+}
+
+/* Top-level icon glyph */
+.sidebar-group__icon {
+    font-size: 15px;
+    color: var(--text-muted);
+    min-width: 20px;
+    -unity-text-align: middle-center;
+    margin-right: 6px;
+}
+
+.sidebar-group--active > .sidebar-group__header .sidebar-group__icon {
+    color: var(--accent-primary);
+}
+
+/* Group label */
+.sidebar-group__label {
+    flex-grow: 1;
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: var(--text-secondary);
+}
+
+.sidebar-group__header:hover .sidebar-group__label {
+    color: var(--text-light);
+}
+
+.sidebar-group--active > .sidebar-group__header .sidebar-group__label {
+    color: var(--text-light);
+}
+
+/* Arrow expand/collapse indicator */
+.sidebar-group__arrow {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-left: 4px;
+    min-width: 10px;
+    -unity-text-align: middle-center;
+}
+
+/* Children container */
+.sidebar-group__children {
+    flex-direction: column;
+}
+
+.sidebar-group__children.hidden {
+    display: none;
+}
+
+/* Sub-group (depth > 0): slightly smaller label */
+.sidebar-group .sidebar-group .sidebar-group__label {
+    font-size: 12px;
+    -unity-font-style: normal;
+}
+
+.sidebar-group .sidebar-group .sidebar-group__header {
+    padding: 5px 12px;
+    min-height: 28px;
+}
+
+/* Leaf sidebar item */
+.sidebar-item {
+    flex-direction: row;
+    align-items: center;
+    padding: 5px 12px;
+    margin: 1px 0;
+    min-height: 30px;
+    border-left-width: 2px;
+    border-left-color: transparent;
+    transition: background-color 0.12s, border-left-color 0.12s;
+    cursor: link;
+}
+
+.sidebar-item:hover {
+    background-color: var(--bg-hover);
+}
+
+.sidebar-item--active {
+    background-color: var(--bg-selected);
+    border-left-color: var(--accent-primary);
+}
+
+.sidebar-item--focused {
+    background-color: var(--bg-hover);
+    border-left-color: var(--accent-primary);
+    opacity: 0.85;
+}
+
+.sidebar-item__label {
+    flex-grow: 1;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.sidebar-item:hover .sidebar-item__label {
+    color: var(--text-light);
+}
+
+.sidebar-item--active .sidebar-item__label {
+    color: var(--text-light);
+    -unity-font-style: bold;
+}
+
+/* Connector indent spacer */
+.sidebar-connector {
+    flex-shrink: 0;
+    border-left-width: 1px;
+    border-left-color: rgba(255, 255, 255, 0.08);
+    margin-right: 6px;
+    align-self: stretch;
+}
+
+/* Notification badge */
+.sidebar-badge {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: var(--text-light);
+    background-color: var(--accent-danger);
+    border-radius: 8px;
+    padding: 1px 5px;
+    min-width: 16px;
+    -unity-text-align: middle-center;
+    margin-left: 4px;
+}
+
+.sidebar-badge--hidden {
+    display: none;
+}
+
+/* In collapsed mode: badges move to absolute top-right */
+.sidebar--collapsed .sidebar-badge {
+    position: absolute;
+    right: 4px;
+    top: 2px;
+    padding: 0 3px;
+    font-size: 8px;
+    min-width: 12px;
+}
+
+/* Hotkey hint label */
+.sidebar-hotkey {
+    font-size: 9px;
+    color: var(--text-muted);
+    -unity-text-align: middle-right;
+    margin-right: 4px;
+    opacity: 0.6;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+    padding: 0 3px;
+    min-width: 14px;
+    -unity-text-align: middle-center;
+}
+
+/* Collapsed mode: hide labels, hotkeys, children */
+.sidebar--collapsed .sidebar-group__label {
+    display: none;
+}
+
+.sidebar--collapsed .sidebar-group__arrow {
+    display: none;
+}
+
+.sidebar--collapsed .sidebar-hotkey {
+    display: none;
+}
+
+.sidebar--collapsed .sidebar-item__label {
+    display: none;
+}
+
+.sidebar--collapsed .sidebar-group__children {
+    display: none;
+}
+
+.sidebar--collapsed .sidebar-group__header {
+    justify-content: center;
+    padding: 7px 0;
+}
+
+.sidebar--collapsed .sidebar-item {
+    justify-content: center;
+    padding: 5px 0;
+}

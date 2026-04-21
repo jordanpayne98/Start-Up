@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caad3ec2759eb6d43b48e6b034c131ed, type: 3}
+  m_Name: PlayBox
+  m_EditorClassIdentifier: Assembly-CSharp::CompetitorStartConfig
+  companyName: ArcadeVault
+  founderName: Kenji Nishida
+  archetype: 0
+  personality:
+    RiskTolerance: 0.45
+    RdSpeed: 0.5
+    BrandInvestment: 0.8
+    PricingAggression: 0.4
+    InnovationBias: 0.5
+  specializations: 010000000b000000
+  startingProducts:
+  - category: 1
+    niche: -1
+    productName: ArcadeVault Prime 6
+    quality: 83
+    marketSharePercent: 40
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 24
+    licensingRate: 0.1
+  - category: 11
+    niche: 41
+    productName: ArcadeVault Link
+    quality: 72
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 18
+    licensingRate: 0
+  - category: 7
+    niche: 9
+    productName: Ember Odyssey
+    quality: 78
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 8
+    licensingRate: 0
+  - category: 7
+    niche: 13
+    productName: Sky Hopper
+    quality: 72
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 14
+    licensingRate: 0
+  - category: 7
+    niche: 15
+    productName: Nitro Circuit
+    quality: 70
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 22
+    licensingRate: 0

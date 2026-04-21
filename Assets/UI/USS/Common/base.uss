@@ -1,0 +1,304 @@
+/* Base typography and reset */
+* {
+    margin: 0;
+    padding: 0;
+    -unity-font: var(--font-body);
+}
+
+Label {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+Button {
+    background-color: var(--bg-tertiary);
+    color: var(--text-light);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: link;
+    transition: background-color 150ms;
+}
+
+Button:hover {
+    background-color: var(--bg-secondary);
+}
+
+Button:active {
+    background-color: var(--bg-primary);
+    border-top-color:    rgba(0, 0, 0, 0.20);
+    border-left-color:   rgba(0, 0, 0, 0.20);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+    border-right-color:  rgba(255, 255, 255, 0.08);
+}
+
+/* Scrollbar styling */
+Scroller {
+    width: 8px;
+    background-color: transparent;
+}
+
+Scroller > RepeatButton {
+    display: none;
+}
+
+Scroller #unity-slider {
+    min-width: 8px;
+    background-color: transparent;
+}
+
+Scroller #unity-tracker {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-width: 0;
+    border-radius: 4px;
+}
+
+Scroller #unity-dragger-border {
+    border-width: 0;
+}
+
+Scroller #unity-dragger {
+    background-color: var(--bg-tertiary);
+    border-radius: 4px;
+    border-width: 0;
+    min-height: 20px;
+    transition: background-color var(--transition-fast);
+}
+
+Scroller #unity-dragger:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+Scroller #unity-dragger:active {
+    background-color: rgba(76, 201, 176, 0.6);
+}
+
+/* TextField styling */
+TextField > #unity-text-input {
+    background-color: var(--bg-primary);
+    border-width: 1px;
+    border-color: var(--border-strong);
+    border-radius: var(--radius-md);
+    color: var(--text-light);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-md);
+}
+
+TextField > #unity-text-input:focus {
+    border-color: var(--accent-primary);
+}
+
+TextField > #unity-text-input:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+TextField > .unity-base-text-field__input--placeholder > .unity-text-element {
+    color: var(--text-disabled);
+}
+
+/* Toggle (Checkbox) styling */
+Toggle > .unity-toggle__input > .unity-toggle__checkmark {
+    background-color: var(--bg-primary);
+    border-width: 1px;
+    border-color: var(--border-strong);
+    border-radius: var(--radius-sm);
+    width: 18px;
+    height: 18px;
+    -unity-background-image-tint-color: var(--accent-primary);
+}
+
+Toggle:checked > .unity-toggle__input > .unity-toggle__checkmark {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    -unity-background-image-tint-color: var(--text-dark);
+}
+
+Toggle:hover > .unity-toggle__input > .unity-toggle__checkmark {
+    border-color: var(--accent-primary);
+}
+
+Toggle > .unity-toggle__text {
+    color: var(--text-light);
+    font-size: var(--font-md);
+}
+
+/* Utility classes */
+.hidden {
+    display: none;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-1 {
+    flex-grow: 1;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+.text-light {
+    color: var(--text-light);
+}
+
+.text-dark {
+    color: var(--text-dark);
+}
+
+.text-accent {
+    color: var(--accent-primary);
+}
+
+.text-success {
+    color: var(--accent-success);
+}
+
+.text-warning {
+    color: var(--accent-warning);
+}
+
+.text-danger {
+    color: var(--accent-danger);
+}
+
+.text-sm {
+    font-size: var(--font-sm);
+}
+
+.text-lg {
+    font-size: var(--font-lg);
+}
+
+.text-xl {
+    font-size: var(--font-xl);
+}
+
+.text-2xl {
+    font-size: var(--font-2xl);
+}
+
+.text-bold {
+    -unity-font-style: bold;
+}
+
+.gap-xs {
+    margin-bottom: var(--spacing-xs);
+}
+
+.gap-sm {
+    margin-bottom: var(--spacing-sm);
+}
+
+.gap-md {
+    margin-bottom: var(--spacing-md);
+}
+
+.gap-lg {
+    margin-bottom: var(--spacing-lg);
+}
+
+.p-sm {
+    padding: var(--spacing-sm);
+}
+
+.p-md {
+    padding: var(--spacing-md);
+}
+
+.p-lg {
+    padding: var(--spacing-lg);
+}
+
+.m-sm {
+    margin: var(--spacing-sm);
+}
+
+.m-md {
+    margin: var(--spacing-md);
+}
+
+.full-width {
+    width: 100%;
+}
+
+.full-height {
+    height: 100%;
+}
+
+/* Headers - bold variant only */
+.h1 {
+    font-size: var(--font-3xl);
+    -unity-font-style: bold;
+    -unity-font: var(--font-display);
+}
+
+.h2 {
+    font-size: var(--font-2xl);
+    -unity-font-style: bold;
+    -unity-font: var(--font-display);
+}
+
+.h3 {
+    font-size: var(--font-xl);
+    -unity-font-style: bold;
+    -unity-font: var(--font-display);
+}
+
+.h4 {
+    font-size: var(--font-lg);
+    -unity-font-style: bold;
+    -unity-font: var(--font-display);
+}
+
+.h5 {
+    font-size: var(--font-md);
+    -unity-font-style: bold;
+    -unity-font: var(--font-display);
+}
+
+/* Data table typography - tighter tracking */
+.text-data {
+    letter-spacing: var(--font-data-tracking);
+    font-size: var(--font-sm);
+}
+
+.text-data-bold {
+    letter-spacing: var(--font-data-tracking);
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+}
+
+.font-display {
+    -unity-font: var(--font-display);
+}
+
+.font-body {
+    -unity-font: var(--font-body);
+}

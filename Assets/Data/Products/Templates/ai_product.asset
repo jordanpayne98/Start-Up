@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9cf6717fcc82f04cb10f6a4a76d9245, type: 3}
+  m_Name: ai_product
+  m_EditorClassIdentifier: Assembly-CSharp::ProductTemplateDefinition
+  templateId: ai_product
+  displayName: AI Product
+  description: "AI-powered applications \u2014 requires Cloud Infrastructure"
+  category: 14
+  layer: 2
+  baseUpfrontCost: 50000
+  difficultyTier: 4
+  validTargetPlatforms: 00000000
+  validPlatformNiches: 0000000002000000
+  requiredToolTypes: 0600000004000000
+  ownToolQualityBonus: 0.1
+  licensedToolQualityBonus: 0.05
+  optimalTeamSizePerPhase: 5
+  paradigmSensitivity: 1.2
+  nicheConfigs: []
+  revenueModelOptions:
+  - api_usage
+  - subscription
+  - enterprise_license
+  phases:
+  - phaseType: 0
+    primaryRole: 1
+    baseWorkUnits: 130
+    prerequisites: 
+    qualitySoftCapBase: 80
+  - phaseType: 1
+    primaryRole: 0
+    baseWorkUnits: 260
+    prerequisites: 00000000
+    qualitySoftCapBase: 80
+  - phaseType: 6
+    primaryRole: 2
+    baseWorkUnits: 156
+    prerequisites: 01000000
+    qualitySoftCapBase: 80
+  availableFeatures:
+  - {fileID: 11400000, guid: 7768e4793c57c9642887fc2ca238b6f5, type: 2}
+  - {fileID: 11400000, guid: 30c09afbd7a720a47a0b8dc0b7736758, type: 2}
+  - {fileID: 11400000, guid: a48ff311d1a84cd459dbf1f042b02714, type: 2}
+  - {fileID: 11400000, guid: 9db93d0734faecd488c8429e473d1c9e, type: 2}
+  - {fileID: 11400000, guid: 0e2c23f8d07f640428a2d82697c1bcb2, type: 2}
+  - {fileID: 11400000, guid: 5dd0a67c79f49994387acbd3327b69e4, type: 2}
+  - {fileID: 11400000, guid: 39b99e91be7f5b744b686ca712933816, type: 2}
+  - {fileID: 11400000, guid: 883e2f8e616f943469b58645a8565777, type: 2}
+  - {fileID: 11400000, guid: bb313351352c3484290f20153fbbef0a, type: 2}
+  - {fileID: 11400000, guid: be3e0e4cc8f8fc04c96930f95d16e8ec, type: 2}
+  - {fileID: 11400000, guid: 79941293c254db94393ff9020eea0b38, type: 2}
+  - {fileID: 11400000, guid: 6b0c393d83b01fc428dfcc3413d358ce, type: 2}
+  - {fileID: 11400000, guid: 7b2d43fac05354a4db9e8a9dd6ec8dc6, type: 2}
+  - {fileID: 11400000, guid: df14edf780ef62749b7dd0f264fca69f, type: 2}
+  - {fileID: 11400000, guid: 9e6a92d39ea46254aab7542854b401f7, type: 2}
+  - {fileID: 11400000, guid: a9d311f9f582afc4b964d5f1e04369d8, type: 2}
+  - {fileID: 11400000, guid: 42f96cc64dad0574bb2b93edaefb76dd, type: 2}
+  - {fileID: 11400000, guid: 5d7c3bee58add6e499970131afce6037, type: 2}
+  economyConfig:
+    isSubscriptionBased: 0
+    launchSalesBase: 0
+    pricePerUnit: 30
+    tailDecayRate: 0.04
+    minTailFactor: 0.05
+    monthlySubscriptionPrice: 25
+    baseChurnRate: 0.04
+    maintenanceChurnReduction: 0.01
+    organicGrowthRate: 0.05
+    updateSalesSpikeMult: 1.6
+    updatePopularityBoost: 6
+    maintenancePopDecayReduction: 0.5
+    breakoutBaseChance: 0.03
+    breakoutMinMultiplier: 3
+    breakoutMaxMultiplier: 10
+    plateauDecayRatePerMonth: 0.03
+    declineDecayRatePerMonth: 0.05
+    ticksToGrowthStage: 144000
+    bugChurnMultiplier: 1.5
+    shipBugPopularityPenalty: 2
+    maxMonthlyBugPopularityPenalty: 5
+    unmaintainedBugGrowthBase: 0.1
+    sequelPopularityBoostMax: 20
+    maxUserPool: 50000000
+    basePricePerUnit: 20
+    baseSubscriptionPrice: 25
+    priceElasticityExponent: 1
+    nicheVolatility: 6
+    retentionMonths: 36
+    interestRate: 0.2
+    baseDemand: 60
+    demandFloor: 0
+    demandCeiling: 100
+    recoveryRateMin: 0.04
+    recoveryRateMax: 0.12
+    saturationThreshold: 4
+    saturationPenaltyPerProduct: 0.5

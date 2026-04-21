@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caad3ec2759eb6d43b48e6b034c131ed, type: 3}
+  m_Name: NexGen
+  m_EditorClassIdentifier: Assembly-CSharp::CompetitorStartConfig
+  companyName: VoltEdge
+  founderName: Hiroshi Tanaka
+  archetype: 4
+  personality:
+    RiskTolerance: 0.6
+    RdSpeed: 0.65
+    BrandInvestment: 0.5
+    PricingAggression: 0.35
+    InnovationBias: 0.75
+  specializations: 0100000003000000
+  startingProducts:
+  - category: 1
+    niche: -1
+    productName: VoltEdge Spark
+    quality: 76
+    marketSharePercent: 35
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 30
+    licensingRate: 0.08
+  - category: 3
+    niche: -1
+    productName: VoltEdge Reactor
+    quality: 71
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 20
+    licensingRate: 0.05
+  - category: 7
+    niche: 18
+    productName: Starfall Legends
+    quality: 74
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 10
+    licensingRate: 0
+  - category: 7
+    niche: 21
+    productName: Iron Arena
+    quality: 69
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 16
+    licensingRate: 0

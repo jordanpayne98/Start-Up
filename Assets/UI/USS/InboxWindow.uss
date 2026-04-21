@@ -1,0 +1,224 @@
+/* Inbox Window Styles */
+
+.inbox-window {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: var(--bg-primary);
+    padding: 16px;
+}
+
+/* Header */
+.inbox-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.22);
+    margin-bottom: 12px;
+}
+
+.inbox-header-actions {
+    flex-direction: row;
+    align-items: center;
+}
+
+.inbox-badge {
+    background-color: var(--accent-danger);
+    color: rgb(255, 255, 255);
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-right: 8px;
+    display: none;
+}
+
+.inbox-dismiss-all-btn {
+    padding: 6px 14px;
+    font-size: 13px;
+}
+
+/* Scroll + List */
+.inbox-scroll {
+    flex-grow: 1;
+}
+
+.inbox-list-container {
+    flex-direction: column;
+}
+
+/* Mail Row */
+.mail-row {
+    flex-direction: row;
+    align-items: flex-start;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+}
+
+.mail-row--unread {
+    background-color: var(--bg-tertiary);
+    border-left-width: 3px;
+    border-left-color: var(--accent-success);
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+}
+
+/* Category icon */
+.mail-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    -unity-text-align: middle-center;
+    font-size: 16px;
+    margin-right: 10px;
+    flex-shrink: 0;
+    align-self: center;
+    background-color: var(--bg-tertiary);
+    color: var(--text-light);
+}
+
+.mail-icon--hr       { background-color: rgba(76, 201, 176, 0.22); }
+.mail-icon--contract { background-color: rgba(72, 149, 239, 0.22); }
+.mail-icon--finance  { background-color: rgba(200, 170, 80, 0.22); }
+.mail-icon--research { background-color: rgba(180, 130, 240, 0.22); }
+
+/* Mail content */
+.mail-content {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.mail-title {
+    font-size: 14px;
+    color: var(--text-light);
+    -unity-font-style: normal;
+    margin-bottom: 2px;
+}
+
+.mail-title--unread {
+    -unity-font-style: bold;
+}
+
+.mail-body {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.mail-timestamp {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* Action buttons */
+.mail-actions {
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+.mail-goto-btn {
+    background-color: var(--accent-success);
+    color: var(--text-light);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.22);
+    border-left-color:   rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-size: 12px;
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+.mail-goto-btn:hover {
+    background-color: rgb(72, 203, 156);
+}
+
+.mail-goto-btn:active {
+    background-color: rgb(42, 163, 116);
+    border-top-color:    rgba(0, 0, 0, 0.20);
+    border-left-color:   rgba(0, 0, 0, 0.20);
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-right-color:  rgba(255, 255, 255, 0.10);
+}
+
+.mail-dismiss-btn {
+    background-color: transparent;
+    color: var(--text-muted);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-size: 12px;
+    -unity-text-align: middle-center;
+}
+
+.mail-dismiss-btn:hover {
+    background-color: rgba(230, 57, 70, 0.12);
+    color: var(--accent-danger);
+    border-top-color:    rgba(230, 57, 70, 0.80);
+    border-left-color:   rgba(230, 57, 70, 0.80);
+    border-bottom-color: rgba(230, 57, 70, 0.40);
+    border-right-color:  rgba(230, 57, 70, 0.40);
+}
+
+/* Empty state */
+.inbox-empty-label {
+    -unity-text-align: middle-center;
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 40px;
+}
+
+/* Compact widget "View All" button */
+.btn-view-all {
+    background-color: transparent;
+    color: var(--accent-success);
+    border-width: 1px;
+    border-top-color:    rgba(76, 201, 176, 0.80);
+    border-left-color:   rgba(76, 201, 176, 0.80);
+    border-bottom-color: rgba(76, 201, 176, 0.40);
+    border-right-color:  rgba(76, 201, 176, 0.40);
+    border-radius: 5px;
+    padding: 4px 10px;
+    font-size: 12px;
+    -unity-text-align: middle-center;
+}
+
+.btn-view-all:hover {
+    background-color: rgba(76, 201, 176, 0.12);
+}
+
+/* Inbox button — inherits .tab-button, adds row layout for the inline count */
+.tab-inbox-btn {
+    flex-direction: row;
+    align-items: center;
+}
+
+/* Unread count label sitting inline next to the icon */
+.tab-inbox-count {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-left: 2px;
+}

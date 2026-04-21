@@ -1,0 +1,157 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9cf6717fcc82f04cb10f6a4a76d9245, type: 3}
+  m_Name: video_game
+  m_EditorClassIdentifier: Assembly-CSharp::ProductTemplateDefinition
+  templateId: video_game
+  displayName: Video Game
+  description: "Flagship product type \u2014 highest risk, highest reward"
+  category: 7
+  layer: 2
+  baseUpfrontCost: 25000
+  difficultyTier: 3
+  validTargetPlatforms: 0000000001000000
+  validPlatformNiches: 0000000001000000
+  requiredToolTypes: 03000000040000000500000006000000
+  ownToolQualityBonus: 0.15
+  licensedToolQualityBonus: 0.08
+  optimalTeamSizePerPhase: 5
+  paradigmSensitivity: 1
+  nicheConfigs:
+  - niche: 9
+    retentionMonths: 30
+    volatility: 0.35
+  - niche: 10
+    retentionMonths: 18
+    volatility: 0.25
+  - niche: 11
+    retentionMonths: 36
+    volatility: 0.4
+  - niche: 12
+    retentionMonths: 8
+    volatility: 0.5
+  - niche: 13
+    retentionMonths: 12
+    volatility: 0.45
+  - niche: 14
+    retentionMonths: 48
+    volatility: 0.3
+  - niche: 15
+    retentionMonths: 12
+    volatility: 0.35
+  - niche: 16
+    retentionMonths: 10
+    volatility: 0.2
+  - niche: 17
+    retentionMonths: 6
+    volatility: 0.6
+  - niche: 18
+    retentionMonths: 14
+    volatility: 0.4
+  - niche: 19
+    retentionMonths: 60
+    volatility: 0.5
+  - niche: 20
+    retentionMonths: 48
+    volatility: 0.45
+  - niche: 21
+    retentionMonths: 15
+    volatility: 0.35
+  revenueModelOptions:
+  - premium
+  - subscription
+  - free_to_play
+  phases:
+  - phaseType: 0
+    primaryRole: 1
+    baseWorkUnits: 100
+    prerequisites: 
+    qualitySoftCapBase: 80
+  - phaseType: 1
+    primaryRole: 0
+    baseWorkUnits: 200
+    prerequisites: 00000000
+    qualitySoftCapBase: 80
+  - phaseType: 4
+    primaryRole: 3
+    baseWorkUnits: 80
+    prerequisites: 00000000
+    qualitySoftCapBase: 80
+  - phaseType: 5
+    primaryRole: 4
+    baseWorkUnits: 80
+    prerequisites: 00000000
+    qualitySoftCapBase: 80
+  - phaseType: 6
+    primaryRole: 2
+    baseWorkUnits: 120
+    prerequisites: 01000000
+    qualitySoftCapBase: 80
+  availableFeatures:
+  - {fileID: 11400000, guid: 26efa30bc56fdfe4fbd256ed69016065, type: 2}
+  - {fileID: 11400000, guid: c0a6b6e7e5fb75744b2b13dddc81d71b, type: 2}
+  - {fileID: 11400000, guid: 740ce4edc51b6ac4795b2a205e902588, type: 2}
+  - {fileID: 11400000, guid: f93d8110644efae4ea548b9df58ac862, type: 2}
+  - {fileID: 11400000, guid: 3a6dcbaef0377d9449d95286879b4c00, type: 2}
+  - {fileID: 11400000, guid: 6d13767827a912749922fc605ad3fa92, type: 2}
+  - {fileID: 11400000, guid: 95bb061134985604aa8560e17f57f055, type: 2}
+  - {fileID: 11400000, guid: 8b635fbc080fe4e4682255b2f9fc9c28, type: 2}
+  - {fileID: 11400000, guid: 3de7979665576914c9446a17e3698588, type: 2}
+  - {fileID: 11400000, guid: 0dd34650247a8ff40b204d0b20aaf511, type: 2}
+  - {fileID: 11400000, guid: 4a9bacb20977db54c8d05bf21951a87a, type: 2}
+  - {fileID: 11400000, guid: c7a523fce4602b24c9c248fe696923d9, type: 2}
+  - {fileID: 11400000, guid: 2c228bfcff1870645b2018ca293c53bb, type: 2}
+  - {fileID: 11400000, guid: 3d19ee414ae47364485dbc33e69e4651, type: 2}
+  - {fileID: 11400000, guid: 04d1ae4fbc8def3459a5956d621729a9, type: 2}
+  - {fileID: 11400000, guid: a8000a3986c409a4aafe933e2368bd26, type: 2}
+  - {fileID: 11400000, guid: 5668fa9d1a5d8f84ca7ce47f05ac0713, type: 2}
+  - {fileID: 11400000, guid: 3a8d13c5590aa6947a8d6f19e0d1c436, type: 2}
+  - {fileID: 11400000, guid: 2f164d5bd808bd245a4e415f044908d3, type: 2}
+  - {fileID: 11400000, guid: 8f6455bc9a83cab498028a16357879cc, type: 2}
+  economyConfig:
+    isSubscriptionBased: 0
+    launchSalesBase: 3000
+    pricePerUnit: 40
+    tailDecayRate: 0.07
+    minTailFactor: 0.05
+    monthlySubscriptionPrice: 12
+    baseChurnRate: 0.04
+    maintenanceChurnReduction: 0.01
+    organicGrowthRate: 0.03
+    updateSalesSpikeMult: 1.8
+    updatePopularityBoost: 8
+    maintenancePopDecayReduction: 0.5
+    breakoutBaseChance: 0.04
+    breakoutMinMultiplier: 3
+    breakoutMaxMultiplier: 15
+    plateauDecayRatePerMonth: 0.03
+    declineDecayRatePerMonth: 0.06
+    ticksToGrowthStage: 108000
+    bugChurnMultiplier: 1.5
+    shipBugPopularityPenalty: 3
+    maxMonthlyBugPopularityPenalty: 6
+    unmaintainedBugGrowthBase: 0.1
+    sequelPopularityBoostMax: 30
+    maxUserPool: 0
+    basePricePerUnit: 0
+    baseSubscriptionPrice: 0
+    priceElasticityExponent: 0
+    nicheVolatility: 0
+    retentionMonths: 0
+    interestRate: 0
+    baseDemand: 0
+    demandFloor: 0
+    demandCeiling: 0
+    recoveryRateMin: 0
+    recoveryRateMax: 0
+    saturationThreshold: 0
+    saturationPenaltyPerProduct: 0

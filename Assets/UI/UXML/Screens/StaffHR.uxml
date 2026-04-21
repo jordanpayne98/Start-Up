@@ -1,0 +1,165 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="project://database/Assets/UI/USS/Screens/StaffHR.uss" />
+    <Style src="project://database/Assets/UI/USS/Components/stars.uss" />
+    <ui:VisualElement name="staff-hr" class="hr-screen">
+
+        <!-- Left column: candidate list -->
+        <ui:VisualElement name="hr-left-panel" class="hr-left-panel">
+            <ui:VisualElement name="hr-candidates-header" class="hr-list-header">
+                <ui:Label name="hr-candidates-title" text="Candidates" class="section-title" />
+                <ui:Button name="hr-reroll-btn" text="Reroll" class="btn btn-secondary btn-sm" />
+            </ui:VisualElement>
+            <ui:ScrollView name="hr-candidates-scroll" class="hr-candidates-scroll">
+                <ui:VisualElement name="hr-candidates-list" class="hr-candidates-list" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+
+        <!-- Right column: candidate detail + interview/offer panels -->
+        <ui:VisualElement name="hr-right-panel" class="hr-right-panel">
+
+            <!-- Candidate identity header -->
+            <ui:VisualElement name="hr-candidate-header" class="hr-candidate-header">
+                <ui:Label name="hr-candidate-name" text="—" class="candidate-name" />
+                <ui:Label name="hr-candidate-role" text="" class="candidate-role" />
+                <ui:Label name="hr-candidate-id" text="" class="candidate-id hidden" />
+            </ui:VisualElement>
+
+            <!-- Candidate stats card (always visible when a candidate is selected) -->
+            <ui:VisualElement name="hr-stats-panel" class="hr-card hidden">
+                <ui:VisualElement class="hr-row">
+                    <ui:Label text="Age" class="label-muted" />
+                    <ui:Label name="hr-stats-age" text="—" class="value-label" />
+                </ui:VisualElement>
+                <ui:VisualElement class="hr-row">
+                    <ui:Label text="Salary" class="label-muted" />
+                    <ui:Label name="hr-stats-salary" text="—" class="value-label" />
+                </ui:VisualElement>
+                <ui:VisualElement class="hr-row">
+                    <ui:Label text="Ability" class="label-muted" />
+                    <ui:Label name="hr-stats-ca" text="—" class="value-label" />
+                </ui:VisualElement>
+                <ui:VisualElement class="hr-row">
+                    <ui:Label text="Potential" class="label-muted" />
+                    <ui:Label name="hr-stats-pa" text="—" class="value-label" />
+                </ui:VisualElement>
+                <ui:VisualElement class="hr-row">
+                    <ui:Label text="Expires" class="label-muted" />
+                    <ui:Label name="hr-stats-expiry" text="—" class="value-label" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Interview panel -->
+            <ui:VisualElement name="hr-interview-panel" class="hr-card">
+                <ui:Label text="Interview" class="card-title" />
+
+                <!-- Progress bar (visible while interview in progress) -->
+                <ui:VisualElement name="hr-interview-progress-row" class="hr-row hidden">
+                    <ui:Label name="hr-interview-team-label" text="HR Team: —" class="label-muted" />
+                    <ui:ProgressBar name="hr-interview-progress-bar" value="0" class="hr-progress-bar" />
+                    <ui:Label name="hr-interview-progress-pct" text="0%" class="label-muted" />
+                </ui:VisualElement>
+
+                <!-- First report badge (visible after halfway) -->
+                <ui:VisualElement name="hr-first-report-row" class="hr-row hidden">
+                    <ui:Label name="hr-first-report-badge" text="● First Report Ready" class="badge badge-info" />
+                </ui:VisualElement>
+
+                <!-- Final report section (visible after interview complete) -->
+                <ui:VisualElement name="hr-final-report-section" class="hr-section hidden">
+                    <ui:Label name="hr-recommendation-label" text="" class="recommendation-label" />
+                    <ui:VisualElement name="hr-skill-tier-row" class="hr-row">
+                        <ui:Label text="Seniority" class="label-muted" />
+                        <ui:Label name="hr-skill-tier" text="—" class="value-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="hr-role-fit-row" class="hr-row">
+                        <ui:Label text="Role Fit" class="label-muted" />
+                        <ui:Label name="hr-role-fit" text="—" class="value-label" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Hard-reject badge -->
+                <ui:Label name="hr-hard-reject-badge" text="✕ Hard Rejected — No further offers" class="badge badge-danger hidden" />
+
+                <!-- Start interview button -->
+                <ui:Button name="hr-start-interview-btn" text="Start Interview" class="btn btn-primary" />
+
+                <!-- No HR team warning -->
+                <ui:Label name="hr-no-team-warning" text="No HR team available" class="label-warning hidden" />
+            </ui:VisualElement>
+
+            <!-- HR team status panel -->
+            <ui:VisualElement name="hr-team-status-panel" class="hr-card">
+                <ui:Label text="HR Teams" class="card-title" />
+                <ui:VisualElement name="hr-team-status-list" class="hr-team-status-list" />
+            </ui:VisualElement>
+
+            <!-- Offer panel (visible after interview complete, not hard-rejected) -->
+            <ui:VisualElement name="hr-offer-panel" class="hr-card hidden">
+                <ui:Label text="Make an Offer" class="card-title" />
+
+                <!-- Fuzzy salary range -->
+                <ui:VisualElement name="hr-salary-range-row" class="hr-row">
+                    <ui:Label text="Est. Range" class="label-muted" />
+                    <ui:Label name="hr-salary-range-label" text="—" class="value-label accent-info" />
+                </ui:VisualElement>
+
+                <!-- Patience pips -->
+                <ui:VisualElement name="hr-patience-row" class="hr-row">
+                    <ui:Label text="Patience" class="label-muted" />
+                    <ui:VisualElement name="hr-patience-pips" class="patience-pips">
+                        <ui:VisualElement name="hr-pip-0" class="patience-pip patience-pip-filled" />
+                        <ui:VisualElement name="hr-pip-1" class="patience-pip patience-pip-filled" />
+                        <ui:VisualElement name="hr-pip-2" class="patience-pip patience-pip-filled" />
+                        <ui:VisualElement name="hr-pip-3" class="patience-pip patience-pip-filled" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Priority label -->
+                <ui:VisualElement name="hr-priority-row" class="hr-row">
+                    <ui:Label text="Priority" class="label-muted" />
+                    <ui:Label name="hr-priority-label" text="—" class="value-label" />
+                </ui:VisualElement>
+
+                <!-- Decline condition (visible after a decline) -->
+                <ui:VisualElement name="hr-decline-condition-row" class="hr-row hidden">
+                    <ui:Label name="hr-decline-condition-text" text="" class="label-warning" />
+                </ui:VisualElement>
+
+                <!-- Salary slider -->
+                <ui:VisualElement name="hr-offer-slider-row" class="hr-row">
+                    <ui:Label name="hr-offer-salary-label" text="$0/mo" class="offer-salary-label" />
+                    <ui:Slider name="hr-offer-slider" low-value="500" high-value="10000" value="2000" class="hr-salary-slider" />
+                </ui:VisualElement>
+
+                <!-- Probability bar -->
+                <ui:VisualElement name="hr-prob-bar" class="prob-bar">
+                    <ui:VisualElement name="hr-prob-accept" class="prob-segment prob-accept" />
+                    <ui:VisualElement name="hr-prob-counter" class="prob-segment prob-counter" />
+                    <ui:VisualElement name="hr-prob-decline" class="prob-segment prob-decline" />
+                </ui:VisualElement>
+                <ui:VisualElement name="hr-prob-labels" class="prob-labels">
+                    <ui:Label name="hr-prob-accept-pct" text="Accept 0%" class="prob-label accent-success" />
+                    <ui:Label name="hr-prob-counter-pct" text="Counter 0%" class="prob-label accent-warning" />
+                    <ui:Label name="hr-prob-decline-pct" text="Decline 0%" class="prob-label accent-danger" />
+                </ui:VisualElement>
+
+                <!-- Action buttons -->
+                <ui:VisualElement name="hr-offer-actions" class="hr-actions">
+                    <ui:Button name="hr-make-offer-btn" text="Make Offer" class="btn btn-success" />
+                </ui:VisualElement>
+
+                <!-- Counter-offer row (hidden until counter is received) -->
+                <ui:VisualElement name="hr-counter-row" class="hr-card-inner hidden">
+                    <ui:Label text="Counter Offer" class="card-subtitle" />
+                    <ui:Label name="hr-counter-salary-label" text="Counter: $0/mo" class="value-label accent-warning" />
+                    <ui:VisualElement name="hr-counter-actions" class="hr-actions">
+                        <ui:Button name="hr-accept-counter-btn" text="Accept Counter" class="btn btn-success" />
+                        <ui:Button name="hr-reject-counter-btn" text="Reject Counter" class="btn btn-danger" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

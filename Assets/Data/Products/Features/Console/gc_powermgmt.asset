@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2502559550f61fd408209db370e24c4b, type: 3}
+  m_Name: gc_powermgmt
+  m_EditorClassIdentifier: Assembly-CSharp::ProductFeatureDefinition
+  featureId: gc_powermgmt
+  displayName: Power Management
+  description: 'Intelligent power modes: instant-on, rest mode with background downloads,
+    energy-saving standby.'
+  featureCategory: 0
+  availableFromGeneration: 1
+  nativeOnly: 0
+  paradigmAffinities: []
+  requiresPlatformFeature: 
+  requiresToolFeature: 
+  synergyFeatureIds:
+  - gc_quickresume
+  conflictFeatureIds: []
+  prerequisiteFeatureIds:
+  - gc_os
+  synergyBonusPercent: 5
+  conflictPenaltyPercent: 0
+  constrainedByHardware: 0
+  minimumHardwareTier: 1
+  formFactorRequired: -1
+  requiredTotalSkillPoints: 0
+  requiredSkillType: 0
+  baseCost: 10000
+  devCostMultiplier: 0.5
+  qualityWeight: 0.5
+  demandIntroductionGen: 1
+  demandMaturitySpeed: 2
+  isFoundational: 0

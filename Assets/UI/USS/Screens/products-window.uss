@@ -1,0 +1,489 @@
+/* ===== PRODUCTS WINDOW — screen-specific styles ===== */
+/* Base styles come from variables.uss, base.uss, components.uss               */
+
+/* ── Feature demand stage labels ──────────────────────────────────────────── */
+.feature-demand-label { font-size: 11px; margin-left: 8px; }
+.demand-cutting-edge  { color: #4DD0E1; }
+.demand-trending      { color: #81C784; }
+.demand-expected      { color: #B0BEC5; }
+.demand-fading        { color: #FFD54F; }
+.demand-outdated      { color: #E57373; }
+
+/* ── Platform group header ────────────────────────────────────────────────── */
+.platform-group-header {
+    font-size: 12px;
+    color: #78909C;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    padding-left: 4px;
+    -unity-font-style: bold;
+}
+
+/* ── Phase row layout ─────────────────────────────────────────────────────── */
+.phase-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.phase-row__label {
+    width: 100px;
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+}
+
+.phase-row__progress {
+    flex-grow: 1;
+    margin: 0 var(--spacing-sm);
+}
+
+.phase-row__quality {
+    width: 44px;
+    font-size: var(--font-sm);
+    -unity-text-align: middle-right;
+    color: var(--accent-success);
+}
+
+.phase-row__team {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.phase-row__actions {
+    flex-direction: row;
+    margin-left: var(--spacing-sm);
+}
+
+/* ── Product detail panel ─────────────────────────────────────────────────── */
+.product-detail {
+    flex-grow: 1;
+    padding: var(--spacing-lg);
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.12);
+    border-left-color: rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color: rgba(0, 0, 0, 0.30);
+}
+
+.product-detail__header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(76, 201, 176, 0.22);
+}
+
+/* ── Lifecycle stage colours — extends badge system ──────────────────────── */
+.lifecycle--launch  { background-color: rgba(72,  149, 239, 0.18); color: var(--accent-info);    }
+.lifecycle--growth  { background-color: rgba(82,  183, 136, 0.18); color: var(--accent-success); }
+.lifecycle--plateau { background-color: rgba(168, 181, 174, 0.20); color: var(--text-muted);     }
+.lifecycle--decline { background-color: rgba(230, 57,  70,  0.18); color: var(--accent-danger);  }
+
+/* ── Create product modal — template picker ──────────────────────────────── */
+.template-category-header {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    text-transform: uppercase;
+    padding: 8px var(--spacing-md) 4px;
+    letter-spacing: 0.5px;
+}
+
+.template-item {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom-width: 1px;
+    border-color: rgba(255, 255, 255, 0.05);
+    transition: background-color var(--transition-fast);
+}
+
+.template-item:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.template-item--selected {
+    background-color: rgba(76, 201, 176, 0.10);
+    border-left-width: 2px;
+    border-left-color: var(--accent-primary);
+}
+
+.feature-checkbox {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    margin-bottom: 2px;
+}
+
+.feature-checkbox__cost {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin-left: var(--spacing-sm);
+    flex-shrink: 0;
+}
+
+/* ── Trend indicators for market demand ──────────────────────────────────── */
+.trend-rising  { color: var(--accent-success); }
+.trend-stable  { color: var(--text-muted);     }
+.trend-falling { color: var(--accent-danger);  }
+
+/* ── Confidence badges for forecasts ─────────────────────────────────────── */
+.confidence-high     { background-color: rgba(82,  183, 136, 0.18); color: var(--accent-success); }
+.confidence-moderate { background-color: rgba(76,  201, 176, 0.18); color: var(--accent-primary); }
+.confidence-low      { background-color: rgba(244, 162, 97,  0.20); color: var(--accent-warning); }
+.confidence-very-low { background-color: rgba(230, 57,  70,  0.18); color: var(--accent-danger);  }
+
+/* ── Create Product Wizard — step indicator ──────────────────────────────── */
+.wizard-step-indicator {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ── Wizard — genre grid ─────────────────────────────────────────────────── */
+.genre-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.genre-toggle {
+    margin-right: 8px;
+    margin-bottom: 6px;
+}
+
+/* ── Genre synergy label ─────────────────────────────────────────────────── */
+.genre-synergy-label {
+    font-size: var(--font-sm);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+}
+
+.genre-compat--great    { color: var(--accent-success); background-color: rgba(82, 183, 136, 0.14); }
+.genre-compat--workable { color: var(--text-muted); }
+.genre-compat--risky    { color: var(--accent-warning); background-color: rgba(244, 162, 97, 0.14); }
+
+/* ── Feature meter ───────────────────────────────────────────────────────── */
+.feature-meter-track {
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    height: 8px;
+}
+
+.feature-meter-fill {
+    height: 100%;
+    border-radius: var(--radius-sm);
+    background-color: var(--accent-primary);
+    transition: width 0.2s ease;
+}
+
+.feature-meter-fill--green  { background-color: var(--accent-success); }
+.feature-meter-fill--yellow { background-color: var(--accent-warning); }
+.feature-meter-fill--red    { background-color: var(--accent-danger);  }
+
+/* ── Price rating colours ────────────────────────────────────────────────── */
+.price-rating--good { color: var(--accent-success); }
+.price-rating--okay { color: var(--accent-warning); }
+.price-rating--bad  { color: var(--accent-danger);  }
+
+/* ── Iteration progress fill ─────────────────────────────────────────────── */
+.progress-bar__fill--iterating { background-color: var(--accent-info); }
+
+/* ── Team assignment rows ────────────────────────────────────────────────── */
+.team-assignment-row {
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Product cards — platforms/genres tags ───────────────────────────────── */
+.product-card__tags {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+.tag-pill {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    background-color: var(--bg-tertiary);
+    border-radius: 10px;
+    padding: 1px 7px;
+    margin-right: 4px;
+    margin-bottom: 2px;
+}
+
+.tag-pill--game { color: var(--accent-primary); background-color: rgba(76, 201, 176, 0.12); }
+
+/* ── Template card — Step 1 redesign ─────────────────────────────────────── */
+.template-item {
+    flex-direction: column;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom-width: 1px;
+    border-color: rgba(255, 255, 255, 0.05);
+    transition: background-color var(--transition-fast);
+}
+
+.template-item__header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.modal-content .template-item__header > .card__title {
+    flex-grow: 1;
+    margin-right: 8px;
+}
+
+.modal-content .template-item__header > .metric-primary {
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+.template-item__phases {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.modal-content .card__description {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    overflow: hidden;
+    -unity-text-overflow-position: end;
+    white-space: nowrap;
+}
+
+.modal-content .phase-pill {
+    font-size: 10px;
+    color: var(--text-muted);
+    background-color: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 2px 6px;
+    margin-right: 4px;
+    margin-top: 2px;
+}
+
+/* ── Feature row — market indicators (Step 3 redesign) ───────────────────── */
+
+/* ── Create Product Wizard — wider modal for 3-column grid ───────────────── */
+.modal-content.create-product-wizard {
+    width: 920px;
+}
+
+/* ── Feature grid layout ─────────────────────────────────────────────────── */
+.feature-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+/* ── Feature filter bar ──────────────────────────────────────────────────── */
+.feature-filter-bar {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    padding: 4px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.filter-group {
+    flex-direction: row;
+    align-items: center;
+    margin-right: 12px;
+    margin-bottom: 4px;
+}
+
+.modal-content .filter-group__label {
+    font-size: 10px;
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    text-transform: uppercase;
+    margin-right: 4px;
+    letter-spacing: 0.3px;
+}
+
+.modal-content .filter-btn {
+    font-size: 11px;
+    padding: 2px 6px;
+    margin: 0 1px;
+    border-radius: var(--radius-sm);
+    background-color: transparent;
+    color: var(--text-muted);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.08);
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.modal-content .filter-btn:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.modal-content .filter-btn.filter-btn--active {
+    background-color: rgba(76, 201, 176, 0.14);
+    color: var(--accent-primary);
+    border-color: rgba(76, 201, 176, 0.30);
+}
+
+.feature-row {
+    width: 33.33%;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-right-width: 1px;
+    border-right-color: rgba(255, 255, 255, 0.10);
+    overflow: hidden;
+}
+
+.feature-description {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    white-space: normal;
+    overflow: hidden;
+}
+
+.feature-row__info {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.modal-content .feature-name {
+    font-size: var(--font-sm);
+}
+
+.modal-content .feature-cost {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin-left: auto;
+    align-self: flex-end;
+}
+
+.feature-row__market {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 2px;
+}
+
+.modal-content .trend-arrow {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-right: 4px;
+}
+
+.trend--rising  { color: var(--accent-success); }
+.trend--falling { color: var(--accent-danger);  }
+.trend--stable  { color: var(--text-muted);     }
+
+.modal-content .stability-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    -unity-font-style: italic;
+    margin-left: 4px;
+    margin-right: 4px;
+    white-space: nowrap;
+}
+
+.volatility-dots {
+    flex-direction: row;
+    align-items: center;
+}
+
+.vol-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.15);
+    margin-left: 2px;
+}
+
+.vol-dot--filled {
+    background-color: rgba(255, 255, 255, 0.75);
+}
+
+.modal-content .synergy-label {
+    font-size: 10px;
+    color: var(--accent-success);
+    margin-top: 2px;
+}
+
+.modal-content .conflict-label {
+    font-size: 10px;
+    color: var(--accent-warning);
+    margin-top: 2px;
+}
+
+.feature-row--locked {
+    opacity: 0.4;
+}
+
+.feature-lock-reason {
+    font-size: 10px;
+    color: #ff6b6b;
+    margin-top: 2px;
+}
+
+.modal-content .ship-demand {
+    font-size: 11px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    align-self: center;
+    margin-left: var(--spacing-sm);
+}
+
+/* ── Product detail info section (below header, above phases) ────────────── */
+.product-detail__info {
+    flex-direction: column;
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Live product trend indicators ──────────────────────────────────────── */
+.trend--up   { color: rgb(76, 175, 80);  }
+.trend--down { color: rgb(244, 67, 54);  }
+.trend--flat { color: rgb(158, 158, 158); }
+
+.metric-trend {
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+/* ── Bug indicators — in-development panel ───────────────────────────────── */
+.bug-indicator--warning { color: rgb(255, 193, 7); }
+.phase-row__bugs { font-size: 11px; color: rgb(244, 67, 54); margin-left: 8px; }
+
+/* ── Budget section ──────────────────────────────────────────────────────── */
+.budget-section {
+    padding: var(--spacing-sm) 0;
+    border-top-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+.budget-funded {
+    color: var(--accent-success);
+}
+
+.budget-warning {
+    color: var(--accent-warning);
+}
+
+.budget-critical {
+    color: var(--accent-danger);
+}

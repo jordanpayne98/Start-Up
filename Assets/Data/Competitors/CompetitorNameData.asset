@@ -1,0 +1,944 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 160879c7758277645b9cabeb1f1b0622, type: 3}
+  m_Name: CompetitorNameData
+  m_EditorClassIdentifier: Assembly-CSharp::CompetitorNameData
+  techPrefixes:
+  - Nova
+  - Apex
+  - Pulse
+  - Iron
+  - Cloud
+  - Nexus
+  - Core
+  - Vega
+  - Orbit
+  - Flux
+  - Peak
+  - Byte
+  - Cipher
+  - Delta
+  - Echo
+  - Forge
+  - Grid
+  - Helix
+  - Ion
+  - Krypto
+  - Lumina
+  - Macro
+  - Node
+  - Omni
+  - Prism
+  - Quark
+  - Relay
+  - Signal
+  - Titan
+  - Unity
+  techSuffixes:
+  - Systems
+  - Digital
+  - Technologies
+  - Labs
+  - Software
+  - Works
+  - Dynamics
+  - Solutions
+  - Ventures
+  - Industries
+  - Networks
+  - Computing
+  - Group
+  - Interactive
+  - Media
+  - Logic
+  - Studio
+  - Global
+  - AI
+  - Cloud
+  companyPatterns:
+  - '{0}{1}'
+  - '{0} {1}'
+  - '{0}{1}'
+  founderFirstNames:
+  - Alex
+  - Jordan
+  - Morgan
+  - Taylor
+  - Casey
+  - Riley
+  - Avery
+  - Quinn
+  - Blake
+  - Cameron
+  - Drew
+  - Ellis
+  - Finley
+  - Gray
+  - Harper
+  - Indira
+  - James
+  - Kai
+  - Lee
+  - Maya
+  - Noel
+  - Omar
+  - Parker
+  - Rowan
+  - Sasha
+  - Tatum
+  - Uma
+  - Val
+  - Wei
+  - Xan
+  - Yuki
+  - Zara
+  - Amara
+  - Beau
+  - Cleo
+  founderLastNames:
+  - Chen
+  - Patel
+  - Kim
+  - Garcia
+  - Johnson
+  - Williams
+  - Brown
+  - Jones
+  - Davis
+  - Martinez
+  - Wilson
+  - Anderson
+  - Thomas
+  - Jackson
+  - White
+  - Harris
+  - Martin
+  - Thompson
+  - Moore
+  - Young
+  - Allen
+  - Scott
+  - Walker
+  - Hall
+  - Rivera
+  - Campbell
+  - Mitchell
+  - Carter
+  - Roberts
+  - Nguyen
+  - Lee
+  - Robinson
+  - Clark
+  - Lewis
+  - Young
+  productAdjectives:
+  - Swift
+  - Cloud
+  - Data
+  - Smart
+  - Pro
+  - Ultra
+  - Hyper
+  - Micro
+  - Mega
+  - Super
+  - Turbo
+  - Rapid
+  - Prime
+  - Elite
+  - Core
+  - Apex
+  - Solid
+  - Quick
+  - Pixel
+  - Open
+  productNouns:
+  - Pulse
+  - Forge
+  - Sync
+  - Flow
+  - Hub
+  - Beam
+  - Cast
+  - Link
+  - Base
+  - Dash
+  - Edge
+  - Grid
+  - Nest
+  - Pack
+  - Path
+  - Port
+  - Rail
+  - Scan
+  - Span
+  - Wave
+  sequelSuffixes:
+  - Pro
+  - Plus
+  - Ultra
+  - 2.0
+  - 3.0
+  - X
+  - Max
+  - HD
+  - Next
+  - Neo
+  - Lite
+  - Turbo
+  - Elite
+  - Prime
+  nicheNamePools:
+  - category: 7
+    niche: 9
+    prefixes:
+    - Eternal
+    - Shadow
+    - Crystal
+    - Hollow
+    - Iron
+    - Obsidian
+    - Mythic
+    - Ancient
+    - Cursed
+    - Fabled
+    suffixes:
+    - Realms
+    - Quest
+    - Saga
+    - Chronicle
+    - Legends
+    - Throne
+    - Legacy
+    - Kingdoms
+    - Odyssey
+    - Dawn
+  - category: 7
+    niche: 10
+    prefixes:
+    - Bullet
+    - Siege
+    - Black
+    - War
+    - Steel
+    - Razor
+    - Breach
+    - Phantom
+    - Ember
+    - Cold
+    suffixes:
+    - Storm
+    - Protocol
+    - Zone
+    - Ops
+    - Front
+    - Strike
+    - Point
+    - Recon
+    - Salvo
+    - Line
+  - category: 7
+    niche: 11
+    prefixes:
+    - Empire
+    - Crown
+    - Iron
+    - Grand
+    - Total
+    - Crimson
+    - Sovereign
+    - Conquest
+    - Dominion
+    - Feudal
+    suffixes:
+    - Dominion
+    - Conquest
+    - Throne
+    - Legions
+    - Command
+    - Tactics
+    - March
+    - Decree
+    - Order
+    - Rule
+  - category: 7
+    niche: 12
+    prefixes:
+    - Mind
+    - Prism
+    - Logic
+    - Spark
+    - Twist
+    - Cubic
+    - Pattern
+    - Block
+    - Cipher
+    - Riddle
+    suffixes:
+    - Lock
+    - Shift
+    - Grid
+    - Loop
+    - Craft
+    - Box
+    - Code
+    - Link
+    - Path
+    - Key
+  - category: 7
+    niche: 13
+    prefixes:
+    - Super
+    - Mega
+    - Bouncy
+    - Sky
+    - Star
+    - Turbo
+    - Zippy
+    - Jolly
+    - Blazing
+    - Wild
+    suffixes:
+    - Hop
+    - Runner
+    - World
+    - Land
+    - Dash
+    - Bounce
+    - Sprint
+    - Leap
+    - Trails
+    - Rush
+  - category: 7
+    niche: 14
+    prefixes:
+    - Sim
+    - Metro
+    - Tycoon
+    - Planet
+    - City
+    - Farm
+    - Harbor
+    - Venture
+    - Frontier
+    - Colony
+    suffixes:
+    - Builder
+    - Craft
+    - Works
+    - Manager
+    - Kingdom
+    - Haven
+    - Estate
+    - Empire
+    - Valley
+    - Isle
+  - category: 7
+    niche: 15
+    prefixes:
+    - Turbo
+    - Nitro
+    - Speed
+    - Grand
+    - Apex
+    - Drift
+    - Thunder
+    - Blitz
+    - Chrome
+    - Asphalt
+    suffixes:
+    - Circuit
+    - Rush
+    - Rally
+    - Drift
+    - Prix
+    - Gear
+    - Track
+    - Lap
+    - Rev
+    - Mile
+  - category: 7
+    niche: 16
+    prefixes:
+    - Pro
+    - All-Star
+    - Championship
+    - League
+    - Golden
+    - Premier
+    - Elite
+    - Dynasty
+    - Gridiron
+    - Arena
+    suffixes:
+    - Season
+    - Cup
+    - League
+    - Rivals
+    - Championship
+    - Classic
+    - Match
+    - Series
+    - Trophy
+    - Bout
+  - category: 7
+    niche: 17
+    prefixes:
+    - Silent
+    - Dead
+    - Dark
+    - Crimson
+    - Hollow
+    - Dread
+    - Wither
+    - Rotting
+    - Pale
+    - Grim
+    suffixes:
+    - Whispers
+    - Night
+    - Asylum
+    - Descent
+    - Echo
+    - Manor
+    - Crypt
+    - Depths
+    - Ward
+    - Mire
+  - category: 7
+    niche: 18
+    prefixes:
+    - Lost
+    - Wild
+    - Uncharted
+    - Forgotten
+    - Hidden
+    - Verdant
+    - Distant
+    - Wandering
+    - Fabled
+    - Sunken
+    suffixes:
+    - Horizons
+    - Shores
+    - Trails
+    - Voyage
+    - Journey
+    - Passage
+    - Frontier
+    - Wilds
+    - Depths
+    - Expedition
+  - category: 7
+    niche: 19
+    prefixes:
+    - Realm of
+    - World of
+    - Age of
+    - Legends of
+    - Eternal
+    - Shattered
+    - Infinite
+    - Celestial
+    - Arcane
+    - Runic
+    suffixes:
+    - Horizons
+    - Ascension
+    - Dominion
+    - Empires
+    - Dawn
+    - Nexus
+    - Aether
+    - Kingdoms
+    - Conquest
+    - Eternity
+  - category: 7
+    niche: 20
+    prefixes:
+    - Craft
+    - Block
+    - Pixel
+    - Terra
+    - Voxel
+    - Open
+    - Endless
+    - Free
+    - Scrap
+    - Forge
+    suffixes:
+    - World
+    - Land
+    - Realm
+    - Space
+    - Verse
+    - Field
+    - Zone
+    - Scape
+    - Haven
+    - Sphere
+  - category: 7
+    niche: 21
+    prefixes:
+    - Iron
+    - Steel
+    - Shadow
+    - Thunder
+    - Crimson
+    - Fatal
+    - Brutal
+    - Fierce
+    - Savage
+    - Primal
+    suffixes:
+    - Fist
+    - Arena
+    - Clash
+    - Fury
+    - Brawl
+    - Strike
+    - Bout
+    - Kombat
+    - Rumble
+    - Duel
+  - category: 0
+    niche: 0
+    prefixes:
+    - Vista
+    - Aurora
+    - Zenith
+    - Onyx
+    - Cobalt
+    - Meridian
+    - Summit
+    - Glacier
+    - Pinnacle
+    - Horizon
+    suffixes:
+    - OS
+    - Core
+    - Shell
+    - Desktop
+    - Platform
+    - Edition
+    - System
+    - Foundation
+    - Base
+    - Framework
+  - category: 0
+    niche: 1
+    prefixes:
+    - Prism
+    - Aura
+    - Nimbus
+    - Lumen
+    - Spark
+    - Iris
+    - Pulse
+    - Swift
+    - Breeze
+    - Zephyr
+    suffixes:
+    - Mobile
+    - Touch
+    - Go
+    - Pocket
+    - Lite
+    - Air
+    - Mini
+    - Flex
+    - Hand
+    - Palm
+  - category: 0
+    niche: 2
+    prefixes:
+    - Bastion
+    - Fortress
+    - Sentinel
+    - Citadel
+    - Vault
+    - Rampart
+    - Bulwark
+    - Bunker
+    - Haven
+    - Anchor
+    suffixes:
+    - Server
+    - Cluster
+    - Rack
+    - Grid
+    - Stack
+    - Host
+    - Fabric
+    - Backbone
+    - Node
+    - Engine
+  - category: 8
+    niche: 22
+    prefixes:
+    - Tap
+    - Quick
+    - Snap
+    - Pocket
+    - Swift
+    - Handy
+    - Smart
+    - Easy
+    - Insta
+    - Rapid
+    suffixes:
+    - Tool
+    - Kit
+    - Helper
+    - Assist
+    - Buddy
+    - Mate
+    - Pro
+    - Plus
+    - Aid
+    - Fix
+  - category: 8
+    niche: 23
+    prefixes:
+    - Buzz
+    - Chirp
+    - Pulse
+    - Wave
+    - Vibe
+    - Flock
+    - Loop
+    - Echo
+    - Ripple
+    - Drift
+    suffixes:
+    - Feed
+    - Circle
+    - Hub
+    - Space
+    - Link
+    - Net
+    - Crowd
+    - Tribe
+    - Scene
+    - Chat
+  - category: 8
+    niche: 24
+    prefixes:
+    - Focus
+    - Flow
+    - Task
+    - Plan
+    - Note
+    - Clear
+    - Sharp
+    - Lean
+    - Agile
+    - Peak
+    suffixes:
+    - Board
+    - List
+    - Pad
+    - Dock
+    - Deck
+    - Desk
+    - Work
+    - Planner
+    - Track
+    - Set
+  - category: 11
+    niche: 38
+    prefixes:
+    - Client
+    - Lead
+    - Deal
+    - Pipeline
+    - Engage
+    - Prospect
+    - Funnel
+    - Reach
+    - Connect
+    - Nurture
+    suffixes:
+    - Force
+    - Hub
+    - Base
+    - Cloud
+    - Desk
+    - CRM
+    - Suite
+    - Track
+    - Pulse
+    - Flow
+  - category: 11
+    niche: 40
+    prefixes:
+    - Insight
+    - Metric
+    - Data
+    - Signal
+    - Trend
+    - Chart
+    - Graph
+    - Beacon
+    - Survey
+    - Index
+    suffixes:
+    - Lens
+    - Scope
+    - View
+    - Dash
+    - Board
+    - Watch
+    - Pulse
+    - Scan
+    - Map
+    - Eye
+  - category: 11
+    niche: 41
+    prefixes:
+    - Team
+    - Ping
+    - Sync
+    - Wire
+    - Chat
+    - Bridge
+    - Relay
+    - Link
+    - Band
+    - Signal
+    suffixes:
+    - Space
+    - Link
+    - Bridge
+    - Wave
+    - Loop
+    - Talk
+    - Room
+    - Line
+    - Meet
+    - Call
+  - category: 3
+    niche: -1
+    prefixes:
+    - Volt
+    - Forge
+    - Spark
+    - Core
+    - Blaze
+    - Flux
+    - Arc
+    - Prism
+    - Nova
+    - Pulse
+    suffixes:
+    - Engine
+    - Kit
+    - SDK
+    - Studio
+    - Framework
+    - Runtime
+    - Core
+    - Render
+    - Build
+    - Forge
+  - category: 4
+    niche: -1
+    prefixes:
+    - Pixel
+    - Vector
+    - Render
+    - Canvas
+    - Palette
+    - Brush
+    - Shade
+    - Hue
+    - Layer
+    - Ink
+    suffixes:
+    - Studio
+    - Pro
+    - Suite
+    - Editor
+    - Lab
+    - Forge
+    - Works
+    - Desk
+    - Art
+    - Draw
+  - category: 5
+    niche: -1
+    prefixes:
+    - Wave
+    - Sound
+    - Tone
+    - Beat
+    - Echo
+    - Sonic
+    - Rhythm
+    - Stereo
+    - Chord
+    - Mix
+    suffixes:
+    - Studio
+    - Lab
+    - Forge
+    - Deck
+    - Board
+    - Box
+    - Craft
+    - Master
+    - Bay
+    - Bench
+  - category: 6
+    niche: -1
+    prefixes:
+    - Stack
+    - Code
+    - Build
+    - Dev
+    - App
+    - Logic
+    - Module
+    - Script
+    - Wire
+    - Mesh
+    suffixes:
+    - Kit
+    - Frame
+    - Base
+    - Core
+    - Forge
+    - Stack
+    - Flow
+    - Hub
+    - Craft
+    - Works
+  - category: 9
+    niche: -1
+    prefixes:
+    - Pro
+    - Office
+    - Work
+    - Doc
+    - Pixel
+    - Draft
+    - Folio
+    - Quill
+    - Atlas
+    - Suite
+    suffixes:
+    - Suite
+    - Studio
+    - Desk
+    - Forge
+    - Lab
+    - Works
+    - Central
+    - Bench
+    - Vault
+    - Office
+  - category: 10
+    niche: -1
+    prefixes:
+    - Cloud
+    - Web
+    - Net
+    - Site
+    - Page
+    - Portal
+    - Domain
+    - Render
+    - Host
+    - Open
+    suffixes:
+    - App
+    - Flow
+    - Platform
+    - Space
+    - Portal
+    - Gate
+    - Hub
+    - Forge
+    - Stack
+    - Zone
+  - category: 12
+    niche: -1
+    prefixes:
+    - Shield
+    - Guard
+    - Sentinel
+    - Vault
+    - Lock
+    - Armor
+    - Cipher
+    - Fort
+    - Watch
+    - Aegis
+    suffixes:
+    - Secure
+    - Wall
+    - Gate
+    - Net
+    - Guard
+    - Shield
+    - Lock
+    - Scan
+    - Safe
+    - Protect
+  - category: 13
+    niche: -1
+    prefixes:
+    - Stratus
+    - Nimbus
+    - Cumulus
+    - Alto
+    - Cirrus
+    - Nebula
+    - Ether
+    - Vapor
+    - Haze
+    - Drift
+    suffixes:
+    - Cloud
+    - Scale
+    - Stack
+    - Grid
+    - Host
+    - Fabric
+    - Mesh
+    - Node
+    - Cluster
+    - Layer
+  - category: 14
+    niche: -1
+    prefixes:
+    - Neural
+    - Cortex
+    - Synth
+    - Deep
+    - Cognit
+    - Logic
+    - Brain
+    - Axon
+    - Tensor
+    - Vertex
+    suffixes:
+    - Mind
+    - AI
+    - Think
+    - Learn
+    - Vision
+    - Sense
+    - Net
+    - Spark
+    - Intel
+    - Sage

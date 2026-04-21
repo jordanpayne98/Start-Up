@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════════
+   Interview System Redesign — USS
+   Dark green palette (matches GlobalStyles)
+   ═══════════════════════════════════════════════ */
+
+/* ── Candidate Tile ─────────────────────────── */
+.candidate-tile {
+    flex-direction: row;
+    margin: 3px 6px;
+    border-radius: 5px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    background-color: var(--bg-secondary);
+    overflow: hidden;
+    cursor: link;
+}
+.candidate-tile:hover { background-color: var(--bg-tertiary); }
+.candidate-tile--selected { border-top-color: rgba(72,149,239,0.80); border-left-color: rgba(72,149,239,0.80); border-bottom-color: rgba(72,149,239,0.40); border-right-color: rgba(72,149,239,0.40); background-color: rgba(72,149,239,0.10); }
+.candidate-tile--urgent  { border-left-color: rgba(230,57,70,0.80); border-top-color: rgba(230,57,70,0.40); }
+.candidate-tile--warning { border-left-color: rgba(200,170,80,0.70); border-top-color: rgba(200,170,80,0.35); }
+
+/* Role accent strip (4px left bar, color set inline per role) */
+.candidate-tile-accent { width: 4px; }
+.candidate-tile-body { flex-grow: 1; padding: 7px 10px; }
+
+/* ── Stage pills ─────────────────────────────── */
+.tile-header-row { flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.stage-progress-pills { flex-direction: row; align-items: center; }
+.stage-pill { width: 9px; height: 9px; border-radius: 5px; margin-right: 3px; background-color: var(--bg-tertiary); }
+.stage-pill--complete { background-color: var(--accent-success); }
+.stage-pill--active   { background-color: var(--accent-info); }
+.stage-pill--pending  { background-color: var(--bg-tertiary); }
+
+/* ── Candidate name ──────────────────────────── */
+.candidate-tile-name { font-size: 12px; color: var(--text-light); -unity-font-style: bold; }
+
+/* ── Role badge ──────────────────────────────── */
+.tile-role-row { flex-direction: row; align-items: center; margin-bottom: 3px; }
+.tile-role-badge { font-size: 10px; padding: 2px 6px; border-radius: 3px; -unity-font-style: bold; margin-right: 6px; }
+.tile-role-badge--developer  { background-color: rgba(96,165,250,0.20);  color: var(--role-programming); }
+.tile-role-badge--designer   { background-color: rgba(167,139,250,0.20); color: var(--role-design); }
+.tile-role-badge--qa         { background-color: rgba(52,211,153,0.20);  color: var(--role-qa); }
+.tile-role-badge--hr         { background-color: rgba(251,191,36,0.20);  color: var(--role-hr); }
+.tile-role-badge--sfx        { background-color: rgba(244,114,182,0.20); color: var(--role-sfx); }
+.tile-role-badge--vfx        { background-color: rgba(251,146,60,0.20);  color: var(--role-vfx); }
+.tile-role-badge--accountant { background-color: rgba(148,163,184,0.20); color: var(--role-accountancy); }
+.tile-leadership-badge { font-size: 10px; color: rgb(220,190,70); }
+.tile-function-badge   { font-size: 10px; color: var(--accent-info); }
+.team-member-role-row  { flex-direction: row; justify-content: space-between; padding: 2px 4px; }
+
+/* ── Mini skill bars ─────────────────────────── */
+.tile-skills-preview { margin-bottom: 3px; }
+.mini-skill-bar-row { flex-direction: row; align-items: center; margin-top: 2px; }
+.mini-skill-label   { width: 34px; font-size: 10px; color: var(--text-muted); }
+.mini-skill-bar     { flex-grow: 1; height: 4px; background-color: var(--bg-tertiary); border-radius: 2px; }
+.mini-skill-bar-fill{ height: 100%; background-color: var(--accent-info); border-radius: 2px; }
+.mini-skill-value   { width: 22px; font-size: 10px; color: var(--text-muted); margin-left: 4px; }
+
+/* ── Tile salary ─────────────────────────────── */
+.tile-salary { font-size: 10px; color: var(--text-muted); margin-bottom: 2px; }
+
+/* ── Tile footer ─────────────────────────────── */
+.tile-footer-row { flex-direction: row; align-items: center; flex-wrap: wrap; margin-top: 2px; }
+
+/* ── Urgency chip ────────────────────────────── */
+.urgency-chip          { font-size: 10px; padding: 2px 6px; border-radius: 3px; margin-top: 3px; }
+.urgency-chip--safe    { background-color: rgba(82,183,136,0.15);  color: var(--accent-success); }
+.urgency-chip--warning { background-color: rgba(200,170,80,0.15);  color: var(--accent-warning); }
+.urgency-chip--urgent  { background-color: rgba(230,57,70,0.15);   color: var(--accent-danger); }
+
+/* ── Follow-up badge ─────────────────────────── */
+.follow-up-badge { font-size: 10px; padding: 2px 6px; border-radius: 3px; background-color: rgba(200,170,80,0.15); color: var(--accent-warning); margin-left: 4px; margin-top: 3px; -unity-font-style: bold; }
+
+/* ═══════════════════════════════════════════════
+   Inspector interview section
+   ═══════════════════════════════════════════════ */
+
+/* ── Confidence row ──────────────────────────── */
+.confidence-row   { flex-direction: row; align-items: center; margin-bottom: 6px; margin-top: 4px; }
+.confidence-label { font-size: 11px; color: var(--text-muted); width: 72px; }
+.confidence-bar   { flex-grow: 1; height: 5px; background-color: var(--bg-tertiary); border-radius: 2px; margin: 0 8px; }
+.confidence-bar-fill   { height: 100%; border-radius: 2px; }
+.confidence-fill--high { background-color: var(--accent-success); }
+.confidence-fill--mid  { background-color: var(--accent-warning); }
+.confidence-fill--low  { background-color: var(--accent-danger); }
+.confidence-value { font-size: 11px; color: var(--text-muted); width: 28px; }
+
+/* ── Fit score row ───────────────────────────── */
+.fit-score-row   { flex-direction: row; align-items: center; margin-bottom: 8px; }
+.fit-score-label { font-size: 11px; color: var(--text-muted); width: 72px; }
+.fit-score-value { font-size: 13px; -unity-font-style: bold; color: var(--text-muted); }
+.fit-score--high { color: var(--accent-success); }
+.fit-score--mid  { color: var(--accent-warning); }
+.fit-score--low  { color: var(--accent-danger); }
+
+/* ── Withdrawal warning ──────────────────────── */
+.withdrawal-warning { font-size: 11px; color: var(--accent-danger); background-color: rgba(230,57,70,0.10); padding: 6px 8px; border-radius: 4px; margin-bottom: 8px; white-space: normal; border-width: 1px; border-top-color: rgba(230,57,70,0.80); border-left-color: rgba(230,57,70,0.80); border-bottom-color: rgba(230,57,70,0.40); border-right-color: rgba(230,57,70,0.40); }
+
+/* ── Patience meter ──────────────────────────── */
+.patience-row    { flex-direction: row; align-items: center; margin-top: 8px; padding-top: 8px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.07); }
+.patience-icon   { font-size: 13px; margin-right: 6px; }
+.patience-label  { font-size: 11px; color: var(--text-muted); width: 62px; }
+.patience-bar    { flex-grow: 1; height: 6px; background-color: var(--bg-tertiary); border-radius: 3px; margin: 0 8px; }
+.patience-bar-fill    { height: 100%; border-radius: 3px; }
+.patience-fill--high  { background-color: var(--accent-success); }
+.patience-fill--mid   { background-color: var(--accent-warning); }
+.patience-fill--low   { background-color: var(--accent-danger); }
+.patience-value  { font-size: 11px; color: var(--text-muted); width: 26px; }
+
+/* ═══════════════════════════════════════════════
+   Single-stage card
+   ═══════════════════════════════════════════════ */
+.stage-card {
+    flex-direction: column;
+    background-color: var(--bg-tertiary);
+    border-radius: 6px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    margin-top: 4px;
+}
+
+.stage-card-progress {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+    -unity-font-style: italic;
+}
+
+.stage-card-name {
+    font-size: 15px;
+    color: var(--text-light);
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.stage-card-reveal {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    white-space: normal;
+}
+
+.stage-card-cost {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.stage-in-progress-label {
+    font-size: 12px;
+    color: var(--accent-info);
+    -unity-font-style: bold;
+    padding: 8px 0 2px 0;
+}
+
+.stage-all-done-label {
+    font-size: 12px;
+    color: var(--accent-success);
+    -unity-font-style: bold;
+    padding: 6px 0;
+    margin-bottom: 4px;
+}
+
+/* ═══════════════════════════════════════════════
+   Negotiation probability panel (inside offer dialog)
+   ═══════════════════════════════════════════════ */
+
+.prob-panel {
+    background-color: var(--bg-tertiary);
+    border-radius: 5px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    padding: 8px 10px;
+    margin-top: 10px;
+}
+
+/* Offer Analysis Panel (right column inside interview inspector) */
+.offer-analysis-panel { margin-top: 12px; padding: 10px; background-color: rgba(0,0,0,0.18); border-radius: 4px; border-width: 1px; border-top-color: rgba(255,255,255,0.08); border-left-color: rgba(255,255,255,0.08); border-bottom-color: rgba(0,0,0,0.30); border-right-color: rgba(0,0,0,0.30); }
+.analysis-header { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 8px; -unity-font-style: bold; }
+
+/* Priority row */
+.priority-row { flex-direction: row; align-items: center; margin-bottom: 8px; }
+.priority-label { font-size: 12px; color: rgba(255,255,255,0.75); }
+
+/* Factor rows */
+.factor-row { flex-direction: row; align-items: center; margin-bottom: 3px; }
+.factor-label { flex-grow: 1; font-size: 11px; color: rgba(255,255,255,0.45); }
+.factor-modifier { font-size: 11px; -unity-text-align: middle-right; }
+.factor-modifier--positive { color: rgb(100,220,140); }
+.factor-modifier--negative { color: rgb(220,100,80); }
+.factor-modifier--neutral  { color: rgba(255,255,255,0.4); }
+
+/* Probability bar */
+.probability-bar-container { flex-direction: row; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; margin-bottom: 4px; }
+.prob-accept-zone  { background-color: rgb(70,190,110); }
+.prob-counter-zone { background-color: rgb(210,170,50); }
+.prob-decline-zone { background-color: rgb(210,80,70); }
+
+.probability-labels-row { flex-direction: row; margin-bottom: 8px; }
+.prob-accept-label  { flex-grow: 1; font-size: 10px; color: rgb(100,220,140); }
+.prob-counter-label { flex-grow: 1; font-size: 10px; color: rgb(240,200,80); -unity-text-align: middle-center; }
+.prob-decline-label { flex-grow: 1; font-size: 10px; color: rgb(240,110,90); -unity-text-align: middle-right; }
+
+/* Condition row */
+.condition-row { padding: 6px 8px; background-color: rgba(200,130,60,0.10); border-radius: 4px; border-width: 1px; border-top-color: rgba(200,130,60,0.60); border-left-color: rgba(200,130,60,0.60); border-bottom-color: rgba(200,130,60,0.25); border-right-color: rgba(200,130,60,0.25); }
+.condition-text { font-size: 11px; color: rgba(255,255,255,0.7); white-space: normal; margin-bottom: 3px; }
+.condition-met--yes { font-size: 10px; color: rgb(80,220,130); }
+.condition-met--no  { font-size: 10px; color: rgba(255,255,255,0.35); }
+.condition-expiry   { font-size: 10px; color: rgb(240,170,80); margin-top: 2px; }
+
+/* Candidate tile declined state */
+.candidate-tile--declined { border-left-color: rgba(200,120,60,0.6); }
+.declined-badge     { font-size: 10px; padding: 2px 6px; border-radius: 3px; background-color: rgba(200,100,60,0.2); color: rgb(240,150,100); }
+.condition-met-badge{ font-size: 10px; padding: 2px 6px; border-radius: 3px; background-color: rgba(60,200,110,0.2); color: rgb(100,240,150); }
+
+/* Outcome bar segments inherit inline colors */

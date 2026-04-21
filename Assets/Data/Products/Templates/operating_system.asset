@@ -1,0 +1,127 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9cf6717fcc82f04cb10f6a4a76d9245, type: 3}
+  m_Name: operating_system
+  m_EditorClassIdentifier: Assembly-CSharp::ProductTemplateDefinition
+  templateId: operating_system
+  displayName: Operating System
+  description: "Foundation platform \u2014 every piece of software targets an OS"
+  category: 0
+  layer: 0
+  baseUpfrontCost: 150000
+  difficultyTier: 5
+  validTargetPlatforms: 
+  validPlatformNiches: 
+  requiredToolTypes: 06000000
+  ownToolQualityBonus: 0.1
+  licensedToolQualityBonus: 0.05
+  optimalTeamSizePerPhase: 8
+  paradigmSensitivity: 0.8
+  nicheConfigs:
+  - niche: 0
+    retentionMonths: 60
+    volatility: 0.1
+  - niche: 1
+    retentionMonths: 36
+    volatility: 0.15
+  - niche: 2
+    retentionMonths: 72
+    volatility: 0.05
+  revenueModelOptions:
+  - premium
+  - subscription
+  - free_to_play
+  phases:
+  - phaseType: 0
+    primaryRole: 1
+    baseWorkUnits: 200
+    prerequisites: 
+    qualitySoftCapBase: 80
+  - phaseType: 1
+    primaryRole: 0
+    baseWorkUnits: 400
+    prerequisites: 00000000
+    qualitySoftCapBase: 80
+  - phaseType: 4
+    primaryRole: 3
+    baseWorkUnits: 160
+    prerequisites: 00000000
+    qualitySoftCapBase: 80
+  - phaseType: 6
+    primaryRole: 2
+    baseWorkUnits: 240
+    prerequisites: 01000000
+    qualitySoftCapBase: 80
+  availableFeatures:
+  - {fileID: 11400000, guid: 14ddea207d652894d8b6d117f8fd4551, type: 2}
+  - {fileID: 11400000, guid: 00b11da5fc7de3946847e00639a6ead0, type: 2}
+  - {fileID: 11400000, guid: 2cd3e6552bf09814d88de3e3a88c7692, type: 2}
+  - {fileID: 11400000, guid: b047e40a429bffa41b6023bf0f47795e, type: 2}
+  - {fileID: 11400000, guid: 309787dc2ba31324584a986343152310, type: 2}
+  - {fileID: 11400000, guid: 2773ae241b0d1f54db96239c1550c4a5, type: 2}
+  - {fileID: 11400000, guid: f1a9081edcc0316449817db0480cfc4f, type: 2}
+  - {fileID: 11400000, guid: 04dccfefcbecf11438bdaf0b3e2ec390, type: 2}
+  - {fileID: 11400000, guid: a87410cd1f583d24aaae782446a69880, type: 2}
+  - {fileID: 11400000, guid: 1ff4cf8e15f80e94c8701f3228bf3fd7, type: 2}
+  - {fileID: 11400000, guid: a7178a8114865604aa7b4e616f1b239a, type: 2}
+  - {fileID: 11400000, guid: 284e3aabbbc82e54f8a9aa8e1abaa2ec, type: 2}
+  - {fileID: 11400000, guid: 9a881db206bed834c93dd89b17075fde, type: 2}
+  - {fileID: 11400000, guid: 5e0de715469ef93448ac465cbe5cd162, type: 2}
+  - {fileID: 11400000, guid: 9bac44d6d0da4ef49b17ef65ddd50e64, type: 2}
+  - {fileID: 11400000, guid: e599bd5d9950ea147872323612715882, type: 2}
+  - {fileID: 11400000, guid: 1cbad9ded32a4b04aa3ea07c999b3d41, type: 2}
+  - {fileID: 11400000, guid: 0fb97a4ef8f03bb48a37fd6aaa08e991, type: 2}
+  - {fileID: 11400000, guid: ba040b1c7a9ec834f9b7058d547fbbfc, type: 2}
+  - {fileID: 11400000, guid: dc89316a83bd7f34b837e8cce9de92ed, type: 2}
+  - {fileID: 11400000, guid: ec86a8d667959d3478974d28d0e9274c, type: 2}
+  - {fileID: 11400000, guid: b47de3013baceb34a8c95beffd49f6ea, type: 2}
+  - {fileID: 11400000, guid: 4bb6c68e7a96d854881a085419aef4bf, type: 2}
+  - {fileID: 11400000, guid: 035d32ac88b9b1b43a1bcadb4a006d27, type: 2}
+  - {fileID: 11400000, guid: 752bee3490a82ac40a1f8b0d11eff4fb, type: 2}
+  economyConfig:
+    isSubscriptionBased: 0
+    launchSalesBase: 2000
+    pricePerUnit: 120
+    tailDecayRate: 0.02
+    minTailFactor: 0.1
+    monthlySubscriptionPrice: 10
+    baseChurnRate: 0.01
+    maintenanceChurnReduction: 0.003
+    organicGrowthRate: 0.02
+    updateSalesSpikeMult: 1.5
+    updatePopularityBoost: 5
+    maintenancePopDecayReduction: 0.6
+    breakoutBaseChance: 0.02
+    breakoutMinMultiplier: 3
+    breakoutMaxMultiplier: 8
+    plateauDecayRatePerMonth: 0.01
+    declineDecayRatePerMonth: 0.02
+    ticksToGrowthStage: 432000
+    bugChurnMultiplier: 2
+    shipBugPopularityPenalty: 4
+    maxMonthlyBugPopularityPenalty: 8
+    unmaintainedBugGrowthBase: 0.1
+    sequelPopularityBoostMax: 30
+    maxUserPool: 0
+    basePricePerUnit: 0
+    baseSubscriptionPrice: 0
+    priceElasticityExponent: 0
+    nicheVolatility: 0
+    retentionMonths: 0
+    interestRate: 0
+    baseDemand: 0
+    demandFloor: 0
+    demandCeiling: 0
+    recoveryRateMin: 0
+    recoveryRateMax: 0
+    saturationThreshold: 0
+    saturationPenaltyPerProduct: 0

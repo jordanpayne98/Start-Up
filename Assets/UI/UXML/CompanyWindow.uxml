@@ -1,0 +1,39 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="company-window" class="company-window">
+        <ui:VisualElement name="company-header" class="company-header">
+            <ui:Label name="company-window-title" text="Company Management" class="window-title" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="office-info-panel" class="info-panel">
+            <ui:Label name="office-info-title" text="Office" class="panel-title" />
+            <ui:VisualElement class="info-row">
+                <ui:Label text="Office Tier:" class="info-label" />
+                <ui:Label name="office-tier-label" text="Garage" class="info-value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="info-row">
+                <ui:Label text="Employees:" class="info-label" />
+                <ui:Label name="employee-capacity-label" text="0/5 (comfortable: 3)" class="info-value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="research-panel" class="info-panel">
+            <ui:Label name="research-panel-title" text="Research" class="panel-title" />
+            <ui:VisualElement class="info-row">
+                <ui:Label text="Target:" class="info-label" />
+                <ui:Label name="research-target-label" text="None" class="info-value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="progress-bar-container">
+                <ui:VisualElement name="research-progress-fill" class="progress-bar-fill" />
+            </ui:VisualElement>
+            <ui:VisualElement class="info-row">
+                <ui:Label name="research-progress-label" text="No research" class="info-value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="category-tabs" class="category-tabs" />
+
+        <ui:ScrollView name="tree-scroll-view" class="tree-scroll-view">
+            <ui:VisualElement name="tree-canvas" class="tree-canvas" />
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

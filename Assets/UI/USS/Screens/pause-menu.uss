@@ -1,0 +1,219 @@
+/* ── Pause Overlay Backdrop ── */
+.pause-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Pause Panel (centered card) ── */
+.pause-panel {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    width: 380px;
+    align-items: stretch;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.40);
+    border-right-color:  rgba(0, 0, 0, 0.40);
+}
+
+.pause-panel__title {
+    font-size: var(--font-2xl);
+    -unity-font-style: bold;
+    color: var(--text-light);
+    -unity-text-align: middle-center;
+    margin-bottom: var(--spacing-xl);
+    letter-spacing: 2px;
+}
+
+.pause-panel__btn {
+    width: 100%;
+    margin-bottom: var(--spacing-sm);
+}
+
+.pause-panel__btn:last-child {
+    margin-bottom: 0;
+}
+
+/* ── Save / Load Shared Panel ── */
+.save-load-panel {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    width: 520px;
+    max-height: 600px;
+    flex-direction: column;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.40);
+    border-right-color:  rgba(0, 0, 0, 0.40);
+}
+
+.save-load-panel__header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+    padding-bottom: var(--spacing-md);
+}
+
+.save-load-panel__title {
+    font-size: var(--font-xl);
+    -unity-font-style: bold;
+    color: var(--text-light);
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+    margin-right: 40px;
+}
+
+.save-load-panel__scroll {
+    flex-grow: 1;
+    overflow: hidden scroll;
+    max-height: 400px;
+}
+
+.slots-remaining-label {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+    margin-top: var(--spacing-md);
+}
+
+/* ── Save / Load Slot ── */
+.save-slot {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    flex-direction: row;
+    align-items: center;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.08);
+    border-left-color:   rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(0, 0, 0, 0.22);
+    border-right-color:  rgba(0, 0, 0, 0.22);
+}
+
+.save-slot--new {
+    border-top-color:  rgba(76, 201, 176, 0.25);
+    border-left-color: rgba(76, 201, 176, 0.25);
+}
+
+.save-slot__name {
+    flex-grow: 1;
+    margin-right: var(--spacing-sm);
+    font-size: var(--font-md);
+    -unity-font-style: bold;
+    color: var(--text-light);
+}
+
+.save-slot__info {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.save-slot__meta {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.save-slot__actions {
+    flex-direction: row;
+    align-items: center;
+}
+
+.save-slot__actions > .btn-primary {
+    margin-right: var(--spacing-xs);
+}
+
+.save-slot__actions > .btn-danger {
+    margin-left: var(--spacing-xs);
+}
+
+/* ── Section headers (load panel) ── */
+.save-section-header {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+}
+
+.save-section-container {
+    flex-direction: column;
+}
+
+/* ── Confirmation Dialog ── */
+.confirm-dialog {
+    background-color: var(--bg-elevated);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    width: 400px;
+    flex-direction: column;
+    align-items: stretch;
+    position: absolute;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.16);
+    border-left-color:   rgba(255, 255, 255, 0.16);
+    border-bottom-color: rgba(0, 0, 0, 0.45);
+    border-right-color:  rgba(0, 0, 0, 0.45);
+}
+
+.confirm-dialog__message {
+    font-size: var(--font-md);
+    color: var(--text-light);
+    -unity-text-align: middle-center;
+    margin-bottom: var(--spacing-xl);
+    white-space: normal;
+}
+
+.confirm-dialog__buttons {
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.confirm-dialog__buttons > Button {
+    margin-left: var(--spacing-sm);
+}
+
+/* ── Settings button in top bar ── */
+.btn-settings-icon {
+    background-color: transparent;
+    border-width: 0;
+    border-radius: var(--radius-md);
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: var(--font-lg);
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+    align-items: center;
+    justify-content: center;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+    margin-left: var(--spacing-sm);
+    align-self: center;
+}
+
+.btn-settings-icon:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-light);
+}
+
+.btn-settings-icon:active {
+    background-color: rgba(255, 255, 255, 0.10);
+}

@@ -1,0 +1,735 @@
+/* ─── HR Panel — dark green palette (matches GlobalStyles) ─── */
+
+.hr-window-root {
+    flex-grow: 1;
+    background-color: var(--bg-primary);
+}
+
+/* ── Locked state ─────────────────────────────── */
+
+.hr-locked-message {
+    margin: 32px;
+    padding: 24px;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    align-items: center;
+}
+
+.hr-locked-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: var(--text-light);
+    margin-bottom: 8px;
+    -unity-text-align: middle-center;
+}
+
+.hr-locked-body {
+    font-size: 13px;
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+/* ── Window chrome ────────────────────────────── */
+
+.hr-window-content {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.hr-window-inner {
+    flex-direction: row;
+    flex-grow: 1;
+    padding: 10px;
+    gap: 10px;
+}
+
+/* ── Left config column ───────────────────────── */
+
+.hr-config-column {
+    flex-direction: column;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    padding: 12px;
+    min-width: 320px;
+    max-width: 380px;
+}
+
+/* ── Right active-searches column ────────────── */
+
+.hr-searches-column {
+    flex-direction: column;
+    flex-grow: 1;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    padding: 12px;
+}
+
+/* ── Tier Buttons ─────────────────────────────── */
+
+.hr-tier-buttons {
+    flex-direction: row;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+
+.hr-tier-button {
+    flex-grow: 1;
+    padding: 7px 8px;
+    font-size: 12px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    background-color: var(--bg-tertiary);
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+    border-radius: 5px;
+    cursor: link;
+    transition: background-color 0.12s, color 0.12s;
+}
+
+.hr-tier-button:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-light);
+}
+
+.hr-tier-button--selected {
+    background-color: var(--accent-success);
+    border-top-color:    rgba(255, 255, 255, 0.22);
+    border-left-color:   rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+    color: var(--text-light);
+    -unity-font-style: bold;
+}
+
+.hr-tier-button--selected:hover {
+    background-color: rgb(72, 203, 156);
+    color: rgb(255, 255, 255);
+}
+
+/* ── Config rows ─────────────────────────────── */
+
+.hr-config-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+    min-height: 28px;
+}
+
+.hr-config-label {
+    width: 80px;
+    font-size: 12px;
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    flex-shrink: 0;
+}
+
+.hr-config-value {
+    flex-grow: 1;
+    font-size: 12px;
+    color: var(--text-light);
+    background-color: var(--bg-tertiary);
+    border-top-color:    rgba(0, 0, 0, 0.38);
+    border-left-color:   rgba(0, 0, 0, 0.38);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+    border-right-color:  rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+}
+
+/* ── Skills desire grid ───────────────────────── */
+
+.hr-skills-section-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+    margin-top: 4px;
+}
+
+.hr-skills-hint {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    white-space: normal;
+}
+
+.hr-skills-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.hr-skill-toggle {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--bg-tertiary);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+    padding: 4px 7px;
+    min-width: 110px;
+    cursor: link;
+    transition: background-color 0.1s;
+}
+
+.hr-skill-toggle:hover {
+    background-color: var(--bg-secondary);
+}
+
+.hr-skill-toggle--active {
+    background-color: rgba(82, 183, 136, 0.18);
+    border-top-color:    rgba(82, 183, 136, 0.80);
+    border-left-color:   rgba(82, 183, 136, 0.80);
+    border-bottom-color: rgba(82, 183, 136, 0.40);
+    border-right-color:  rgba(82, 183, 136, 0.40);
+}
+
+.hr-skill-toggle--active:hover {
+    background-color: rgba(82, 183, 136, 0.28);
+}
+
+.hr-skill-checkbox {
+    width: 14px;
+    height: 14px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    border-radius: 3px;
+    background-color: var(--bg-tertiary);
+    margin-right: 6px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+    font-size: 10px;
+    color: var(--accent-success);
+}
+
+.hr-skill-checkbox--checked {
+    background-color: var(--accent-success);
+    border-top-color:    rgba(255, 255, 255, 0.22);
+    border-left-color:   rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+    color: var(--text-light);
+}
+
+.hr-skill-name {
+    font-size: 11px;
+    color: var(--text-light);
+}
+
+/* ── CA / PA range rows ───────────────────────── */
+
+.hr-range-section {
+    margin-top: 4px;
+    margin-bottom: 10px;
+}
+
+.hr-range-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.hr-range-label {
+    width: 80px;
+    font-size: 12px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.hr-range-separator {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0 4px;
+}
+
+.hr-range-dropdown {
+    flex-grow: 1;
+    font-size: 12px;
+    color: var(--text-light);
+    background-color: var(--bg-tertiary);
+    border-top-color:    rgba(0, 0, 0, 0.38);
+    border-left-color:   rgba(0, 0, 0, 0.38);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+    border-right-color:  rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+}
+
+/* ── Preview strip ───────────────────────────── */
+
+.hr-preview-strip {
+    flex-direction: row;
+    padding: 8px 0;
+    margin-bottom: 8px;
+    border-top-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.07);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.22);
+}
+
+.hr-preview-cell {
+    flex-grow: 1;
+    align-items: center;
+}
+
+.hr-preview-cell-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+}
+
+.hr-preview-cell-value {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: var(--text-light);
+    -unity-text-align: middle-center;
+    margin-top: 2px;
+}
+
+/* ── Launch button ───────────────────────────── */
+
+.hr-launch-button {
+    margin-top: 4px;
+    padding: 9px 0;
+    font-size: 13px;
+    -unity-font-style: bold;
+    background-color: var(--accent-success);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.22);
+    border-left-color:   rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+    border-radius: 5px;
+    color: var(--text-light);
+    -unity-text-align: middle-center;
+    cursor: link;
+    transition: background-color 0.12s;
+}
+
+.hr-launch-button:hover {
+    background-color: rgb(72, 203, 156);
+}
+
+.hr-launch-button:active {
+    background-color: rgb(42, 163, 116);
+    border-top-color:    rgba(0, 0, 0, 0.20);
+    border-left-color:   rgba(0, 0, 0, 0.20);
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-right-color:  rgba(255, 255, 255, 0.10);
+}
+
+.hr-launch-button:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-muted);
+    opacity: 0.6;
+    cursor: arrow;
+}
+
+/* ── Active search cards ─────────────────────── */
+
+.hr-searches-scroll {
+    flex-grow: 1;
+}
+
+.headhunt-card {
+    background-color: var(--bg-primary);
+    border-radius: 6px;
+    border-left-width: 3px;
+    border-left-color: var(--accent-success);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.headhunt-card:hover {
+    background-color: var(--bg-secondary);
+}
+
+.headhunt-card-body {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.headhunt-card-title {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: var(--text-light);
+    margin-bottom: 3px;
+}
+
+.headhunt-card-detail {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.headhunt-card-time {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: var(--accent-info);
+    min-width: 50px;
+    -unity-text-align: middle-right;
+}
+
+.hr-cancel-button {
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+    margin-left: 8px;
+    background-color: transparent;
+    border-top-color:    rgba(230, 57, 70, 0.80);
+    border-left-color:   rgba(230, 57, 70, 0.80);
+    border-bottom-color: rgba(230, 57, 70, 0.40);
+    border-right-color:  rgba(230, 57, 70, 0.40);
+    border-width: 1px;
+    color: var(--accent-danger);
+    border-radius: 4px;
+    -unity-text-align: middle-center;
+    cursor: link;
+    transition: background-color 0.1s;
+}
+
+.hr-cancel-button:hover {
+    background-color: rgba(230, 57, 70, 0.12);
+    color: var(--accent-danger);
+}
+
+/* ── Empty state ─────────────────────────────── */
+
+.hr-empty-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+    margin: 20px;
+    white-space: normal;
+}
+
+/* ── Team-based layout columns ───────────────── */
+
+.hr-left-column {
+    flex-direction: column;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    padding: 12px;
+    min-width: 220px;
+    max-width: 280px;
+}
+
+.hr-right-column {
+    flex-direction: column;
+    flex-grow: 1;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    padding: 12px;
+}
+
+.hr-section-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    margin-top: 10px;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+/* ── HR Specialist cards ─────────────────────── */
+
+.hr-specialists-scroll {
+    max-height: 160px;
+    min-height: 60px;
+}
+
+.hr-specialist-card {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--bg-primary);
+    border-radius: 5px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    gap: 6px;
+    cursor: link;
+    transition: background-color 0.1s;
+}
+
+.hr-specialist-card:hover {
+    background-color: var(--bg-secondary);
+}
+
+.hr-specialist-card--selected {
+    background-color: rgba(82, 183, 136, 0.15);
+    border-top-color:    rgba(82, 183, 136, 0.80);
+    border-left-color:   rgba(82, 183, 136, 0.80);
+    border-bottom-color: rgba(82, 183, 136, 0.40);
+    border-right-color:  rgba(82, 183, 136, 0.40);
+    border-width: 1px;
+}
+
+.hr-specialist-card--selected:hover {
+    background-color: rgba(82, 183, 136, 0.22);
+}
+
+.hr-specialist-name {
+    flex-grow: 1;
+    font-size: 12px;
+    color: var(--text-light);
+}
+
+.hr-specialist-skill-badge {
+    font-size: 11px;
+    color: var(--accent-info);
+    -unity-font-style: bold;
+    min-width: 48px;
+    -unity-text-align: middle-right;
+}
+
+.hr-specialist-view-button {
+    font-size: 10px;
+    color: var(--text-muted);
+    background-color: var(--bg-secondary);
+    border-radius: 3px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    padding: 2px 7px;
+    margin-left: 4px;
+    cursor: link;
+}
+
+.hr-specialist-view-button:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-light);
+}
+
+.hr-specialist-team-chip {
+    font-size: 10px;
+    color: var(--text-muted);
+    background-color: var(--bg-tertiary);
+    border-radius: 3px;
+    padding: 2px 5px;
+    -unity-text-align: middle-center;
+}
+
+/* ── HR Team cards ───────────────────────────── */
+
+.hr-teams-scroll {
+    flex-grow: 1;
+    min-height: 80px;
+}
+
+.hr-team-card {
+    flex-direction: column;
+    background-color: var(--bg-primary);
+    border-radius: 6px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    padding: 8px 10px;
+    margin-bottom: 5px;
+    cursor: link;
+    transition: background-color 0.1s;
+}
+
+.hr-team-card:hover {
+    background-color: var(--bg-secondary);
+}
+
+.hr-team-card--selected {
+    background-color: rgba(82, 183, 136, 0.15);
+    border-top-color:    rgba(82, 183, 136, 0.80);
+    border-left-color:   rgba(82, 183, 136, 0.80);
+    border-bottom-color: rgba(82, 183, 136, 0.40);
+    border-right-color:  rgba(82, 183, 136, 0.40);
+    border-width: 1px;
+}
+
+.hr-team-card--selected:hover {
+    background-color: rgba(82, 183, 136, 0.22);
+}
+
+.hr-team-card-name {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: var(--text-light);
+    margin-bottom: 2px;
+}
+
+.hr-team-card-stats {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.hr-team-card-search-badge {
+    font-size: 10px;
+    color: var(--accent-success);
+    -unity-font-style: bold;
+}
+
+.hr-create-team-button {
+    margin-bottom: 6px;
+    padding: 6px 8px;
+    font-size: 12px;
+    background-color: var(--bg-tertiary);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+    cursor: link;
+    transition: background-color 0.1s;
+}
+
+.hr-create-team-button:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-light);
+}
+
+/* ── Team stats strip ────────────────────────── */
+
+.hr-team-stats-strip {
+    flex-direction: row;
+    gap: 12px;
+    margin-bottom: 8px;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.22);
+}
+
+.hr-team-stat {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.hr-selected-team-name {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: var(--text-light);
+    margin-bottom: 4px;
+}
+
+/* ── No team hint ────────────────────────────── */
+
+.hr-no-team-hint {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.hr-no-team-hint-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+}
+
+/* ── Active search card ──────────────────────── */
+
+.hr-active-search-card {
+    background-color: var(--bg-primary);
+    border-radius: 7px;
+    border-left-width: 4px;
+    border-left-color: var(--accent-success);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    padding: 10px 14px;
+    margin-bottom: 8px;
+}
+
+.hr-active-search-role {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: var(--text-light);
+    margin-bottom: 3px;
+}
+
+.hr-active-search-status {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
+
+.hr-active-search-row {
+    flex-direction: row;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.hr-active-search-time {
+    font-size: 12px;
+    color: var(--accent-info);
+    -unity-font-style: bold;
+}
+
+.hr-active-search-chance {
+    font-size: 12px;
+    color: var(--accent-success);
+    -unity-font-style: bold;
+}
+
+.hr-active-search-criteria {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.hr-search-panel {
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+/* ── Search count row ────────────────────────── */
+
+.hr-search-count-row {
+    margin-top: 4px;
+}

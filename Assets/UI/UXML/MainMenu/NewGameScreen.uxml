@@ -1,0 +1,57 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="project://database/Assets/UI/USS/Common/variables.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Common/base.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Common/components.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/main-menu.uss" />
+    <ui:VisualElement name="new-game-root" class="new-game-root">
+        <ui:VisualElement name="header-bar" class="new-game-header">
+            <ui:Button name="btn-back" text="&lt; Back" class="btn-ghost" />
+            <ui:Label name="new-game-title" text="New Company" class="new-game-title" />
+        </ui:VisualElement>
+        <ui:VisualElement name="content-row" class="new-game-content">
+            <ui:VisualElement name="company-panel" class="card company-panel">
+                <ui:Label text="Company Details" class="section-header" />
+                <ui:TextField name="company-name-field" label="Company Name" class="new-game-field" />
+                <ui:VisualElement name="difficulty-section" class="difficulty-section">
+                    <ui:Label text="Difficulty" class="section-header" />
+                    <ui:DropdownField name="difficulty-preset" label="Preset" class="new-game-field" />
+                    <ui:VisualElement name="difficulty-details" class="difficulty-details">
+                        <ui:Label text="Finance" class="difficulty-group-header" />
+                        <ui:SliderInt name="starting-cash-slider" label="Starting Cash" low-value="30000" high-value="500000" value="100000" show-input-field="true" class="new-game-field" />
+                        <ui:SliderInt name="contract-reward-slider" label="Contract Rewards %" low-value="50" high-value="200" value="100" show-input-field="true" class="new-game-field" />
+                        <ui:Label text="Tax" class="difficulty-group-header" />
+                        <ui:Toggle name="tax-toggle" label="Tax Enabled" value="true" class="new-game-field" />
+                        <ui:SliderInt name="tax-rate-slider" label="Tax Rate %" low-value="0" high-value="50" value="30" show-input-field="true" class="new-game-field" />
+                        <ui:Label text="Employees" class="difficulty-group-header" />
+                        <ui:Toggle name="salaries-toggle" label="Salaries Enabled" value="true" class="new-game-field" />
+                        <ui:SliderInt name="salary-slider" label="Salary Multiplier %" low-value="0" high-value="200" value="100" show-input-field="true" class="new-game-field" />
+                        <ui:Toggle name="quitting-toggle" label="Quitting Enabled" value="true" class="new-game-field" />
+                        <ui:SliderInt name="skill-growth-slider" label="Skill Growth %" low-value="50" high-value="300" value="100" show-input-field="true" class="new-game-field" />
+                        <ui:Label text="Morale" class="difficulty-group-header" />
+                        <ui:SliderInt name="morale-decay-slider" label="Morale Decay %" low-value="0" high-value="200" value="100" show-input-field="true" class="new-game-field" />
+                        <ui:Label text="Competition" class="difficulty-group-header" />
+                        <ui:Toggle name="competitors-toggle" label="Competitors Enabled" value="true" class="new-game-field" />
+                        <ui:SliderInt name="competitor-slider" label="Aggression %" low-value="0" high-value="200" value="100" show-input-field="true" class="new-game-field" />
+                        <ui:SliderInt name="market-difficulty-slider" label="Market Difficulty %" low-value="25" high-value="200" value="100" show-input-field="true" class="new-game-field" />
+                        <ui:Label text="Survival" class="difficulty-group-header" />
+                        <ui:Toggle name="bankruptcy-toggle" label="Bankruptcy Enabled" value="true" class="new-game-field" />
+                        <ui:SliderInt name="loan-interest-slider" label="Loan Interest %" low-value="0" high-value="200" value="100" show-input-field="true" class="new-game-field" />
+                        <ui:Label text="Products" class="difficulty-group-header" />
+                        <ui:SliderInt name="product-work-rate-slider" label="Dev Speed %" low-value="50" high-value="200" value="100" show-input-field="true" class="new-game-field" />
+                        <ui:SliderInt name="bug-rate-slider" label="Bug Rate %" low-value="25" high-value="200" value="100" show-input-field="true" class="new-game-field" />
+                        <ui:SliderInt name="review-harshness-slider" label="Review Harshness %" low-value="50" high-value="200" value="100" show-input-field="true" class="new-game-field" />
+                        <ui:SliderInt name="product-revenue-slider" label="Product Revenue %" low-value="50" high-value="200" value="100" show-input-field="true" class="new-game-field" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="founders-panel" class="card founders-panel">
+                <ui:Label text="Founding Employees (1–3)" class="section-header" />
+                <ui:VisualElement name="founders-list" class="founders-list" />
+                <ui:Button name="btn-add-founder" text="+ Add Founder" class="btn-secondary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="footer-bar" class="new-game-footer">
+            <ui:Button name="btn-launch" text="Launch Company" class="btn-primary" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

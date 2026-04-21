@@ -1,0 +1,408 @@
+/* ── Main Menu Screen ── */
+
+.main-menu-root {
+    flex-grow: 1;
+    background-color: var(--bg-floor);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.menu-panel {
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    width: 480px;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    align-items: stretch;
+}
+
+.game-title {
+    font-size: var(--font-3xl);
+    -unity-font-style: bold;
+    -unity-font: var(--font-display);
+    color: var(--text-light);
+    -unity-text-align: middle-center;
+    margin-bottom: var(--spacing-xs);
+    letter-spacing: 3px;
+}
+
+.tagline {
+    font-size: var(--font-md);
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.menu-spacer {
+    height: 24px;
+}
+
+.menu-btn {
+    width: 100%;
+    margin-bottom: var(--spacing-sm);
+}
+
+.version-label {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+    margin-top: var(--spacing-md);
+}
+
+/* ── New Game Screen ── */
+
+.new-game-root {
+    flex-grow: 1;
+    background-color: var(--bg-floor);
+    flex-direction: column;
+    display: none;
+}
+
+.new-game-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background-color: var(--bg-primary);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+.new-game-title {
+    font-size: var(--font-2xl);
+    -unity-font-style: bold;
+    color: var(--text-light);
+}
+
+.new-game-content {
+    flex-direction: row;
+    flex-grow: 1;
+    padding: var(--spacing-md);
+    margin: 0;
+}
+
+.company-panel {
+    width: 340px;
+    min-width: 280px;
+    margin-right: var(--spacing-md);
+    flex-shrink: 0;
+    background-color: var(--bg-primary);
+    overflow: scroll;
+}
+
+.founders-panel {
+    flex-grow: 1;
+    background-color: var(--bg-primary);
+    flex-direction: column;
+}
+
+.new-game-field {
+    margin-top: var(--spacing-sm);
+}
+
+.difficulty-section {
+    margin-top: var(--spacing-sm);
+    flex-direction: column;
+}
+
+.difficulty-group-header {
+    font-size: var(--font-xs);
+    -unity-font-style: bold;
+    color: var(--text-muted);
+    margin-top: var(--spacing-xs);
+    margin-bottom: 1px;
+    width: 100%;
+}
+
+.difficulty-details {
+    margin-top: var(--spacing-sm);
+    flex-direction: column;
+}
+
+.difficulty-details > .new-game-field {
+    margin-top: 2px;
+}
+
+.founders-list {
+    flex-grow: 1;
+    flex-direction: column;
+    overflow: scroll;
+    margin-bottom: var(--spacing-md);
+}
+
+.new-game-footer {
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background-color: var(--bg-primary);
+    border-top-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.07);
+}
+
+/* ── Founder Card ── */
+
+.founder-card {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.10);
+    border-left-color:   rgba(255, 255, 255, 0.10);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    flex-direction: column;
+}
+
+.founder-card-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-sm);
+}
+
+.founder-title {
+    font-size: var(--font-lg);
+    -unity-font-style: bold;
+    color: var(--accent-primary);
+}
+
+.founder-card-body {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.founder-card-left {
+    flex-grow: 1;
+    flex-direction: column;
+    margin-right: var(--spacing-md);
+}
+
+.founder-card-right {
+    flex-shrink: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.founder-name-field {
+    margin-bottom: var(--spacing-sm);
+}
+
+.founder-name-field .unity-base-field__label {
+    min-width: 0;
+    width: 45px;
+}
+
+.founder-fields-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.founder-fields-row > .unity-base-field {
+    margin-right: var(--spacing-xs);
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.founder-age-slider {
+    flex-basis: 130px;
+}
+
+.founder-age-slider .unity-base-field__label {
+    min-width: 0;
+    width: 30px;
+}
+
+.founder-gender-dropdown {
+    flex-basis: 160px;
+}
+
+.founder-gender-dropdown .unity-base-field__label {
+    min-width: 0;
+    width: 60px;
+}
+
+.founder-role-dropdown {
+    flex-basis: 200px;
+}
+
+.founder-role-dropdown .unity-base-field__label {
+    min-width: 0;
+    width: 34px;
+}
+
+.founder-tier-dropdown {
+    flex-basis: 200px;
+}
+
+.founder-tier-dropdown .unity-base-field__label {
+    min-width: 0;
+    width: 80px;
+}
+
+.skills-section {
+    flex-direction: column;
+}
+
+.skills-section-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-sm);
+}
+
+.skills-title {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    color: var(--text-secondary);
+}
+
+.points-remaining {
+    font-size: var(--font-sm);
+    color: var(--accent-primary);
+    -unity-font-style: bold;
+}
+
+.points-remaining.points-exhausted {
+    color: var(--accent-danger);
+}
+
+.skills-grid {
+    flex-direction: column;
+}
+
+.skill-row {
+    flex-direction: row;
+    align-items: center;
+    height: 28px;
+    margin-bottom: 2px;
+}
+
+.skill-label {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    width: 100px;
+}
+
+.skill-value {
+    font-size: var(--font-sm);
+    color: var(--text-light);
+    width: 30px;
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+}
+
+.btn-icon.btn-skill {
+    width: 28px;
+    height: 28px;
+}
+
+.founder-note {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin-top: var(--spacing-sm);
+}
+
+.founder-radar-chart {
+    width: 260px;
+    height: 260px;
+    align-self: center;
+}
+
+/* ── Load Game Screen ── */
+
+.load-game-root {
+    flex-grow: 1;
+    background-color: var(--bg-floor);
+    flex-direction: column;
+    display: none;
+}
+
+.load-game-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-lg);
+    background-color: var(--bg-primary);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.07);
+}
+
+.load-game-title {
+    font-size: var(--font-2xl);
+    -unity-font-style: bold;
+    color: var(--text-light);
+}
+
+.load-game-content {
+    flex-direction: row;
+    flex-grow: 1;
+    padding: var(--spacing-lg);
+}
+
+.load-saves-panel {
+    flex-grow: 1;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-right: var(--spacing-lg);
+    flex-direction: column;
+}
+
+.load-saves-panel:last-child {
+    margin-right: 0;
+}
+
+.saves-list {
+    flex-direction: column;
+    overflow: scroll;
+    flex-grow: 1;
+}
+
+.save-slot-card {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.08);
+    border-left-color:   rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(0, 0, 0, 0.22);
+    border-right-color:  rgba(0, 0, 0, 0.22);
+}
+
+.save-slot-info {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.save-slot-name {
+    font-size: var(--font-md);
+    -unity-font-style: bold;
+    color: var(--text-light);
+    margin-bottom: 2px;
+}
+
+.save-slot-meta {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+}
+
+.save-slot-actions {
+    flex-direction: row;
+    align-items: center;
+}
+
+.save-slot-actions > .btn-danger {
+    margin-left: var(--spacing-sm);
+}

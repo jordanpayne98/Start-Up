@@ -1,0 +1,89 @@
+:root {
+    /* Backgrounds (60% — neutral zinc-based) */
+    --bg-floor:      #121416;
+    --bg-primary:    #1A1D22;
+    --bg-secondary:  #24282F;
+    --bg-tertiary:   #2F343C;
+    --bg-elevated:   #363B44;
+    --bg-overlay:    #3D424C;
+
+    /* Interaction surfaces (30%) */
+    --bg-hover:      rgba(255, 255, 255, 0.06);
+    --bg-selected:   rgba(76, 201, 176, 0.08);
+    --border-subtle: rgba(255, 255, 255, 0.07);
+    --border-strong: rgba(255, 255, 255, 0.12);
+
+    /* Text (expanded tiers) */
+    --text-light:    #E4E4E7;
+    --text-secondary:#A1A1AA;
+    --text-muted:    #71717A;
+    --text-disabled: #52525B;
+    --text-dark:     #18181B;
+
+    /* Accents (10% — teal stays, success shifted to emerald) */
+    --accent-primary: #4CC9B0;
+    --accent-info:    #60A5FA;
+    --accent-success: #34D399;
+    --accent-warning: #FBBF24;
+    --accent-danger:  #FB7185;
+    --accent-special: #A78BFA;
+
+    /* Role / Skill colours */
+    --role-programming:  #60A5FA;
+    --role-design:       #A78BFA;
+    --role-qa:           #34D399;
+    --role-vfx:          #FB923C;
+    --role-sfx:          #F472B6;
+    --role-hr:           #FBBF24;
+    --role-negotiation:  #2DD4BF;
+    --role-accountancy:  #94A3B8;
+    --role-marketing:    #F59E0B;
+
+    /* Product category colours */
+    --cat-videogame:     #818CF8;
+    --cat-mobileapp:     #38BDF8;
+    --cat-website:       #34D399;
+    --cat-office:        #94A3B8;
+    --cat-onlineservice: #C084FC;
+    --cat-security:      #FB7185;
+    --cat-hosting:       #FBBF24;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 24px;
+    --spacing-2xl: 32px;
+
+    /* Font sizes */
+    --font-xs: 10px;
+    --font-sm: 12px;
+    --font-md: 14px;
+    --font-lg: 16px;
+    --font-xl: 20px;
+    --font-2xl: 24px;
+    --font-3xl: 32px;
+
+    /* Font - data table (tighter tracking) */
+    --font-data-tracking: -0.3px;
+
+    /* Border radii */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+
+    /* Transitions */
+    --transition-fast: 150ms;
+    --transition-normal: 250ms;
+    --transition-slow: 400ms;
+
+    /* Font families */
+    --font-body:    url("/Assets/Graphics/Font/Inter-VariableFont_opsz,wght.ttf");
+    --font-display: url("/Assets/Graphics/Font/SpaceGrotesk-VariableFont_wght.ttf");
+
+    /* Gradient overlay defaults */
+    --gradient-from: rgba(255, 255, 255, 0.04);
+    --gradient-to:   rgba(0, 0, 0, 0.06);
+}

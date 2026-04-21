@@ -1,0 +1,110 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9cf6717fcc82f04cb10f6a4a76d9245, type: 3}
+  m_Name: audio_tool
+  m_EditorClassIdentifier: Assembly-CSharp::ProductTemplateDefinition
+  templateId: audio_tool
+  displayName: Audio Tool
+  description: "Music and sound production \u2014 quality bonus for audio products"
+  category: 5
+  layer: 1
+  baseUpfrontCost: 15000
+  difficultyTier: 3
+  validTargetPlatforms: 00000000
+  validPlatformNiches: 00000000
+  requiredToolTypes: 06000000
+  ownToolQualityBonus: 0.15
+  licensedToolQualityBonus: 0.08
+  optimalTeamSizePerPhase: 6
+  paradigmSensitivity: 0.8
+  nicheConfigs: []
+  revenueModelOptions:
+  - subscription
+  - perpetual_license
+  phases:
+  - phaseType: 0
+    primaryRole: 1
+    baseWorkUnits: 120
+    prerequisites: 
+    qualitySoftCapBase: 80
+  - phaseType: 1
+    primaryRole: 0
+    baseWorkUnits: 240
+    prerequisites: 00000000
+    qualitySoftCapBase: 80
+  - phaseType: 4
+    primaryRole: 3
+    baseWorkUnits: 96
+    prerequisites: 00000000
+    qualitySoftCapBase: 80
+  - phaseType: 6
+    primaryRole: 2
+    baseWorkUnits: 144
+    prerequisites: 01000000
+    qualitySoftCapBase: 80
+  availableFeatures:
+  - {fileID: 11400000, guid: eb0e33338ec2efe47898a68b09f73da1, type: 2}
+  - {fileID: 11400000, guid: d28d872b09498e849abd72dae4bd6336, type: 2}
+  - {fileID: 11400000, guid: 17c2947019f047d42bdbcad7387b44f2, type: 2}
+  - {fileID: 11400000, guid: ed9bc1fa80f356c4faa436f4ae8c279c, type: 2}
+  - {fileID: 11400000, guid: 766b3a132e8d4654ca3d11ecc37a4bb9, type: 2}
+  - {fileID: 11400000, guid: 0814952bdd5caea4da32933fbae381cc, type: 2}
+  - {fileID: 11400000, guid: 1f35218df67daf040bca5ab2568dc698, type: 2}
+  - {fileID: 11400000, guid: 2d5435d2ea9a0a64b9ec1b6181490d6d, type: 2}
+  - {fileID: 11400000, guid: 144621e2d200ccf4fbc943033bdd8089, type: 2}
+  - {fileID: 11400000, guid: 274c518d2808d4c4eba7006fbcf9002a, type: 2}
+  - {fileID: 11400000, guid: e77b02d6d5522224bae5c09a365f85b4, type: 2}
+  - {fileID: 11400000, guid: 10d2a380a410ee14c855ab1546996e2b, type: 2}
+  - {fileID: 11400000, guid: 4ca91b9752ef6f447b553984393a945b, type: 2}
+  - {fileID: 11400000, guid: 15606c3e62607964594a0251901ea8b1, type: 2}
+  - {fileID: 11400000, guid: d4ea3b3bb3d7cf84b99e762b77f4ee32, type: 2}
+  - {fileID: 11400000, guid: b49ff305a34c1db48860677ff6813570, type: 2}
+  - {fileID: 11400000, guid: c72951ed6176a794690c0e1cdc611f6e, type: 2}
+  - {fileID: 11400000, guid: a8b1f5af06ed92645bda86779c3af84f, type: 2}
+  economyConfig:
+    isSubscriptionBased: 0
+    launchSalesBase: 0
+    pricePerUnit: 0
+    tailDecayRate: 0.03
+    minTailFactor: 0.08
+    monthlySubscriptionPrice: 20
+    baseChurnRate: 0.02
+    maintenanceChurnReduction: 0.005
+    organicGrowthRate: 0.01
+    updateSalesSpikeMult: 1.4
+    updatePopularityBoost: 4
+    maintenancePopDecayReduction: 0.5
+    breakoutBaseChance: 0.01
+    breakoutMinMultiplier: 2
+    breakoutMaxMultiplier: 5
+    plateauDecayRatePerMonth: 0.01
+    declineDecayRatePerMonth: 0.03
+    ticksToGrowthStage: 216000
+    bugChurnMultiplier: 1.5
+    shipBugPopularityPenalty: 2
+    maxMonthlyBugPopularityPenalty: 4
+    unmaintainedBugGrowthBase: 0.08
+    sequelPopularityBoostMax: 20
+    maxUserPool: 15000000
+    basePricePerUnit: 150
+    baseSubscriptionPrice: 20
+    priceElasticityExponent: 1
+    nicheVolatility: 0.1
+    retentionMonths: 60
+    interestRate: 0.1
+    baseDemand: 25
+    demandFloor: 0
+    demandCeiling: 100
+    recoveryRateMin: 0.02
+    recoveryRateMax: 0.06
+    saturationThreshold: 3
+    saturationPenaltyPerProduct: 0.4

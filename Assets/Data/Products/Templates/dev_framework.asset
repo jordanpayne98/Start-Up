@@ -1,0 +1,107 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9cf6717fcc82f04cb10f6a4a76d9245, type: 3}
+  m_Name: dev_framework
+  m_EditorClassIdentifier: Assembly-CSharp::ProductTemplateDefinition
+  templateId: dev_framework
+  displayName: Dev Framework
+  description: "SDKs, APIs, libraries \u2014 quality bonus for all software built
+    with it"
+  category: 6
+  layer: 1
+  baseUpfrontCost: 15000
+  difficultyTier: 3
+  validTargetPlatforms: 00000000
+  validPlatformNiches: 00000000
+  requiredToolTypes: 
+  ownToolQualityBonus: 0.1
+  licensedToolQualityBonus: 0.05
+  optimalTeamSizePerPhase: 6
+  paradigmSensitivity: 0.9
+  nicheConfigs: []
+  revenueModelOptions:
+  - freemium
+  - per_seat
+  - cloud_attached
+  phases:
+  - phaseType: 0
+    primaryRole: 1
+    baseWorkUnits: 120
+    prerequisites: 
+    qualitySoftCapBase: 80
+  - phaseType: 1
+    primaryRole: 0
+    baseWorkUnits: 240
+    prerequisites: 00000000
+    qualitySoftCapBase: 80
+  - phaseType: 6
+    primaryRole: 2
+    baseWorkUnits: 144
+    prerequisites: 01000000
+    qualitySoftCapBase: 80
+  availableFeatures:
+  - {fileID: 11400000, guid: 38a9c0b2dfdb55945a4ff248475e0b2b, type: 2}
+  - {fileID: 11400000, guid: 1b649723fc8ec2746b87bcc0059b7099, type: 2}
+  - {fileID: 11400000, guid: 4485f143cb460194eb8185195e7a5733, type: 2}
+  - {fileID: 11400000, guid: 340df43c0f5654c4c9dafde7d92683ba, type: 2}
+  - {fileID: 11400000, guid: 4a40aa91e2059bb4bb40385af2933cb4, type: 2}
+  - {fileID: 11400000, guid: 51ffbd11cc037f445b47e9b8c566c8cc, type: 2}
+  - {fileID: 11400000, guid: de04223c70bc4d249b87219a0e707fa4, type: 2}
+  - {fileID: 11400000, guid: df2a9cdd291c3424391483ff5dedd02f, type: 2}
+  - {fileID: 11400000, guid: 05daab3c3f5c45444b88d46278a171f6, type: 2}
+  - {fileID: 11400000, guid: cb5b266ff7436b14ba0c34453490d677, type: 2}
+  - {fileID: 11400000, guid: f647f678901d96a4480fb5fc557fac74, type: 2}
+  - {fileID: 11400000, guid: 7d5295798985965408579bb6eb57ee81, type: 2}
+  - {fileID: 11400000, guid: f71b43998ecfa114f958898640ca19b7, type: 2}
+  - {fileID: 11400000, guid: 98b4a735db6d41342815bf0b59febef9, type: 2}
+  - {fileID: 11400000, guid: 1f1ad4e020c43144fb05f4e277402489, type: 2}
+  - {fileID: 11400000, guid: ee188962717e26849bda1800df15ae82, type: 2}
+  - {fileID: 11400000, guid: 83100cf1db43a7b4ea6ba5ed3f144f00, type: 2}
+  - {fileID: 11400000, guid: 5033b8ec88b8e99409fbd079d44a5c3f, type: 2}
+  economyConfig:
+    isSubscriptionBased: 0
+    launchSalesBase: 600
+    pricePerUnit: 40
+    tailDecayRate: 0.03
+    minTailFactor: 0.08
+    monthlySubscriptionPrice: 10
+    baseChurnRate: 0.02
+    maintenanceChurnReduction: 0.005
+    organicGrowthRate: 0.02
+    updateSalesSpikeMult: 1.4
+    updatePopularityBoost: 4
+    maintenancePopDecayReduction: 0.5
+    breakoutBaseChance: 0.02
+    breakoutMinMultiplier: 2
+    breakoutMaxMultiplier: 4
+    plateauDecayRatePerMonth: 0.01
+    declineDecayRatePerMonth: 0.03
+    ticksToGrowthStage: 216000
+    bugChurnMultiplier: 1.5
+    shipBugPopularityPenalty: 2
+    maxMonthlyBugPopularityPenalty: 4
+    unmaintainedBugGrowthBase: 0.08
+    sequelPopularityBoostMax: 15
+    maxUserPool: 30000000
+    basePricePerUnit: 40
+    baseSubscriptionPrice: 10
+    priceElasticityExponent: 1.4
+    nicheVolatility: 0.15
+    retentionMonths: 48
+    interestRate: 0.08
+    baseDemand: 25
+    demandFloor: 0
+    demandCeiling: 100
+    recoveryRateMin: 0.03
+    recoveryRateMax: 0.08
+    saturationThreshold: 4
+    saturationPenaltyPerProduct: 0.3

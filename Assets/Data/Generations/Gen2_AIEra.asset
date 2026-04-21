@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4ac5cffc0c16be40a6975c82e50d48c, type: 3}
+  m_Name: Gen2_AIEra
+  m_EditorClassIdentifier: Assembly-CSharp::ArchitectureGenerationDefinition
+  generationId: 2
+  displayName: Gen 2 - AI Era
+  description: Generative AI, edge computing, and spatial interfaces reshape the
+    software landscape.
+  arrivalTickMin: 14016000
+  arrivalTickMax: 17520000
+  transitionDurationTicks: 4380000
+  marketGrowthMultiplier: 1.2
+  paradigms:
+  - {fileID: 11400000, guid: d33dcd31be4342f4288a3882c8cbd959, type: 2}
+  - {fileID: 11400000, guid: 7385784512853f84f8db7d918e84fcb6, type: 2}
+  - {fileID: 11400000, guid: c7622f6bee10898478d944cb68e7fed0, type: 2}
+  - {fileID: 11400000, guid: 51ea948c5a3301541a59c27cb5d6b13d, type: 2}
+  - {fileID: 11400000, guid: 35c46705be5f4294b80952816d5a7f49, type: 2}
+  - {fileID: 11400000, guid: eb781f88dd4b97c49a333eb0d482754a, type: 2}
+  - {fileID: 11400000, guid: ec6d83db814f3c347b99ff99d61ea7d6, type: 2}
+  featureCapByProductType: 0a0000000900000008000000080000000800000008000000080000000900000008000000080000000800000008000000080000000800000008000000

@@ -1,0 +1,60 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:Style src="project://database/Assets/UI/USS/Common/variables.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Common/base.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Common/components.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/shell.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/ResearchTree.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/market-window.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/marketing-window.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/products-window.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Components/NewsArticleToast.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Components/HypeBar.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Components/accordion-sidebar.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Modals/competitor-detail-modal.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/create-product.uss" />
+    <ui:VisualElement name="root" class="root">
+        <ui:VisualElement name="top-bar" class="top-bar">
+            <ui:VisualElement name="module-company" class="top-bar__module top-bar__cluster-end">
+                <ui:Label name="caption-company" text="COMPANY" class="top-bar__caption" />
+                <ui:Label name="company-name" class="top-bar__value" text="My Company" />
+                <ui:Label name="reputation-subtitle" class="top-bar__subtitle" text="★ Unknown" />
+            </ui:VisualElement>
+            <ui:VisualElement name="module-finance" class="top-bar__module top-bar__cluster-end">
+                <ui:Label name="caption-money" text="BALANCE" class="top-bar__caption" />
+                <ui:VisualElement name="money-row" style="flex-direction: row; align-items: center;">
+                    <ui:Label name="money-display" class="top-bar__value" text="$0" />
+                    <ui:VisualElement name="delta-container" class="delta-container" />
+                </ui:VisualElement>
+                <ui:Label name="net-income-display" class="top-bar__subtitle" text="Net: $0/mo" />
+            </ui:VisualElement>
+            <ui:VisualElement name="module-date" class="top-bar__module top-bar__cluster-end">
+                <ui:Label name="caption-date" text="DATE" class="top-bar__caption" />
+                <ui:Label name="date-display" class="top-bar__value" text="Day 1, Month 1" />
+            </ui:VisualElement>
+            <ui:VisualElement name="module-controls" class="top-bar__module">
+                <ui:Button name="btn-continue" class="btn-primary" text="Continue" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="main-body" class="main-body">
+            <ui:VisualElement name="sidebar" class="sidebar">
+                <ui:ScrollView name="sidebar-content" class="sidebar-content" />
+                <ui:Button name="sidebar-collapse" class="btn-icon sidebar-collapse" text="«" />
+            </ui:VisualElement>
+            <ui:VisualElement name="content-area" class="content-area" />
+        </ui:VisualElement>
+        <ui:VisualElement name="modal-overlay" class="modal-overlay hidden">
+            <ui:VisualElement name="modal-backdrop" class="modal-backdrop" />
+            <ui:VisualElement name="modal-content" class="modal-content" />
+        </ui:VisualElement>
+        <ui:VisualElement name="toast-container" class="toast-container" />
+        <ui:VisualElement name="news-toast-container" class="news-toast-container" picking-mode="Ignore">
+            <ui:Label name="news-toast-category" class="news-toast-category" text="BREAKING NEWS" />
+            <ui:Label name="news-toast-headline" class="news-toast-headline" text="" />
+            <ui:Label name="news-toast-hint" class="news-toast-hint" text="Details in your inbox" />
+        </ui:VisualElement>
+        <ui:VisualElement name="tooltip-container" class="tooltip" picking-mode="Ignore">
+            <ui:Label name="tooltip-title" class="tooltip__title" />
+            <ui:Label name="tooltip-body" class="tooltip__body" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

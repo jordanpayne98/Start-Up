@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfec8359a275a0c4c9b6b2a6cefe3ee3, type: 3}
+  m_Name: HardwareGen5_AmbientEra
+  m_EditorClassIdentifier: Assembly-CSharp::HardwareGenerationConfig
+  generation: 5
+  processingTiers:
+  - tier: 0
+    manufactureCostPerUnit: 11
+    qualityCeiling: 40
+    devCostAdd: 6500
+  - tier: 1
+    manufactureCostPerUnit: 21
+    qualityCeiling: 60
+    devCostAdd: 15600
+  - tier: 2
+    manufactureCostPerUnit: 39
+    qualityCeiling: 80
+    devCostAdd: 32500
+  - tier: 3
+    manufactureCostPerUnit: 63
+    qualityCeiling: 95
+    devCostAdd: 52000
+  graphicsTiers:
+  - tier: 0
+    manufactureCostPerUnit: 14
+    qualityCeiling: 40
+    devCostAdd: 7800
+  - tier: 1
+    manufactureCostPerUnit: 28
+    qualityCeiling: 60
+    devCostAdd: 19500
+  - tier: 2
+    manufactureCostPerUnit: 49
+    qualityCeiling: 80
+    devCostAdd: 39000
+  - tier: 3
+    manufactureCostPerUnit: 84
+    qualityCeiling: 95
+    devCostAdd: 65000
+  memoryTiers:
+  - tier: 0
+    manufactureCostPerUnit: 4
+    qualityCeiling: 50
+    devCostAdd: 2600
+  - tier: 1
+    manufactureCostPerUnit: 8
+    qualityCeiling: 70
+    devCostAdd: 6500
+  - tier: 2
+    manufactureCostPerUnit: 18
+    qualityCeiling: 90
+    devCostAdd: 13000
+  storageTiers:
+  - tier: 0
+    manufactureCostPerUnit: 6
+    qualityCeiling: 50
+    devCostAdd: 3900
+  - tier: 1
+    manufactureCostPerUnit: 13
+    qualityCeiling: 70
+    devCostAdd: 9100
+  - tier: 2
+    manufactureCostPerUnit: 25
+    qualityCeiling: 90
+    devCostAdd: 15600
+  formFactors:
+  - formFactor: 0
+    manufactureCostMultiplier: 1
+    ceilingMultiplier: 1
+    devCostMultiplier: 1
+  - formFactor: 1
+    manufactureCostMultiplier: 1.3
+    ceilingMultiplier: 0.85
+    devCostMultiplier: 1.25
+  - formFactor: 2
+    manufactureCostMultiplier: 1.5
+    ceilingMultiplier: 0.95
+    devCostMultiplier: 1.4
