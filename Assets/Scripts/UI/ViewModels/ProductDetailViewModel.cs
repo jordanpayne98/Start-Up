@@ -14,6 +14,7 @@ public class ProductDetailViewModel : IViewModel
     public string MonthlyRevenue { get; private set; }
     public string LaunchDate { get; private set; }
     public string LifecycleStage { get; private set; }
+    public string UserTrend { get; private set; }
     public string MaintenanceStatus { get; private set; }
     public bool IsPlayerOwned { get; private set; }
     public bool HasCrisis { get; private set; }
@@ -78,6 +79,7 @@ public class ProductDetailViewModel : IViewModel
             MonthlyRevenue = "--";
             LaunchDate = "--";
             LifecycleStage = "--";
+            UserTrend = "--";
             MaintenanceStatus = "--";
             IsPlayerOwned = false;
             HasCrisis = false;
@@ -134,6 +136,12 @@ public class ProductDetailViewModel : IViewModel
             LaunchDate = "In Development";
         }
         LifecycleStage = product.LifecycleStage.ToString();
+        if (product.PreviousDailyActiveUsers == 0)
+            UserTrend = product.ActiveUserCount > 0 ? "New" : "--";
+        else {
+            int delta = product.ActiveUserCount - product.PreviousDailyActiveUsers;
+            UserTrend = delta > 0 ? "Growth" : delta < 0 ? "Decline" : "Stable";
+        }
         MaintenanceStatus = product.IsMaintained ? "Maintained" : "Unmaintained";
         HasCrisis = product.CrisisLevel > 0;
         switch (product.CrisisLevel)

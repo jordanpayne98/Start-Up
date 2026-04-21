@@ -585,10 +585,8 @@ public class CompetitorSystem : ISystem
             return ProductCategory.VideoGame;
 
         int roll = rng.Range(0, 100);
-        if (roll < 50) return ProductCategory.VideoGame;
-        if (roll < 75) return ProductCategory.DesktopSoftware;
-        if (roll < 90) return ProductCategory.MobileApp;
-        return ProductCategory.WebApplication;
+        if (roll < 70) return ProductCategory.VideoGame;
+        return ProductCategory.GameEngine;
     }
 
     private ProductNiche PickSeedNiche(ProductCategory category, IRng rng)
@@ -605,18 +603,6 @@ public class CompetitorSystem : ISystem
                 };
                 return videoGameNiches[rng.Range(0, videoGameNiches.Length)];
             }
-            case ProductCategory.MobileApp:
-            {
-                var mobileNiches = new ProductNiche[]
-                {
-                    ProductNiche.AppUtility, ProductNiche.AppSocial, ProductNiche.AppProductivity
-                };
-                return mobileNiches[rng.Range(0, mobileNiches.Length)];
-            }
-            case ProductCategory.DesktopSoftware:
-                return ProductNiche.None;
-            case ProductCategory.WebApplication:
-                return ProductNiche.None;
             default:
                 return ProductNiche.None;
         }
@@ -1002,9 +988,7 @@ public class CompetitorSystem : ISystem
     {
         switch (niche)
         {
-            case ProductNiche.DesktopOS:
-            case ProductNiche.MobileOS:
-            case ProductNiche.ServerOS:    return ProductCategory.OperatingSystem;
+            case ProductNiche.DesktopOS:       return ProductCategory.OperatingSystem;
             case ProductNiche.RPG:
             case ProductNiche.FPS:
             case ProductNiche.Strategy:
@@ -1017,14 +1001,8 @@ public class CompetitorSystem : ISystem
             case ProductNiche.Adventure:
             case ProductNiche.MMORPG:
             case ProductNiche.Sandbox:
-            case ProductNiche.Fighting:    return ProductCategory.VideoGame;
-            case ProductNiche.AppUtility:
-            case ProductNiche.AppSocial:
-            case ProductNiche.AppProductivity: return ProductCategory.MobileApp;
-            case ProductNiche.CRM:
-            case ProductNiche.Communication:
-            case ProductNiche.Analytics:   return ProductCategory.OnlineService;
-            default:                       return ProductCategory.DesktopSoftware;
+            case ProductNiche.Fighting:        return ProductCategory.VideoGame;
+            default:                           return ProductCategory.VideoGame;
         }
     }
 
@@ -1410,7 +1388,8 @@ public class CompetitorSystem : ISystem
         if (_archetypeConfigs == null || _archetypeConfigs.Length == 0) return null;
 
         var id = new CompetitorId(_state.nextCompetitorId++);
-        var archetype = (CompetitorArchetype)rng.Range(0, _archetypeConfigs.Length);
+        int configIndex = rng.Range(0, _archetypeConfigs.Length);
+        var archetype = _archetypeConfigs[configIndex].archetype;
 
         string companyName = GenerateCompanyName(rng);
         string founderName = GenerateFounderName(rng);
@@ -1542,7 +1521,7 @@ public class CompetitorSystem : ISystem
         {
             resolvedNiche = ProductNiche.None;
             resolvedCategory = comp.Specializations != null && comp.Specializations.Length > 0
-                ? comp.Specializations[0] : ProductCategory.DesktopSoftware;
+                ? comp.Specializations[0] : ProductCategory.VideoGame;
         }
         else
         {

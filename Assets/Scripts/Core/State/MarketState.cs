@@ -127,15 +127,11 @@ public class MarketState
 
     public static bool IsConsumerCategory(ProductCategory cat)
     {
-        return cat == ProductCategory.DesktopSoftware
-            || cat == ProductCategory.WebApplication
-            || cat == ProductCategory.SecuritySoftware
-            || cat == ProductCategory.CloudInfrastructure
-            || cat == ProductCategory.AIProduct
-            || cat == ProductCategory.GameConsole
+        return cat == ProductCategory.GameConsole
             || cat == ProductCategory.GameEngine
             || cat == ProductCategory.GraphicsEditor
             || cat == ProductCategory.AudioTool
-            || cat == ProductCategory.DevFramework;
+            || cat == ProductCategory.DevFramework
+            || cat == ProductCategory.VideoGame;
     }
 }

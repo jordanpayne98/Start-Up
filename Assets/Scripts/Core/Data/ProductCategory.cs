@@ -9,13 +9,6 @@ public enum ProductCategory {
     DevFramework        = 6,
     // Layer 2: Applications
     VideoGame           = 7,
-    MobileApp           = 8,
-    DesktopSoftware     = 9,
-    WebApplication      = 10,
-    OnlineService       = 11,
-    SecuritySoftware    = 12,
-    CloudInfrastructure = 13,
-    AIProduct           = 14
 }
 
 public static class ProductCategoryExtensions {
@@ -29,6 +22,8 @@ public static class ProductCategoryExtensions {
             case ProductCategory.AudioTool:
             case ProductCategory.DevFramework:
                 return 1;
+            case ProductCategory.VideoGame:
+                return 2;
             default:
                 return 2;
         }
@@ -38,7 +33,7 @@ public static class ProductCategoryExtensions {
 
     public static bool IsTool(this ProductCategory cat) => cat.GetLayer() == 1;
 
-    public static bool IsApplication(this ProductCategory cat) => cat.GetLayer() == 2;
+    public static bool IsApplication(this ProductCategory cat) => cat == ProductCategory.VideoGame;
 
     public static ProductLayer ToProductLayer(this ProductCategory cat) {
         int layer = cat.GetLayer();

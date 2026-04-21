@@ -335,17 +335,7 @@ public static class MarketShareResolver
         switch (niche)
         {
             case ProductNiche.DesktopOS:
-            case ProductNiche.MobileOS:
-            case ProductNiche.ServerOS:
                 return 72f;
-            case ProductNiche.CRM:
-            case ProductNiche.Analytics:
-            case ProductNiche.Communication:
-            case ProductNiche.AppProductivity:
-                return 48f;
-            case ProductNiche.AppUtility:
-            case ProductNiche.AppSocial:
-                return 36f;
             default:
                 return 24f;
         }

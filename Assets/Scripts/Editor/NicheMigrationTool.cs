@@ -52,12 +52,10 @@ public static class NicheMigrationTool
 
     private static List<NicheDef> BuildNicheList() {
         const string root = "Assets/Data/Market/Niches/";
-        var list = new List<NicheDef>(22);
+        var list = new List<NicheDef>(14);
 
-        // Operating System niches (3)
+        // Operating System niches (1)
         list.Add(new NicheDef(root + "DesktopOS.asset",   ProductNiche.DesktopOS,   "Desktop OS",     "Desktop operating system market"));
-        list.Add(new NicheDef(root + "Mobile.asset",      ProductNiche.MobileOS,    "Mobile OS",      "Mobile operating system market"));
-        list.Add(new NicheDef(root + "ServerOS.asset",    ProductNiche.ServerOS,    "Server OS",      "Server operating system market"));
 
         // Video Game niches (13)
         list.Add(new NicheDef(root + "RPG.asset",         ProductNiche.RPG,         "RPG",            "Role-playing games with deep narratives"));
@@ -73,16 +71,6 @@ public static class NicheMigrationTool
         list.Add(new NicheDef(root + "MMORPG.asset",      ProductNiche.MMORPG,      "MMORPG",         "Massively multiplayer online RPGs"));
         list.Add(new NicheDef(root + "Sandbox.asset",     ProductNiche.Sandbox,     "Sandbox",        "Open-world sandbox games"));
         list.Add(new NicheDef(root + "Fighting.asset",    ProductNiche.Fighting,    "Fighting",       "Fighting and combat games"));
-
-        // Mobile App niches (3)
-        list.Add(new NicheDef(root + "AppUtility.asset",       ProductNiche.AppUtility,       "Utility",              "Utility and tool apps"));
-        list.Add(new NicheDef(root + "AppSocial.asset",        ProductNiche.AppSocial,        "Social (Mobile)",      "Social networking apps"));
-        list.Add(new NicheDef(root + "AppProductivity.asset",  ProductNiche.AppProductivity,  "Productivity (Mobile)", "Productivity and organization apps"));
-
-        // Online Service niches (3)
-        list.Add(new NicheDef(root + "CRM.asset",           ProductNiche.CRM,           "CRM",           "Customer relationship management"));
-        list.Add(new NicheDef(root + "Analytics.asset",     ProductNiche.Analytics,     "Analytics",     "Data analytics and business intelligence"));
-        list.Add(new NicheDef(root + "Communication.asset", ProductNiche.Communication, "Communication", "Team communication and messaging"));
 
         return list;
     }

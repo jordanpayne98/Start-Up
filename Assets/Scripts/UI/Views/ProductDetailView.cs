@@ -257,7 +257,7 @@ public class ProductDetailView : IGameView
         _companyLabel.text = _vm.CompanyName;
         _nicheLabel.text = _vm.Niche;
         _qualityLabel.text = _vm.Quality;
-        _lifecycleLabel.text = _vm.LifecycleStage;
+        _lifecycleLabel.text = _vm.UserTrend;
         _maintenanceLabel.text = _vm.MaintenanceStatus;
         _activeUsersLabel.text = _vm.ActiveUsers;
         _marketShareLabel.text = _vm.MarketSharePercent;

@@ -36,7 +36,7 @@ MonoBehaviour:
   expansionCashThreshold: 750000
   expansionRiskTolerance: 0.3
   sunsetMonths: 36
-  maxSimultaneousProducts: 3
+  maxSimultaneousProducts: 4
   dateShiftReactivity: 0.15
   prefersRush: 0
   maxDateShiftFraction: 0.1

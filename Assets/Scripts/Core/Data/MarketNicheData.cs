@@ -44,31 +44,31 @@ public class MarketNicheData : ScriptableObject
         switch (category) {
             // Core / fundamental functionality
             case FeatureCategory.Core:
-            case FeatureCategory.Frontend:
-            case FeatureCategory.CoreAI:
-            case FeatureCategory.MobileCore:
-            case FeatureCategory.DesktopCore:
-            case FeatureCategory.SaaSPlatform:
-            case FeatureCategory.Compute:
+            case FeatureCategory._UnusedWebApp0:
+            case FeatureCategory._UnusedAI0:
+            case FeatureCategory._UnusedMobile0:
+            case FeatureCategory._UnusedDesktop0:
+            case FeatureCategory._UnusedSaaS0:
+            case FeatureCategory._UnusedCloud0:
             case FeatureCategory.Rendering:
             case FeatureCategory.Hardware:
             case FeatureCategory.Production:
-            case FeatureCategory.Protection:
+            case FeatureCategory._UnusedSecurity0:
             case FeatureCategory.System:
             case FeatureCategory.Gameplay:
                 return coreAffinity;
 
             // Technical / infrastructure / backend
-            case FeatureCategory.Backend:
-            case FeatureCategory.Infrastructure:
-            case FeatureCategory.CloudNetwork:
-            case FeatureCategory.CloudManagement:
+            case FeatureCategory._UnusedWebApp1:
+            case FeatureCategory._UnusedWebApp2:
+            case FeatureCategory._UnusedCloud1:
+            case FeatureCategory._UnusedCloud2:
             case FeatureCategory.Simulation:
-            case FeatureCategory.Detection:
+            case FeatureCategory._UnusedSecurity1:
             case FeatureCategory.Network:
             case FeatureCategory.Processing:
             case FeatureCategory.Services:
-            case FeatureCategory.Operations:
+            case FeatureCategory._UnusedSaaS2:
             case FeatureCategory.Platform:
                 return technicalAffinity;
 
@@ -77,23 +77,23 @@ public class MarketNicheData : ScriptableObject
             case FeatureCategory.Collaboration:
             case FeatureCategory.Distribution:
             case FeatureCategory.Ecosystem:
-            case FeatureCategory.Integration:
-            case FeatureCategory.DesktopIntegration:
+            case FeatureCategory._UnusedMobile2:
+            case FeatureCategory._UnusedDesktop2:
                 return socialAffinity;
 
             // Quality of life / UX / DX
             case FeatureCategory.DeveloperExperience:
-            case FeatureCategory.Experience:
+            case FeatureCategory._UnusedMobile1:
             case FeatureCategory.Interface:
-            case FeatureCategory.DesktopInterface:
-            case FeatureCategory.AIInterface:
+            case FeatureCategory._UnusedDesktop1:
+            case FeatureCategory._UnusedAI1:
             case FeatureCategory.Tooling:
-            case FeatureCategory.Management:
+            case FeatureCategory._UnusedSecurity2:
                 return qualityOfLifeAffinity;
 
             // Content / intelligence / data
-            case FeatureCategory.Data:
-            case FeatureCategory.Intelligence:
+            case FeatureCategory._UnusedAI2:
+            case FeatureCategory._UnusedSaaS1:
             case FeatureCategory.Presentation:
             case FeatureCategory.Pipeline:
             case FeatureCategory.Creation:

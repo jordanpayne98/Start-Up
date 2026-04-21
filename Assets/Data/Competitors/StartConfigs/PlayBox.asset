@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CompetitorStartConfig
   companyName: ArcadeVault
   founderName: Kenji Nishida
-  archetype: 0
+  archetype: 2
   personality:
     RiskTolerance: 0.45
     RdSpeed: 0.5
     BrandInvestment: 0.8
     PricingAggression: 0.4
     InnovationBias: 0.5
-  specializations: 010000000b000000
+  specializations: 0100000007000000
   startingProducts:
   - category: 1
     niche: -1
@@ -32,15 +32,6 @@ MonoBehaviour:
     featureQualities: []
     ageInMonths: 24
     licensingRate: 0.1
-  - category: 11
-    niche: 41
-    productName: ArcadeVault Link
-    quality: 72
-    marketSharePercent: 0
-    featureIds: []
-    featureQualities: []
-    ageInMonths: 18
-    licensingRate: 0
   - category: 7
     niche: 9
     productName: Ember Odyssey

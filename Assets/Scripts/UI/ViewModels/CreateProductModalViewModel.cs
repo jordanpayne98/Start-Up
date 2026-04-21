@@ -1561,8 +1561,6 @@ public class CreateProductModalViewModel : IViewModel
     private static string ResolvePlatformTypeLabel(Product product) {
         if (product.Category == ProductCategory.GameConsole) return "Game Console";
         if (product.Niche == ProductNiche.DesktopOS) return "Desktop OS";
-        if (product.Niche == ProductNiche.MobileOS) return "Mobile OS";
-        if (product.Niche == ProductNiche.ServerOS) return "Server OS";
         return UIFormatting.FormatCategory(product.Category);
     }
 
@@ -1936,13 +1934,6 @@ public class CreateProductModalViewModel : IViewModel
             case ProductCategory.GraphicsEditor:      return "Tools";
             case ProductCategory.AudioTool:           return "Tools";
             case ProductCategory.DevFramework:        return "Tools";
-            case ProductCategory.MobileApp:           return "Apps";
-            case ProductCategory.DesktopSoftware:     return "Apps";
-            case ProductCategory.WebApplication:      return "Web";
-            case ProductCategory.OnlineService:       return "Services";
-            case ProductCategory.SecuritySoftware:    return "Services";
-            case ProductCategory.CloudInfrastructure: return "Services";
-            case ProductCategory.AIProduct:           return "Services";
             default:                                  return "Other";
         }
     }

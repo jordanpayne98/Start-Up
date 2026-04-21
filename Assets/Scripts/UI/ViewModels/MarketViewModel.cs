@@ -57,13 +57,6 @@ public class MarketViewModel : IViewModel
     {
         ProductCategory.OperatingSystem,
         ProductCategory.VideoGame,
-        ProductCategory.MobileApp,
-        ProductCategory.OnlineService,
-        ProductCategory.DesktopSoftware,
-        ProductCategory.WebApplication,
-        ProductCategory.SecuritySoftware,
-        ProductCategory.CloudInfrastructure,
-        ProductCategory.AIProduct,
         ProductCategory.GameConsole,
         ProductCategory.GameEngine,
         ProductCategory.GraphicsEditor,
@@ -75,13 +68,6 @@ public class MarketViewModel : IViewModel
     {
         ProductCategory.OperatingSystem,
         ProductCategory.VideoGame,
-        ProductCategory.MobileApp,
-        ProductCategory.OnlineService,
-        ProductCategory.DesktopSoftware,
-        ProductCategory.WebApplication,
-        ProductCategory.SecuritySoftware,
-        ProductCategory.CloudInfrastructure,
-        ProductCategory.AIProduct,
         ProductCategory.GameConsole,
         ProductCategory.GameEngine,
         ProductCategory.GraphicsEditor,
@@ -95,8 +81,6 @@ public class MarketViewModel : IViewModel
         {
             // Operating System niches
             { ProductNiche.DesktopOS,           ProductCategory.OperatingSystem },
-            { ProductNiche.MobileOS,            ProductCategory.OperatingSystem },
-            { ProductNiche.ServerOS,            ProductCategory.OperatingSystem },
             // Video Game genres
             { ProductNiche.RPG,               ProductCategory.VideoGame },
             { ProductNiche.FPS,               ProductCategory.VideoGame },
@@ -111,14 +95,6 @@ public class MarketViewModel : IViewModel
             { ProductNiche.MMORPG,            ProductCategory.VideoGame },
             { ProductNiche.Sandbox,           ProductCategory.VideoGame },
             { ProductNiche.Fighting,          ProductCategory.VideoGame },
-            // Mobile App niches
-            { ProductNiche.AppUtility,        ProductCategory.MobileApp },
-            { ProductNiche.AppSocial,         ProductCategory.MobileApp },
-            { ProductNiche.AppProductivity,   ProductCategory.MobileApp },
-            // Online Service niches
-            { ProductNiche.CRM,               ProductCategory.OnlineService },
-            { ProductNiche.Communication,     ProductCategory.OnlineService },
-            { ProductNiche.Analytics,         ProductCategory.OnlineService },
         };
     }
 
@@ -354,13 +330,6 @@ public class MarketViewModel : IViewModel
         {
             case ProductCategory.OperatingSystem:     return "Operating Systems";
             case ProductCategory.VideoGame:           return "Video Games";
-            case ProductCategory.MobileApp:           return "Mobile Apps";
-            case ProductCategory.OnlineService:       return "Online Services";
-            case ProductCategory.DesktopSoftware:     return "Desktop Software";
-            case ProductCategory.WebApplication:      return "Web Applications";
-            case ProductCategory.SecuritySoftware:    return "Security Software";
-            case ProductCategory.CloudInfrastructure: return "Cloud Infrastructure";
-            case ProductCategory.AIProduct:           return "AI Products";
             case ProductCategory.GameConsole:         return "Game Consoles";
             case ProductCategory.GameEngine:          return "Game Engines";
             case ProductCategory.GraphicsEditor:      return "Graphics Editors";

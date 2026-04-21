@@ -79,13 +79,6 @@ public static class UIFormatting
             case ProductCategory.AudioTool:           return "Audio Tool";
             case ProductCategory.DevFramework:        return "Dev Framework";
             case ProductCategory.VideoGame:           return "Video Game";
-            case ProductCategory.MobileApp:           return "Mobile App";
-            case ProductCategory.DesktopSoftware:     return "Desktop Software";
-            case ProductCategory.WebApplication:      return "Web Application";
-            case ProductCategory.OnlineService:       return "Online Service";
-            case ProductCategory.SecuritySoftware:    return "Security Software";
-            case ProductCategory.CloudInfrastructure: return "Cloud Infrastructure";
-            case ProductCategory.AIProduct:           return "AI Product";
             default:                                  return cat.ToString();
         }
     }
@@ -98,8 +91,6 @@ public static class UIFormatting
     public static string FormatNiche(ProductNiche niche) {
         switch (niche) {
             case ProductNiche.DesktopOS:        return "Desktop OS";
-            case ProductNiche.MobileOS:         return "Mobile OS";
-            case ProductNiche.ServerOS:         return "Server OS";
             case ProductNiche.RPG:              return "RPG";
             case ProductNiche.FPS:              return "FPS";
             case ProductNiche.MMORPG:           return "MMORPG";
@@ -113,12 +104,6 @@ public static class UIFormatting
             case ProductNiche.Adventure:        return "Adventure";
             case ProductNiche.Sandbox:          return "Sandbox";
             case ProductNiche.Fighting:         return "Fighting";
-            case ProductNiche.AppUtility:       return "Utility";
-            case ProductNiche.AppSocial:        return "Social";
-            case ProductNiche.AppProductivity:  return "Productivity";
-            case ProductNiche.CRM:              return "CRM";
-            case ProductNiche.Analytics:        return "Analytics";
-            case ProductNiche.Communication:    return "Communication";
             default:                            return niche.ToString();
         }
     }

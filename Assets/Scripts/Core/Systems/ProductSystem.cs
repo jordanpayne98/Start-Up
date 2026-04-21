@@ -2732,7 +2732,7 @@ public class ProductSystem : ISystem
 
         var cheatNiche = template.nicheConfigs != null && template.nicheConfigs.Length > 0
             ? template.nicheConfigs[0].niche
-            : ProductNiche.AppUtility;
+            : ProductNiche.None;
         float cheatNicheDevTimeMult = GetNicheDevTimeMultiplier(cheatNiche);
         var phases = BuildPhaseRuntimes(template, cmd.SelectedFeatureIds, _tuning?.ProductBaseWorkMultiplier ?? 100f, cheatNicheDevTimeMult, template.difficultyTier);
         int phaseCount = phases.Length;
@@ -4505,7 +4505,7 @@ public class ProductSystem : ISystem
             return cmd.SelectedNiche;
         if (template.nicheConfigs != null && template.nicheConfigs.Length > 0)
             return template.nicheConfigs[0].niche;
-        return ProductNiche.AppUtility;
+        return ProductNiche.None;
     }
 
     private static ProductPhaseRuntime[] BuildPhaseRuntimes(ProductTemplateDefinition template, string[] selectedFeatureIds, float workMultiplier = 1f, float nicheDevTimeMult = 1f, int difficultyTier = 1)

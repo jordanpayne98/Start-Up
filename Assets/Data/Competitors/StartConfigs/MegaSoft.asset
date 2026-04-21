@@ -32,15 +32,6 @@ MonoBehaviour:
     featureQualities: []
     ageInMonths: 36
     licensingRate: 0.12
-  - category: 9
-    niche: -1
-    productName: Monolith Suite
-    quality: 75
-    marketSharePercent: 0
-    featureIds: []
-    featureQualities: []
-    ageInMonths: 48
-    licensingRate: 0
   - category: 7
     niche: 10
     productName: Monolith Vanguard
@@ -50,12 +41,12 @@ MonoBehaviour:
     featureQualities: []
     ageInMonths: 12
     licensingRate: 0
-  - category: 11
-    niche: 41
-    productName: Monolith Relay
-    quality: 68
+  - category: 6
+    niche: -1
+    productName: Monolith Forge
+    quality: 65
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
-    ageInMonths: 20
+    ageInMonths: 18
     licensingRate: 0

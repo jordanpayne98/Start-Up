@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CompetitorStartConfig
   companyName: FreeForge Foundation
   founderName: Erik Lindqvist
-  archetype: 4
+  archetype: 1
   personality:
     RiskTolerance: 0.5
     RdSpeed: 0.55
@@ -24,7 +24,7 @@ MonoBehaviour:
   specializations: 06000000
   startingProducts:
   - category: 0
-    niche: 2
+    niche: 0
     productName: FreeForge Kernel
     quality: 80
     marketSharePercent: 40
@@ -54,24 +54,6 @@ MonoBehaviour:
     niche: -1
     productName: FreeForge Waveform
     quality: 62
-    marketSharePercent: 0
-    featureIds: []
-    featureQualities: []
-    ageInMonths: 36
-    licensingRate: 0
-  - category: 9
-    niche: -1
-    productName: FreeForge Scribe
-    quality: 62
-    marketSharePercent: 0
-    featureIds: []
-    featureQualities: []
-    ageInMonths: 30
-    licensingRate: 0
-  - category: 9
-    niche: -1
-    productName: FreeForge Ledger
-    quality: 58
     marketSharePercent: 0
     featureIds: []
     featureQualities: []

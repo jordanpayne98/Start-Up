@@ -1054,7 +1054,7 @@ public class AIDecisionSystem : ISystem
         {
             resolvedNiche = ProductNiche.None;
             resolvedCategory = comp.Specializations != null && comp.Specializations.Length > 0
-                ? comp.Specializations[0] : ProductCategory.DesktopSoftware;
+                ? comp.Specializations[0] : ProductCategory.VideoGame;
         }
         else
         {
@@ -1610,9 +1610,7 @@ public class AIDecisionSystem : ISystem
     {
         switch (niche)
         {
-            case ProductNiche.DesktopOS:
-            case ProductNiche.MobileOS:
-            case ProductNiche.ServerOS:    return ProductCategory.OperatingSystem;
+            case ProductNiche.DesktopOS:       return ProductCategory.OperatingSystem;
             case ProductNiche.RPG:
             case ProductNiche.FPS:
             case ProductNiche.Strategy:
@@ -1625,14 +1623,8 @@ public class AIDecisionSystem : ISystem
             case ProductNiche.Adventure:
             case ProductNiche.MMORPG:
             case ProductNiche.Sandbox:
-            case ProductNiche.Fighting:    return ProductCategory.VideoGame;
-            case ProductNiche.AppUtility:
-            case ProductNiche.AppSocial:
-            case ProductNiche.AppProductivity: return ProductCategory.MobileApp;
-            case ProductNiche.CRM:
-            case ProductNiche.Communication:
-            case ProductNiche.Analytics:   return ProductCategory.OnlineService;
-            default:                       return ProductCategory.DesktopSoftware;
+            case ProductNiche.Fighting:        return ProductCategory.VideoGame;
+            default:                           return ProductCategory.VideoGame;
         }
     }
 
@@ -1891,38 +1883,38 @@ public class AIDecisionSystem : ISystem
         {
             case FeatureCategory.Gameplay:
             case FeatureCategory.Core:
-            case FeatureCategory.MobileCore:
-            case FeatureCategory.DesktopCore:
-            case FeatureCategory.Frontend:
-            case FeatureCategory.Backend:
-            case FeatureCategory.SaaSPlatform:
-            case FeatureCategory.CoreAI:
-            case FeatureCategory.Compute:
+            case FeatureCategory._UnusedMobile0:
+            case FeatureCategory._UnusedDesktop0:
+            case FeatureCategory._UnusedWebApp0:
+            case FeatureCategory._UnusedWebApp1:
+            case FeatureCategory._UnusedSaaS0:
+            case FeatureCategory._UnusedAI0:
+            case FeatureCategory._UnusedCloud0:
             case FeatureCategory.System:
                 dim = ReviewDimension.Functionality; return true;
 
             case FeatureCategory.Rendering:
             case FeatureCategory.Simulation:
             case FeatureCategory.Tooling:
-            case FeatureCategory.Intelligence:
+            case FeatureCategory._UnusedSaaS1:
                 dim = ReviewDimension.Innovation; return true;
 
             case FeatureCategory.Presentation:
             case FeatureCategory.Interface:
-            case FeatureCategory.Experience:
-            case FeatureCategory.DesktopInterface:
-            case FeatureCategory.AIInterface:
+            case FeatureCategory._UnusedMobile1:
+            case FeatureCategory._UnusedDesktop1:
+            case FeatureCategory._UnusedAI1:
                 dim = ReviewDimension.Polish; return true;
 
             case FeatureCategory.Social:
-            case FeatureCategory.Integration:
-            case FeatureCategory.DesktopIntegration:
+            case FeatureCategory._UnusedMobile2:
+            case FeatureCategory._UnusedDesktop2:
             case FeatureCategory.Ecosystem:
-            case FeatureCategory.Infrastructure:
+            case FeatureCategory._UnusedWebApp2:
             case FeatureCategory.Network:
-            case FeatureCategory.CloudNetwork:
-            case FeatureCategory.Operations:
-            case FeatureCategory.CloudManagement:
+            case FeatureCategory._UnusedCloud1:
+            case FeatureCategory._UnusedSaaS2:
+            case FeatureCategory._UnusedCloud2:
                 dim = ReviewDimension.Quality; return true;
 
             default:

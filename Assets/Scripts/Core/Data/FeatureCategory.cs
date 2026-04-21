@@ -39,37 +39,37 @@ public enum FeatureCategory {
     Social,
 
     // Mobile App
-    MobileCore,
-    Experience,
-    Integration,
+    _UnusedMobile0,
+    _UnusedMobile1,
+    _UnusedMobile2,
 
     // Desktop Software
-    DesktopCore,
-    DesktopInterface,
-    DesktopIntegration,
+    _UnusedDesktop0,
+    _UnusedDesktop1,
+    _UnusedDesktop2,
 
     // Web Application
-    Frontend,
-    Backend,
-    Infrastructure,
+    _UnusedWebApp0,
+    _UnusedWebApp1,
+    _UnusedWebApp2,
 
     // Online Service
-    SaaSPlatform,
-    Intelligence,
-    Operations,
+    _UnusedSaaS0,
+    _UnusedSaaS1,
+    _UnusedSaaS2,
 
     // Security Software
-    Protection,
-    Detection,
-    Management,
+    _UnusedSecurity0,
+    _UnusedSecurity1,
+    _UnusedSecurity2,
 
     // Cloud Infrastructure
-    Compute,
-    CloudNetwork,
-    CloudManagement,
+    _UnusedCloud0,
+    _UnusedCloud1,
+    _UnusedCloud2,
 
     // AI Product
-    CoreAI,
-    AIInterface,
-    Data
+    _UnusedAI0,
+    _UnusedAI1,
+    _UnusedAI2
 }

@@ -24,15 +24,6 @@ MonoBehaviour:
   specializations: 00000000
   startingProducts:
   - category: 0
-    niche: 1
-    productName: PearByte Prism
-    quality: 85
-    marketSharePercent: 45
-    featureIds: []
-    featureQualities: []
-    ageInMonths: 48
-    licensingRate: 0.15
-  - category: 0
     niche: 0
     productName: PearByte Orion
     quality: 82
@@ -41,28 +32,19 @@ MonoBehaviour:
     featureQualities: []
     ageInMonths: 60
     licensingRate: 0
-  - category: 8
-    niche: 22
-    productName: PearByte Memo
-    quality: 72
-    marketSharePercent: 0
-    featureIds: []
-    featureQualities: []
-    ageInMonths: 30
-    licensingRate: 0
-  - category: 8
-    niche: 23
-    productName: PearByte Hive
-    quality: 68
-    marketSharePercent: 0
-    featureIds: []
-    featureQualities: []
-    ageInMonths: 18
-    licensingRate: 0
-  - category: 9
+  - category: 6
     niche: -1
-    productName: PearByte Compose
-    quality: 65
+    productName: PearByte Kit
+    quality: 70
+    marketSharePercent: 0
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 36
+    licensingRate: 0
+  - category: 4
+    niche: -1
+    productName: PearByte Studio
+    quality: 68
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
