@@ -197,9 +197,7 @@ public static class MarketShareResolver
         float reviewMult = product.PublicReceptionScore > 0f
             ? product.PublicReceptionScore / 100f
             : quality / 100f;
-        float reviewCurve = reviewMult < 0.5f
-            ? reviewMult * 0.5f
-            : reviewMult * reviewMult;
+        float reviewCurve = (float)Math.Pow(reviewMult, 1.5);
 
         float obsolescenceMod = 1f;
         if (generationSystem != null) {
@@ -275,7 +273,7 @@ public static class MarketShareResolver
                           + popularityFactor * 0.15f
                           + freshness * 0.30f;
 
-        return Clamp(penetration, 0.01f, 0.50f);
+        return Clamp(penetration, 0.01f, 0.75f);
     }
 
     public static void ApplyAnticipationEffect(

@@ -5,7 +5,8 @@ public enum CalendarEventColor
     Blue,
     Red,
     Yellow,
-    Purple
+    Purple,
+    Orange
 }
 
 public struct CalendarEventVM
@@ -265,9 +266,47 @@ public class CalendarViewModel : IViewModel
             }
         }
 
+        // Competitor scheduled product updates (orange)
+        if (compState?.competitors != null && productState?.shippedProducts != null) {
+            foreach (var compKvp in compState.competitors) {
+                var comp = compKvp.Value;
+                if (comp.IsBankrupt || comp.IsAbsorbed) continue;
+                if (comp.ScheduledUpdates == null) continue;
+
+                int updateCount = comp.ScheduledUpdates.Count;
+                for (int p = 0; p < updateCount; p++) {
+                    var scheduled = comp.ScheduledUpdates[p];
+                    if (scheduled.ScheduledTick <= 0) continue;
+                    if (!productState.shippedProducts.TryGetValue(scheduled.ProductId, out var shippedProd)) continue;
+
+                    int updateDay = scheduled.ScheduledTick / TimeState.TicksPerDay;
+                    string label = shippedProd.ProductName + " (update)";
+                    _events.Add(new CalendarEventVM {
+                        Tick = scheduled.ScheduledTick,
+                        Label = label,
+                        Color = CalendarEventColor.Orange,
+                        CompetitorId = compKvp.Key,
+                        ProductId = scheduled.ProductId
+                    });
+                    for (int i = 0; i < 7; i++) {
+                        int thisAbsoluteDay = anchorAbsoluteDay + i;
+                        if (thisAbsoluteDay == updateDay) {
+                            _days[i].Events.Add(new CalendarEventDisplay {
+                                Title = label,
+                                Type = "competitor-update",
+                                DayIndex = i,
+                                Color = CalendarEventColor.Orange,
+                                CompetitorId = compKvp.Key,
+                                ProductId = scheduled.ProductId
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
         // Active disruptions (yellow)
-        if (disruptionState?.activeDisruptions != null) {
-            int dCount = disruptionState.activeDisruptions.Count;
+        if (disruptionState?.activeDisruptions != null) {            int dCount = disruptionState.activeDisruptions.Count;
             for (int d = 0; d < dCount; d++) {
                 var disruption = disruptionState.activeDisruptions[d];
                 int startDay = disruption.StartTick / TimeState.TicksPerDay;

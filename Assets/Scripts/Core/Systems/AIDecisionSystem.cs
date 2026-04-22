@@ -46,6 +46,7 @@ public class AIDecisionSystem : ISystem
     private ReviewSystem _reviewSystem;
     private PlatformState _platformState;
     private MoraleSystem _moraleSystem;
+    private TaxSystem _taxSystem;
     private Dictionary<string, ProductTemplateDefinition> _templateLookup;
     private ProductSystem _productSystem;
     private CompetitorSystem _competitorSystem;
@@ -95,6 +96,7 @@ public class AIDecisionSystem : ISystem
     public void SetReviewSystem(ReviewSystem rs) { _reviewSystem = rs; }
     public void SetPlatformState(PlatformState ps) { _platformState = ps; }
     public void SetMoraleSystem(MoraleSystem ms) { _moraleSystem = ms; }
+    public void SetTaxSystem(TaxSystem ts) { _taxSystem = ts; }
     public void SetCrossProductGateConfig(CrossProductGateConfig cfg) { _crossProductGateConfig = cfg; }
     public void SetNameData(CompetitorNameData nameData) { _nameData = nameData; }
     public void SetCompetitorSystem(CompetitorSystem cs) { _competitorSystem = cs; }
@@ -275,11 +277,24 @@ public class AIDecisionSystem : ISystem
         }
     }
 
+    private long GetTaxLiability(Competitor comp)
+    {
+        long pending = comp.TaxRecord.pendingTaxAmount + comp.TaxRecord.pendingLateFees;
+        float taxRate = _taxSystem != null ? _taxSystem.TaxRate : 0.30f;
+        long estimated = comp.TaxRecord.profitSinceLastCycle > 0
+            ? (long)(comp.TaxRecord.profitSinceLastCycle * taxRate)
+            : 0L;
+        return pending + estimated;
+    }
+
     private CashHealthTier ClassifyCashHealth(Competitor comp)
     {
         long expenses = comp.Finance.MonthlyExpenses;
         if (expenses <= 0) return CashHealthTier.Flush;
-        long runway = comp.Finance.Cash / expenses;
+        long taxLiability = GetTaxLiability(comp);
+        long availableCash = comp.Finance.Cash - taxLiability;
+        if (availableCash < 0) availableCash = 0;
+        long runway = availableCash / expenses;
         if (runway < 2) return CashHealthTier.Critical;
         if (runway < 6) return CashHealthTier.Tight;
         if (runway < 12) return CashHealthTier.Stable;
@@ -315,7 +330,9 @@ public class AIDecisionSystem : ISystem
                 break;
         }
 
-        long available = comp.Finance.Cash > 0 ? comp.Finance.Cash : 0L;
+        long taxLiability = GetTaxLiability(comp);
+        long available = comp.Finance.Cash - taxLiability;
+        if (available < 0) available = 0;
         return new AIBudgetAllocation
         {
             hiringBudget    = (long)(available * salaryRatio),
@@ -572,7 +589,9 @@ public class AIDecisionSystem : ISystem
             if (cashThreshold < 50000L) cashThreshold = 50000L;
         }
 
-        if (comp.Finance.Cash < cashThreshold) return;
+        long taxAdjustedCash = comp.Finance.Cash - GetTaxLiability(comp);
+        if (taxAdjustedCash < 0) taxAdjustedCash = 0;
+        if (taxAdjustedCash < cashThreshold) return;
 
         ProductNiche bestNiche;
         if (!TryFindBestNicheForCompetitor(comp, out bestNiche)) return;
@@ -605,7 +624,11 @@ public class AIDecisionSystem : ISystem
             Product product = GetShippedProduct(pid);
             if (product == null || !product.IsOnMarket) continue;
 
-            int mercyTicks = 3 * TimeState.TicksPerDay * 30;
+            bool isLastProduct = comp.ActiveProductIds.Count <= 1 &&
+                (comp.InDevelopmentProductIds == null || comp.InDevelopmentProductIds.Count == 0);
+            if (isLastProduct) continue;
+
+            int mercyTicks = 6 * TimeState.TicksPerDay * 30;
             if (product.MonthlyRevenue < 500L && product.TicksSinceShip > mercyTicks)
             {
                 if (product.Category.IsCriticalCategory() && _productState.IsLastOnMarketInCategory(pid))
@@ -665,12 +688,22 @@ public class AIDecisionSystem : ISystem
                 if (boostBudget > currentMarketing)
                     _productSystem.ApplyCommand(new SetProductBudgetCommand { Tick = tick, ProductId = pid, BudgetType = ProductBudgetType.Marketing, MonthlyAllocation = boostBudget });
 
-                float currentPrice = product.PriceOverride;
-                float reducedPrice = System.Math.Max(1f, currentPrice * 0.85f);
-                if (reducedPrice < currentPrice)
-                    product.PriceOverride = reducedPrice;
-
-                _logger.Log($"[AIDecisionSystem] {comp.CompanyName} intervening on failing product {pid.Value}: boost marketing ${boostBudget}/mo, cut price to ${reducedPrice:F2}.");
+                if (!product.IsOnSale)
+                {
+                    bool firstSale = product.TotalSalesTriggered == 0;
+                    if (firstSale || product.TicksSinceLastSale >= ProductSystem.SaleEventCooldownTicks)
+                    {
+                        product.IsOnSale = true;
+                        product.SaleTicksRemaining = ProductSystem.SaleEventDurationTicks;
+                        product.TotalSalesTriggered++;
+                        product.PopularityScore = System.Math.Min(100f, product.PopularityScore + 8f);
+                        _logger.Log($"[AIDecisionSystem] {comp.CompanyName} triggered emergency sale on failing product {pid.Value}: boost marketing ${boostBudget}/mo.");
+                    }
+                    else
+                    {
+                        _logger.Log($"[AIDecisionSystem] {comp.CompanyName} intervening on failing product {pid.Value}: boost marketing ${boostBudget}/mo (sale on cooldown).");
+                    }
+                }
             }
             else if (isDeclining && cashHealth >= CashHealthTier.Stable)
             {
@@ -707,21 +740,19 @@ public class AIDecisionSystem : ISystem
 
             long currentBudget = product.MaintenanceBudgetMonthly;
 
-            if (cashHealth == CashHealthTier.Critical)
+            bool isDecline = product.LifecycleStage == ProductLifecycleStage.Decline;
+
+            if (cashHealth == CashHealthTier.Critical && isDecline)
             {
                 if (currentBudget != 0)
                     _productSystem.ApplyCommand(new SetProductBudgetCommand { Tick = tick, ProductId = _scratchProductIds[i], BudgetType = ProductBudgetType.Maintenance, MonthlyAllocation = 0 });
                 continue;
             }
 
-            bool isHighValue = product.LifecycleStage == ProductLifecycleStage.Launch ||
-                               product.LifecycleStage == ProductLifecycleStage.Growth;
+            long desiredBudget = (long)(comp.Finance.MonthlyRevenue * maintenanceBudgetRatio / System.Math.Max(1, scratchCount));
 
-            long desiredBudget = isHighValue || cashHealth >= CashHealthTier.Stable
-                ? (long)(comp.Finance.MonthlyRevenue * maintenanceBudgetRatio / System.Math.Max(1, scratchCount))
-                : 0L;
-
-            if (cashHealth == CashHealthTier.Tight) desiredBudget /= 2;
+            if (isDecline) desiredBudget = desiredBudget * 3 / 4;
+            if (cashHealth == CashHealthTier.Tight || cashHealth == CashHealthTier.Critical) desiredBudget /= 2;
 
             if (desiredBudget != currentBudget)
                 _productSystem.ApplyCommand(new SetProductBudgetCommand { Tick = tick, ProductId = _scratchProductIds[i], BudgetType = ProductBudgetType.Maintenance, MonthlyAllocation = desiredBudget });
@@ -813,27 +844,24 @@ public class AIDecisionSystem : ISystem
             ProductId pid = comp.ActiveProductIds[i];
             Product product = GetShippedProduct(pid);
             if (product == null || !product.IsOnMarket) continue;
+            if (product.IsOnSale) continue;
 
-            float currentPrice = product.PriceOverride;
-            float newPrice = currentPrice;
+            bool usersFalling = product.ActiveUserCount < product.PreviousActiveUsers;
+            bool recentUpdate = product.TicksSinceLastUpdate < TimeState.TicksPerDay * 30;
 
-            bool revenueFalling = product.MonthlyRevenue < product.PreviousMonthlyRevenue;
-            bool revenueGrowing = product.MonthlyRevenue > product.PreviousMonthlyRevenue;
+            bool shouldSale = (recentUpdate && usersFalling)
+                || (usersFalling && product.ActiveUserCount < (int)(product.PreviousActiveUsers * 0.8f));
 
-            if (revenueFalling && product.ActiveUserCount < 100)
-            {
-                newPrice = System.Math.Max(1f, currentPrice * 0.8f);
-            }
-            else if (revenueGrowing && product.ActiveUserCount > 1000 && comp.Personality.PricingAggression > 0.5f)
-            {
-                newPrice = currentPrice * 1.1f;
-            }
+            if (!shouldSale) continue;
 
-            if (newPrice != currentPrice)
-            {
-                product.PriceOverride = newPrice;
-                _logger.Log($"[AIDecisionSystem] {comp.CompanyName} adjusted price for product {pid.Value} from ${currentPrice:F2} to ${newPrice:F2}.");
-            }
+            bool firstSale = product.TotalSalesTriggered == 0;
+            if (!firstSale && product.TicksSinceLastSale < ProductSystem.SaleEventCooldownTicks) continue;
+
+            product.IsOnSale = true;
+            product.SaleTicksRemaining = ProductSystem.SaleEventDurationTicks;
+            product.TotalSalesTriggered++;
+            product.PopularityScore = System.Math.Min(100f, product.PopularityScore + 8f);
+            _logger.Log($"[AIDecisionSystem] {comp.CompanyName} triggered sale on product {pid.Value} (recentUpdate={recentUpdate}, usersFalling={usersFalling}).");
         }
     }
 
@@ -1139,6 +1167,29 @@ public class AIDecisionSystem : ISystem
             RequiredToolIds = selectedToolIds,
             TargetPlatformIds = selectedPlatformIds
         };
+
+        if (resolvedCategory.IsTool())
+        {
+            float pricingAggression = comp.Personality.PricingAggression;
+            if (comp.Archetype == CompetitorArchetype.ToolMaker)
+            {
+                product.DistributionModel = ToolDistributionModel.Licensed;
+                product.PlayerLicensingRate = 0.05f + pricingAggression * 0.15f;
+            }
+            else if (pricingAggression < 0.3f)
+            {
+                product.DistributionModel = ToolDistributionModel.OpenSource;
+                product.PlayerLicensingRate = 0f;
+            }
+            else
+            {
+                product.DistributionModel = ToolDistributionModel.Licensed;
+                product.PlayerLicensingRate = 0.05f + pricingAggression * 0.10f;
+            }
+
+            if (product.IsSubscriptionBased && product.DistributionModel == ToolDistributionModel.Licensed)
+                product.MonthlySubscriptionPrice = System.Math.Max(5f, product.PriceOverride * 0.3f);
+        }
 
         _productState.developmentProducts[productId] = product;
         comp.InDevelopmentProductIds.Add(productId);

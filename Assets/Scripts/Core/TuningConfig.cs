@@ -700,42 +700,11 @@ public class TuningConfig
         set { _skillAgeDecayMultipliers = value; OnParameterChanged?.Invoke("SkillAgeDecayMultipliers", null, value); }
     }
 
-    // ── Upgrade System ──────────────────────────────────────────────────────────
-    private int[] _upgradeTierResearchTicks = { 0, 14400, 28800, 72000, 144000, 288000, 480000 };
-    public int[] UpgradeTierResearchTicks {
-        get => _upgradeTierResearchTicks;
-        set { _upgradeTierResearchTicks = value; OnParameterChanged?.Invoke("UpgradeTierResearchTicks", null, value); }
-    }
-
     // ── Product Work Rate ───────────────────────────────────────────────────────
     private float _teamOverheadPerMember = 0.04f;
     public float TeamOverheadPerMember {
         get => _teamOverheadPerMember;
         set { if (value != _teamOverheadPerMember) { var o = _teamOverheadPerMember; _teamOverheadPerMember = value; OnParameterChanged?.Invoke("TeamOverheadPerMember", o, value); } }
-    }
-
-    [System.Obsolete("Use TeamOverheadPerMember instead.")]
-    private float _productTeamOverheadFactor = 0.3f;
-    [System.Obsolete("Use TeamOverheadPerMember instead.")]
-    public float ProductTeamOverheadFactor {
-        get => _productTeamOverheadFactor;
-        set { if (value != _productTeamOverheadFactor) { var o = _productTeamOverheadFactor; _productTeamOverheadFactor = value; OnParameterChanged?.Invoke("ProductTeamOverheadFactor", o, value); } }
-    }
-
-    [System.Obsolete("Per-employee WorkEthic is applied directly in TeamWorkEngine (0.90-1.10).")]
-    private float _productWorkEthicMinMult = 0.7f;
-    [System.Obsolete("Per-employee WorkEthic is applied directly in TeamWorkEngine (0.90-1.10).")]
-    public float ProductWorkEthicMinMult {
-        get => _productWorkEthicMinMult;
-        set { if (value != _productWorkEthicMinMult) { var o = _productWorkEthicMinMult; _productWorkEthicMinMult = value; OnParameterChanged?.Invoke("ProductWorkEthicMinMult", o, value); } }
-    }
-
-    [System.Obsolete("Per-employee WorkEthic is applied directly in TeamWorkEngine (0.90-1.10).")]
-    private float _productWorkEthicMaxMult = 1.3f;
-    [System.Obsolete("Per-employee WorkEthic is applied directly in TeamWorkEngine (0.90-1.10).")]
-    public float ProductWorkEthicMaxMult {
-        get => _productWorkEthicMaxMult;
-        set { if (value != _productWorkEthicMaxMult) { var o = _productWorkEthicMaxMult; _productWorkEthicMaxMult = value; OnParameterChanged?.Invoke("ProductWorkEthicMaxMult", o, value); } }
     }
 
     private float _productBaseWorkMultiplier = 100f;
@@ -1221,9 +1190,6 @@ public class TuningConfig
             case "SkillSpilloverRateBase":             SkillSpilloverRateBase             = Convert.ToSingle(value); break;
             case "SkillSpilloverRateSpread":           SkillSpilloverRateSpread           = Convert.ToSingle(value); break;
             case "TeamOverheadPerMember":          TeamOverheadPerMember          = Convert.ToSingle(value); break;
-            case "ProductTeamOverheadFactor":          ProductTeamOverheadFactor          = Convert.ToSingle(value); break;
-            case "ProductWorkEthicMinMult":            ProductWorkEthicMinMult            = Convert.ToSingle(value); break;
-            case "ProductWorkEthicMaxMult":            ProductWorkEthicMaxMult            = Convert.ToSingle(value); break;
             case "ProductBaseWorkMultiplier":          ProductBaseWorkMultiplier          = Convert.ToSingle(value); break;
             case "MaxXPPerProductShip":                MaxXPPerProductShip                = Convert.ToInt32(value);  break;
             case "ProductXPDurationCapDays":           ProductXPDurationCapDays           = Convert.ToInt32(value);  break;
@@ -1377,9 +1343,6 @@ public class TuningConfig
             { "SkillSpilloverRateBase",             SkillSpilloverRateBase },
             { "SkillSpilloverRateSpread",           SkillSpilloverRateSpread },
             { "TeamOverheadPerMember",              TeamOverheadPerMember },
-            { "ProductTeamOverheadFactor",          ProductTeamOverheadFactor },
-            { "ProductWorkEthicMinMult",            ProductWorkEthicMinMult },
-            { "ProductWorkEthicMaxMult",            ProductWorkEthicMaxMult },
             { "ProductBaseWorkMultiplier",          ProductBaseWorkMultiplier },
             { "MaxXPPerProductShip",                MaxXPPerProductShip },
             { "ProductXPDurationCapDays",           ProductXPDurationCapDays },

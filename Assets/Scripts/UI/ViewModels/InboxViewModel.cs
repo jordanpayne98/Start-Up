@@ -9,7 +9,7 @@ public enum InboxFilter
     Recruitment,
     HR,
     Finance,
-    Research,
+    Technology,
     Operations,
     News
 }
@@ -162,8 +162,8 @@ public class InboxViewModel : IViewModel
                 case InboxFilter.Finance:
                     include = msg.Category == MailCategory.Finance;
                     break;
-                case InboxFilter.Research:
-                    include = msg.Category == MailCategory.Research;
+                case InboxFilter.Technology:
+                    include = msg.Category == MailCategory.Technology;
                     break;
                 case InboxFilter.Operations:
                     include = msg.Category == MailCategory.Operations;

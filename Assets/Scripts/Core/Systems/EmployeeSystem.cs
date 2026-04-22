@@ -503,9 +503,7 @@ public class EmployeeSystem : ISystem
             case CompetitorArchetype.PlatformGiant:  return 1.4f;
             case CompetitorArchetype.ToolMaker:      return 1.2f;
             case CompetitorArchetype.GameStudio:     return 1.1f;
-            case CompetitorArchetype.AppDeveloper:   return 0.9f;
             case CompetitorArchetype.FullStack:      return 1.15f;
-            case CompetitorArchetype.CloudProvider:  return 1.3f;
             default:                                 return 1.0f;
         }
     }
@@ -521,12 +519,8 @@ public class EmployeeSystem : ISystem
                 wDev=45; wDes=20; wQA=20; wSound=2; wVFX=5; wMktg=8; break;
             case CompetitorArchetype.GameStudio:
                 wDev=30; wDes=25; wQA=15; wSound=10; wVFX=15; wMktg=5; break;
-            case CompetitorArchetype.AppDeveloper:
-                wDev=40; wDes=25; wQA=20; wSound=2; wVFX=5; wMktg=8; break;
             case CompetitorArchetype.FullStack:
                 wDev=30; wDes=15; wQA=15; wSound=10; wVFX=10; wMktg=20; break;
-            case CompetitorArchetype.CloudProvider:
-                wDev=55; wDes=5; wQA=25; wSound=2; wVFX=3; wMktg=10; break;
             default:
                 wDev=35; wDes=20; wQA=20; wSound=8; wVFX=10; wMktg=7; break;
         }

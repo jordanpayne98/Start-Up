@@ -1,6 +1,5 @@
 // ContractFactory Version: Clean v1
 using System;
-using System.Collections.Generic;
 
 public class ContractFactory
 {
@@ -32,11 +31,9 @@ public class ContractFactory
     public Contract GenerateContract(
         int currentTick,
         int difficultyCap,
-        IReadOnlyCollection<string> unlockedUpgrades,
         int[] existingPoolSkillCounts = null,
         string preferredCategoryId = null)
     {
-        // 1. All categories are always available — no upgrade gate
         int availableCount = _categories.Length;
         for (int i = 0; i < _categories.Length; i++)
             _weightScratch[i] = 1;
@@ -47,7 +44,7 @@ public class ContractFactory
             return null;
         }
 
-        // 2. Apply preferred bias (default 70/30 split)
+        // 1. Apply preferred bias (default 70/30 split)
         if (!string.IsNullOrEmpty(preferredCategoryId))
         {
             int preferredIdx = -1;
@@ -74,7 +71,7 @@ public class ContractFactory
             }
         }
 
-        // 3. Weighted random category pick — no LINQ
+        // 2. Weighted random category pick — no LINQ
         int totalCatWeight = 0;
         for (int i = 0; i < _categories.Length; i++)
             totalCatWeight += _weightScratch[i];
@@ -92,7 +89,7 @@ public class ContractFactory
             }
         }
 
-        // 4. Roll difficulty via category's weight table, capped to difficultyCap
+        // 3. Roll difficulty via category's weight table, capped to difficultyCap
         int difficulty = RollDifficulty(selectedCategory, difficultyCap);
 
         return BuildContract(selectedCategory, difficulty, currentTick, existingPoolSkillCounts);
@@ -335,13 +332,4 @@ public class ContractFactory
     }
 
     private static float Lerp(float a, float b, float t) => a + (b - a) * t;
-
-    private static bool ContainsUpgrade(IReadOnlyCollection<string> upgrades, string id)
-    {
-        foreach (var u in upgrades)
-        {
-            if (u == id) return true;
-        }
-        return false;
-    }
 }

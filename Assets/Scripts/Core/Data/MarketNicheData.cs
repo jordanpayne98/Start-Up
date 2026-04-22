@@ -24,6 +24,7 @@ public class MarketNicheData : ScriptableObject
 
     [Header("User Pool")]
     public int maxUserPool = 50_000_000;
+    [Range(0.01f, 0.30f)] public float initialPoolUtilization = 0.08f;
 
     [Header("Market Interest")]
     [Range(0.01f, 0.40f)] public float interestRate = 0.15f;

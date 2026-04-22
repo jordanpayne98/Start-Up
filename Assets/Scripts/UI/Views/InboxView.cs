@@ -24,7 +24,7 @@ public class InboxView : IGameView
     {
         InboxFilter.All, InboxFilter.Unread, InboxFilter.Alert,
         InboxFilter.Contract, InboxFilter.Recruitment, InboxFilter.HR,
-        InboxFilter.Finance, InboxFilter.Research, InboxFilter.Operations,
+        InboxFilter.Finance, InboxFilter.Technology, InboxFilter.Operations,
         InboxFilter.News
     };
 
@@ -81,12 +81,12 @@ public class InboxView : IGameView
         _filterBar.style.marginBottom = 12;
         _filterBar.style.flexWrap = Wrap.Wrap;
 
-        var filterLabels = new[] { "All", "Unread", "Alerts", "Contract", "Recruit", "HR", "Finance", "Research", "Ops", "News" };
+        var filterLabels = new[] { "All", "Unread", "Alerts", "Contract", "Recruit", "HR", "Finance", "Technology", "Ops", "News" };
         var filterEnums = new[]
         {
             InboxFilter.All, InboxFilter.Unread, InboxFilter.Alert,
             InboxFilter.Contract, InboxFilter.Recruitment, InboxFilter.HR,
-            InboxFilter.Finance, InboxFilter.Research, InboxFilter.Operations,
+            InboxFilter.Finance, InboxFilter.Technology, InboxFilter.Operations,
             InboxFilter.News
         };
 

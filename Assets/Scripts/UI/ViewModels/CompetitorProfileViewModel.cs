@@ -368,9 +368,7 @@ public class CompetitorProfileViewModel : IViewModel
             case CompetitorArchetype.PlatformGiant:  return "Platform Giant";
             case CompetitorArchetype.ToolMaker:      return "Tool Maker";
             case CompetitorArchetype.GameStudio:     return "Game Studio";
-            case CompetitorArchetype.AppDeveloper:   return "App Developer";
             case CompetitorArchetype.FullStack:      return "Full Stack";
-            case CompetitorArchetype.CloudProvider:  return "Cloud Provider";
             default:                                 return archetype.ToString();
         }
     }

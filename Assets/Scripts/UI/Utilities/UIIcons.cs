@@ -4,7 +4,7 @@ public static class UIIcons
     public const string IconMailHR = "icon-mail-hr";
     public const string IconMailContract = "icon-mail-contract";
     public const string IconMailFinance = "icon-mail-finance";
-    public const string IconMailResearch = "icon-mail-research";
+    public const string IconMailTechnology = "icon-mail-research";
 
     // Navigation
     public const string IconPortal = "icon-portal";
@@ -40,7 +40,7 @@ public static class UIIcons
             case MailCategory.HR: return IconMailHR;
             case MailCategory.Contract: return IconMailContract;
             case MailCategory.Finance: return IconMailFinance;
-            case MailCategory.Research: return IconMailResearch;
+            case MailCategory.Technology: return IconMailTechnology;
             default: return IconInfo;
         }
     }

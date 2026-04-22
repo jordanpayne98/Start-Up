@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caad3ec2759eb6d43b48e6b034c131ed, type: 3}
+  m_Name: SandboxIndie
+  m_EditorClassIdentifier: Assembly-CSharp::CompetitorStartConfig
+  companyName: Wanderlust Interactive
+  founderName: Lena Kowalski
+  archetype: 4
+  personality:
+    RiskTolerance: 0
+    RdSpeed: 0
+    BrandInvestment: 0
+    PricingAggression: 0
+    InnovationBias: 0
+  specializations: 07000000
+  startingProducts:
+  - category: 7
+    niche: 20
+    productName: Terraform
+    quality: 52
+    marketSharePercent: 7
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 8
+    licensingRate: 0
+    maintenanceBudgetMonthly: 1000
+  - category: 7
+    niche: 12
+    productName: Hexlock
+    quality: 42
+    marketSharePercent: 2
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 24
+    licensingRate: 0
+    maintenanceBudgetMonthly: 600
+  startingDevProducts:
+  - category: 7
+    niche: 14
+    productName: Colony Prime
+    devMonthsRemaining: 5
+    featureIds: []
+  scheduledUpdates: []

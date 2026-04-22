@@ -1,0 +1,659 @@
+﻿=== SESSION LOG ===
+Started: 2026-04-21 21:45:48
+Unity: 6000.3.8f1
+Session: 7
+============================================================
+
+[T:-1] [CONSOLE:LOG] [TooltipService] Initialized. Root=GameUI-container, Container=tooltip-container, Registry=assigned
+[T:-1] [CONSOLE:LOG] [GameController] New game: seed=30333407, company=Test
+[T:-1] [CONSOLE:WARNING] [RoleTierProfile] 'Accountant' tier distribution is 2P / 3S / 4T. Expected exactly 1 Primary (2), 3 Secondary (3), 5 Tertiary (4).
+[T:-1] [CONSOLE:WARNING] [RoleTierProfile] 'Designer' tier distribution is 2P / 3S / 4T. Expected exactly 1 Primary (2), 3 Secondary (3), 5 Tertiary (4).
+[T:-1] [CONSOLE:WARNING] [RoleTierProfile] 'Developer' tier distribution is 2P / 3S / 4T. Expected exactly 1 Primary (2), 3 Secondary (3), 5 Tertiary (4).
+[T:-1] [CONSOLE:WARNING] [RoleTierProfile] 'HR' tier distribution is 2P / 3S / 4T. Expected exactly 1 Primary (2), 3 Secondary (3), 5 Tertiary (4).
+[T:-1] [CONSOLE:WARNING] [RoleTierProfile] 'Marketer' tier distribution is 2P / 3S / 4T. Expected exactly 1 Primary (2), 3 Secondary (3), 5 Tertiary (4).
+[T:-1] [CONSOLE:WARNING] [RoleTierProfile] 'QAEngineer' tier distribution is 2P / 3S / 4T. Expected exactly 1 Primary (2), 3 Secondary (3), 5 Tertiary (4).
+[T:-1] [CONSOLE:WARNING] [RoleTierProfile] 'SoundEngineer' tier distribution is 2P / 3S / 4T. Expected exactly 1 Primary (2), 3 Secondary (3), 5 Tertiary (4).
+[T:-1] [CONSOLE:WARNING] [RoleTierProfile] 'VFXArtist' tier distribution is 2P / 3S / 4T. Expected exactly 1 Primary (2), 3 Secondary (3), 5 Tertiary (4).
+[T:-1] [CONSOLE:LOG] [GameController] Save migration v1→v2 complete: skills and hidden attributes divided by 5.
+[T:-1] [CONSOLE:LOG] [GameController] Save migration v2→v3 complete: Art2D/Art3D merged into Design; skills array resized 10→8.
+[T:-1] [CONSOLE:LOG] [GameController] Save migration v3→v4 complete: MailCategory enum remapped.
+[T:-1] [CONSOLE:LOG] [GameController] Save migration v4->v5 complete: Marketing skill slot added.
+[T:-1] [CONSOLE:LOG] [GameController] Save migration v5->v6 complete: SyntheticAdaptability and RoleFitRatio defaulted for existing competitors.
+[T:-1] [CONSOLE:LOG] [GameController] Save migration v6->v7 complete: MoraleData new fields defaulted, morale reset to 60.
+[T:-1] [CONSOLE:LOG] [GameController] Save migration v7->v8 complete: isCrunching defaulted to false on all teams.
+[T:-1] [CONSOLE:LOG] [GameController] Save migration v8->v9 complete: MoraleEquilibrium initialised from SyntheticMorale for all competitors.
+[T:-1] [CONSOLE:LOG] [GameController] Save migration v9->v10 complete: Competitor Unification — real employees generated, product ownership migrated.
+[T:-1] [CONSOLE:LOG] [GameController] Save migration v10->v11 complete: Stale competitor salary recurring costs purged.
+[T:-1] [CONSOLE:LOG] [GameController] Ability data migration complete.
+[T:-1] [CONSOLE:LOG] [Tick 1400] Generated contract 'Jewellery Store' (ID: 1, Category: online_shops)
+[T:-1] [CONSOLE:LOG] [Tick 1400] Generated contract 'Shooter Game' (ID: 2, Category: games)
+[T:-1] [CONSOLE:LOG] [Tick 1400] Generated contract 'Banking App' (ID: 3, Category: mobile_apps)
+[T:-1] [CONSOLE:LOG] [Tick 1400] Generated contract 'Predictive Analytics' (ID: 4, Category: ai_features)
+[T:-1] [CONSOLE:LOG] [Tick 1400] Generated contract 'Electronics Shop' (ID: 5, Category: online_shops)
+[T:-1] [CONSOLE:LOG] Systems initialized
+[T:-1] [CONSOLE:LOG] [Hired] Jordan Payne (Developer) | Ability:125 PA:200 | LR:19 Cr:20 WE:15 A:19 Amb:17
+[T:-1] [CONSOLE:LOG] [Hired] Jennifer Turner (QAEngineer) | Ability:74 PA:101 | LR:5 Cr:12 WE:9 A:8 Amb:13
+[T:-1] [CONSOLE:LOG] [Hired] Keith Saito (Developer) | Ability:106 PA:153 | LR:8 Cr:9 WE:10 A:11 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Harper Yamamoto (Marketer) | Ability:101 PA:183 | LR:14 Cr:15 WE:14 A:10 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Samira Saito (Developer) | Ability:141 PA:178 | LR:9 Cr:12 WE:15 A:11 Amb:13
+[T:-1] [CONSOLE:LOG] [Hired] Amanda Collins (Developer) | Ability:77 PA:140 | LR:14 Cr:12 WE:9 A:10 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Lily Miller (Developer) | Ability:174 PA:200 | LR:14 Cr:10 WE:12 A:9 Amb:16
+[T:-1] [CONSOLE:LOG] [Hired] Liam Howard (Developer) | Ability:151 PA:174 | LR:14 Cr:14 WE:15 A:11 Amb:13
+[T:-1] [CONSOLE:LOG] [Hired] Chloe Volkov (QAEngineer) | Ability:176 PA:200 | LR:13 Cr:11 WE:13 A:10 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Charlotte Adams (QAEngineer) | Ability:49 PA:78 | LR:8 Cr:9 WE:9 A:3 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Zhen Popov (Developer) | Ability:45 PA:128 | LR:15 Cr:7 WE:9 A:12 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Isabella Morgan (QAEngineer) | Ability:161 PA:200 | LR:12 Cr:17 WE:12 A:14 Amb:15
+[T:-1] [CONSOLE:LOG] [Hired] Bo White (QAEngineer) | Ability:101 PA:109 | LR:13 Cr:9 WE:8 A:11 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Ming Mwangi (Developer) | Ability:40 PA:77 | LR:9 Cr:5 WE:9 A:5 Amb:6
+[T:-1] [CONSOLE:LOG] [Hired] Bo Shah (Developer) | Ability:83 PA:120 | LR:9 Cr:9 WE:15 A:8 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Amara Nwosu (Developer) | Ability:92 PA:119 | LR:10 Cr:6 WE:8 A:6 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Evelyn Price (Developer) | Ability:40 PA:52 | LR:10 Cr:11 WE:8 A:5 Amb:10
+[T:-1] [CONSOLE:LOG] [Hired] Patrick Flores (Developer) | Ability:153 PA:199 | LR:13 Cr:10 WE:14 A:15 Amb:16
+[T:-1] [CONSOLE:LOG] [Hired] Bryan Mwangi (QAEngineer) | Ability:79 PA:113 | LR:8 Cr:6 WE:13 A:4 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Santiago Williams (Developer) | Ability:84 PA:102 | LR:12 Cr:5 WE:13 A:9 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Martha Watanabe (Developer) | Ability:69 PA:96 | LR:9 Cr:7 WE:5 A:5 Amb:10
+[T:-1] [CONSOLE:LOG] [Hired] Katherine Ross (QAEngineer) | Ability:94 PA:114 | LR:11 Cr:11 WE:5 A:7 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Yuki Rogers (Designer) | Ability:138 PA:171 | LR:12 Cr:13 WE:8 A:8 Amb:10
+[T:-1] [CONSOLE:LOG] [Hired] Lin Jackson (VFXArtist) | Ability:151 PA:172 | LR:14 Cr:13 WE:9 A:11 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Sarah Mazur (Developer) | Ability:163 PA:191 | LR:16 Cr:15 WE:16 A:8 Amb:11
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 2 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 3 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 4 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 5 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 6 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 7 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 8 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 9 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 10 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 11 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 12 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 13 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 14 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 15 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 16 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 17 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 18 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 19 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 20 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 21 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 22 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 23 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 24 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 25 at 60
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Created in-dev product 'Monolith Engine' for 'Monolith Software' (releases tick 576000).
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 1, Type: Programming, Company: 1)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 2' (ID: 2, Type: Programming, Company: 1)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 3' (ID: 3, Type: Programming, Company: 1)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 4' (ID: 4, Type: Programming, Company: 1)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 5' (ID: 5, Type: Programming, Company: 1)
+[T:-1] [CONSOLE:LOG] Assigned employee 2 to team 'Programming' (ID: 1)
+[T:-1] [CONSOLE:LOG] Assigned employee 3 to team 'Programming 2' (ID: 2)
+[T:-1] [CONSOLE:LOG] Assigned employee 4 to team 'Programming 3' (ID: 3)
+[T:-1] [CONSOLE:LOG] Assigned employee 5 to team 'Programming 4' (ID: 4)
+[T:-1] [CONSOLE:LOG] Assigned employee 6 to team 'Programming 5' (ID: 5)
+[T:-1] [CONSOLE:LOG] Assigned employee 7 to team 'Programming' (ID: 1)
+[T:-1] [CONSOLE:LOG] Assigned employee 8 to team 'Programming 2' (ID: 2)
+[T:-1] [CONSOLE:LOG] Assigned employee 9 to team 'Programming 3' (ID: 3)
+[T:-1] [CONSOLE:LOG] Assigned employee 10 to team 'Programming 4' (ID: 4)
+[T:-1] [CONSOLE:LOG] Assigned employee 11 to team 'Programming 5' (ID: 5)
+[T:-1] [CONSOLE:LOG] Assigned employee 12 to team 'Programming' (ID: 1)
+[T:-1] [CONSOLE:LOG] Assigned employee 13 to team 'Programming 2' (ID: 2)
+[T:-1] [CONSOLE:LOG] Assigned employee 14 to team 'Programming 3' (ID: 3)
+[T:-1] [CONSOLE:LOG] Assigned employee 15 to team 'Programming 4' (ID: 4)
+[T:-1] [CONSOLE:LOG] Assigned employee 16 to team 'Programming 5' (ID: 5)
+[T:-1] [CONSOLE:LOG] Assigned employee 17 to team 'Programming' (ID: 1)
+[T:-1] [CONSOLE:LOG] Assigned employee 18 to team 'Programming 2' (ID: 2)
+[T:-1] [CONSOLE:LOG] Assigned employee 19 to team 'Programming 3' (ID: 3)
+[T:-1] [CONSOLE:LOG] Assigned employee 20 to team 'Programming 4' (ID: 4)
+[T:-1] [CONSOLE:LOG] Assigned employee 21 to team 'Programming 5' (ID: 5)
+[T:-1] [CONSOLE:LOG] Assigned employee 22 to team 'Programming' (ID: 1)
+[T:-1] [CONSOLE:LOG] Assigned employee 23 to team 'Programming 2' (ID: 2)
+[T:-1] [CONSOLE:LOG] Assigned employee 24 to team 'Programming 3' (ID: 3)
+[T:-1] [CONSOLE:LOG] Assigned employee 25 to team 'Programming 4' (ID: 4)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Initialized start competitor 'Monolith Software' (PlatformGiant).
+[T:-1] [CONSOLE:LOG] [Hired] Joe Okello (Marketer) | Ability:91 PA:108 | LR:14 Cr:9 WE:12 A:10 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Tyler Moore (QAEngineer) | Ability:42 PA:58 | LR:9 Cr:2 WE:11 A:7 Amb:5
+[T:-1] [CONSOLE:LOG] [Hired] Gary Kovalenko (Developer) | Ability:35 PA:40 | LR:4 Cr:9 WE:11 A:11 Amb:4
+[T:-1] [CONSOLE:LOG] [Hired] Yan Cruz (Marketer) | Ability:130 PA:159 | LR:14 Cr:6 WE:11 A:10 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Ming Adeyemi (VFXArtist) | Ability:100 PA:129 | LR:14 Cr:8 WE:13 A:11 Amb:5
+[T:-1] [CONSOLE:LOG] [Hired] Chioma Allen (Developer) | Ability:72 PA:132 | LR:12 Cr:15 WE:14 A:12 Amb:15
+[T:-1] [CONSOLE:LOG] [Hired] Saki Ortiz (Designer) | Ability:49 PA:91 | LR:13 Cr:13 WE:10 A:8 Amb:5
+[T:-1] [CONSOLE:LOG] [Hired] Leo Takahashi (Marketer) | Ability:113 PA:200 | LR:11 Cr:17 WE:12 A:13 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Ali Flores (QAEngineer) | Ability:137 PA:147 | LR:8 Cr:6 WE:9 A:9 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Tatiana Nguyen (QAEngineer) | Ability:34 PA:110 | LR:6 Cr:9 WE:8 A:11 Amb:4
+[T:-1] [CONSOLE:LOG] [Hired] Harold Edwards (Designer) | Ability:37 PA:43 | LR:8 Cr:8 WE:9 A:9 Amb:7
+[T:-1] [CONSOLE:LOG] [Hired] Yewande Peterson (VFXArtist) | Ability:41 PA:59 | LR:9 Cr:9 WE:3 A:12 Amb:10
+[T:-1] [CONSOLE:LOG] [Hired] Hiroshi Mensah (Designer) | Ability:52 PA:86 | LR:8 Cr:10 WE:10 A:6 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Alice Perez (QAEngineer) | Ability:56 PA:104 | LR:13 Cr:13 WE:11 A:6 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Diana Wright (QAEngineer) | Ability:107 PA:117 | LR:5 Cr:14 WE:5 A:12 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Isabel Nguyen (Developer) | Ability:65 PA:86 | LR:6 Cr:7 WE:7 A:7 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Brandon Thompson (VFXArtist) | Ability:110 PA:123 | LR:8 Cr:7 WE:7 A:7 Amb:11
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 26 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 27 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 28 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 29 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 30 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 31 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 32 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 33 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 34 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 35 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 36 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 37 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 38 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 39 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 40 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 41 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 42 at 60
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Created in-dev product 'PearByte Kit 2' for 'PearByte' (releases tick 720000).
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 6, Type: Programming, Company: 2)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 2' (ID: 7, Type: Programming, Company: 2)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 3' (ID: 8, Type: Programming, Company: 2)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 4' (ID: 9, Type: Programming, Company: 2)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 5' (ID: 10, Type: Programming, Company: 2)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 6' (ID: 11, Type: Programming, Company: 2)
+[T:-1] [CONSOLE:LOG] Assigned employee 26 to team 'Programming' (ID: 6)
+[T:-1] [CONSOLE:LOG] Assigned employee 27 to team 'Programming 2' (ID: 7)
+[T:-1] [CONSOLE:LOG] Assigned employee 28 to team 'Programming 3' (ID: 8)
+[T:-1] [CONSOLE:LOG] Assigned employee 29 to team 'Programming 4' (ID: 9)
+[T:-1] [CONSOLE:LOG] Assigned employee 30 to team 'Programming 5' (ID: 10)
+[T:-1] [CONSOLE:LOG] Assigned employee 31 to team 'Programming 6' (ID: 11)
+[T:-1] [CONSOLE:LOG] Assigned employee 32 to team 'Programming' (ID: 6)
+[T:-1] [CONSOLE:LOG] Assigned employee 33 to team 'Programming 2' (ID: 7)
+[T:-1] [CONSOLE:LOG] Assigned employee 34 to team 'Programming 3' (ID: 8)
+[T:-1] [CONSOLE:LOG] Assigned employee 35 to team 'Programming 4' (ID: 9)
+[T:-1] [CONSOLE:LOG] Assigned employee 36 to team 'Programming 5' (ID: 10)
+[T:-1] [CONSOLE:LOG] Assigned employee 37 to team 'Programming 6' (ID: 11)
+[T:-1] [CONSOLE:LOG] Assigned employee 38 to team 'Programming' (ID: 6)
+[T:-1] [CONSOLE:LOG] Assigned employee 39 to team 'Programming 2' (ID: 7)
+[T:-1] [CONSOLE:LOG] Assigned employee 40 to team 'Programming 3' (ID: 8)
+[T:-1] [CONSOLE:LOG] Assigned employee 41 to team 'Programming 4' (ID: 9)
+[T:-1] [CONSOLE:LOG] Assigned employee 42 to team 'Programming 5' (ID: 10)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Initialized start competitor 'PearByte' (FullStack).
+[T:-1] [CONSOLE:LOG] [Hired] Chioma Turner (QAEngineer) | Ability:142 PA:200 | LR:11 Cr:12 WE:13 A:16 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Imani Nwosu (Developer) | Ability:130 PA:194 | LR:12 Cr:11 WE:13 A:10 Amb:14
+[T:-1] [CONSOLE:LOG] [Hired] Arthur Morgan (Developer) | Ability:49 PA:79 | LR:3 Cr:9 WE:8 A:9 Amb:10
+[T:-1] [CONSOLE:LOG] [Hired] Xavier Cox (Developer) | Ability:135 PA:146 | LR:11 Cr:14 WE:8 A:14 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Kenneth Martinez (Developer) | Ability:83 PA:97 | LR:8 Cr:9 WE:11 A:10 Amb:10
+[T:-1] [CONSOLE:LOG] [Hired] Fang Stewart (QAEngineer) | Ability:56 PA:76 | LR:6 Cr:10 WE:5 A:3 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Christopher Yamamoto (Developer) | Ability:134 PA:160 | LR:10 Cr:10 WE:14 A:8 Amb:10
+[T:-1] [CONSOLE:LOG] [Hired] Catherine Popov (Developer) | Ability:67 PA:93 | LR:11 Cr:3 WE:11 A:9 Amb:14
+[T:-1] [CONSOLE:LOG] [Hired] Emily Jackson (Developer) | Ability:172 PA:200 | LR:15 Cr:9 WE:14 A:11 Amb:15
+[T:-1] [CONSOLE:LOG] [Hired] Yasmin Peterson (Developer) | Ability:70 PA:96 | LR:4 Cr:10 WE:10 A:6 Amb:14
+[T:-1] [CONSOLE:LOG] [Hired] Stefano Watanabe (Developer) | Ability:177 PA:200 | LR:11 Cr:11 WE:15 A:10 Amb:15
+[T:-1] [CONSOLE:LOG] [Hired] Elena Lee (QAEngineer) | Ability:135 PA:137 | LR:9 Cr:9 WE:8 A:12 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Henry Liu (Designer) | Ability:42 PA:50 | LR:3 Cr:8 WE:7 A:5 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Betty Miller (Developer) | Ability:41 PA:82 | LR:11 Cr:4 WE:9 A:11 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Julie Watanabe (Developer) | Ability:142 PA:168 | LR:14 Cr:11 WE:13 A:11 Amb:15
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 43 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 44 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 45 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 46 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 47 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 48 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 49 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 50 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 51 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 52 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 53 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 54 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 55 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 56 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 57 at 60
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 12, Type: Programming, Company: 3)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 2' (ID: 13, Type: Programming, Company: 3)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 3' (ID: 14, Type: Programming, Company: 3)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 4' (ID: 15, Type: Programming, Company: 3)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 5' (ID: 16, Type: Programming, Company: 3)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 6' (ID: 17, Type: Programming, Company: 3)
+[T:-1] [CONSOLE:LOG] Assigned employee 43 to team 'Programming' (ID: 12)
+[T:-1] [CONSOLE:LOG] Assigned employee 44 to team 'Programming 2' (ID: 13)
+[T:-1] [CONSOLE:LOG] Assigned employee 45 to team 'Programming 3' (ID: 14)
+[T:-1] [CONSOLE:LOG] Assigned employee 46 to team 'Programming 4' (ID: 15)
+[T:-1] [CONSOLE:LOG] Assigned employee 47 to team 'Programming 5' (ID: 16)
+[T:-1] [CONSOLE:LOG] Assigned employee 48 to team 'Programming 6' (ID: 17)
+[T:-1] [CONSOLE:LOG] Assigned employee 49 to team 'Programming' (ID: 12)
+[T:-1] [CONSOLE:LOG] Assigned employee 50 to team 'Programming 2' (ID: 13)
+[T:-1] [CONSOLE:LOG] Assigned employee 51 to team 'Programming 3' (ID: 14)
+[T:-1] [CONSOLE:LOG] Assigned employee 52 to team 'Programming 4' (ID: 15)
+[T:-1] [CONSOLE:LOG] Assigned employee 53 to team 'Programming 5' (ID: 16)
+[T:-1] [CONSOLE:LOG] Assigned employee 54 to team 'Programming 6' (ID: 17)
+[T:-1] [CONSOLE:LOG] Assigned employee 55 to team 'Programming' (ID: 12)
+[T:-1] [CONSOLE:LOG] Assigned employee 56 to team 'Programming 2' (ID: 13)
+[T:-1] [CONSOLE:LOG] Assigned employee 57 to team 'Programming 3' (ID: 14)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Initialized start competitor 'FreeForge Foundation' (ToolMaker).
+[T:-1] [CONSOLE:LOG] [Hired] Sarah Lewis (SoundEngineer) | Ability:177 PA:200 | LR:14 Cr:15 WE:14 A:16 Amb:14
+[T:-1] [CONSOLE:LOG] [Hired] Colin Takahashi (VFXArtist) | Ability:114 PA:200 | LR:11 Cr:12 WE:12 A:14 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Douglas Ito (Developer) | Ability:33 PA:45 | LR:3 Cr:8 WE:5 A:5 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Andrew Young (Designer) | Ability:44 PA:49 | LR:5 Cr:8 WE:11 A:8 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Hannah Volkov (Developer) | Ability:38 PA:123 | LR:9 Cr:8 WE:7 A:15 Amb:5
+[T:-1] [CONSOLE:LOG] [Hired] Aaron Desai (QAEngineer) | Ability:169 PA:200 | LR:13 Cr:14 WE:14 A:16 Amb:13
+[T:-1] [CONSOLE:LOG] [Hired] Jean Okafor (Designer) | Ability:35 PA:45 | LR:11 Cr:10 WE:6 A:9 Amb:8
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 58 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 59 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 60 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 61 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 62 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 63 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 64 at 60
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Created in-dev product 'ArcadeVault Striker' for 'ArcadeVault' (releases tick 720000).
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 18, Type: Programming, Company: 4)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 2' (ID: 19, Type: Programming, Company: 4)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 3' (ID: 20, Type: Programming, Company: 4)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 4' (ID: 21, Type: Programming, Company: 4)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 5' (ID: 22, Type: Programming, Company: 4)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 6' (ID: 23, Type: Programming, Company: 4)
+[T:-1] [CONSOLE:LOG] Assigned employee 58 to team 'Programming' (ID: 18)
+[T:-1] [CONSOLE:LOG] Assigned employee 59 to team 'Programming 2' (ID: 19)
+[T:-1] [CONSOLE:LOG] Assigned employee 60 to team 'Programming 3' (ID: 20)
+[T:-1] [CONSOLE:LOG] Assigned employee 61 to team 'Programming 4' (ID: 21)
+[T:-1] [CONSOLE:LOG] Assigned employee 62 to team 'Programming 5' (ID: 22)
+[T:-1] [CONSOLE:LOG] Assigned employee 63 to team 'Programming 6' (ID: 23)
+[T:-1] [CONSOLE:LOG] Assigned employee 64 to team 'Programming' (ID: 18)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Initialized start competitor 'ArcadeVault' (GameStudio).
+[T:-1] [CONSOLE:LOG] [Hired] William Hernandez (Designer) | Ability:136 PA:152 | LR:7 Cr:8 WE:12 A:7 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Lin Perez (SoundEngineer) | Ability:39 PA:64 | LR:11 Cr:4 WE:3 A:4 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Ming Abubakar (Designer) | Ability:51 PA:80 | LR:12 Cr:8 WE:9 A:13 Amb:13
+[T:-1] [CONSOLE:LOG] [Hired] Dominic Long (SoundEngineer) | Ability:49 PA:73 | LR:11 Cr:8 WE:7 A:3 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Lars Castillo (Developer) | Ability:42 PA:140 | LR:9 Cr:9 WE:13 A:7 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Kelly Mendoza (Marketer) | Ability:90 PA:145 | LR:7 Cr:7 WE:9 A:9 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Melissa Mensah (QAEngineer) | Ability:180 PA:199 | LR:13 Cr:8 WE:12 A:16 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Caleb Garcia (SoundEngineer) | Ability:42 PA:87 | LR:5 Cr:10 WE:6 A:7 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Qian Stewart (VFXArtist) | Ability:39 PA:42 | LR:4 Cr:7 WE:10 A:6 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Aaron Mitchell (Marketer) | Ability:120 PA:149 | LR:11 Cr:13 WE:13 A:7 Amb:7
+[T:-1] [CONSOLE:LOG] [Hired] Stella Osei (Designer) | Ability:46 PA:71 | LR:11 Cr:10 WE:8 A:5 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Lauren Wang (QAEngineer) | Ability:42 PA:61 | LR:11 Cr:7 WE:11 A:10 Amb:6
+[T:-1] [CONSOLE:LOG] [Hired] Leo Hernandez (Designer) | Ability:102 PA:138 | LR:5 Cr:11 WE:7 A:11 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Fernanda Baker (Developer) | Ability:64 PA:95 | LR:9 Cr:4 WE:7 A:12 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Timothy Adams (Designer) | Ability:36 PA:102 | LR:11 Cr:12 WE:7 A:13 Amb:14
+[T:-1] [CONSOLE:LOG] [Hired] Melissa Wu (VFXArtist) | Ability:170 PA:200 | LR:11 Cr:17 WE:15 A:12 Amb:16
+[T:-1] [CONSOLE:LOG] [Hired] Mary Parker (Developer) | Ability:106 PA:154 | LR:13 Cr:12 WE:7 A:10 Amb:15
+[T:-1] [CONSOLE:LOG] [Hired] Keith Reyes (Marketer) | Ability:81 PA:104 | LR:7 Cr:7 WE:8 A:12 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Amelia Davis (Developer) | Ability:35 PA:123 | LR:14 Cr:10 WE:10 A:6 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Samira Stewart (Developer) | Ability:39 PA:63 | LR:10 Cr:10 WE:9 A:7 Amb:4
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 65 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 66 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 67 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 68 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 69 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 70 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 71 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 72 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 73 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 74 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 75 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 76 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 77 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 78 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 79 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 80 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 81 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 82 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 83 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 84 at 60
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Created in-dev product 'VoltEdge Nexus' for 'VoltEdge' (releases tick 432000).
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 24, Type: Programming, Company: 5)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 2' (ID: 25, Type: Programming, Company: 5)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 3' (ID: 26, Type: Programming, Company: 5)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 4' (ID: 27, Type: Programming, Company: 5)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 5' (ID: 28, Type: Programming, Company: 5)
+[T:-1] [CONSOLE:LOG] Assigned employee 65 to team 'Programming' (ID: 24)
+[T:-1] [CONSOLE:LOG] Assigned employee 66 to team 'Programming 2' (ID: 25)
+[T:-1] [CONSOLE:LOG] Assigned employee 67 to team 'Programming 3' (ID: 26)
+[T:-1] [CONSOLE:LOG] Assigned employee 68 to team 'Programming 4' (ID: 27)
+[T:-1] [CONSOLE:LOG] Assigned employee 69 to team 'Programming 5' (ID: 28)
+[T:-1] [CONSOLE:LOG] Assigned employee 70 to team 'Programming' (ID: 24)
+[T:-1] [CONSOLE:LOG] Assigned employee 71 to team 'Programming 2' (ID: 25)
+[T:-1] [CONSOLE:LOG] Assigned employee 72 to team 'Programming 3' (ID: 26)
+[T:-1] [CONSOLE:LOG] Assigned employee 73 to team 'Programming 4' (ID: 27)
+[T:-1] [CONSOLE:LOG] Assigned employee 74 to team 'Programming 5' (ID: 28)
+[T:-1] [CONSOLE:LOG] Assigned employee 75 to team 'Programming' (ID: 24)
+[T:-1] [CONSOLE:LOG] Assigned employee 76 to team 'Programming 2' (ID: 25)
+[T:-1] [CONSOLE:LOG] Assigned employee 77 to team 'Programming 3' (ID: 26)
+[T:-1] [CONSOLE:LOG] Assigned employee 78 to team 'Programming 4' (ID: 27)
+[T:-1] [CONSOLE:LOG] Assigned employee 79 to team 'Programming 5' (ID: 28)
+[T:-1] [CONSOLE:LOG] Assigned employee 80 to team 'Programming' (ID: 24)
+[T:-1] [CONSOLE:LOG] Assigned employee 81 to team 'Programming 2' (ID: 25)
+[T:-1] [CONSOLE:LOG] Assigned employee 82 to team 'Programming 3' (ID: 26)
+[T:-1] [CONSOLE:LOG] Assigned employee 83 to team 'Programming 4' (ID: 27)
+[T:-1] [CONSOLE:LOG] Assigned employee 84 to team 'Programming 5' (ID: 28)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Initialized start competitor 'VoltEdge' (FullStack).
+[T:-1] [CONSOLE:LOG] [Hired] Connor Chavez (Designer) | Ability:42 PA:51 | LR:9 Cr:12 WE:5 A:4 Amb:4
+[T:-1] [CONSOLE:LOG] [Hired] Fernanda Zhao (VFXArtist) | Ability:62 PA:73 | LR:11 Cr:5 WE:8 A:3 Amb:7
+[T:-1] [CONSOLE:LOG] [Hired] Imani Gomez (QAEngineer) | Ability:52 PA:74 | LR:3 Cr:10 WE:6 A:7 Amb:5
+[T:-1] [CONSOLE:LOG] [Hired] Abigail Liu (Designer) | Ability:71 PA:103 | LR:14 Cr:5 WE:13 A:13 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Thomas Kim (Developer) | Ability:42 PA:77 | LR:2 Cr:3 WE:10 A:12 Amb:8
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 85 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 86 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 87 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 88 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 89 at 60
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Created in-dev product 'Hollowscape' for 'Dread Engine Studios' (releases tick 576000).
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 29, Type: Programming, Company: 6)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 2' (ID: 30, Type: Programming, Company: 6)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 3' (ID: 31, Type: Programming, Company: 6)
+[T:-1] [CONSOLE:LOG] Assigned employee 85 to team 'Programming' (ID: 29)
+[T:-1] [CONSOLE:LOG] Assigned employee 86 to team 'Programming 2' (ID: 30)
+[T:-1] [CONSOLE:LOG] Assigned employee 87 to team 'Programming 3' (ID: 31)
+[T:-1] [CONSOLE:LOG] Assigned employee 88 to team 'Programming' (ID: 29)
+[T:-1] [CONSOLE:LOG] Assigned employee 89 to team 'Programming 2' (ID: 30)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Initialized start competitor 'Dread Engine Studios' (IndieStudio).
+[T:-1] [CONSOLE:LOG] [Hired] Mei Adams (Designer) | Ability:25 PA:25 | LR:8 Cr:9 WE:2 A:11 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Zhen Bailey (Developer) | Ability:92 PA:111 | LR:11 Cr:12 WE:11 A:8 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Susan Wilson (Designer) | Ability:105 PA:147 | LR:14 Cr:10 WE:9 A:11 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Freya Wood (QAEngineer) | Ability:67 PA:118 | LR:7 Cr:7 WE:11 A:10 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Valentina Ortiz (Marketer) | Ability:101 PA:137 | LR:11 Cr:12 WE:9 A:9 Amb:15
+[T:-1] [CONSOLE:LOG] [Hired] Sunita Gonzalez (Developer) | Ability:77 PA:110 | LR:11 Cr:5 WE:9 A:6 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Judith Walker (VFXArtist) | Ability:36 PA:48 | LR:7 Cr:11 WE:4 A:7 Amb:4
+[T:-1] [CONSOLE:LOG] [Hired] Oscar Bennett (Marketer) | Ability:46 PA:60 | LR:8 Cr:3 WE:5 A:5 Amb:13
+[T:-1] [CONSOLE:LOG] [Hired] Sergio Thompson (QAEngineer) | Ability:71 PA:178 | LR:8 Cr:7 WE:13 A:8 Amb:15
+[T:-1] [CONSOLE:LOG] [Hired] Hassan Petrov (Developer) | Ability:77 PA:116 | LR:12 Cr:10 WE:13 A:13 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Amit Novak (Developer) | Ability:96 PA:128 | LR:11 Cr:7 WE:14 A:10 Amb:7
+[T:-1] [CONSOLE:LOG] [Hired] Logan Lewis (VFXArtist) | Ability:71 PA:141 | LR:11 Cr:14 WE:10 A:7 Amb:7
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 90 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 91 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 92 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 93 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 94 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 95 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 96 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 97 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 98 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 99 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 100 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 101 at 60
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Created in-dev product 'Pinnacle Striker 27' for 'Pinnacle Games' (releases tick 864000).
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 32, Type: Programming, Company: 7)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 2' (ID: 33, Type: Programming, Company: 7)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 3' (ID: 34, Type: Programming, Company: 7)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 4' (ID: 35, Type: Programming, Company: 7)
+[T:-1] [CONSOLE:LOG] Assigned employee 90 to team 'Programming' (ID: 32)
+[T:-1] [CONSOLE:LOG] Assigned employee 91 to team 'Programming 2' (ID: 33)
+[T:-1] [CONSOLE:LOG] Assigned employee 92 to team 'Programming 3' (ID: 34)
+[T:-1] [CONSOLE:LOG] Assigned employee 93 to team 'Programming 4' (ID: 35)
+[T:-1] [CONSOLE:LOG] Assigned employee 94 to team 'Programming' (ID: 32)
+[T:-1] [CONSOLE:LOG] Assigned employee 95 to team 'Programming 2' (ID: 33)
+[T:-1] [CONSOLE:LOG] Assigned employee 96 to team 'Programming 3' (ID: 34)
+[T:-1] [CONSOLE:LOG] Assigned employee 97 to team 'Programming 4' (ID: 35)
+[T:-1] [CONSOLE:LOG] Assigned employee 98 to team 'Programming' (ID: 32)
+[T:-1] [CONSOLE:LOG] Assigned employee 99 to team 'Programming 2' (ID: 33)
+[T:-1] [CONSOLE:LOG] Assigned employee 100 to team 'Programming 3' (ID: 34)
+[T:-1] [CONSOLE:LOG] Assigned employee 101 to team 'Programming 4' (ID: 35)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Initialized start competitor 'Pinnacle Games' (AAAPublisher).
+[T:-1] [CONSOLE:LOG] [Hired] Eleanor Roberts (Developer) | Ability:68 PA:90 | LR:7 Cr:8 WE:11 A:10 Amb:6
+[T:-1] [CONSOLE:LOG] [Hired] Ann Kuznetsov (Developer) | Ability:60 PA:67 | LR:11 Cr:10 WE:9 A:6 Amb:5
+[T:-1] [CONSOLE:LOG] [Hired] Arthur Lewis (Developer) | Ability:93 PA:151 | LR:7 Cr:14 WE:7 A:9 Amb:13
+[T:-1] [CONSOLE:LOG] [Hired] Matteo Desai (Developer) | Ability:34 PA:35 | LR:3 Cr:8 WE:3 A:7 Amb:4
+[T:-1] [CONSOLE:LOG] [Hired] Dominic Jimenez (Designer) | Ability:135 PA:173 | LR:9 Cr:8 WE:14 A:12 Amb:13
+[T:-1] [CONSOLE:LOG] [Hired] Nancy Thompson (Designer) | Ability:56 PA:68 | LR:4 Cr:7 WE:5 A:10 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Patricia Gomez (Marketer) | Ability:50 PA:68 | LR:9 Cr:6 WE:2 A:4 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Tommaso Reed (Developer) | Ability:51 PA:134 | LR:8 Cr:6 WE:11 A:12 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Yewande Jones (Developer) | Ability:74 PA:96 | LR:13 Cr:8 WE:9 A:7 Amb:7
+[T:-1] [CONSOLE:LOG] [Hired] Elizabeth Scott (Designer) | Ability:51 PA:60 | LR:4 Cr:9 WE:9 A:7 Amb:10
+[T:-1] [CONSOLE:LOG] [Hired] Teresa Myers (QAEngineer) | Ability:150 PA:179 | LR:10 Cr:12 WE:12 A:13 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Laura Sokolov (QAEngineer) | Ability:47 PA:83 | LR:5 Cr:9 WE:12 A:9 Amb:12
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 102 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 103 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 104 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 105 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 106 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 107 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 108 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 109 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 110 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 111 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 112 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 113 at 60
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Created in-dev product 'Colony Prime' for 'Wanderlust Interactive' (releases tick 720000).
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 36, Type: Programming, Company: 8)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 2' (ID: 37, Type: Programming, Company: 8)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 3' (ID: 38, Type: Programming, Company: 8)
+[T:-1] [CONSOLE:LOG] Assigned employee 102 to team 'Programming' (ID: 36)
+[T:-1] [CONSOLE:LOG] Assigned employee 103 to team 'Programming 2' (ID: 37)
+[T:-1] [CONSOLE:LOG] Assigned employee 104 to team 'Programming 3' (ID: 38)
+[T:-1] [CONSOLE:LOG] Assigned employee 105 to team 'Programming' (ID: 36)
+[T:-1] [CONSOLE:LOG] Assigned employee 106 to team 'Programming 2' (ID: 37)
+[T:-1] [CONSOLE:LOG] Assigned employee 107 to team 'Programming 3' (ID: 38)
+[T:-1] [CONSOLE:LOG] Assigned employee 108 to team 'Programming' (ID: 36)
+[T:-1] [CONSOLE:LOG] Assigned employee 109 to team 'Programming 2' (ID: 37)
+[T:-1] [CONSOLE:LOG] Assigned employee 110 to team 'Programming 3' (ID: 38)
+[T:-1] [CONSOLE:LOG] Assigned employee 111 to team 'Programming' (ID: 36)
+[T:-1] [CONSOLE:LOG] Assigned employee 112 to team 'Programming 2' (ID: 37)
+[T:-1] [CONSOLE:LOG] Assigned employee 113 to team 'Programming 3' (ID: 38)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Initialized start competitor 'Wanderlust Interactive' (IndieStudio).
+[T:-1] [CONSOLE:LOG] [Hired] Patricia Richardson (Developer) | Ability:52 PA:138 | LR:8 Cr:8 WE:14 A:8 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Yui Sanchez (Developer) | Ability:138 PA:157 | LR:14 Cr:9 WE:6 A:9 Amb:13
+[T:-1] [CONSOLE:LOG] [Hired] Emma Clark (QAEngineer) | Ability:128 PA:146 | LR:10 Cr:12 WE:13 A:8 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Deepak Mwangi (Developer) | Ability:93 PA:169 | LR:10 Cr:11 WE:15 A:14 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Karim Ross (QAEngineer) | Ability:97 PA:117 | LR:6 Cr:13 WE:12 A:8 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Steven Jackson (Developer) | Ability:116 PA:158 | LR:9 Cr:7 WE:15 A:9 Amb:13
+[T:-1] [CONSOLE:LOG] [Hired] Sigrid Bennett (SoundEngineer) | Ability:81 PA:133 | LR:7 Cr:11 WE:11 A:13 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Alejandra Sanders (Developer) | Ability:92 PA:124 | LR:13 Cr:14 WE:8 A:13 Amb:14
+[T:-1] [CONSOLE:LOG] [Hired] Peter Chen (SoundEngineer) | Ability:82 PA:119 | LR:7 Cr:10 WE:4 A:12 Amb:6
+[T:-1] [CONSOLE:LOG] [Hired] Rahul Kobayashi (QAEngineer) | Ability:92 PA:99 | LR:9 Cr:6 WE:12 A:12 Amb:7
+[T:-1] [CONSOLE:LOG] [Hired] Ella Singh (Designer) | Ability:198 PA:200 | LR:10 Cr:16 WE:14 A:14 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Ali Wright (Designer) | Ability:181 PA:200 | LR:17 Cr:10 WE:17 A:12 Amb:15
+[T:-1] [CONSOLE:LOG] [Hired] Michelle Myers (Marketer) | Ability:126 PA:173 | LR:14 Cr:7 WE:7 A:14 Amb:14
+[T:-1] [CONSOLE:LOG] [Hired] Ren Suzuki (Developer) | Ability:101 PA:145 | LR:14 Cr:10 WE:13 A:11 Amb:6
+[T:-1] [CONSOLE:LOG] [Hired] Claudia Jimenez (QAEngineer) | Ability:67 PA:90 | LR:13 Cr:14 WE:12 A:10 Amb:6
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Relay Dynamics instant-shipped 'Asphalt Rally' (quality: 70.4, revenue: 0).
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 114 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 115 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 116 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 117 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 118 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 119 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 120 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 121 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 122 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 123 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 124 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 125 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 126 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 127 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 128 at 60
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 39, Type: Programming, Company: 9)
+[T:-1] [CONSOLE:LOG] Assigned employee 114 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 115 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 116 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 117 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 118 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 119 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 120 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 121 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 122 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 123 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 124 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 125 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 126 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 127 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] Assigned employee 128 to team 'Programming' (ID: 39)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Spawned competitor 'Relay Dynamics' (PlatformGiant) at tick 0.
+[T:-1] [CONSOLE:LOG] [Hired] Deborah Rogers (Developer) | Ability:69 PA:90 | LR:12 Cr:7 WE:7 A:11 Amb:6
+[T:-1] [CONSOLE:LOG] [Hired] Jessica Anderson (Developer) | Ability:93 PA:111 | LR:11 Cr:7 WE:6 A:9 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Dennis Okafor (Developer) | Ability:94 PA:133 | LR:11 Cr:14 WE:7 A:14 Amb:10
+[T:-1] [CONSOLE:LOG] [Hired] Liang Alvarez (SoundEngineer) | Ability:181 PA:195 | LR:12 Cr:12 WE:12 A:12 Amb:10
+[T:-1] [CONSOLE:LOG] [Hired] Stella Zhao (Developer) | Ability:97 PA:117 | LR:8 Cr:9 WE:14 A:6 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Eleanor Watson (Designer) | Ability:58 PA:132 | LR:10 Cr:6 WE:12 A:8 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Oleg Wood (Developer) | Ability:42 PA:90 | LR:3 Cr:4 WE:8 A:8 Amb:6
+[T:-1] [CONSOLE:LOG] [Hired] Mariana Mitchell (Developer) | Ability:46 PA:85 | LR:8 Cr:5 WE:5 A:12 Amb:13
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] OrbitDynamics instant-shipped 'Open Realm' (quality: 50.1, revenue: 0).
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 129 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 130 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 131 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 132 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 133 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 134 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 135 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 136 at 60
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 40, Type: Programming, Company: 10)
+[T:-1] [CONSOLE:LOG] Assigned employee 129 to team 'Programming' (ID: 40)
+[T:-1] [CONSOLE:LOG] Assigned employee 130 to team 'Programming' (ID: 40)
+[T:-1] [CONSOLE:LOG] Assigned employee 131 to team 'Programming' (ID: 40)
+[T:-1] [CONSOLE:LOG] Assigned employee 132 to team 'Programming' (ID: 40)
+[T:-1] [CONSOLE:LOG] Assigned employee 133 to team 'Programming' (ID: 40)
+[T:-1] [CONSOLE:LOG] Assigned employee 134 to team 'Programming' (ID: 40)
+[T:-1] [CONSOLE:LOG] Assigned employee 135 to team 'Programming' (ID: 40)
+[T:-1] [CONSOLE:LOG] Assigned employee 136 to team 'Programming' (ID: 40)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Spawned competitor 'OrbitDynamics' (IndieStudio) at tick 0.
+[T:-1] [CONSOLE:LOG] [Hired] Maria Lee (QAEngineer) | Ability:33 PA:40 | LR:12 Cr:4 WE:10 A:6 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Gustaf Chen (Developer) | Ability:87 PA:119 | LR:8 Cr:5 WE:8 A:11 Amb:7
+[T:-1] [CONSOLE:LOG] [Hired] Matteo Allen (Designer) | Ability:145 PA:180 | LR:12 Cr:11 WE:14 A:10 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Ali Anderson (Developer) | Ability:49 PA:57 | LR:10 Cr:8 WE:4 A:2 Amb:1
+[T:-1] [CONSOLE:LOG] [Hired] Lakshmi Wang (SoundEngineer) | Ability:37 PA:49 | LR:10 Cr:12 WE:10 A:5 Amb:7
+[T:-1] [CONSOLE:LOG] [Hired] Mason Kovalenko (Marketer) | Ability:66 PA:93 | LR:9 Cr:8 WE:6 A:8 Amb:7
+[T:-1] [CONSOLE:LOG] [Hired] Marco Hill (Developer) | Ability:33 PA:38 | LR:5 Cr:11 WE:8 A:3 Amb:1
+[T:-1] [CONSOLE:LOG] [Hired] Tommaso Sanchez (Designer) | Ability:60 PA:81 | LR:8 Cr:4 WE:6 A:5 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Hazel Mazur (Developer) | Ability:172 PA:200 | LR:12 Cr:11 WE:12 A:13 Amb:17
+[T:-1] [CONSOLE:LOG] [Hired] Nicholas Phillips (Developer) | Ability:37 PA:46 | LR:12 Cr:12 WE:4 A:2 Amb:9
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Dylan Ross's Software instant-shipped 'Prism Loop' (quality: 58.8, revenue: 0).
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 137 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 138 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 139 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 140 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 141 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 142 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 143 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 144 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 145 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 146 at 60
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 41, Type: Programming, Company: 11)
+[T:-1] [CONSOLE:LOG] Assigned employee 137 to team 'Programming' (ID: 41)
+[T:-1] [CONSOLE:LOG] Assigned employee 138 to team 'Programming' (ID: 41)
+[T:-1] [CONSOLE:LOG] Assigned employee 139 to team 'Programming' (ID: 41)
+[T:-1] [CONSOLE:LOG] Assigned employee 140 to team 'Programming' (ID: 41)
+[T:-1] [CONSOLE:LOG] Assigned employee 141 to team 'Programming' (ID: 41)
+[T:-1] [CONSOLE:LOG] Assigned employee 142 to team 'Programming' (ID: 41)
+[T:-1] [CONSOLE:LOG] Assigned employee 143 to team 'Programming' (ID: 41)
+[T:-1] [CONSOLE:LOG] Assigned employee 144 to team 'Programming' (ID: 41)
+[T:-1] [CONSOLE:LOG] Assigned employee 145 to team 'Programming' (ID: 41)
+[T:-1] [CONSOLE:LOG] Assigned employee 146 to team 'Programming' (ID: 41)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Spawned competitor 'Dylan Ross's Software' (GameStudio) at tick 0.
+[T:-1] [CONSOLE:LOG] [Hired] Ruth Gupta (QAEngineer) | Ability:46 PA:70 | LR:5 Cr:5 WE:8 A:4 Amb:6
+[T:-1] [CONSOLE:LOG] [Hired] Amara Rao (Designer) | Ability:104 PA:151 | LR:7 Cr:9 WE:7 A:9 Amb:13
+[T:-1] [CONSOLE:LOG] [Hired] Rahul Watanabe (VFXArtist) | Ability:36 PA:36 | LR:4 Cr:6 WE:4 A:6 Amb:6
+[T:-1] [CONSOLE:LOG] [Hired] Lei Nwosu (VFXArtist) | Ability:138 PA:177 | LR:13 Cr:7 WE:10 A:13 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Ann Okafor (Developer) | Ability:44 PA:58 | LR:4 Cr:8 WE:11 A:8 Amb:4
+[T:-1] [CONSOLE:LOG] [Hired] Pablo Zhang (VFXArtist) | Ability:98 PA:189 | LR:13 Cr:11 WE:13 A:9 Amb:13
+[T:-1] [CONSOLE:LOG] [Hired] Stephen Garcia (Developer) | Ability:108 PA:170 | LR:11 Cr:14 WE:8 A:14 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Rebecca Cook (Developer) | Ability:35 PA:53 | LR:8 Cr:6 WE:2 A:3 Amb:7
+[T:-1] [CONSOLE:LOG] [Hired] Nia Zhang (Designer) | Ability:75 PA:167 | LR:11 Cr:11 WE:16 A:10 Amb:15
+[T:-1] [CONSOLE:LOG] [Hired] Yewande King (Developer) | Ability:86 PA:168 | LR:8 Cr:9 WE:7 A:10 Amb:9
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Magnus Nakamura's Software instant-shipped 'Grim Echo' (quality: 59.9, revenue: 0).
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Magnus Nakamura's Software instant-shipped 'Drift Mile' (quality: 58.2, revenue: 0).
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 147 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 148 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 149 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 150 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 151 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 152 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 153 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 154 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 155 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 156 at 60
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 42, Type: Programming, Company: 12)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 2' (ID: 43, Type: Programming, Company: 12)
+[T:-1] [CONSOLE:LOG] Assigned employee 147 to team 'Programming' (ID: 42)
+[T:-1] [CONSOLE:LOG] Assigned employee 148 to team 'Programming 2' (ID: 43)
+[T:-1] [CONSOLE:LOG] Assigned employee 149 to team 'Programming' (ID: 42)
+[T:-1] [CONSOLE:LOG] Assigned employee 150 to team 'Programming 2' (ID: 43)
+[T:-1] [CONSOLE:LOG] Assigned employee 151 to team 'Programming' (ID: 42)
+[T:-1] [CONSOLE:LOG] Assigned employee 152 to team 'Programming 2' (ID: 43)
+[T:-1] [CONSOLE:LOG] Assigned employee 153 to team 'Programming' (ID: 42)
+[T:-1] [CONSOLE:LOG] Assigned employee 154 to team 'Programming 2' (ID: 43)
+[T:-1] [CONSOLE:LOG] Assigned employee 155 to team 'Programming' (ID: 42)
+[T:-1] [CONSOLE:LOG] Assigned employee 156 to team 'Programming 2' (ID: 43)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Spawned competitor 'Magnus Nakamura's Software' (GameStudio) at tick 0.
+[T:-1] [CONSOLE:LOG] [Hired] Nils Cox (Marketer) | Ability:38 PA:60 | LR:8 Cr:4 WE:13 A:12 Amb:4
+[T:-1] [CONSOLE:LOG] [Hired] Meera Murphy (Developer) | Ability:90 PA:197 | LR:14 Cr:8 WE:13 A:12 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Kofi Wang (QAEngineer) | Ability:56 PA:70 | LR:5 Cr:10 WE:11 A:10 Amb:5
+[T:-1] [CONSOLE:LOG] [Hired] Ricardo Parker (Developer) | Ability:46 PA:52 | LR:7 Cr:6 WE:6 A:10 Amb:6
+[T:-1] [CONSOLE:LOG] [Hired] Vera Nwosu (VFXArtist) | Ability:52 PA:52 | LR:5 Cr:11 WE:4 A:7 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Andrew Horvat (Developer) | Ability:51 PA:73 | LR:6 Cr:3 WE:6 A:8 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Samuel Kapoor (Developer) | Ability:53 PA:151 | LR:15 Cr:9 WE:13 A:8 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Aiko Kim (Developer) | Ability:119 PA:179 | LR:12 Cr:15 WE:12 A:13 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Elsa Flores (QAEngineer) | Ability:71 PA:130 | LR:12 Cr:9 WE:13 A:9 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Christina Cooper (Developer) | Ability:34 PA:99 | LR:8 Cr:6 WE:11 A:12 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Joshua Gray (Developer) | Ability:79 PA:93 | LR:6 Cr:5 WE:5 A:7 Amb:7
+[T:-1] [CONSOLE:LOG] [Hired] Emma Adeyemi (Developer) | Ability:89 PA:123 | LR:11 Cr:10 WE:9 A:12 Amb:14
+[T:-1] [CONSOLE:LOG] [Hired] Roger Young (Developer) | Ability:35 PA:36 | LR:5 Cr:9 WE:5 A:3 Amb:7
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Peak Software instant-shipped 'Venture Manager' (quality: 56.7, revenue: 0).
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Peak Software instant-shipped 'Grand Lap' (quality: 60.0, revenue: 0).
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Peak Software instant-shipped 'Pinnacle Base' (quality: 72.9, revenue: 0).
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 157 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 158 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 159 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 160 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 161 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 162 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 163 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 164 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 165 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 166 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 167 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 168 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 169 at 60
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 44, Type: Programming, Company: 13)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 2' (ID: 45, Type: Programming, Company: 13)
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming 3' (ID: 46, Type: Programming, Company: 13)
+[T:-1] [CONSOLE:LOG] Assigned employee 157 to team 'Programming' (ID: 44)
+[T:-1] [CONSOLE:LOG] Assigned employee 158 to team 'Programming 2' (ID: 45)
+[T:-1] [CONSOLE:LOG] Assigned employee 159 to team 'Programming 3' (ID: 46)
+[T:-1] [CONSOLE:LOG] Assigned employee 160 to team 'Programming' (ID: 44)
+[T:-1] [CONSOLE:LOG] Assigned employee 161 to team 'Programming 2' (ID: 45)
+[T:-1] [CONSOLE:LOG] Assigned employee 162 to team 'Programming 3' (ID: 46)
+[T:-1] [CONSOLE:LOG] Assigned employee 163 to team 'Programming' (ID: 44)
+[T:-1] [CONSOLE:LOG] Assigned employee 164 to team 'Programming 2' (ID: 45)
+[T:-1] [CONSOLE:LOG] Assigned employee 165 to team 'Programming 3' (ID: 46)
+[T:-1] [CONSOLE:LOG] Assigned employee 166 to team 'Programming' (ID: 44)
+[T:-1] [CONSOLE:LOG] Assigned employee 167 to team 'Programming 2' (ID: 45)
+[T:-1] [CONSOLE:LOG] Assigned employee 168 to team 'Programming 3' (ID: 46)
+[T:-1] [CONSOLE:LOG] Assigned employee 169 to team 'Programming' (ID: 44)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Spawned competitor 'Peak Software' (ToolMaker) at tick 0.
+[T:-1] [CONSOLE:LOG] [Hired] Zara Saito (Developer) | Ability:130 PA:163 | LR:14 Cr:7 WE:11 A:9 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Sanjay Smith (Developer) | Ability:77 PA:87 | LR:6 Cr:4 WE:9 A:12 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Freya Brooks (Marketer) | Ability:146 PA:200 | LR:15 Cr:12 WE:15 A:11 Amb:15
+[T:-1] [CONSOLE:LOG] [Hired] Michael Scott (Developer) | Ability:50 PA:126 | LR:6 Cr:13 WE:12 A:11 Amb:9
+[T:-1] [CONSOLE:LOG] [Hired] Divya Lopez (Developer) | Ability:33 PA:72 | LR:9 Cr:4 WE:5 A:6 Amb:11
+[T:-1] [CONSOLE:LOG] [Hired] Henry Tanaka (QAEngineer) | Ability:112 PA:166 | LR:8 Cr:9 WE:9 A:13 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Robert Wright (Developer) | Ability:181 PA:200 | LR:17 Cr:13 WE:16 A:13 Amb:12
+[T:-1] [CONSOLE:LOG] [Hired] Angela Cooper (Marketer) | Ability:38 PA:108 | LR:12 Cr:9 WE:10 A:12 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Dina Lopez (Developer) | Ability:102 PA:135 | LR:14 Cr:8 WE:11 A:14 Amb:10
+[T:-1] [CONSOLE:LOG] [Hired] Kathryn Suzuki (Developer) | Ability:49 PA:77 | LR:10 Cr:11 WE:5 A:4 Amb:8
+[T:-1] [CONSOLE:LOG] [Hired] Kavita Li (QAEngineer) | Ability:58 PA:69 | LR:11 Cr:9 WE:10 A:5 Amb:8
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] DeltaVentures instant-shipped 'DeltaVentures Zenith Platform' (quality: 74.5, revenue: 0).
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 170 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 171 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 172 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 173 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 174 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 175 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 176 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 177 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 178 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 179 at 60
+[T:-1] [CONSOLE:LOG] [MoraleSystem] Initialized morale for employee 180 at 60
+[T:-1] [CONSOLE:LOG] [Tick 0] Created team 'Programming' (ID: 47, Type: Programming, Company: 14)
+[T:-1] [CONSOLE:LOG] Assigned employee 170 to team 'Programming' (ID: 47)
+[T:-1] [CONSOLE:LOG] Assigned employee 171 to team 'Programming' (ID: 47)
+[T:-1] [CONSOLE:LOG] Assigned employee 172 to team 'Programming' (ID: 47)
+[T:-1] [CONSOLE:LOG] Assigned employee 173 to team 'Programming' (ID: 47)
+[T:-1] [CONSOLE:LOG] Assigned employee 174 to team 'Programming' (ID: 47)
+[T:-1] [CONSOLE:LOG] Assigned employee 175 to team 'Programming' (ID: 47)
+[T:-1] [CONSOLE:LOG] Assigned employee 176 to team 'Programming' (ID: 47)
+[T:-1] [CONSOLE:LOG] Assigned employee 177 to team 'Programming' (ID: 47)
+[T:-1] [CONSOLE:LOG] Assigned employee 178 to team 'Programming' (ID: 47)
+[T:-1] [CONSOLE:LOG] Assigned employee 179 to team 'Programming' (ID: 47)
+[T:-1] [CONSOLE:LOG] Assigned employee 180 to team 'Programming' (ID: 47)
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Spawned competitor 'DeltaVentures' (ToolMaker) at tick 0.
+[T:-1] [CONSOLE:LOG] [CompetitorSystem] Generated 14 starting competitors.
+[T:-1] [CONSOLE:LOG] [DEBUG-Engine] cat=GameEngine effectiveMaxUsers=199999 interestRate=0.1000 demand=57.06 basePrice=100.00
+[T:-1] [CONSOLE:LOG]   [DEBUG-Engine] id=25 activeUsers=4279 monthlyRevenue=427900 sharePercent=0.7500 penetration=0.5000
+[T:-1] [CONSOLE:LOG] [Tick 1400] Generated 20 new job candidates
+[T:-1] [CONSOLE:LOG] [InterviewSystem] Cleared all active interviews (candidate pool refreshed)
+[T:-1] [CONSOLE:LOG] [NegotiationSystem] Cleared all active negotiations (candidate pool refreshed)
+[T:1401 | Day 1 Mo 1 Yr 2026] [SESSION] Logger bound to GameController
+[T:1401] [CONSOLE:LOG] 'Assets/Logs/sessiontuning_007.txt' Amount of processed bytes '175' does not match file size '129'
+
+============================================================
+Ended: 2026-04-21 21:58:12

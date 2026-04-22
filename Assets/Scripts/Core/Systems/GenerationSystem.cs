@@ -293,7 +293,7 @@ public class GenerationSystem : ISystem {
 
         _inboxSystem.AddMail(new MailItem {
             Tick = tick,
-            Category = MailCategory.Research,
+            Category = MailCategory.Technology,
             Priority = priority,
             Title = title,
             Body = body,

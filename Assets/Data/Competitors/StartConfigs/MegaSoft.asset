@@ -21,32 +21,54 @@ MonoBehaviour:
     BrandInvestment: 0.75
     PricingAggression: 0.65
     InnovationBias: 0.4
-  specializations: 00000000
+  specializations: 
   startingProducts:
   - category: 0
     niche: 0
     productName: Monolith Bedrock
-    quality: 78
-    marketSharePercent: 55
+    quality: 55
+    marketSharePercent: 36
     featureIds: []
     featureQualities: []
     ageInMonths: 36
     licensingRate: 0.12
+    maintenanceBudgetMonthly: 6500
   - category: 7
-    niche: 10
+    niche: 19
     productName: Monolith Vanguard
-    quality: 70
-    marketSharePercent: 0
+    quality: 49
+    marketSharePercent: 1
     featureIds: []
     featureQualities: []
     ageInMonths: 12
     licensingRate: 0
+    maintenanceBudgetMonthly: 2500
   - category: 6
     niche: -1
     productName: Monolith Forge
-    quality: 65
-    marketSharePercent: 0
+    quality: 46
+    marketSharePercent: 2
     featureIds: []
     featureQualities: []
     ageInMonths: 18
     licensingRate: 0
+    maintenanceBudgetMonthly: 3000
+  - category: 7
+    niche: 11
+    productName: Monolith Dominion
+    quality: 48
+    marketSharePercent: 4
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 8
+    licensingRate: 0
+    maintenanceBudgetMonthly: 2500
+  startingDevProducts:
+  - category: 3
+    niche: -1
+    productName: Monolith Engine
+    devMonthsRemaining: 4
+    featureIds: []
+  scheduledUpdates:
+  - productIndex: 0
+    monthsUntilUpdate: 2

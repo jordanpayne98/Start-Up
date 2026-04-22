@@ -55,6 +55,11 @@ public class ProductsView : IGameView
     private Label _changeDateValueLabel;
     private Label _changeDatePenaltyLabel;
     private Button _changeDateConfirmBtn;
+    private Button _setReleaseDateButton;
+    private VisualElement _setReleaseDateFlyout;
+    private SliderInt _setReleaseDateSlider;
+    private Label _setReleaseDateValueLabel;
+    private Button _setReleaseDateConfirmBtn;
 
     // ── Shipped panel ────────────────────────────────────────────────────────
     private VisualElement _shippedContainer;
@@ -432,6 +437,13 @@ public class ProductsView : IGameView
         _changeDateButton.clicked += OnChangeDateClicked;
         releaseDateRow.Add(_changeDateButton);
 
+        _setReleaseDateButton = new Button { text = "Set Release Date" };
+        _setReleaseDateButton.AddToClassList("btn-primary");
+        _setReleaseDateButton.AddToClassList("btn-sm");
+        _setReleaseDateButton.style.marginLeft = 4;
+        _setReleaseDateButton.clicked += OnSetReleaseDateClicked;
+        releaseDateRow.Add(_setReleaseDateButton);
+
         releaseDateSection.Add(releaseDateRow);
 
         var daysRow = new VisualElement();
@@ -489,6 +501,36 @@ public class ProductsView : IGameView
         _changeDateFlyout.Add(_changeDateConfirmBtn);
 
         _detailPanel.Add(_changeDateFlyout);
+
+        // ── Set Release Date flyout ───────────────────────────────────────────
+        _setReleaseDateFlyout = new VisualElement();
+        _setReleaseDateFlyout.AddToClassList("card");
+        _setReleaseDateFlyout.style.marginBottom = 8;
+        _setReleaseDateFlyout.style.display = DisplayStyle.None;
+
+        var srdfHeader = new Label("Set Release Date");
+        srdfHeader.AddToClassList("section-header");
+        srdfHeader.style.marginBottom = 8;
+        _setReleaseDateFlyout.Add(srdfHeader);
+
+        _setReleaseDateValueLabel = new Label("Select a date");
+        _setReleaseDateValueLabel.AddToClassList("metric-primary");
+        _setReleaseDateValueLabel.AddToClassList("text-accent");
+        _setReleaseDateValueLabel.style.marginBottom = 4;
+        _setReleaseDateFlyout.Add(_setReleaseDateValueLabel);
+
+        _setReleaseDateSlider = new SliderInt(30, 730);
+        _setReleaseDateSlider.SetValueWithoutNotify(180);
+        _setReleaseDateSlider.style.marginBottom = 4;
+        _setReleaseDateSlider.RegisterValueChangedCallback(OnSetReleaseDateSliderChanged);
+        _setReleaseDateFlyout.Add(_setReleaseDateSlider);
+
+        _setReleaseDateConfirmBtn = new Button { text = "Announce Release Date" };
+        _setReleaseDateConfirmBtn.AddToClassList("btn-primary");
+        _setReleaseDateConfirmBtn.clicked += OnSetReleaseDateConfirmed;
+        _setReleaseDateFlyout.Add(_setReleaseDateConfirmBtn);
+
+        _detailPanel.Add(_setReleaseDateFlyout);
 
         var actionRow = new VisualElement();
         actionRow.AddToClassList("flex-row");
@@ -1152,10 +1194,17 @@ public class ProductsView : IGameView
     {
         var row = new VisualElement();
         row.AddToClassList("phase-row");
+        row.style.flexDirection = FlexDirection.Column;
+
+        // Top row: label + progress + quality + badge
+        var topRow = new VisualElement();
+        topRow.style.flexDirection = FlexDirection.Row;
+        topRow.style.alignItems = Align.Center;
+        topRow.style.flexGrow = 1;
 
         var phaseLabel = new Label();
         phaseLabel.AddToClassList("phase-row__label");
-        row.Add(phaseLabel);
+        topRow.Add(phaseLabel);
         _phaseLabels[index] = phaseLabel;
 
         var progressBar = new VisualElement();
@@ -1165,22 +1214,32 @@ public class ProductsView : IGameView
         var fill = new VisualElement();
         fill.AddToClassList("progress-bar__fill");
         progressBar.Add(fill);
-        row.Add(progressBar);
+        topRow.Add(progressBar);
         _phaseProgressFills[index] = fill;
 
         var qualLabel = new Label();
         qualLabel.AddToClassList("phase-row__quality");
-        row.Add(qualLabel);
+        topRow.Add(qualLabel);
         _phaseQualityLabels[index] = qualLabel;
 
         var badge = new Label();
         badge.AddToClassList("badge");
         badge.style.marginLeft = 4;
-        row.Add(badge);
+        topRow.Add(badge);
         _phaseBadges[index] = badge;
+
+        row.Add(topRow);
+
+        // Bottom row: actions + team + bugs
+        var bottomRow = new VisualElement();
+        bottomRow.style.flexDirection = FlexDirection.Row;
+        bottomRow.style.alignItems = Align.Center;
+        bottomRow.style.marginTop = 2;
 
         var actions = new VisualElement();
         actions.AddToClassList("phase-row__actions");
+        actions.style.flexShrink = 0;
+        actions.style.marginLeft = 0;
 
         var iterateBtn = new Button { text = "Iterate" };
         iterateBtn.AddToClassList("btn-secondary");
@@ -1197,17 +1256,21 @@ public class ProductsView : IGameView
         actions.Add(assignBtn);
         _phaseAssignButtons[index] = assignBtn;
 
-        row.Add(actions);
+        bottomRow.Add(actions);
 
         var teamLabel = new Label();
         teamLabel.AddToClassList("phase-row__team");
-        row.Add(teamLabel);
+        teamLabel.style.marginLeft = 4;
+        bottomRow.Add(teamLabel);
         _phaseTeamLabels[index] = teamLabel;
 
         var bugLabel = new Label();
         bugLabel.AddToClassList("phase-row__bugs");
-        row.Add(bugLabel);
+        bugLabel.style.flexShrink = 0;
+        bottomRow.Add(bugLabel);
         _phaseBugLabels[index] = bugLabel;
+
+        row.Add(bottomRow);
 
         return row;
     }
@@ -1352,6 +1415,9 @@ public class ProductsView : IGameView
         if (_changeDateButton != null) _changeDateButton.clicked -= OnChangeDateClicked;
         if (_changeDateConfirmBtn != null) _changeDateConfirmBtn.clicked -= OnChangeDateConfirmed;
         if (_changeDateSlider != null) _changeDateSlider.UnregisterValueChangedCallback(OnChangeDateSliderChanged);
+        if (_setReleaseDateButton != null) _setReleaseDateButton.clicked -= OnSetReleaseDateClicked;
+        if (_setReleaseDateConfirmBtn != null) _setReleaseDateConfirmBtn.clicked -= OnSetReleaseDateConfirmed;
+        if (_setReleaseDateSlider != null) _setReleaseDateSlider.UnregisterValueChangedCallback(OnSetReleaseDateSliderChanged);
         if (_licensingRateSlider != null) _licensingRateSlider.UnregisterValueChangedCallback(OnLicensingRateChanged);
         if (_shippedSubscriptionPriceSlider != null) _shippedSubscriptionPriceSlider.UnregisterValueChangedCallback(OnShippedSubscriptionPriceChanged);
         if (_shipDistRateSlider != null) _shipDistRateSlider.UnregisterValueChangedCallback(OnShipDistRateChanged);
@@ -1366,6 +1432,11 @@ public class ProductsView : IGameView
         _changeDateValueLabel = null;
         _changeDatePenaltyLabel = null;
         _changeDateConfirmBtn = null;
+        _setReleaseDateButton = null;
+        _setReleaseDateFlyout = null;
+        _setReleaseDateSlider = null;
+        _setReleaseDateValueLabel = null;
+        _setReleaseDateConfirmBtn = null;
 
         _shippedMarketingPanel = null;
         _shippedHypeBarFill = null;
@@ -2371,6 +2442,12 @@ public class ProductsView : IGameView
         if (_changeDateButton != null)
             _changeDateButton.style.display = vm.SelectedHasReleaseDate ? DisplayStyle.Flex : DisplayStyle.None;
 
+        if (_setReleaseDateButton != null)
+            _setReleaseDateButton.style.display = vm.SelectedHasReleaseDate ? DisplayStyle.None : DisplayStyle.Flex;
+
+        if (_setReleaseDateFlyout != null && vm.SelectedHasReleaseDate)
+            _setReleaseDateFlyout.style.display = DisplayStyle.None;
+
         // Dev marketing binding
         if (_devHypeLabel != null) _devHypeLabel.text = vm.DevHypeScoreDisplay;
         if (_devMarketingTeamLabel != null) _devMarketingTeamLabel.text = vm.DevMarketingTeamDisplay;
@@ -2719,6 +2796,57 @@ public class ProductsView : IGameView
         });
         if (_changeDateFlyout != null)
             _changeDateFlyout.style.display = DisplayStyle.None;
+    }
+
+    private void OnSetReleaseDateClicked()
+    {
+        if (!_hasSelection || _setReleaseDateFlyout == null) return;
+        bool isVisible = _setReleaseDateFlyout.style.display == DisplayStyle.Flex;
+        _setReleaseDateFlyout.style.display = isVisible ? DisplayStyle.None : DisplayStyle.Flex;
+        if (!isVisible)
+        {
+            _setReleaseDateSlider?.SetValueWithoutNotify(180);
+            UpdateSetReleaseDateLabel(180);
+        }
+    }
+
+    private void OnSetReleaseDateSliderChanged(ChangeEvent<int> evt)
+    {
+        UpdateSetReleaseDateLabel(evt.newValue);
+    }
+
+    private void UpdateSetReleaseDateLabel(int offsetDays)
+    {
+        int currentDay = 0;
+        if (_dispatcher is WindowManager wm && wm.GameController != null)
+        {
+            var gs = wm.GameController.GetGameState();
+            currentDay = gs?.timeState?.currentDay ?? 0;
+        }
+        int newAbsoluteDay = currentDay + offsetDays;
+        int dom = TimeState.GetDayOfMonth(newAbsoluteDay);
+        int mon = TimeState.GetMonth(newAbsoluteDay);
+        int yr = TimeState.GetYear(newAbsoluteDay);
+        if (_setReleaseDateValueLabel != null)
+            _setReleaseDateValueLabel.text = UIFormatting.FormatDate(dom, mon, yr);
+    }
+
+    private void OnSetReleaseDateConfirmed()
+    {
+        if (!_hasSelection || _setReleaseDateSlider == null) return;
+        int currentDay = 0;
+        if (_dispatcher is WindowManager wm && wm.GameController != null)
+        {
+            var gs = wm.GameController.GetGameState();
+            currentDay = gs?.timeState?.currentDay ?? 0;
+        }
+        int newAbsoluteDay = currentDay + _setReleaseDateSlider.value;
+        _dispatcher.Dispatch(new AnnounceReleaseDateCommand {
+            ProductId = _selectedProductId,
+            TargetDay = newAbsoluteDay
+        });
+        if (_setReleaseDateFlyout != null)
+            _setReleaseDateFlyout.style.display = DisplayStyle.None;
     }
 
     private void OnUpdateProductClicked()

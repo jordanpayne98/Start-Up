@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 191ff352f86147f4c83110d915268705, type: 3}
   m_Name: FullStack
   m_EditorClassIdentifier: Assembly-CSharp::CompetitorArchetypeConfig
-  archetype: 4
+  archetype: 3
   releaseIntervalMonthsMin: 6
   releaseIntervalMonthsMax: 14
   personalityMin:

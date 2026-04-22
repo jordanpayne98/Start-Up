@@ -8,8 +8,8 @@ public class ProductDetailViewModel : IViewModel
     public string Niche { get; private set; }
     public string Quality { get; private set; }
     public string FeatureList { get; private set; }
-    public string ActiveUsers { get; private set; }
-    public string MarketSharePercent { get; private set; }
+    public string SalesPerMonth { get; private set; }
+    public string UsersPerMonth { get; private set; }
     public string LifetimeRevenue { get; private set; }
     public string MonthlyRevenue { get; private set; }
     public string LaunchDate { get; private set; }
@@ -21,6 +21,7 @@ public class ProductDetailViewModel : IViewModel
     public string CrisisDescription { get; private set; }
     public List<string> TeamAssignments { get; private set; }
     public ProductReviewViewModel ReviewVM { get; private set; }
+    public string LifetimeSales { get; private set; }
 
     // Budget display properties
     public string MaintenanceBudgetMonthly { get; private set; }
@@ -73,8 +74,9 @@ public class ProductDetailViewModel : IViewModel
             Niche = "--";
             Quality = "--";
             FeatureList = "--";
-            ActiveUsers = "--";
-            MarketSharePercent = "--";
+            SalesPerMonth = "--";
+            UsersPerMonth = "--";
+            LifetimeSales = "--";
             LifetimeRevenue = "--";
             MonthlyRevenue = "--";
             LaunchDate = "--";
@@ -122,11 +124,11 @@ public class ProductDetailViewModel : IViewModel
 
         FeatureList = UIFormatting.FormatFeatureList(product.SelectedFeatureIds, _templates);
 
-        ActiveUsers = product.ActiveUserCount.ToString("N0");
+        SalesPerMonth = product.HasCompletedFirstMonth ? product.SnapshotMonthlySales.ToString("N0") : "New";
         LifetimeRevenue = UIFormatting.FormatMoney(product.TotalLifetimeRevenue);
-        MonthlyRevenue = UIFormatting.FormatMoney(product.MonthlyRevenue);
+        MonthlyRevenue = UIFormatting.FormatMoney(product.HasCompletedFirstMonth ? product.SnapshotMonthlyRevenue : 0L);
         if (product.IsShipped) {
-            int launchTick = product.CreationTick + product.TotalDevelopmentTicks;
+            int launchTick = product.ShipTick;
             int launchDay = launchTick / TimeState.TicksPerDay;
             int year = TimeState.GetYear(launchDay);
             int month = TimeState.GetMonth(launchDay);
@@ -136,12 +138,7 @@ public class ProductDetailViewModel : IViewModel
             LaunchDate = "In Development";
         }
         LifecycleStage = product.LifecycleStage.ToString();
-        if (product.PreviousDailyActiveUsers == 0)
-            UserTrend = product.ActiveUserCount > 0 ? "New" : "--";
-        else {
-            int delta = product.ActiveUserCount - product.PreviousDailyActiveUsers;
-            UserTrend = delta > 0 ? "Growth" : delta < 0 ? "Decline" : "Stable";
-        }
+        UserTrend = product.HasCompletedFirstMonth ? (product.SnapshotMonthlyTrend ?? "--") : "New";
         MaintenanceStatus = product.IsMaintained ? "Maintained" : "Unmaintained";
         HasCrisis = product.CrisisLevel > 0;
         switch (product.CrisisLevel)
@@ -164,20 +161,13 @@ public class ProductDetailViewModel : IViewModel
                 break;
         }
 
-        float marketShare = 0f;
-        if (marketState?.currentMarketShares != null) {
-            foreach (var kvp in marketState.currentMarketShares) {
-                var entries = kvp.Value;
-                int count = entries.Count;
-                for (int i = 0; i < count; i++) {
-                    if (entries[i].ProductId == id) {
-                        marketShare += entries[i].GlobalUserSharePercent;
-                        break;
-                    }
-                }
-            }
+        UsersPerMonth = product.HasCompletedFirstMonth ? product.SnapshotMonthlyUsers.ToString("N0") : "New";
+
+        if (product.IsSubscriptionBased) {
+            LifetimeSales = product.TotalSubscribers.ToString("N0") + " active";
+        } else {
+            LifetimeSales = product.TotalUnitsSold.ToString("N0");
         }
-        MarketSharePercent = UIFormatting.FormatPercent(marketShare);
 
         if (IsPlayerOwned && product.TeamAssignments != null) {
             foreach (var kvp in product.TeamAssignments) {

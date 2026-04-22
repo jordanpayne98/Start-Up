@@ -25,6 +25,7 @@ public class CalendarView : IGameView
     private static readonly Color _colRed    = new Color(0.87f, 0.27f, 0.27f, 1f);
     private static readonly Color _colYellow = new Color(0.95f, 0.78f, 0.20f, 1f);
     private static readonly Color _colPurple = new Color(0.65f, 0.27f, 0.87f, 1f);
+    private static readonly Color _colOrange = new Color(0.95f, 0.55f, 0.15f, 1f);
 
     public CalendarView(IModalPresenter modal) {
         _modal = modal;
@@ -136,6 +137,7 @@ public class CalendarView : IGameView
         _legendContainer.style.marginTop = 8;
         AddLegendItem(_legendContainer, "Player", _colBlue);
         AddLegendItem(_legendContainer, "Competitor", _colRed);
+        AddLegendItem(_legendContainer, "Competitor Update", _colOrange);
         AddLegendItem(_legendContainer, "Disruption", _colYellow);
         AddLegendItem(_legendContainer, "Showdown", _colPurple);
         _root.Add(_legendContainer);
@@ -244,6 +246,7 @@ public class CalendarView : IGameView
             case CalendarEventColor.Red:    return _colRed;
             case CalendarEventColor.Yellow: return _colYellow;
             case CalendarEventColor.Purple: return _colPurple;
+            case CalendarEventColor.Orange: return _colOrange;
             default:                        return _colBlue;
         }
     }

@@ -296,15 +296,18 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f7d495d9c699a3c4d971fb7886e6f9fb, type: 2}
   - {fileID: 11400000, guid: 3658e7b59bec55f498bf1d9e40ec9b97, type: 2}
   - {fileID: 11400000, guid: e61d5215f58b11048bf1bfd7cda80773, type: 2}
-  - {fileID: 11400000, guid: 3dd928a786cff8048a48a0e5749749c6, type: 2}
   - {fileID: 11400000, guid: e259dce2aabc9ce4fa4886b94ec29f52, type: 2}
-  - {fileID: 11400000, guid: 5d6f5d99004d7cd4f8855fdfd2c357f4, type: 2}
+  - {fileID: 11400000, guid: c34dd8db68c744249b4b1131ee56b0a5, type: 2}
+  - {fileID: 11400000, guid: b9263397868243247a9f9609c4b7aa1a, type: 2}
   competitorStartConfigs:
   - {fileID: 11400000, guid: 0fb4d70dd2babde45b676458e33bef20, type: 2}
   - {fileID: 11400000, guid: 98870cfcff04dda4289bf5ad29c9d716, type: 2}
   - {fileID: 11400000, guid: bc77e826af2d22c43af1b87449f925f2, type: 2}
   - {fileID: 11400000, guid: 495b2eb2d75179747aebc622109877ed, type: 2}
   - {fileID: 11400000, guid: 43baa19ccefea6b46b0dbf442f6861d5, type: 2}
+  - {fileID: 11400000, guid: 6eb412e0228267a41bdbe467ea4c747f, type: 2}
+  - {fileID: 11400000, guid: f278ab0c01d3e4a4b8e5409169d0583d, type: 2}
+  - {fileID: 11400000, guid: 6ca55c7f036143a4398eabd22baceb77, type: 2}
   competitorNameData: {fileID: 11400000, guid: 7ddb65d58d6156246a0086abf4db7462, type: 2}
   architectureGenerations:
   - {fileID: 11400000, guid: cf8fb3ca73d746a4cb53c81d93935467, type: 2}

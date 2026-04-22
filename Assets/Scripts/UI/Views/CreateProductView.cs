@@ -94,8 +94,13 @@ public class CreateProductView : IGameView
     private Label _qualityCeilingLabel;
     private Label _techPenaltyLabel;
 
+    // ── Release Date ──────────────────────────────────────────────────────────
+    private SliderInt _releaseDateSlider;
+    private Label _releaseDateValueLabel;
+    private Label _releaseDateHintLabel;
+
     // ── Validation (left panel bottom) ────────────────────────────────────────
-    private const int MaxValidationMessages = 5;
+    private const int MaxValidationMessages = 12;
     private VisualElement _validationContainer;
     private Label[] _validationMessages;
     private Button _startDevBtnBar;
@@ -210,6 +215,7 @@ public class CreateProductView : IGameView
         BuildEstimatesSection(leftPanel.contentContainer);
         BuildDependencyMetricsSection(leftPanel.contentContainer);
         BuildPricingSection(leftPanel.contentContainer);
+        BuildReleaseDateSection(leftPanel.contentContainer);
         BuildValidationSection(leftPanel.contentContainer);
 
         body.Add(leftPanel);
@@ -571,6 +577,35 @@ public class CreateProductView : IGameView
         _priceWarningLabel.AddToClassList("text-warning");
         _priceWarningLabel.style.display = DisplayStyle.None;
         section.Add(_priceWarningLabel);
+
+        parent.Add(section);
+    }
+
+    private void BuildReleaseDateSection(VisualElement parent)
+    {
+        var section = new VisualElement();
+        section.AddToClassList("create-product-section");
+
+        var title = new Label("TARGET RELEASE DATE");
+        title.AddToClassList("create-product-section-title");
+        section.Add(title);
+
+        _releaseDateValueLabel = new Label("Not set");
+        _releaseDateValueLabel.AddToClassList("metric-primary");
+        _releaseDateValueLabel.AddToClassList("text-accent");
+        _releaseDateValueLabel.style.marginBottom = 4;
+        section.Add(_releaseDateValueLabel);
+
+        _releaseDateSlider = new SliderInt(30, 730);
+        _releaseDateSlider.SetValueWithoutNotify(180);
+        _releaseDateSlider.style.marginBottom = 4;
+        _releaseDateSlider.RegisterValueChangedCallback(OnReleaseDateSliderChanged);
+        section.Add(_releaseDateSlider);
+
+        _releaseDateHintLabel = new Label("Days from today until release");
+        _releaseDateHintLabel.AddToClassList("text-muted");
+        _releaseDateHintLabel.style.fontSize = 11;
+        section.Add(_releaseDateHintLabel);
 
         parent.Add(section);
     }
@@ -1145,6 +1180,7 @@ public class CreateProductView : IGameView
         BindTeamRows();
         BindDependencyToggles();
         BindValidationSection();
+        BindReleaseDate();
         BindUpdateTypeSelector();
         BindFeatures();
         BindHardwarePageVisibility();
@@ -1164,6 +1200,7 @@ public class CreateProductView : IGameView
         BindTeamRows();
         BindDependencyToggles();
         BindValidationSection();
+        BindReleaseDate();
         BindFeatures();
         BindPlatformToggles();
         BindHardwarePageVisibility();
@@ -1718,6 +1755,29 @@ public class CreateProductView : IGameView
         _startDevBtnBar.SetEnabled(canStart);
     }
 
+    private void BindReleaseDate()
+    {
+        if (_viewModel == null || _releaseDateValueLabel == null) return;
+        if (_viewModel.SelectedTargetDay > 0)
+            _releaseDateValueLabel.text = _viewModel.ReleaseDateDisplay;
+        else
+            _releaseDateValueLabel.text = "Not set";
+    }
+
+    private void OnReleaseDateSliderChanged(ChangeEvent<int> evt)
+    {
+        if (_viewModel == null) return;
+        int currentDay = 0;
+        if (_dispatcher is WindowManager wm && wm.GameController != null)
+        {
+            var gs = wm.GameController.GetGameState();
+            currentDay = gs?.timeState?.currentDay ?? 0;
+        }
+        _viewModel.SetTargetDay(currentDay + evt.newValue);
+        if (_releaseDateValueLabel != null)
+            _releaseDateValueLabel.text = _viewModel.ReleaseDateDisplay;
+    }
+
     private void BindFeatures()
     {
         if (_viewModel == null) return;
@@ -1915,6 +1975,11 @@ public class CreateProductView : IGameView
             _pricingModelDropdown.UnregisterCallback<ChangeEvent<string>>(OnPricingModelChanged);
         if (_priceField != null)
             _priceField.UnregisterCallback<ChangeEvent<float>>(OnPriceChanged);
+        if (_releaseDateSlider != null)
+            _releaseDateSlider.UnregisterValueChangedCallback(OnReleaseDateSliderChanged);
+        _releaseDateSlider = null;
+        _releaseDateValueLabel = null;
+        _releaseDateHintLabel = null;
 
         int platToggleCount = _platformToggles.Count;
         for (int i = 0; i < platToggleCount; i++)

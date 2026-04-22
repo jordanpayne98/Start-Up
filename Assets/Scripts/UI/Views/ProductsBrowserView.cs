@@ -94,14 +94,14 @@ public class ProductsBrowserView : IGameView
         headerRow.AddToClassList("column-header");
 
         var columns = new[] {
-            ("Product",    ProductBrowserSortColumn.Name,        3),
-            ("Company",    ProductBrowserSortColumn.Company,     2),
-            ("Niche",      ProductBrowserSortColumn.Niche,       2),
-            ("Review",     ProductBrowserSortColumn.Quality,     1),
-            ("Users",      ProductBrowserSortColumn.ActiveUsers, 2),
+            ("Product",    ProductBrowserSortColumn.Name,          3),
+            ("Company",    ProductBrowserSortColumn.Company,       2),
+            ("Niche",      ProductBrowserSortColumn.Niche,         2),
+            ("Review",     ProductBrowserSortColumn.Quality,       1),
+            ("Sales /mo",  ProductBrowserSortColumn.SalesPerMonth, 2),
             ("Monthly Rev.", ProductBrowserSortColumn.Revenue,     2),
-            ("User Share", ProductBrowserSortColumn.MarketShare, 2),
-            ("Trend",      ProductBrowserSortColumn.Name,        1),
+            ("Users /mo",  ProductBrowserSortColumn.UsersPerMonth, 2),
+            ("Trend",      ProductBrowserSortColumn.Name,          1),
         };
 
         for (int i = 0; i < columns.Length; i++) {
@@ -272,10 +272,10 @@ public class ProductsBrowserView : IGameView
         el.Q<Label>("pb-name").text = data.ProductName;
         el.Q<Label>("pb-company").text = data.CompanyName;
         el.Q<Label>("pb-niche").text = data.Niche;
-        el.Q<Label>("pb-quality").text = data.ReviewRating;
-        el.Q<Label>("pb-users").text = data.ActiveUsers;
+        el.Q<Label>("pb-quality").text = data.ReviewScore;
+        el.Q<Label>("pb-users").text = data.SalesPerMonth;
         el.Q<Label>("pb-revenue").text = data.Revenue;
-        el.Q<Label>("pb-share").text = data.MarketShare;
+        el.Q<Label>("pb-share").text = data.UsersPerMonth;
         el.Q<Label>("pb-stage").text = data.UserTrend;
         el.userData = data.Id;
     }

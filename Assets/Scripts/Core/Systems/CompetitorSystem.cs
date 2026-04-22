@@ -21,7 +21,7 @@ public class CompetitorSystem : ISystem
     }
 
     private const int MonthlyEvalIntervalTicks = TimeState.TicksPerDay * 30;
-    private const int BankruptcyMonthsThreshold = 6;
+    private const int BankruptcyMonthsThreshold = 12;
     private const long MinCashFloor = 0L;
     private const long MaxCashCeiling = 1_000_000_000L;
 
@@ -201,6 +201,7 @@ public class CompetitorSystem : ISystem
                 NicheMarketShare = new Dictionary<ProductNiche, float>(),
                 ActiveProductIds = new List<ProductId>(),
                 InDevelopmentProductIds = new List<ProductId>(),
+                ScheduledUpdates = new List<ScheduledCompetitorUpdate>(),
                 EmployeeIds = new List<EmployeeId>(),
                 TeamAssignments = new Dictionary<TeamId, ProductId>(),
                 LastProductEvalTick = 0,
@@ -221,12 +222,40 @@ public class CompetitorSystem : ISystem
 
             _state.competitors[id] = comp;
 
-            if (cfg.startingProducts != null)
+            ProductId[] startingProductIds = null;
+            if (cfg.startingProducts != null && cfg.startingProducts.Length > 0)
             {
+                startingProductIds = new ProductId[cfg.startingProducts.Length];
                 for (int p = 0; p < cfg.startingProducts.Length; p++)
                 {
                     var sp = cfg.startingProducts[p];
+                    int productIdBefore = _productState.nextProductId;
                     CreateStartingProduct(comp, sp, initRng);
+                    startingProductIds[p] = new ProductId(productIdBefore);
+                }
+            }
+
+            if (cfg.startingDevProducts != null)
+            {
+                for (int p = 0; p < cfg.startingDevProducts.Length; p++)
+                {
+                    var sdp = cfg.startingDevProducts[p];
+                    CreateStartingDevProduct(comp, sdp);
+                }
+            }
+
+            if (cfg.scheduledUpdates != null && startingProductIds != null)
+            {
+                for (int p = 0; p < cfg.scheduledUpdates.Length; p++)
+                {
+                    var su = cfg.scheduledUpdates[p];
+                    if (su.productIndex < 0 || su.productIndex >= startingProductIds.Length) continue;
+                    int scheduledTick = su.monthsUntilUpdate * 30 * TimeState.TicksPerDay;
+                    comp.ScheduledUpdates.Add(new ScheduledCompetitorUpdate
+                    {
+                        ProductId = startingProductIds[su.productIndex],
+                        ScheduledTick = scheduledTick
+                    });
                 }
             }
 
@@ -271,9 +300,7 @@ public class CompetitorSystem : ISystem
             case CompetitorArchetype.PlatformGiant: return rng.Range(8000, 18001);
             case CompetitorArchetype.FullStack:     return rng.Range(5000, 12001);
             case CompetitorArchetype.ToolMaker:     return rng.Range(3000, 8001);
-            case CompetitorArchetype.CloudProvider: return rng.Range(2000, 6001);
             case CompetitorArchetype.GameStudio:    return rng.Range(1000, 4001);
-            case CompetitorArchetype.AppDeveloper:  return rng.Range(500, 2001);
             default:                                return rng.Range(500, 2001);
         }
     }
@@ -290,8 +317,6 @@ public class CompetitorSystem : ISystem
                 minCount = 12; maxCount = 20; break;
             case CompetitorArchetype.ToolMaker:
                 minCount = 8; maxCount = 15; break;
-            case CompetitorArchetype.CloudProvider:
-                minCount = 8; maxCount = 14; break;
             default:
                 minCount = 5; maxCount = 12; break;
         }
@@ -407,8 +432,30 @@ public class CompetitorSystem : ISystem
         };
 
         int ageInTicks = sp.ageInMonths * TimeState.TicksPerDay * 30;
+        product.ShipTick = -ageInTicks;
         product.CreationTick = -ageInTicks - devTicks;
-        product.IsMaintained = false;
+        product.TicksSinceShip = ageInTicks;
+
+        product.MaintenanceBudgetMonthly = sp.maintenanceBudgetMonthly;
+        product.IsMaintained = sp.maintenanceBudgetMonthly > 0;
+        if (product.IsMaintained) {
+            const float budgetRef = 5000f;
+            float budgetMult = (float)(Math.Log10(sp.maintenanceBudgetMonthly + 1) / Math.Log10(budgetRef + 1));
+            if (budgetMult < 0.1f) budgetMult = 0.1f;
+            if (budgetMult > 2.0f) budgetMult = 2.0f;
+            product.MaintenanceQuality = Math.Clamp(budgetMult * 50f, 10f, 80f);
+        }
+
+        if (templateId != null && _templateLookup != null && _templateLookup.TryGetValue(templateId, out var tailTemplate)
+            && tailTemplate.economyConfig != null) {
+            var cfg = tailTemplate.economyConfig;
+            float dailyDecay = cfg.tailDecayRate / 30f;
+            if (product.IsMaintained)
+                dailyDecay = Math.Max(0f, dailyDecay - cfg.maintenancePopDecayReduction / 30f);
+            product.TailDecayFactor = Math.Max(cfg.minTailFactor, (float)Math.Pow(1f - dailyDecay, sp.ageInMonths * 30));
+        } else {
+            product.TailDecayFactor = Math.Max(0.15f, (float)Math.Pow(0.997, sp.ageInMonths * 30));
+        }
         product.TotalDevelopmentTicks = EstimateDevTicks(templateId, phaseQuality);
         product.FeatureRelevanceAtShip = ComputeCompetitorFeatureRelevance(product, phaseQuality);
 
@@ -421,6 +468,10 @@ public class CompetitorSystem : ISystem
             product.ReviewResult = _reviewSystem.GenerateReviews(product, reviewTemplate, product.FeatureRelevanceAtShip);
             product.PublicReceptionScore = product.ReviewResult.AggregateScore;
         }
+
+        // Pre-populate monthly snapshots so competitor products don't show "New" at game start
+        product.HasCompletedFirstMonth = true;
+        product.SnapshotMonthlyTrend = "Stable";
 
         _productState.shippedProducts[productId] = product;
         comp.ActiveProductIds.Add(productId);
@@ -453,6 +504,77 @@ public class CompetitorSystem : ISystem
             comp.NicheMarketShare = new Dictionary<ProductNiche, float>();
         if (sp.marketSharePercent > 0f)
             comp.NicheMarketShare[sp.niche] = sp.marketSharePercent;
+    }
+
+    private void CreateStartingDevProduct(Competitor comp, StartingDevProduct sdp)
+    {
+        var productId = new ProductId(_productState.nextProductId++);
+
+        int devTicks = sdp.devMonthsRemaining * 30 * TimeState.TicksPerDay;
+        int targetReleaseTick = devTicks;
+
+        ProductNiche resolvedNiche = IsTemplateForCategoryTier2(sdp.category) ? ProductNiche.None : sdp.niche;
+        string templateId = resolvedNiche != ProductNiche.None
+            ? FindTemplateForNiche(resolvedNiche)
+            : FindTemplateForCategory(sdp.category);
+
+        string[] featureIds = sdp.featureIds != null && sdp.featureIds.Length > 0
+            ? sdp.featureIds
+            : null;
+
+        ProductPhaseRuntime[] phases;
+        if (_productSystem != null && templateId != null)
+        {
+            phases = _productSystem.BuildPhasesForTemplate(templateId, featureIds, 1f);
+        }
+        else
+        {
+            phases = new ProductPhaseRuntime[]
+            {
+                new ProductPhaseRuntime
+                {
+                    phaseType = ProductPhaseType.Programming,
+                    phaseQuality = 0f,
+                    totalWorkRequired = 1000f,
+                    workCompleted = 0f,
+                    isComplete = false,
+                    isUnlocked = true
+                }
+            };
+        }
+
+        var product = new Product
+        {
+            Id = productId,
+            ProductName = sdp.productName,
+            OwnerCompanyId = comp.Id.ToCompanyId(),
+            IsInDevelopment = true,
+            IsShipped = false,
+            IsOnMarket = false,
+            CreationTick = -devTicks,
+            TargetReleaseTick = targetReleaseTick,
+            OriginalReleaseTick = targetReleaseTick,
+            HasAnnouncedReleaseDate = true,
+            TemplateId = templateId,
+            Phases = phases,
+            TeamAssignments = new Dictionary<ProductTeamRole, TeamId>(),
+            ActiveUserCount = 0,
+            OverallQuality = 0f,
+            PopularityScore = 0f,
+            MonthlyRevenue = 0,
+            LifecycleStage = ProductLifecycleStage.PreLaunch,
+            Niche = resolvedNiche,
+            Category = sdp.category,
+            SelectedFeatureIds = featureIds,
+            TotalDevelopmentTicks = 0,
+            DroppedFeatureIds = new List<string>(),
+            SequelIds = new List<ProductId>()
+        };
+
+        _productState.developmentProducts[productId] = product;
+        comp.InDevelopmentProductIds.Add(productId);
+
+        _logger.Log($"[CompetitorSystem] Created in-dev product '{sdp.productName}' for '{comp.CompanyName}' (releases tick {targetReleaseTick}).");
     }
 
     private void AutoSeedPlatformApplications(Competitor comp, IRng rng)
@@ -506,7 +628,8 @@ public class CompetitorSystem : ISystem
                     ageInMonths = rng.Range(3, 25),
                     licensingRate = 0f,
                     featureIds = null,
-                    featureQualities = null
+                    featureQualities = null,
+                    maintenanceBudgetMonthly = (long)(rng.Range(40, 76) * 30)
                 };
 
                 CreateStartingProduct(comp, sp, rng);
@@ -564,7 +687,7 @@ public class CompetitorSystem : ISystem
         foreach (var kvp in _productState.shippedProducts)
         {
             var product = kvp.Value;
-            if (product.IsCompetitorProduct && !product.IsOnMarket)
+            if (!product.IsOnMarket)
                 ghostIds.Add(kvp.Key);
         }
 
@@ -693,6 +816,7 @@ public class CompetitorSystem : ISystem
             EvaluateMonthlyFinances(comp, tick);
             EvaluateCompetitorTax(comp, tick);
             EvaluatePlatformMaintenance(comp, tick);
+            ProcessScheduledUpdates(comp, tick);
         }
 
         _bankruptPendingIds.Clear();
@@ -807,16 +931,17 @@ public class CompetitorSystem : ISystem
         if (tick >= nextDueTick && comp.TaxRecord.hasPendingTax)
         {
             long unpaid = comp.TaxRecord.pendingTaxAmount + comp.TaxRecord.pendingLateFees;
-            comp.Finance.Cash -= unpaid;
-            if (comp.Finance.Cash < 0) comp.Finance.Cash = 0;
+            long payment = Math.Min(unpaid, Math.Max(0L, comp.Finance.Cash));
+            comp.Finance.Cash = Clamp(comp.Finance.Cash - payment, MinCashFloor, MaxCashCeiling);
+            if (payment < unpaid)
+                _logger.Log($"[CompetitorSystem] {comp.CompanyName} partial tax payment: paid {payment} of {unpaid}. Cash now {comp.Finance.Cash}.");
+            else
+                _logger.Log($"[CompetitorSystem] {comp.CompanyName} overdue tax collected: {payment}.");
             comp.TaxRecord.hasPendingTax = false;
             comp.TaxRecord.pendingTaxAmount = 0;
             comp.TaxRecord.pendingLateFees = 0;
             comp.TaxRecord.overdueMonthsApplied = 0;
             comp.TaxRecord.plannedPaymentTick = 0;
-            _logger.Log($"[CompetitorSystem] {comp.CompanyName} tax bankruptcy: unpaid {unpaid}. Triggering bankruptcy.");
-            ProcessBankruptcy(comp.Id, tick);
-            return;
         }
 
         if (tick >= nextDueTick && !comp.TaxRecord.hasPendingTax)
@@ -915,7 +1040,7 @@ public class CompetitorSystem : ISystem
         {
             long absProfit = -profit;
             long monthsOfRunway = absProfit > 0 ? comp.Finance.Cash / absProfit : 999;
-            if (monthsOfRunway < 6)
+            if (monthsOfRunway < 3)
                 comp.Finance.ConsecutiveNegativeCashMonths++;
             else
                 comp.Finance.ConsecutiveNegativeCashMonths = comp.Finance.ConsecutiveNegativeCashMonths > 0
@@ -1045,7 +1170,12 @@ public class CompetitorSystem : ISystem
         if (archetypeCfg != null)
         {
             float baseSkill = (archetypeCfg.baseSkillRange.x + archetypeCfg.baseSkillRange.y) * 0.5f;
-            finalQuality = Clamp(baseSkill * (0.5f + comp.Personality.RdSpeed * 0.5f), 5f, 100f);
+            float skillNormalized = baseSkill / 20f;
+            float rdFactor = 0.6f + comp.Personality.RdSpeed * 0.4f;
+            float innovationBonus = comp.Personality.InnovationBias * 0.15f;
+            float rawQuality = (skillNormalized * rdFactor + innovationBonus) * 100f;
+            float variance = _rng.NextFloat01() * 20f - 10f;
+            finalQuality = Clamp(rawQuality + variance, 25f, 95f);
         }
 
         int selectedCount = product.SelectedFeatureIds?.Length ?? 0;
@@ -1068,10 +1198,21 @@ public class CompetitorSystem : ISystem
         product.ShipTick = tick;
         product.IsOnMarket = true;
         product.IsInDevelopment = false;
-        product.IsMaintained = false;
         product.LifecycleStage = ProductLifecycleStage.Launch;
         product.HasAnnouncedReleaseDate = false;
         product.TotalDevelopmentTicks = EstimateDevTicks(product.TemplateId, finalQuality);
+
+        float maintenanceRatio = archetypeCfg != null ? archetypeCfg.maintenanceBudgetRatio : 0.1f;
+        long initialBudget = (long)(comp.Finance.MonthlyRevenue * maintenanceRatio / Math.Max(1, comp.ActiveProductIds.Count + 1));
+        product.MaintenanceBudgetMonthly = initialBudget;
+        product.IsMaintained = initialBudget > 0;
+        if (product.IsMaintained) {
+            const float budgetRef = 5000f;
+            float budgetMult = (float)(Math.Log10(initialBudget + 1) / Math.Log10(budgetRef + 1));
+            if (budgetMult < 0.1f) budgetMult = 0.1f;
+            if (budgetMult > 2.0f) budgetMult = 2.0f;
+            product.MaintenanceQuality = Math.Clamp(budgetMult * 50f, 10f, 80f);
+        }
 
         if (product.TemplateId != null && _templateLookup.TryGetValue(product.TemplateId, out var featureTemplate))
             _productSystem.InitializeFeatureStates(product, featureTemplate, finalQuality);
@@ -1111,7 +1252,7 @@ public class CompetitorSystem : ISystem
         product.TotalUnitsSold = finalSales;
         product.PeakMonthlySales = finalSales;
 
-        float pricePerUnit = econ?.pricePerUnit ?? 20f;
+        float pricePerUnit = product.PriceOverride > 0f ? product.PriceOverride : (econ?.pricePerUnit ?? 20f);
         int launchRevenue = (int)(finalSales * pricePerUnit);
         product.LaunchRevenue = launchRevenue;
         product.MonthlyRevenue = launchRevenue;
@@ -1383,12 +1524,47 @@ public class CompetitorSystem : ISystem
         }
     }
 
+    private void ProcessScheduledUpdates(Competitor comp, int tick)
+    {
+        if (comp.ScheduledUpdates == null || comp.ScheduledUpdates.Count == 0) return;
+
+        for (int i = comp.ScheduledUpdates.Count - 1; i >= 0; i--)
+        {
+            var update = comp.ScheduledUpdates[i];
+            if (tick < update.ScheduledTick) continue;
+
+            if (!_productState.shippedProducts.TryGetValue(update.ProductId, out var product)) {
+                comp.ScheduledUpdates.RemoveAt(i);
+                continue;
+            }
+
+            product.UpdateCount++;
+            product.TicksSinceLastUpdate = 0;
+            product.ProductVersion++;
+            product.PopularityScore = Math.Min(100f, product.PopularityScore + 10f);
+            product.BugsRemaining = Math.Max(0f, product.BugsRemaining * 0.5f);
+            product.IsLegacy = false;
+            _productState.shippedProducts[update.ProductId] = product;
+
+            comp.ScheduledUpdates.RemoveAt(i);
+            _logger.Log($"[CompetitorSystem] {comp.CompanyName} applied scheduled update to '{product.ProductName}' (version {product.ProductVersion}) at tick {tick}.");
+        }
+    }
+
     private Competitor GenerateCompetitor(IRng rng, int tick, ProductNiche? forcedNiche = null)
     {
         if (_archetypeConfigs == null || _archetypeConfigs.Length == 0) return null;
 
+        int configIndex = PickWeightedArchetypeIndex(rng);
+        if (_archetypeConfigs[configIndex] == null) {
+            int fallback = -1;
+            for (int j = 0; j < _archetypeConfigs.Length; j++) {
+                if (_archetypeConfigs[j] != null) { fallback = j; break; }
+            }
+            if (fallback < 0) return null;
+            configIndex = fallback;
+        }
         var id = new CompetitorId(_state.nextCompetitorId++);
-        int configIndex = rng.Range(0, _archetypeConfigs.Length);
         var archetype = _archetypeConfigs[configIndex].archetype;
 
         string companyName = GenerateCompanyName(rng);
@@ -1418,6 +1594,7 @@ public class CompetitorSystem : ISystem
             NicheMarketShare = new Dictionary<ProductNiche, float>(),
             ActiveProductIds = new List<ProductId>(),
             InDevelopmentProductIds = new List<ProductId>(),
+            ScheduledUpdates = new List<ScheduledCompetitorUpdate>(),
             EmployeeIds = new List<EmployeeId>(),
             TeamAssignments = new Dictionary<TeamId, ProductId>(),
             LastProductEvalTick = tick,
@@ -1451,7 +1628,7 @@ public class CompetitorSystem : ISystem
                     if (!TryPickStartingNiche(rng, out nicheForProduct))
                         break;
                 }
-                bool willComplete = (tick == 0 || p == 0);
+                bool willComplete = (p == 0);
                 Product product = GenerateCompetitorProduct(comp, nicheForProduct, tick, suppressDevEvent: willComplete);
                 if (product != null && willComplete) {
                     InstantShipCompetitorProduct(comp, product.Id, tick);
@@ -1473,6 +1650,10 @@ public class CompetitorSystem : ISystem
                 int devTicks = devMonths * TimeState.TicksPerDay * 30;
                 product.TotalDevelopmentTicks = EstimateDevTicks(product.TemplateId, product.OverallQuality);
                 product.CreationTick = isMidGameSpawn ? tick - ageInTicks - devTicks : -ageInTicks - devTicks;
+                product.ShipTick = isMidGameSpawn ? tick - ageInTicks : -ageInTicks;
+                product.TicksSinceShip = ageInTicks;
+                product.HasCompletedFirstMonth = true;
+                product.SnapshotMonthlyTrend = "Stable";
                 product.TotalLifetimeRevenue = (long)product.MonthlyRevenue * ageInMonths;
                 float ageDecayFactor = 1f / (1f + ageInMonths / 12f);
                 product.ActiveUserCount = (int)(product.ActiveUserCount * ageDecayFactor);
@@ -1483,6 +1664,18 @@ public class CompetitorSystem : ISystem
                     product.LifecycleStage = ProductLifecycleStage.Plateau;
                 } else if (ageInMonths >= 4) {
                     product.LifecycleStage = ProductLifecycleStage.Growth;
+                }
+
+                if (product.TemplateId != null && _templateLookup != null
+                    && _templateLookup.TryGetValue(product.TemplateId, out var tailTmpl)
+                    && tailTmpl.economyConfig != null) {
+                    var cfg = tailTmpl.economyConfig;
+                    float dailyDecay = cfg.tailDecayRate / 30f;
+                    if (product.IsMaintained)
+                        dailyDecay = Math.Max(0f, dailyDecay - cfg.maintenancePopDecayReduction / 30f);
+                    product.TailDecayFactor = Math.Max(cfg.minTailFactor, (float)Math.Pow(1f - dailyDecay, ageInMonths * 30));
+                } else {
+                    product.TailDecayFactor = Math.Max(0.15f, (float)Math.Pow(0.997, ageInMonths * 30));
                 }
 
                 totalHistoricalRevenue += product.TotalLifetimeRevenue;
@@ -2173,6 +2366,38 @@ public class CompetitorSystem : ISystem
 
         niche = keys[rng.Range(0, keys.Count)];
         return true;
+    }
+
+    private int PickWeightedArchetypeIndex(IRng rng) {
+        if (_archetypeConfigs == null || _archetypeConfigs.Length == 0) return 0;
+        int count = _archetypeConfigs.Length;
+        float totalWeight = 0f;
+        for (int i = 0; i < count; i++) {
+            if (_archetypeConfigs[i] == null) continue;
+            bool hasVideoGame = false;
+            var primary = _archetypeConfigs[i].primaryCategories;
+            if (primary != null) {
+                for (int j = 0; j < primary.Length; j++) {
+                    if (primary[j] == ProductCategory.VideoGame) { hasVideoGame = true; break; }
+                }
+            }
+            totalWeight += hasVideoGame ? 2f : 1f;
+        }
+        float roll = rng.NextFloat01() * totalWeight;
+        float accumulated = 0f;
+        for (int i = 0; i < count; i++) {
+            if (_archetypeConfigs[i] == null) continue;
+            bool hasVideoGame = false;
+            var primary = _archetypeConfigs[i].primaryCategories;
+            if (primary != null) {
+                for (int j = 0; j < primary.Length; j++) {
+                    if (primary[j] == ProductCategory.VideoGame) { hasVideoGame = true; break; }
+                }
+            }
+            accumulated += hasVideoGame ? 2f : 1f;
+            if (roll < accumulated) return i;
+        }
+        return count - 1;
     }
 
     private CompetitorArchetypeConfig GetArchetypeConfig(CompetitorArchetype archetype)

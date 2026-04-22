@@ -171,6 +171,24 @@ public class GameController : MonoBehaviour
         _competitorSystem.SyncNicheMarketShares(_gameState.marketState);
         _competitorSystem.ForceInitialFinanceEval(_gameState.currentTick);
 
+        // Seed previous-period snapshots so starting products don't show "New" trend
+        foreach (var kvp in _gameState.productState.shippedProducts) {
+            var p = kvp.Value;
+            p.PreviousDailyActiveUsers = p.ActiveUserCount;
+            p.PreviousMonthActiveUsers = p.ActiveUserCount;
+            p.PreviousMonthlyRevenue = p.MonthlyRevenue;
+            if (p.HasCompletedFirstMonth) {
+                p.SnapshotMonthlyUsers = p.ActiveUserCount;
+                p.SnapshotMonthlyRevenue = (long)p.MonthlyRevenue;
+                p.SnapshotMonthlySales = p.ActiveUserCount;
+                if (p.IsCompetitorProduct && p.TicksSinceShip > 0) {
+                    int ageInMonths = p.TicksSinceShip / (TimeState.TicksPerDay * 30);
+                    if (ageInMonths > 0)
+                        p.TotalLifetimeRevenue = (long)p.MonthlyRevenue * ageInMonths;
+                }
+            }
+        }
+
         if (!startPaused)
         {
             StartAdvance();
@@ -770,6 +788,7 @@ public class GameController : MonoBehaviour
 
         // CompetitorSystem
         if (_gameState.competitorState == null) _gameState.competitorState = CompetitorState.CreateNew();
+        _productSystem.SetCompetitorState(_gameState.competitorState);
         IRng competitorRng = RngFactory.CreateStream(_gameState.masterSeed, "competitors");
         _competitorSystem = new CompetitorSystem(
             _gameState.competitorState,
@@ -893,6 +912,7 @@ public class GameController : MonoBehaviour
         _aiDecisionSystem.RegisterTemplates(safeProductTemplates);
         _aiDecisionSystem.SetProductSystem(_productSystem);
         _aiDecisionSystem.SetCompetitorSystem(_competitorSystem);
+        _aiDecisionSystem.SetTaxSystem(_taxSystem);
 
         _productSystem.OnProductCrisis += OnProductCrisis;
         _productSystem.OnProductSold += OnProductSold;
@@ -1039,8 +1059,6 @@ public class GameController : MonoBehaviour
         return result.ToArray();
     }
 
-    // Also performs skill-scale migration: version 1 saves store skills in 0-100;
-    // version 2 uses 0-20. Divides all skill values by 5 on upgrade.
     private void MigrateAbilityDataIfNeeded()
     {
         if (_gameState.employeeState == null) return;
@@ -1150,7 +1168,7 @@ public class GameController : MonoBehaviour
                     case 0: mail.Category = MailCategory.HR;       break; // old HR(0) → new HR(3)
                     case 1: mail.Category = MailCategory.Contract;  break; // unchanged
                     case 2: mail.Category = MailCategory.Finance;   break; // old Finance(2) → new Finance(4)
-                    case 3: mail.Category = MailCategory.Research;  break; // old Research(3) → new Research(5)
+                    case 3: mail.Category = MailCategory.Technology;  break; // old Research(3) → new Technology(5)
                 }
                 // Priority defaults to Info(0) for all existing items — no remapping needed
                 items[i] = mail;
@@ -1416,7 +1434,6 @@ public class GameController : MonoBehaviour
                     case CompetitorArchetype.PlatformGiant: minCount = 15; maxCount = 25; break;
                     case CompetitorArchetype.FullStack:     minCount = 12; maxCount = 20; break;
                     case CompetitorArchetype.ToolMaker:     minCount = 8;  maxCount = 15; break;
-                    case CompetitorArchetype.CloudProvider: minCount = 8;  maxCount = 14; break;
                     default:                                minCount = 5;  maxCount = 12; break;
                 }
                 int employeeCount = compRng.Range(minCount, maxCount + 1);

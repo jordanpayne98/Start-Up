@@ -26,36 +26,64 @@ MonoBehaviour:
   - category: 0
     niche: 0
     productName: FreeForge Kernel
-    quality: 80
-    marketSharePercent: 40
+    quality: 56
+    marketSharePercent: 26
     featureIds: []
     featureQualities: []
     ageInMonths: 72
     licensingRate: 0
+    maintenanceBudgetMonthly: 4000
   - category: 6
     niche: -1
     productName: FreeForge Toolkit
-    quality: 75
+    quality: 53
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
     ageInMonths: 24
     licensingRate: 0
+    maintenanceBudgetMonthly: 3000
   - category: 4
     niche: -1
     productName: FreeForge Canvas
-    quality: 65
+    quality: 46
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
     ageInMonths: 36
     licensingRate: 0
+    maintenanceBudgetMonthly: 2000
   - category: 5
     niche: -1
     productName: FreeForge Waveform
-    quality: 62
+    quality: 43
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
     ageInMonths: 36
     licensingRate: 0
+    maintenanceBudgetMonthly: 1500
+  - category: 7
+    niche: 10
+    productName: FreeForge Arena
+    quality: 43
+    marketSharePercent: 3
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 10
+    licensingRate: 0
+    maintenanceBudgetMonthly: 1000
+  - category: 6
+    niche: -1
+    productName: FreeForge Compiler
+    quality: 48
+    marketSharePercent: 4
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 14
+    licensingRate: 0
+    maintenanceBudgetMonthly: 2500
+  startingDevProducts: []
+  scheduledUpdates:
+  - productIndex: 1
+    monthsUntilUpdate: 2

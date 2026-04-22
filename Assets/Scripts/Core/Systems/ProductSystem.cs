@@ -136,6 +136,7 @@ public class ProductSystem : ISystem
     }
 
     private ProductState _state;
+    private CompetitorState _competitorState;
     private IRng _rng;
     private ILogger _logger;
     private FinanceSystem _financeSystem;
@@ -184,6 +185,11 @@ public class ProductSystem : ISystem
     public void SetFinanceSystem(FinanceSystem financeSystem)
     {
         _financeSystem = financeSystem;
+    }
+
+    public void SetCompetitorState(CompetitorState competitorState)
+    {
+        _competitorState = competitorState;
     }
 
     public void SetTuningConfig(TuningConfig tuning)
@@ -533,10 +539,60 @@ public class ProductSystem : ISystem
         {
             if (!_state.shippedProducts.TryGetValue(_shippedProductIds[i], out var product)) continue;
             if (!product.IsOnMarket) continue;
-            if (product.IsCompetitorProduct) continue;
-            product.PreviousMonthlyRevenue = product.AccumulatedMonthlyRevenue;
+
+            // Snapshot for ALL products (player + competitor) — used by trend display
+            product.PreviousMonthActiveUsers = product.ActiveUserCount;
+            product.PreviousMonthlyRevenue = product.MonthlyRevenue;
+
+            // Monthly snapshot: users and trend (all products)
+            product.SnapshotMonthlyUsers = product.ActiveUserCount;
+            if (product.PreviousMonthActiveUsers <= 0)
+                product.SnapshotMonthlyTrend = product.ActiveUserCount > 0 ? "New" : "--";
+            else {
+                float trendDelta = (float)(product.ActiveUserCount - product.PreviousMonthActiveUsers) / product.PreviousMonthActiveUsers;
+                if (trendDelta > 0.05f) product.SnapshotMonthlyTrend = "Growth";
+                else if (trendDelta < -0.05f) product.SnapshotMonthlyTrend = "Decline";
+                else product.SnapshotMonthlyTrend = "Stable";
+            }
+            product.HasCompletedFirstMonth = true;
+
+            if (product.IsCompetitorProduct) {
+                product.SnapshotMonthlyRevenue = (long)product.MonthlyRevenue;
+
+                if (product.IsSubscriptionBased) {
+                    product.SnapshotMonthlySales = product.TotalSubscribers;
+                } else {
+                    float unitPrice = GetCompetitorUnitPrice(product);
+                    if (unitPrice > 0f && product.MonthlyRevenue > 0) {
+                        int derivedSales = (int)(product.MonthlyRevenue / unitPrice);
+                        product.SnapshotMonthlySales = derivedSales;
+                        product.TotalUnitsSold += derivedSales;
+                    } else {
+                        product.SnapshotMonthlySales = Math.Max(0, product.ActiveUserCount - product.PreviousMonthActiveUsers);
+                    }
+                }
+                product.PreviousMonthUnitsSold = product.TotalUnitsSold;
+
+                if (product.SnapshotMonthlySales > product.PeakMonthlySales)
+                    product.PeakMonthlySales = product.SnapshotMonthlySales;
+
+                continue;
+            }
+
+            // Player-only: finalize accumulated revenue
             product.MonthlyRevenue = product.AccumulatedMonthlyRevenue;
             product.AccumulatedMonthlyRevenue = 0;
+
+            // Player snapshot: revenue
+            product.SnapshotMonthlyRevenue = (long)product.MonthlyRevenue;
+
+            // Player snapshot: sales
+            if (product.IsSubscriptionBased) {
+                product.SnapshotMonthlySales = product.TotalSubscribers;
+            } else {
+                product.SnapshotMonthlySales = product.TotalUnitsSold - product.PreviousMonthUnitsSold;
+                product.PreviousMonthUnitsSold = product.TotalUnitsSold;
+            }
         }
 
         // Derive DailyRevenue for competitor products from MonthlyRevenue set by MarketSystem
@@ -916,7 +972,25 @@ public class ProductSystem : ISystem
             else
             {
                 product.IsOnMarket = false;
+
+                if (product.TeamAssignments != null) {
+                    foreach (var kvp in product.TeamAssignments)
+                        _state.teamToProduct.Remove(kvp.Value);
+                    product.TeamAssignments.Clear();
+                }
+
+                _state.shippedProducts.Remove(product.Id);
+                _state.archivedProducts[product.Id] = product;
+
+                if (product.IsCompetitorProduct && _competitorState != null)
+                {
+                    CompetitorId compId = product.OwnerCompanyId.ToCompetitorId();
+                    if (_competitorState.competitors.TryGetValue(compId, out var comp) && comp.ActiveProductIds != null)
+                        comp.ActiveProductIds.Remove(product.Id);
+                }
+
                 _pendingEvents.Add(new PendingEvent { Type = PendingEventType.ProductCrisis, ProductId = product.Id, CrisisType = CrisisEventType.Catastrophic });
+                _logger.Log($"[ProductSystem] Catastrophic crisis archived product {product.Id.Value}.");
             }
         }
         else if (nextLevel == 2)
@@ -1406,6 +1480,16 @@ public class ProductSystem : ISystem
         product.ProjectedMonthlyRevenue = product.DailyRevenue * 30;
     }
 
+    private float GetCompetitorUnitPrice(Product product) {
+        if (product.PriceOverride > 0f) return product.PriceOverride;
+        if (product.TemplateId != null && _templateLookup != null
+            && _templateLookup.TryGetValue(product.TemplateId, out var tmpl)
+            && tmpl.economyConfig != null) {
+            return tmpl.economyConfig.pricePerUnit;
+        }
+        return 20f;
+    }
+
     private void UpdateLifecycleStage(Product product, ProductEconomyConfig config, int tick)
     {
         var oldStage = product.LifecycleStage;
@@ -1448,7 +1532,7 @@ public class ProductSystem : ISystem
         float qualityTarget = product.OverallQuality * 0.7f;
         float receptionBonus = (product.PublicReceptionScore / 100f) * 15f;
         float maintainedBonus = product.IsMaintained ? 10f : 0f;
-        float unmaintainedPenalty = (!product.IsMaintained && product.LifecycleStage != ProductLifecycleStage.Launch) ? -15f : 0f;
+        float unmaintainedPenalty = (!product.IsMaintained && product.LifecycleStage != ProductLifecycleStage.Launch) ? -8f : 0f;
         float bugPenalty = -Math.Min(15f, product.BugsRemaining * 0.15f);
         float repScore = _reputationSystem != null ? _reputationSystem.GlobalReputation : 0f;
         float reputationBonus = (repScore / 1500f) * 10f;
@@ -1459,7 +1543,27 @@ public class ProductSystem : ISystem
             _                             => 0f,
         };
 
-        float equilibrium = qualityTarget + receptionBonus + maintainedBonus + unmaintainedPenalty + bugPenalty + reputationBonus + stageModifier;
+        // --- Market-aware modifiers ---
+
+        // 1. Market demand: products in hot niches sustain popularity, cold niches lose it
+        float demand = GetProductDemand(product);
+        float demandModifier = (demand - 50f) * 0.15f;  // range: -7.5 to +7.5
+
+        // 2. Saturation: more competitors in the niche = more downward pressure
+        int competitorCount = CountProductsInSameMarket(product) - 1; // exclude self
+        float saturationPenalty = -Math.Min(8f, competitorCount * 0.6f);  // 0 to -8
+
+        // 3. Relative quality: above-average products hold better, below-average fall faster
+        float avgQuality = ComputeAverageMarketQuality(product);
+        float qualityDelta = avgQuality > 0f ? (product.OverallQuality - avgQuality) / 100f : 0f;
+        float relativeQualityModifier = qualityDelta * 10f;  // range: -5 to +5
+
+        // 4. Age decay: gentle downward drift after 12 months regardless of other factors
+        float ageMonths = product.TicksSinceShip / (float)(TimeState.TicksPerDay * 30);
+        float ageDecay = ageMonths > 12f ? -Math.Min(5f, (ageMonths - 12f) * 0.25f) : 0f;
+
+        float equilibrium = qualityTarget + receptionBonus + maintainedBonus + unmaintainedPenalty + bugPenalty + reputationBonus + stageModifier
+            + demandModifier + saturationPenalty + relativeQualityModifier + ageDecay;
         if (equilibrium < 0f) equilibrium = 0f;
         if (equilibrium > 85f) equilibrium = 85f;
 
@@ -1470,6 +1574,43 @@ public class ProductSystem : ISystem
         if (newPop < 0f) newPop = 0f;
         if (newPop > 100f) newPop = 100f;
         product.PopularityScore = newPop;
+    }
+
+    private float GetProductDemand(Product product) {
+        if (_marketSystem == null) return 50f;
+        if (product.Niche != ProductNiche.None)
+            return _marketSystem.GetNicheDemand(product.Niche);
+        return _marketSystem.GetCategoryDemand(product.Category);
+    }
+
+    private int CountProductsInSameMarket(Product product) {
+        int count = 0;
+        foreach (var kvp in _state.shippedProducts) {
+            var p = kvp.Value;
+            if (!p.IsOnMarket) continue;
+            if (product.Niche != ProductNiche.None) {
+                if (p.Niche == product.Niche) count++;
+            } else {
+                if (p.Niche == ProductNiche.None && p.Category == product.Category) count++;
+            }
+        }
+        return count;
+    }
+
+    private float ComputeAverageMarketQuality(Product product) {
+        float sum = 0f;
+        int count = 0;
+        foreach (var kvp in _state.shippedProducts) {
+            var p = kvp.Value;
+            if (!p.IsOnMarket) continue;
+            bool sameMarket = product.Niche != ProductNiche.None
+                ? p.Niche == product.Niche
+                : (p.Niche == ProductNiche.None && p.Category == product.Category);
+            if (!sameMarket) continue;
+            sum += p.OverallQuality;
+            count++;
+        }
+        return count > 0 ? sum / count : 0f;
     }
 
     private void ProcessReputationDecay()
@@ -3697,7 +3838,7 @@ public class ProductSystem : ISystem
         {
             product.MaintenanceBudgetMonthly = cmd.MonthlyAllocation;
             bool hasQATeam = product.TeamAssignments != null && product.TeamAssignments.ContainsKey(ProductTeamRole.QA);
-            product.IsMaintained = cmd.MonthlyAllocation > 0 && hasQATeam;
+            product.IsMaintained = cmd.MonthlyAllocation > 0 && (product.IsCompetitorProduct || hasQATeam);
         }
         else
         {

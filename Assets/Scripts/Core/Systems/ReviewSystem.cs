@@ -51,13 +51,14 @@ public class ReviewSystem {
             }
 
             float effectiveHarshness = outlet.harshness * (_tuning != null ? _tuning.ReviewHarshnessMultiplier : 1f);
-            float outletScore = weightedScore / effectiveHarshness;
+            float harshnessPenalty = (effectiveHarshness - 1f) * 30f;
+            float outletScore = weightedScore - harshnessPenalty;
             float volatilityRange = outlet.volatility;
             float noise = (_rng.NextFloat01() * 2f - 1f) * volatilityRange;
             outletScore += noise;
-            if (outletScore > 80f) {
-                float excess = outletScore - 80f;
-                outletScore = 80f + excess * (20f / (20f + excess));
+            if (outletScore > 90f) {
+                float excess = outletScore - 90f;
+                outletScore = 90f + excess * (10f / (10f + excess));
             }
             outletScore = outletScore < 0f ? 0f : outletScore > 100f ? 100f : outletScore;
 

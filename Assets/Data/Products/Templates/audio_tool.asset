@@ -108,3 +108,4 @@ MonoBehaviour:
     recoveryRateMax: 0.06
     saturationThreshold: 3
     saturationPenaltyPerProduct: 0.4
+    initialPoolUtilization: 0.08

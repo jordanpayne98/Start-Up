@@ -24,6 +24,7 @@ MonoBehaviour:
   demandFloor: 0
   demandCeiling: 100
   maxUserPool: 25000000
+  initialPoolUtilization: 0.1
   interestRate: 0.15
   basePricePerUnit: 35
   baseSubscriptionPrice: 12

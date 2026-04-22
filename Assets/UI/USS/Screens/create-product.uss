@@ -56,7 +56,7 @@
 .create-product-metric-row {
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: var(--spacing-xs);
 }
 
@@ -68,6 +68,10 @@
 .create-product-metric-value {
     font-size: var(--font-sm);
     color: var(--text-light);
+    white-space: normal;
+    flex-shrink: 1;
+    max-width: 180px;
+    -unity-text-align: upper-right;
 }
 
 .create-product-validation {

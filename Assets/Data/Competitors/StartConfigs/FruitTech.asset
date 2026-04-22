@@ -14,39 +14,71 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CompetitorStartConfig
   companyName: PearByte
   founderName: Marcus Ashford
-  archetype: 0
+  archetype: 3
   personality:
     RiskTolerance: 0.4
     RdSpeed: 0.5
     BrandInvestment: 0.9
     PricingAggression: 0.8
     InnovationBias: 0.55
-  specializations: 00000000
+  specializations: 
   startingProducts:
   - category: 0
     niche: 0
     productName: PearByte Orion
-    quality: 82
-    marketSharePercent: 25
+    quality: 57
+    marketSharePercent: 16
     featureIds: []
     featureQualities: []
     ageInMonths: 60
     licensingRate: 0
+    maintenanceBudgetMonthly: 5500
   - category: 6
     niche: -1
     productName: PearByte Kit
-    quality: 70
+    quality: 49
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
     ageInMonths: 36
     licensingRate: 0
+    maintenanceBudgetMonthly: 3000
   - category: 4
     niche: -1
     productName: PearByte Studio
-    quality: 68
+    quality: 48
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
     ageInMonths: 24
     licensingRate: 0
+    maintenanceBudgetMonthly: 3000
+  - category: 5
+    niche: -1
+    productName: PearByte Harmony
+    quality: 46
+    marketSharePercent: 5
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 18
+    licensingRate: 0
+    maintenanceBudgetMonthly: 2500
+  - category: 7
+    niche: 18
+    productName: PearByte Realms
+    quality: 51
+    marketSharePercent: 3
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 6
+    licensingRate: 0
+    maintenanceBudgetMonthly: 2500
+  startingDevProducts:
+  - category: 6
+    niche: -1
+    productName: PearByte Kit 2
+    devMonthsRemaining: 5
+    featureIds: []
+  scheduledUpdates:
+  - productIndex: 2
+    monthsUntilUpdate: 3

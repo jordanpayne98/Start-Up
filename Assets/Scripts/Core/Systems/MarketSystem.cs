@@ -10,7 +10,7 @@ public class MarketSystem : ISystem
     private const int ProjectionDays = MarketState.ProjectionDays;
     private const float ForecastMaxNoise = 20f;
     private const float ForecastNoiseExponent = 1.3f;
-    private const float UtilizationLerpRate = 0.03f;
+    private const float UtilizationLerpRate = 0.06f;
 
     public event Action<ProductNiche, float, MarketTrend> OnNicheDemandUpdated;
     public event Action<ProductNiche, float> OnNicheDemandSpiked;
@@ -411,7 +411,7 @@ public class MarketSystem : ISystem
                 product.PreviousActiveUsers = product.ActiveUserCount;
                 product.ActiveUserCount = entry.ActiveUsers;
                 product.MonthlyRevenue = entry.MonthlyRevenue;
-                if (product.Category.IsTool() && product.DistributionModel == ToolDistributionModel.Licensed)
+                if (product.Category.IsTool() && product.DistributionModel != ToolDistributionModel.Proprietary)
                 {
                     product.ActiveSubscriberCount = entry.ActiveUsers;
                     product.TotalSubscriptionRevenue += entry.MonthlyRevenue;
@@ -703,12 +703,12 @@ public class MarketSystem : ISystem
 
         float target = baseGrowth * demandFactor * maturityFactor * qualityMult;
         if (target < 0.01f) target = 0.01f;
-        if (target > 0.20f) target = 0.20f;
+        if (target > 0.50f) target = 0.50f;
 
         float current = _state.nichePoolUtilization.TryGetValue(niche, out float cur) ? cur : 0.02f;
         float utilization = Lerp(current, target, UtilizationLerpRate);
         if (utilization < 0.01f) utilization = 0.01f;
-        if (utilization > 0.20f) utilization = 0.20f;
+        if (utilization > 0.50f) utilization = 0.50f;
 
         if (_rng.Chance(0.001f))
         {
@@ -832,12 +832,12 @@ public class MarketSystem : ISystem
 
         float target = baseGrowth * demandFactor * maturityFactor * catQualityMult;
         if (target < 0.01f) target = 0.01f;
-        if (target > 0.20f) target = 0.20f;
+        if (target > 0.50f) target = 0.50f;
 
         float current = _state.categoryPoolUtilization.TryGetValue(cat, out float cur) ? cur : 0.02f;
         float utilization = Lerp(current, target, UtilizationLerpRate);
         if (utilization < 0.01f) utilization = 0.01f;
-        if (utilization > 0.20f) utilization = 0.20f;
+        if (utilization > 0.50f) utilization = 0.50f;
 
         _state.categoryPoolUtilization[cat] = utilization;
     }

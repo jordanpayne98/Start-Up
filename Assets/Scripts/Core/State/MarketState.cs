@@ -87,7 +87,7 @@ public class MarketState
                 state.nicheTrends[cfg.niche]       = MarketTrend.Stable;
                 state.nicheMomentum[cfg.niche]     = (rng.NextFloat01() * 2f - 1f) * cfg.volatility * 0.5f;
                 state.nicheRecoveryRate[cfg.niche] = cfg.recoveryRateMin + rng.NextFloat01() * (cfg.recoveryRateMax - cfg.recoveryRateMin);
-                state.nichePoolUtilization[cfg.niche]         = 0.02f;
+                state.nichePoolUtilization[cfg.niche] = cfg.initialPoolUtilization;
                 state.nicheViralSpikeDaysRemaining[cfg.niche] = 0;
             }
         }
@@ -118,7 +118,7 @@ public class MarketState
                 state.categoryTrends[t.category]       = MarketTrend.Stable;
                 state.categoryMomentum[t.category]     = (rng.NextFloat01() * 2f - 1f) * ec.nicheVolatility * 0.5f;
                 state.categoryRecoveryRate[t.category] = ec.recoveryRateMin + rng.NextFloat01() * (ec.recoveryRateMax - ec.recoveryRateMin);
-                state.categoryPoolUtilization[t.category] = 0.02f;
+                state.categoryPoolUtilization[t.category] = ec.initialPoolUtilization;
             }
         }
 
@@ -132,6 +132,7 @@ public class MarketState
             || cat == ProductCategory.GraphicsEditor
             || cat == ProductCategory.AudioTool
             || cat == ProductCategory.DevFramework
-            || cat == ProductCategory.VideoGame;
+            || cat == ProductCategory.VideoGame
+            || cat == ProductCategory.OperatingSystem;
     }
 }

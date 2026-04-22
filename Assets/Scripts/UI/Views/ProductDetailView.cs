@@ -13,10 +13,11 @@ public class ProductDetailView : IGameView
     private Label _nicheLabel;
     private Label _qualityLabel;
     private Label _featuresLabel;
-    private Label _activeUsersLabel;
-    private Label _marketShareLabel;
+    private Label _salesPerMonthLabel;
+    private Label _usersPerMonthLabel;
     private Label _revenueLabel;
     private Label _monthlyRevenueLabel;
+    private Label _lifetimeSalesLabel;
     private Label _launchDateLabel;
     private Label _lifecycleLabel;
     private Label _maintenanceLabel;
@@ -101,10 +102,11 @@ public class ProductDetailView : IGameView
         marketTitle.AddToClassList("text-bold");
         marketTitle.style.marginBottom = 8;
         marketCard.Add(marketTitle);
-        _activeUsersLabel = CreateInfoRow(marketCard, "Active Users");
-        _marketShareLabel = CreateInfoRow(marketCard, "Market Share");
+        _salesPerMonthLabel = CreateInfoRow(marketCard, "Sales /mo");
+        _usersPerMonthLabel = CreateInfoRow(marketCard, "Users /mo");
         _revenueLabel = CreateInfoRow(marketCard, "Lifetime Revenue");
         _monthlyRevenueLabel = CreateInfoRow(marketCard, "Monthly Revenue");
+        _lifetimeSalesLabel = CreateInfoRow(marketCard, "Lifetime Sales");
         _launchDateLabel = CreateInfoRow(marketCard, "Launch");
         body.Add(marketCard);
 
@@ -259,10 +261,11 @@ public class ProductDetailView : IGameView
         _qualityLabel.text = _vm.Quality;
         _lifecycleLabel.text = _vm.UserTrend;
         _maintenanceLabel.text = _vm.MaintenanceStatus;
-        _activeUsersLabel.text = _vm.ActiveUsers;
-        _marketShareLabel.text = _vm.MarketSharePercent;
+        _salesPerMonthLabel.text = _vm.SalesPerMonth;
+        _usersPerMonthLabel.text = _vm.UsersPerMonth;
         _revenueLabel.text = _vm.LifetimeRevenue;
         _monthlyRevenueLabel.text = _vm.MonthlyRevenue;
+        _lifetimeSalesLabel.text = _vm.LifetimeSales;
         _launchDateLabel.text = _vm.LaunchDate;
         _featuresLabel.text = _vm.FeatureList;
 
@@ -316,6 +319,7 @@ public class ProductDetailView : IGameView
         _mktDrainLabel = null;
         _mktCoverageLabel = null;
         _monthlyRevenueLabel = null;
+        _lifetimeSalesLabel = null;
         _vm = null;
     }
 

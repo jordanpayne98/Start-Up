@@ -76,7 +76,6 @@ public class ContractSystem : ISystem
     private readonly List<ContractId> _scratchIds;
     private readonly List<ContractId> _completedOrFailedIds;
     private readonly int[] _poolSkillCountScratch;
-    private IReadOnlyCollection<string> _unlockedUpgrades;
     private RoleTierTable _roleTierTable;
     private AbilitySystem _abilitySystem;
     private ProductSystem _productSystem;
@@ -124,11 +123,6 @@ public class ContractSystem : ISystem
         _reputationSystem = reputationSystem;
     }
 
-    public void SetUnlockedUpgrades(IReadOnlyCollection<string> upgrades)
-    {
-        _unlockedUpgrades = upgrades;
-    }
-
     public void SetSkillGrowthDependencies(RoleTierTable roleTierTable, AbilitySystem abilitySystem)
     {
         _roleTierTable = roleTierTable;
@@ -171,7 +165,6 @@ public class ContractSystem : ISystem
             Contract contract = _factory.GenerateContract(
                 currentTick,
                 difficultyCap,
-                _unlockedUpgrades ?? Array.Empty<string>(),
                 _poolSkillCountScratch);
 
             if (contract == null)

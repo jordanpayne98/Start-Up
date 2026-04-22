@@ -67,6 +67,7 @@ public class ProductEconomyConfig
     public float nicheVolatility;                // demand volatility for Tier 2 competition pool
     public int retentionMonths;                  // expected product lifespan in months (Tier 2 only)
     [Range(0.01f, 0.40f)] public float interestRate;  // fraction of maxUserPool actually in-market (Tier 2 only)
+    [Range(0.01f, 0.30f)] public float initialPoolUtilization = 0.08f;
 
     // --- Category-Level Demand Fields ---
     [Range(0f, 100f)] public float baseDemand;

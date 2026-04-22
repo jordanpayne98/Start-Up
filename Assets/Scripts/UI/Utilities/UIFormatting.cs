@@ -125,6 +125,7 @@ public static class UIFormatting
                 int tCount = templates.Length;
                 bool found = false;
                 for (int t = 0; t < tCount && !found; t++) {
+                    if (templates[t] == null) continue;
                     var features = templates[t].availableFeatures;
                     if (features == null) continue;
                     int fCount = features.Length;
@@ -260,7 +261,7 @@ public static class UIFormatting
             case MailCategory.Recruitment: return "Recruit";
             case MailCategory.HR:          return "HR";
             case MailCategory.Finance:     return "Finance";
-            case MailCategory.Research:    return "Research";
+            case MailCategory.Technology:  return "Technology";
             case MailCategory.Operations:  return "Ops";
             case MailCategory.NewsArticle: return "News";
             default:                       return "General";

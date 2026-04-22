@@ -2,6 +2,12 @@ using System;
 using System.Collections.Generic;
 
 [Serializable]
+public struct ScheduledCompetitorUpdate {
+    public ProductId ProductId;
+    public int ScheduledTick;
+}
+
+[Serializable]
 public struct CompanyFinance
 {
     public long Cash;
@@ -29,6 +35,7 @@ public class Competitor
     public Dictionary<ProductNiche, float> NicheMarketShare;
     public List<ProductId> ActiveProductIds;
     public List<ProductId> InDevelopmentProductIds;
+    public List<ScheduledCompetitorUpdate> ScheduledUpdates;
     public List<EmployeeId> EmployeeIds;
     public Dictionary<TeamId, ProductId> TeamAssignments;
     public int LastProductEvalTick;
@@ -60,7 +67,7 @@ public class CompetitorState
         {
             competitors = new Dictionary<CompetitorId, Competitor>(),
             nextCompetitorId = 1,
-            maxCompetitorCap = 10,
+            maxCompetitorCap = 30,
             lastSpawnCheckTick = 0
         };
     }

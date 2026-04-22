@@ -150,6 +150,15 @@ public class Product
     public int AccumulatedMonthlyRevenue; // running total for current month
     public float DailyRevenueRemainder;   // float remainder to prevent small products from earning $0/day
     public int PreviousDailyActiveUsers;  // previous day's user count
+    public int PreviousMonthActiveUsers;  // snapshot at month boundary for trend comparison
+
+    // --- Monthly Snapshot (written once per month at month boundary) ---
+    public int SnapshotMonthlySales;     // one-time: units sold this month; subscription: active subscribers at month end
+    public int SnapshotMonthlyUsers;     // ActiveUserCount at month end
+    public long SnapshotMonthlyRevenue;  // finalized monthly revenue
+    public string SnapshotMonthlyTrend;  // "Growth", "Decline", "Stable", "New", or "--"
+    public int PreviousMonthUnitsSold;   // TotalUnitsSold at previous month boundary (for delta calc)
+    public bool HasCompletedFirstMonth;  // false until first OnMonthChanged fires; controls "New"/"--" display
 
     public long TotalProductionCost => UpfrontCostPaid + AccumulatedSalaryCost;
 
@@ -161,8 +170,6 @@ public class Product
     // --- Wizard V2 fields ---
     public bool IsSubscriptionBased;       // player-chosen pricing model (overrides template default)
     public float PriceOverride;            // player-chosen price (one-time or monthly)
-    [System.Obsolete("Always 0f — replaced by MaintenanceBudgetMonthly. Do not use.")]
-    public float MaintenanceCostPerTick;
 
     // --- Layered Architecture fields ---
     public ProductId[] TargetPlatformIds;      // platform products this targets
@@ -175,8 +182,6 @@ public class Product
     public LineageId Lineage;                   // lineage chain identifier
     public bool IsLegacy;                       // true when total debt exceeds threshold
     public int ProductVersion;                  // increments with each shipped update/version
-    [System.Obsolete("Never set or read by any system. Will be removed.")]
-    public float MaintenanceCostBase;           // calculated from feature count
 
     // --- Hardware Configuration (Game Console only) ---
     public bool HasHardwareConfig;                   // true for console products with hardware selected

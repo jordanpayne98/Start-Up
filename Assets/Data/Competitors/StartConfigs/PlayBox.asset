@@ -26,36 +26,59 @@ MonoBehaviour:
   - category: 1
     niche: -1
     productName: ArcadeVault Prime 6
-    quality: 83
-    marketSharePercent: 40
+    quality: 58
+    marketSharePercent: 26
     featureIds: []
     featureQualities: []
     ageInMonths: 24
     licensingRate: 0.1
+    maintenanceBudgetMonthly: 5500
   - category: 7
     niche: 9
     productName: Ember Odyssey
-    quality: 78
+    quality: 55
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
     ageInMonths: 8
     licensingRate: 0
+    maintenanceBudgetMonthly: 2000
   - category: 7
     niche: 13
     productName: Sky Hopper
-    quality: 72
+    quality: 50
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
     ageInMonths: 14
     licensingRate: 0
+    maintenanceBudgetMonthly: 1500
   - category: 7
     niche: 15
     productName: Nitro Circuit
-    quality: 70
+    quality: 49
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
     ageInMonths: 22
     licensingRate: 0
+    maintenanceBudgetMonthly: 1000
+  - category: 7
+    niche: 19
+    productName: ArcadeVault Legends
+    quality: 50
+    marketSharePercent: 3
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 4
+    licensingRate: 0
+    maintenanceBudgetMonthly: 2000
+  startingDevProducts:
+  - category: 7
+    niche: 16
+    productName: ArcadeVault Striker
+    devMonthsRemaining: 5
+    featureIds: []
+  scheduledUpdates:
+  - productIndex: 0
+    monthsUntilUpdate: 3

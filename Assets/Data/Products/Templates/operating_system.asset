@@ -30,16 +30,9 @@ MonoBehaviour:
   - niche: 0
     retentionMonths: 60
     volatility: 0.1
-  - niche: 1
-    retentionMonths: 36
-    volatility: 0.15
-  - niche: 2
-    retentionMonths: 72
-    volatility: 0.05
   revenueModelOptions:
   - premium
   - subscription
-  - free_to_play
   phases:
   - phaseType: 0
     primaryRole: 1
@@ -111,17 +104,17 @@ MonoBehaviour:
     maxMonthlyBugPopularityPenalty: 8
     unmaintainedBugGrowthBase: 0.1
     sequelPopularityBoostMax: 30
-    maxUserPool: 0
+    maxUserPool: 500000000
     basePricePerUnit: 0
     baseSubscriptionPrice: 0
-    priceElasticityExponent: 0
-    nicheVolatility: 0
+    priceElasticityExponent: 1.1
+    nicheVolatility: 0.1
     retentionMonths: 0
     interestRate: 0
-    baseDemand: 0
-    demandFloor: 0
+    baseDemand: 30
+    demandFloor: 5
     demandCeiling: 0
     recoveryRateMin: 0
-    recoveryRateMax: 0
+    recoveryRateMax: 0.05
     saturationThreshold: 0
     saturationPenaltyPerProduct: 0

@@ -199,22 +199,20 @@ public class CreateProductViewModel : IViewModel
         get
         {
             if (_selectedTools.Count == 0) return "No tools selected";
-            if (_selectedTemplate == null) return "";
 
-            float totalLift = 0f;
+            float total = 0f;
+            int count = 0;
             foreach (var kvp in _selectedTools)
             {
                 if (_lastState?.ShippedProducts == null) continue;
                 if (!_lastState.ShippedProducts.TryGetValue(kvp.Value, out var tool)) continue;
-                float toolQualityFactor = tool.OverallQuality / 100f;
-                bool isOwn = !tool.IsCompetitorProduct;
-                float bonus = isOwn ? _selectedTemplate.ownToolQualityBonus : _selectedTemplate.licensedToolQualityBonus;
-                totalLift += bonus * toolQualityFactor;
+                total += tool.OverallQuality;
+                count++;
             }
 
-            float baseCeiling = 75f;
-            float estimatedCeiling = Math.Min(100f, baseCeiling + totalLift * 100f);
-            return "Est. quality ceiling: ~" + ((int)estimatedCeiling) + "%";
+            if (count == 0) return "No tools selected";
+            int avg = (int)(total / count);
+            return "Average Tool Quality: " + avg + "/100";
         }
     }
 
@@ -1553,7 +1551,7 @@ public class CreateProductViewModel : IViewModel
                         DisplayName = product.ProductName,
                         OwnerLabel = "Your Company | Owned",
                         QualityScore = score,
-                        QualitativeLabel = GetQualitativeLabel(score),
+                        QualitativeLabel = ((int)score) + "/100  " + GetQualitativeLabel(score),
                         LicensingCostLabel = "Owned",
                         IsPlayerOwned = true,
                         RoyaltyRate = 0f
@@ -1582,7 +1580,7 @@ public class CreateProductViewModel : IViewModel
                         DisplayName = product.ProductName,
                         OwnerLabel = "Competitor | " + licensingLabel,
                         QualityScore = score,
-                        QualitativeLabel = GetQualitativeLabel(score),
+                        QualitativeLabel = ((int)score) + "/100  " + GetQualitativeLabel(score),
                         LicensingCostLabel = licensingLabel,
                         IsPlayerOwned = false,
                         RoyaltyRate = product.PlayerLicensingRate
@@ -2273,6 +2271,18 @@ public class CreateProductViewModel : IViewModel
             if (_validationMessages[i].IsError) { hasErrors = true; break; }
         }
         CanStartDevelopment = !hasErrors;
+
+        int writeIndex = 0;
+        for (int i = 0; i < msgCount; i++) {
+            if (_validationMessages[i].IsError) {
+                if (i != writeIndex) {
+                    var tmp = _validationMessages[writeIndex];
+                    _validationMessages[writeIndex] = _validationMessages[i];
+                    _validationMessages[i] = tmp;
+                }
+                writeIndex++;
+            }
+        }
     }
 
     // ── Template setup ────────────────────────────────────────────────────────

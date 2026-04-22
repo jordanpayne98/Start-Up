@@ -8,18 +8,18 @@ public struct BrowserProductRowVM
     public string CompanyName;
     public string Niche;
     public string Quality;
-    public string ActiveUsers;
+    public string SalesPerMonth;
     public string Revenue;
-    public string MarketShare;
+    public string UsersPerMonth;
     public string LaunchDate;
     public string LifecycleStage;
     public string UserTrend;
     public string ReviewScore;
     public string ReviewRating;
     public int QualityRaw;
-    public int ActiveUsersRaw;
+    public int SalesPerMonthRaw;
     public long RevenueRaw;
-    public float MarketShareRaw;
+    public int UsersPerMonthRaw;
     public bool IsPlayerOwned;
     public bool IsArchived;
     public long MonthlyRevenueRaw;
@@ -29,6 +29,8 @@ public struct BrowserProductRowVM
     public string ProfitDisplay;
     public bool HasCrisis;
     public CrisisEventType? CrisisType;
+    public int PreviousMonthActiveUsersRaw;
+    public int PreviousMonthRevenueRaw;
 }
 
 public enum ProductBrowserSortColumn
@@ -37,9 +39,9 @@ public enum ProductBrowserSortColumn
     Company,
     Niche,
     Quality,
-    ActiveUsers,
+    SalesPerMonth,
     Revenue,
-    MarketShare
+    UsersPerMonth
 }
 
 public enum OwnerFilter { All, MyProducts, Competitor }
@@ -72,7 +74,7 @@ public class ProductsBrowserViewModel : IViewModel
     }
 
     public ProductsBrowserViewModel() {
-        CurrentSort = ProductBrowserSortColumn.ActiveUsers;
+        CurrentSort = ProductBrowserSortColumn.SalesPerMonth;
         CurrentDirection = SortDirection.Descending;
         CurrentOwner = OwnerFilter.All;
         CurrentStatus = StatusFilter.Live;
@@ -129,36 +131,7 @@ public class ProductsBrowserViewModel : IViewModel
                 ? GetCompetitorName(compState, product.OwnerCompanyId.ToCompetitorId())
                 : (playerCompanyName ?? "Player");
 
-            float marketShare = 0f;
-            if (marketState != null) {
-                if (marketState.currentMarketShares != null) {
-                    foreach (var msKvp in marketState.currentMarketShares) {
-                        var entries = msKvp.Value;
-                        int eCount = entries.Count;
-                        for (int e = 0; e < eCount; e++) {
-                            if (entries[e].ProductId == product.Id) {
-                                marketShare = entries[e].GlobalUserSharePercent;
-                                goto shareFound;
-                            }
-                        }
-                    }
-                }
-                if (marketState.categoryMarketShares != null) {
-                    foreach (var catKvp in marketState.categoryMarketShares) {
-                        var entries = catKvp.Value;
-                        int eCount = entries.Count;
-                        for (int e = 0; e < eCount; e++) {
-                            if (entries[e].ProductId == product.Id) {
-                                marketShare = entries[e].GlobalUserSharePercent;
-                                goto shareFound;
-                            }
-                        }
-                    }
-                }
-                shareFound:;
-            }
-
-            int launchTick = product.CreationTick + product.TotalDevelopmentTicks;
+            int launchTick = product.ShipTick;
             int launchDay = launchTick / TimeState.TicksPerDay;
             int launchYear = TimeState.GetYear(launchDay);
             int launchMonth = TimeState.GetMonth(launchDay);
@@ -187,18 +160,18 @@ public class ProductsBrowserViewModel : IViewModel
                 Quality = product.ReviewResult != null
                     ? ProductReviewViewModel.GetRatingLabel((int)product.ReviewResult.AggregateScore)
                     : "--",
-                ActiveUsers = product.ActiveUserCount.ToString("N0"),
-                Revenue = UIFormatting.FormatMoney(DeriveRevenue(product, currentTick)),
-                MarketShare = UIFormatting.FormatPercent(marketShare),
+                SalesPerMonth = product.HasCompletedFirstMonth ? product.SnapshotMonthlySales.ToString("N0") : "New",
+                Revenue = UIFormatting.FormatMoney(product.HasCompletedFirstMonth ? product.SnapshotMonthlyRevenue : 0L),
+                UsersPerMonth = product.HasCompletedFirstMonth ? product.SnapshotMonthlyUsers.ToString("N0") : "New",
                 LaunchDate = UIFormatting.FormatDate(launchDayOfMonth, launchMonth, launchYear),
                 LifecycleStage = FormatLifecycle(product.LifecycleStage),
-                UserTrend = ComputeUserTrend(product.ActiveUserCount, product.PreviousDailyActiveUsers, product.LifecycleStage),
-                ReviewScore = product.ReviewResult != null ? ((int)product.ReviewResult.AggregateScore).ToString() : "--",
+                UserTrend = product.HasCompletedFirstMonth ? (product.SnapshotMonthlyTrend ?? "--") : "New",
+                ReviewScore = product.ReviewResult != null ? ((int)product.ReviewResult.AggregateScore).ToString() + "/100" : "--",
                 ReviewRating = product.ReviewResult != null ? ProductReviewViewModel.GetRatingLabel((int)product.ReviewResult.AggregateScore) : "--",
                 QualityRaw = product.ReviewResult != null ? (int)product.ReviewResult.AggregateScore : 0,
-                ActiveUsersRaw = product.ActiveUserCount,
-                RevenueRaw = DeriveRevenue(product, currentTick),
-                MarketShareRaw = marketShare,
+                SalesPerMonthRaw = product.SnapshotMonthlySales,
+                RevenueRaw = product.HasCompletedFirstMonth ? product.SnapshotMonthlyRevenue : 0L,
+                UsersPerMonthRaw = product.SnapshotMonthlyUsers,
                 IsPlayerOwned = !product.IsCompetitorProduct,
                 IsArchived = false,
                 MonthlyRevenueRaw = monthlyRevenue,
@@ -207,7 +180,9 @@ public class ProductsBrowserViewModel : IViewModel
                 MaintenanceCostDisplay = UIFormatting.FormatMoney(totalBudgets),
                 ProfitDisplay = UIFormatting.FormatMoney(profit),
                 HasCrisis = hasCrisis,
-                CrisisType = crisisType
+                CrisisType = crisisType,
+                PreviousMonthActiveUsersRaw = product.PreviousMonthActiveUsers,
+                PreviousMonthRevenueRaw = product.PreviousMonthlyRevenue
             });
         }
 
@@ -219,7 +194,7 @@ public class ProductsBrowserViewModel : IViewModel
                     ? GetCompetitorName(compState, product.OwnerCompanyId.ToCompetitorId())
                     : (playerCompanyName ?? "Player");
 
-                int launchTick = product.CreationTick + product.TotalDevelopmentTicks;
+                int launchTick = product.ShipTick;
                 int launchDay = launchTick / TimeState.TicksPerDay;
                 int launchYear = TimeState.GetYear(launchDay);
                 int launchMonth = TimeState.GetMonth(launchDay);
@@ -234,18 +209,18 @@ public class ProductsBrowserViewModel : IViewModel
                     Quality = product.ReviewResult != null
                         ? ProductReviewViewModel.GetRatingLabel((int)product.ReviewResult.AggregateScore)
                         : "--",
-                    ActiveUsers = product.ActiveUserCount.ToString("N0"),
+                    SalesPerMonth = "--",
                     Revenue = UIFormatting.FormatMoney(product.TotalLifetimeRevenue),
-                    MarketShare = "--",
+                    UsersPerMonth = "--",
                     LaunchDate = UIFormatting.FormatDate(launchDayOfMonth, launchMonth, launchYear),
                     LifecycleStage = "Archived",
                     UserTrend = "--",
-                    ReviewScore = product.ReviewResult != null ? ((int)product.ReviewResult.AggregateScore).ToString() : "--",
+                    ReviewScore = product.ReviewResult != null ? ((int)product.ReviewResult.AggregateScore).ToString() + "/100" : "--",
                     ReviewRating = product.ReviewResult != null ? ProductReviewViewModel.GetRatingLabel((int)product.ReviewResult.AggregateScore) : "--",
                     QualityRaw = product.ReviewResult != null ? (int)product.ReviewResult.AggregateScore : 0,
-                    ActiveUsersRaw = product.ActiveUserCount,
+                    SalesPerMonthRaw = 0,
                     RevenueRaw = product.TotalLifetimeRevenue,
-                    MarketShareRaw = 0f,
+                    UsersPerMonthRaw = 0,
                     IsPlayerOwned = !product.IsCompetitorProduct,
                     IsArchived = true,
                     MonthlyRevenueRaw = 0,
@@ -318,14 +293,14 @@ public class ProductsBrowserViewModel : IViewModel
             case ProductBrowserSortColumn.Quality:
                 result = a.QualityRaw.CompareTo(b.QualityRaw);
                 break;
-            case ProductBrowserSortColumn.ActiveUsers:
-                result = a.ActiveUsersRaw.CompareTo(b.ActiveUsersRaw);
+            case ProductBrowserSortColumn.SalesPerMonth:
+                result = a.SalesPerMonthRaw.CompareTo(b.SalesPerMonthRaw);
                 break;
             case ProductBrowserSortColumn.Revenue:
                 result = a.RevenueRaw.CompareTo(b.RevenueRaw);
                 break;
-            case ProductBrowserSortColumn.MarketShare:
-                result = a.MarketShareRaw.CompareTo(b.MarketShareRaw);
+            case ProductBrowserSortColumn.UsersPerMonth:
+                result = a.UsersPerMonthRaw.CompareTo(b.UsersPerMonthRaw);
                 break;
         }
         return CurrentDirection == SortDirection.Descending ? -result : result;
@@ -347,20 +322,6 @@ public class ProductsBrowserViewModel : IViewModel
             case ProductLifecycleStage.Decline:   return "Decline";
             default:                              return stage.ToString();
         }
-    }
-
-    private static string ComputeUserTrend(int activeUsers, int previousUsers, ProductLifecycleStage stage) {
-        if (previousUsers == 0) {
-            return activeUsers > 0 ? "New" : "--";
-        }
-        int delta = activeUsers - previousUsers;
-        if (delta > 0) return "Growth";
-        if (delta < 0) return "Decline";
-        return "Stable";
-    }
-
-    private static long DeriveRevenue(Product product, int currentTick) {
-        return (long)product.MonthlyRevenue;
     }
 
     public void RefreshProductDetail(ProductDetailViewModel detailVM, ProductId id) {

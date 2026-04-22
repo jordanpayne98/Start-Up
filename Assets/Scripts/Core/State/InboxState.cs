@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-public enum MailCategory { Alert, Contract, Recruitment, HR, Finance, Research, Operations, NewsArticle }
+public enum MailCategory { Alert, Contract, Recruitment, HR, Finance, Technology, Operations, NewsArticle }
 public enum MailPriority { Info, Warning, Critical }
 public enum MailActionType { Navigate, OpenModal, DismissOnly }
 

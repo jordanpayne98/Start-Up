@@ -21,9 +21,9 @@
 
 /* ── Phase row layout ─────────────────────────────────────────────────────── */
 .phase-row {
-    flex-direction: row;
-    align-items: center;
-    padding: 6px 0;
+    flex-direction: column;
+    padding: 8px 0;
+    margin-bottom: 2px;
     border-bottom-width: 1px;
     border-bottom-color: rgba(255, 255, 255, 0.05);
 }
@@ -49,12 +49,12 @@
 .phase-row__team {
     font-size: var(--font-xs);
     color: var(--text-muted);
-    margin-top: 2px;
+    margin-left: 4px;
 }
 
 .phase-row__actions {
     flex-direction: row;
-    margin-left: var(--spacing-sm);
+    flex-shrink: 0;
 }
 
 /* ── Product detail panel ─────────────────────────────────────────────────── */
@@ -467,7 +467,7 @@
 
 /* ── Bug indicators — in-development panel ───────────────────────────────── */
 .bug-indicator--warning { color: rgb(255, 193, 7); }
-.phase-row__bugs { font-size: 11px; color: rgb(244, 67, 54); margin-left: 8px; }
+.phase-row__bugs { font-size: 11px; color: rgb(244, 67, 54); margin-left: 8px; flex-shrink: 0; }
 
 /* ── Budget section ──────────────────────────────────────────────────────── */
 .budget-section {

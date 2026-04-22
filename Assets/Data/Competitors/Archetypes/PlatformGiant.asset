@@ -28,7 +28,7 @@ MonoBehaviour:
     PricingAggression: 0.85
     InnovationBias: 0.65
   primaryCategories: 0000000001000000
-  secondaryCategories: 09000000
+  secondaryCategories: 07000000
   marketingBudgetRatio: 0.25
   salaryBudgetRatio: 0.4
   maintenanceBudgetRatio: 0.2

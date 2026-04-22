@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CompetitorStartConfig
   companyName: VoltEdge
   founderName: Hiroshi Tanaka
-  archetype: 4
+  archetype: 3
   personality:
     RiskTolerance: 0.6
     RdSpeed: 0.65
@@ -26,36 +26,49 @@ MonoBehaviour:
   - category: 1
     niche: -1
     productName: VoltEdge Spark
-    quality: 76
-    marketSharePercent: 35
+    quality: 53
+    marketSharePercent: 23
     featureIds: []
     featureQualities: []
     ageInMonths: 30
     licensingRate: 0.08
+    maintenanceBudgetMonthly: 5000
   - category: 3
     niche: -1
     productName: VoltEdge Reactor
-    quality: 71
+    quality: 50
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
     ageInMonths: 20
     licensingRate: 0.05
+    maintenanceBudgetMonthly: 3000
   - category: 7
     niche: 18
     productName: Starfall Legends
-    quality: 74
+    quality: 52
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
     ageInMonths: 10
     licensingRate: 0
+    maintenanceBudgetMonthly: 2000
   - category: 7
     niche: 21
     productName: Iron Arena
-    quality: 69
+    quality: 48
     marketSharePercent: 0
     featureIds: []
     featureQualities: []
     ageInMonths: 16
     licensingRate: 0
+    maintenanceBudgetMonthly: 1500
+  startingDevProducts:
+  - category: 7
+    niche: 14
+    productName: VoltEdge Nexus
+    devMonthsRemaining: 3
+    featureIds: []
+  scheduledUpdates:
+  - productIndex: 1
+    monthsUntilUpdate: 4

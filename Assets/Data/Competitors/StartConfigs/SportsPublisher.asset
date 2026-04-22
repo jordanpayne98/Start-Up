@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: caad3ec2759eb6d43b48e6b034c131ed, type: 3}
+  m_Name: SportsPublisher
+  m_EditorClassIdentifier: Assembly-CSharp::CompetitorStartConfig
+  companyName: Pinnacle Games
+  founderName: Rodrigo Mendes
+  archetype: 5
+  personality:
+    RiskTolerance: 0
+    RdSpeed: 0
+    BrandInvestment: 0
+    PricingAggression: 0
+    InnovationBias: 0
+  specializations: 07000000
+  startingProducts:
+  - category: 7
+    niche: 16
+    productName: Pinnacle Striker 26
+    quality: 53
+    marketSharePercent: 8
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 6
+    licensingRate: 0
+    maintenanceBudgetMonthly: 2000
+  - category: 7
+    niche: 15
+    productName: Apex Velocity
+    quality: 49
+    marketSharePercent: 3
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 20
+    licensingRate: 0
+    maintenanceBudgetMonthly: 1000
+  - category: 7
+    niche: 14
+    productName: Metro Builder
+    quality: 48
+    marketSharePercent: 4
+    featureIds: []
+    featureQualities: []
+    ageInMonths: 14
+    licensingRate: 0
+    maintenanceBudgetMonthly: 1000
+  startingDevProducts:
+  - category: 7
+    niche: 16
+    productName: Pinnacle Striker 27
+    devMonthsRemaining: 6
+    featureIds: []
+  scheduledUpdates:
+  - productIndex: 2
+    monthsUntilUpdate: 3

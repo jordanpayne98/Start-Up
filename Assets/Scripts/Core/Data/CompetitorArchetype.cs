@@ -1,8 +1,8 @@
 public enum CompetitorArchetype {
-    PlatformGiant,   // builds OS/Console, earns from ecosystem
-    ToolMaker,       // builds engines/editors, licenses to everyone
-    GameStudio,      // builds games, licenses others' engines/platforms
-    AppDeveloper,    // builds apps/SaaS, targets popular platforms
-    FullStack,       // tries everything (rare, very large companies)
-    CloudProvider    // builds cloud infra, serves AI/SaaS companies
+    PlatformGiant = 0,
+    ToolMaker     = 1,
+    GameStudio    = 2,
+    FullStack     = 3,
+    IndieStudio   = 4,
+    AAAPublisher  = 5,
 }
