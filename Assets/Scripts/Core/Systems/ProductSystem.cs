@@ -540,16 +540,18 @@ public class ProductSystem : ISystem
             if (!_state.shippedProducts.TryGetValue(_shippedProductIds[i], out var product)) continue;
             if (!product.IsOnMarket) continue;
 
+            int oldPreviousMonthActiveUsers = product.PreviousMonthActiveUsers;
+
             // Snapshot for ALL products (player + competitor) — used by trend display
             product.PreviousMonthActiveUsers = product.ActiveUserCount;
             product.PreviousMonthlyRevenue = product.MonthlyRevenue;
 
             // Monthly snapshot: users and trend (all products)
             product.SnapshotMonthlyUsers = product.ActiveUserCount;
-            if (product.PreviousMonthActiveUsers <= 0)
+            if (oldPreviousMonthActiveUsers <= 0)
                 product.SnapshotMonthlyTrend = product.ActiveUserCount > 0 ? "New" : "--";
             else {
-                float trendDelta = (float)(product.ActiveUserCount - product.PreviousMonthActiveUsers) / product.PreviousMonthActiveUsers;
+                float trendDelta = (float)(product.ActiveUserCount - oldPreviousMonthActiveUsers) / oldPreviousMonthActiveUsers;
                 if (trendDelta > 0.05f) product.SnapshotMonthlyTrend = "Growth";
                 else if (trendDelta < -0.05f) product.SnapshotMonthlyTrend = "Decline";
                 else product.SnapshotMonthlyTrend = "Stable";
@@ -568,7 +570,7 @@ public class ProductSystem : ISystem
                         product.SnapshotMonthlySales = derivedSales;
                         product.TotalUnitsSold += derivedSales;
                     } else {
-                        product.SnapshotMonthlySales = Math.Max(0, product.ActiveUserCount - product.PreviousMonthActiveUsers);
+                        product.SnapshotMonthlySales = Math.Max(0, product.ActiveUserCount - oldPreviousMonthActiveUsers);
                     }
                 }
                 product.PreviousMonthUnitsSold = product.TotalUnitsSold;

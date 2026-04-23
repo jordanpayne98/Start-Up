@@ -198,8 +198,19 @@ public class GameController : MonoBehaviour
                                     ? (long)(currentMonthlySales / p.TailDecayFactor)
                                     : currentMonthlySales;
                                 p.PeakMonthlySales = (int)Math.Max(p.PeakMonthlySales, undecayedPeak);
-                                p.TotalUnitsSold = currentMonthlySales * ageInMonths;
+                                long shapedUnits = EstimateShapedLifetimeTotal(currentMonthlySales, p.TailDecayFactor, ageInMonths);
+                                p.TotalUnitsSold = (int)Math.Min(shapedUnits, int.MaxValue);
                                 p.PreviousMonthUnitsSold = p.TotalUnitsSold;
+                            } else {
+                                float fallbackPrice = 20f;
+                                int fallbackSales = (int)(p.MonthlyRevenue / fallbackPrice);
+                                if (fallbackSales > 0) {
+                                    p.SnapshotMonthlySales = fallbackSales;
+                                    long shapedUnits = EstimateShapedLifetimeTotal(fallbackSales, p.TailDecayFactor, ageInMonths);
+                                    p.TotalUnitsSold = (int)Math.Min(shapedUnits, int.MaxValue);
+                                    p.PreviousMonthUnitsSold = p.TotalUnitsSold;
+                                    p.PeakMonthlySales = Math.Max(p.PeakMonthlySales, fallbackSales);
+                                }
                             }
                         }
                     }
@@ -424,7 +435,7 @@ public class GameController : MonoBehaviour
         double monthDecay = Math.Pow(tailDecayFactor, 1.0 / ageInMonths);
         double peak = currentMonthly / tailDecayFactor;
         double total = peak * (1.0 - Math.Pow(monthDecay, ageInMonths)) / (1.0 - monthDecay);
-        return (long)Math.Max(total, currentMonthly * ageInMonths);
+        return (long)Math.Max(total, 0);
     }
 
     private void LoadOrCreateGameState()
