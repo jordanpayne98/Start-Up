@@ -435,6 +435,8 @@ public class CompetitorSystem : ISystem
         product.ShipTick = -ageInTicks;
         product.CreationTick = -ageInTicks - devTicks;
         product.TicksSinceShip = ageInTicks;
+        int graceTicks = 6 * TimeState.TicksPerDay * 30;
+        product.WorldStartSunsetGraceUntilTick = graceTicks;
 
         product.MaintenanceBudgetMonthly = sp.maintenanceBudgetMonthly;
         product.IsMaintained = sp.maintenanceBudgetMonthly > 0;
@@ -1652,6 +1654,10 @@ public class CompetitorSystem : ISystem
                 product.CreationTick = isMidGameSpawn ? tick - ageInTicks - devTicks : -ageInTicks - devTicks;
                 product.ShipTick = isMidGameSpawn ? tick - ageInTicks : -ageInTicks;
                 product.TicksSinceShip = ageInTicks;
+                if (!isMidGameSpawn) {
+                    int graceTicks = 6 * TimeState.TicksPerDay * 30;
+                    product.WorldStartSunsetGraceUntilTick = graceTicks;
+                }
                 product.HasCompletedFirstMonth = true;
                 product.SnapshotMonthlyTrend = "Stable";
                 float ageDecayFactor = 1f / (1f + ageInMonths / 12f);

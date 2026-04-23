@@ -159,6 +159,7 @@ public class Product
     public string SnapshotMonthlyTrend;  // "Growth", "Decline", "Stable", "New", or "--"
     public int PreviousMonthUnitsSold;   // TotalUnitsSold at previous month boundary (for delta calc)
     public bool HasCompletedFirstMonth;  // false until first OnMonthChanged fires; controls "New"/"--" display
+    public int WorldStartSunsetGraceUntilTick; // tick after which normal sunset evaluation applies; 0 = no grace
 
     public long TotalProductionCost => UpfrontCostPaid + AccumulatedSalaryCost;
 

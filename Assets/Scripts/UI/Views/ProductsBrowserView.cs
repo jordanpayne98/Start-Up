@@ -19,6 +19,7 @@ public class ProductsBrowserView : IGameView
     private Label _summaryMaintenanceLabel;
     private Label _summaryNetLabel;
     private VisualElement _summaryCard;
+    private Button _revenueHeaderBtn;
 
     private static readonly OwnerFilter[] _ownerEnums = { OwnerFilter.All, OwnerFilter.MyProducts, OwnerFilter.Competitor };
     private static readonly StatusFilter[] _statusEnums = { StatusFilter.Live, StatusFilter.Archived, StatusFilter.All };
@@ -124,6 +125,7 @@ public class ProductsBrowserView : IGameView
             _headerButtons.Add(btn);
         }
         content.Add(headerRow);
+        _revenueHeaderBtn = _headerButtons[5];
 
         _listContainer = new VisualElement();
         _listPool = new ElementPool(CreateProductRow, _listContainer);
@@ -172,6 +174,7 @@ public class ProductsBrowserView : IGameView
         _summaryMaintenanceLabel = null;
         _summaryNetLabel = null;
         _summaryCard = null;
+        _revenueHeaderBtn = null;
     }
 
     private void OnOwnerFilterClicked(OwnerFilter filter) {
@@ -183,6 +186,10 @@ public class ProductsBrowserView : IGameView
     private void OnStatusFilterClicked(StatusFilter filter) {
         if (_viewModel == null) return;
         _viewModel.SetStatusFilter(filter);
+        if (_revenueHeaderBtn != null)
+            _revenueHeaderBtn.text = filter == StatusFilter.Archived ? "Lifetime Rev."
+                                   : filter == StatusFilter.All      ? "Revenue"
+                                   :                                    "Monthly Rev.";
         Bind(_viewModel);
     }
 

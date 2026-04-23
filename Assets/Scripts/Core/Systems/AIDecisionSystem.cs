@@ -628,6 +628,9 @@ public class AIDecisionSystem : ISystem
                 (comp.InDevelopmentProductIds == null || comp.InDevelopmentProductIds.Count == 0);
             if (isLastProduct) continue;
 
+            if (product.WorldStartSunsetGraceUntilTick > 0 && tick < product.WorldStartSunsetGraceUntilTick)
+                continue;
+
             int mercyTicks = 6 * TimeState.TicksPerDay * 30;
             if (product.MonthlyRevenue < 500L && product.TicksSinceShip > mercyTicks)
             {
