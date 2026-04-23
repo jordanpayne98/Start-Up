@@ -570,7 +570,9 @@ public class ProductSystem : ISystem
                         product.SnapshotMonthlySales = derivedSales;
                         product.TotalUnitsSold += derivedSales;
                     } else {
-                        product.SnapshotMonthlySales = Math.Max(0, product.ActiveUserCount - oldPreviousMonthActiveUsers);
+                        int userBasedFallback = Math.Max(1, (int)Math.Round(product.ActiveUserCount * 0.15f));
+                        product.SnapshotMonthlySales = userBasedFallback;
+                        product.TotalUnitsSold += userBasedFallback;
                     }
                 }
                 product.PreviousMonthUnitsSold = product.TotalUnitsSold;

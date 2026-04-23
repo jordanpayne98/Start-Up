@@ -1683,7 +1683,14 @@ public class CompetitorSystem : ISystem
                 }
             }
             if (isMidGameSpawn) {
-                comp.Finance.Cash += totalHistoricalRevenue;
+                long totalCurrentMonthly = 0L;
+                for (int p2 = 0; p2 < activeCount; p2++) {
+                    ProductId pid2 = comp.ActiveProductIds[p2];
+                    if (_productState.shippedProducts.TryGetValue(pid2, out var prod2))
+                        totalCurrentMonthly += (long)prod2.MonthlyRevenue;
+                }
+                long retainedCash = Math.Min(totalHistoricalRevenue / 10, totalCurrentMonthly * 12);
+                comp.Finance.Cash += retainedCash;
             }
         }
 

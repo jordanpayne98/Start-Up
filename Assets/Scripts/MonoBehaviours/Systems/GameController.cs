@@ -190,27 +190,22 @@ public class GameController : MonoBehaviour
                         if (p.IsSubscriptionBased) {
                             p.SnapshotMonthlySales = p.TotalSubscribers;
                         } else {
+                            int userBasedCap = Math.Max(1, (int)Math.Round(p.ActiveUserCount * 0.15f));
                             float unitPrice = _productSystem.GetCompetitorUnitPrice(p);
                             if (unitPrice > 0f) {
-                                int currentMonthlySales = (int)(p.MonthlyRevenue / unitPrice);
+                                int currentMonthlySales = Math.Min((int)(p.MonthlyRevenue / unitPrice), userBasedCap);
                                 p.SnapshotMonthlySales = currentMonthlySales;
-                                long undecayedPeak = p.TailDecayFactor > 0f
-                                    ? (long)(currentMonthlySales / p.TailDecayFactor)
-                                    : currentMonthlySales;
-                                p.PeakMonthlySales = (int)Math.Max(p.PeakMonthlySales, undecayedPeak);
+                                p.PeakMonthlySales = Math.Max(p.PeakMonthlySales, currentMonthlySales);
                                 long shapedUnits = EstimateShapedLifetimeTotal(currentMonthlySales, p.TailDecayFactor, ageInMonths);
                                 p.TotalUnitsSold = (int)Math.Min(shapedUnits, int.MaxValue);
                                 p.PreviousMonthUnitsSold = p.TotalUnitsSold;
                             } else {
-                                float fallbackPrice = 20f;
-                                int fallbackSales = (int)(p.MonthlyRevenue / fallbackPrice);
-                                if (fallbackSales > 0) {
-                                    p.SnapshotMonthlySales = fallbackSales;
-                                    long shapedUnits = EstimateShapedLifetimeTotal(fallbackSales, p.TailDecayFactor, ageInMonths);
-                                    p.TotalUnitsSold = (int)Math.Min(shapedUnits, int.MaxValue);
-                                    p.PreviousMonthUnitsSold = p.TotalUnitsSold;
-                                    p.PeakMonthlySales = Math.Max(p.PeakMonthlySales, fallbackSales);
-                                }
+                                int currentMonthlySales = userBasedCap;
+                                p.SnapshotMonthlySales = currentMonthlySales;
+                                p.PeakMonthlySales = Math.Max(p.PeakMonthlySales, currentMonthlySales);
+                                long shapedUnits = EstimateShapedLifetimeTotal(currentMonthlySales, p.TailDecayFactor, ageInMonths);
+                                p.TotalUnitsSold = (int)Math.Min(shapedUnits, int.MaxValue);
+                                p.PreviousMonthUnitsSold = p.TotalUnitsSold;
                             }
                         }
                     }
@@ -231,13 +226,17 @@ public class GameController : MonoBehaviour
             foreach (var compKvp in _gameState.competitorState.competitors) {
                 var comp = compKvp.Value;
                 if (comp.ActiveProductIds == null) continue;
-                long cashAccum = 0L;
+                long companyHistoricalRevenue = 0L;
+                long companyCurrentMonthlyRevenue = 0L;
                 int pidCount = comp.ActiveProductIds.Count;
                 for (int pi = 0; pi < pidCount; pi++) {
-                    if (_gameState.productState.shippedProducts.TryGetValue(comp.ActiveProductIds[pi], out var prod))
-                        cashAccum += prod.TotalLifetimeRevenue;
+                    if (_gameState.productState.shippedProducts.TryGetValue(comp.ActiveProductIds[pi], out var prod)) {
+                        companyHistoricalRevenue += prod.TotalLifetimeRevenue;
+                        companyCurrentMonthlyRevenue += (long)prod.MonthlyRevenue;
+                    }
                 }
-                comp.Finance.Cash += cashAccum;
+                long retainedCash = Math.Min((long)(companyHistoricalRevenue * 0.10), companyCurrentMonthlyRevenue * 12);
+                comp.Finance.Cash += retainedCash;
             }
             _freshWorldGeneration = false;
         }
@@ -430,10 +429,14 @@ public class GameController : MonoBehaviour
     }
     
     private static long EstimateShapedLifetimeTotal(double currentMonthly, float tailDecayFactor, int ageInMonths) {
-        if (tailDecayFactor <= 0f || ageInMonths <= 0) return (long)(currentMonthly * ageInMonths);
-        if (tailDecayFactor >= 0.999f) return (long)(currentMonthly * ageInMonths);
-        double monthDecay = Math.Pow(tailDecayFactor, 1.0 / ageInMonths);
-        double peak = currentMonthly / tailDecayFactor;
+        if (tailDecayFactor <= 0f || ageInMonths <= 0) return (long)(currentMonthly * Math.Max(ageInMonths, 0));
+        float effectiveTail;
+        if (ageInMonths >= 60) effectiveTail = Math.Min(tailDecayFactor, 0.94f);
+        else if (ageInMonths >= 36) effectiveTail = Math.Min(tailDecayFactor, 0.96f);
+        else if (ageInMonths >= 12) effectiveTail = Math.Min(tailDecayFactor, 0.98f);
+        else effectiveTail = Math.Min(tailDecayFactor, 0.99f);
+        double monthDecay = Math.Pow(effectiveTail, 1.0 / ageInMonths);
+        double peak = currentMonthly / effectiveTail;
         double total = peak * (1.0 - Math.Pow(monthDecay, ageInMonths)) / (1.0 - monthDecay);
         return (long)Math.Max(total, 0);
     }

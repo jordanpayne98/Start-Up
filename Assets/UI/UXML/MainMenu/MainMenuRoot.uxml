@@ -14,7 +14,7 @@
             <ui:Button name="btn-load-game" text="Load Game" class="btn-secondary menu-btn" />
             <ui:Button name="btn-settings" text="Settings" class="btn-secondary menu-btn" />
             <ui:Button name="btn-exit" text="Exit" class="btn-ghost menu-btn" />
-            <ui:Label name="version-label" text="v0.0.206" class="version-label" />
+            <ui:Label name="version-label" text="v0.0.207" class="version-label" />
         </ui:VisualElement>
     </ui:VisualElement>
     <!-- New Game Screen -->
