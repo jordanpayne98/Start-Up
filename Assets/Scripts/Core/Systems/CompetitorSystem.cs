@@ -1654,7 +1654,6 @@ public class CompetitorSystem : ISystem
                 product.TicksSinceShip = ageInTicks;
                 product.HasCompletedFirstMonth = true;
                 product.SnapshotMonthlyTrend = "Stable";
-                product.TotalLifetimeRevenue = (long)product.MonthlyRevenue * ageInMonths;
                 float ageDecayFactor = 1f / (1f + ageInMonths / 12f);
                 product.ActiveUserCount = (int)(product.ActiveUserCount * ageDecayFactor);
 
@@ -1678,9 +1677,12 @@ public class CompetitorSystem : ISystem
                     product.TailDecayFactor = Math.Max(0.15f, (float)Math.Pow(0.997, ageInMonths * 30));
                 }
 
-                totalHistoricalRevenue += product.TotalLifetimeRevenue;
+                if (isMidGameSpawn) {
+                    product.TotalLifetimeRevenue = (long)product.MonthlyRevenue * ageInMonths;
+                    totalHistoricalRevenue += product.TotalLifetimeRevenue;
+                }
             }
-            if (!isMidGameSpawn) {
+            if (isMidGameSpawn) {
                 comp.Finance.Cash += totalHistoricalRevenue;
             }
         }

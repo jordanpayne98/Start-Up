@@ -75,6 +75,7 @@ public class GameController : MonoBehaviour
     private GenerationSystem _generationSystem;
     private bool _isAdvancing;
     private bool _stopAdvanceRequested;
+    private bool _freshWorldGeneration;
     private Coroutine _advanceCoroutine;
     
     // Interrupt dirty flags — set by On* handlers after each SimTick batch
@@ -159,6 +160,7 @@ public class GameController : MonoBehaviour
             IRng startRng = RngFactory.CreateStream(_gameState.masterSeed, "competitor-start");
             int competitorCount = startRng.Range(10, 16);
             _competitorSystem.GenerateStartingCompetitors(competitorCount, _gameState.masterSeed);
+            _freshWorldGeneration = true;
         }
 
         _competitorSystem.MigrateGhostProducts();
@@ -174,29 +176,59 @@ public class GameController : MonoBehaviour
         // Seed previous-period snapshots so starting products don't show "New" trend
         foreach (var kvp in _gameState.productState.shippedProducts) {
             var p = kvp.Value;
-            p.PreviousDailyActiveUsers = p.ActiveUserCount;
-            p.PreviousMonthActiveUsers = p.ActiveUserCount;
-            p.PreviousMonthlyRevenue = p.MonthlyRevenue;
-            if (p.HasCompletedFirstMonth) {
-                p.SnapshotMonthlyUsers = p.ActiveUserCount;
-                p.SnapshotMonthlyRevenue = (long)p.MonthlyRevenue;
-                p.SnapshotMonthlySales = p.ActiveUserCount;
-                if (p.IsCompetitorProduct && p.TicksSinceShip > 0) {
+            if (p.IsCompetitorProduct) {
+                if (!_freshWorldGeneration) continue;
+                p.PreviousDailyActiveUsers = p.ActiveUserCount;
+                p.PreviousMonthActiveUsers = p.ActiveUserCount;
+                p.PreviousMonthlyRevenue = p.MonthlyRevenue;
+                if (p.HasCompletedFirstMonth) {
+                    p.SnapshotMonthlyUsers = p.ActiveUserCount;
+                    p.SnapshotMonthlyRevenue = (long)p.MonthlyRevenue;
                     int ageInMonths = p.TicksSinceShip / (TimeState.TicksPerDay * 30);
                     if (ageInMonths > 0) {
-                        p.TotalLifetimeRevenue = (long)p.MonthlyRevenue * ageInMonths;
-                        if (!p.IsSubscriptionBased) {
+                        p.TotalLifetimeRevenue = EstimateShapedLifetimeTotal(p.MonthlyRevenue, p.TailDecayFactor, ageInMonths);
+                        if (p.IsSubscriptionBased) {
+                            p.SnapshotMonthlySales = p.TotalSubscribers;
+                        } else {
                             float unitPrice = _productSystem.GetCompetitorUnitPrice(p);
                             if (unitPrice > 0f) {
                                 int currentMonthlySales = (int)(p.MonthlyRevenue / unitPrice);
+                                p.SnapshotMonthlySales = currentMonthlySales;
+                                long undecayedPeak = p.TailDecayFactor > 0f
+                                    ? (long)(currentMonthlySales / p.TailDecayFactor)
+                                    : currentMonthlySales;
+                                p.PeakMonthlySales = (int)Math.Max(p.PeakMonthlySales, undecayedPeak);
                                 p.TotalUnitsSold = currentMonthlySales * ageInMonths;
                                 p.PreviousMonthUnitsSold = p.TotalUnitsSold;
-                                p.PeakMonthlySales = Math.Max(p.PeakMonthlySales, currentMonthlySales);
                             }
                         }
                     }
                 }
+            } else {
+                p.PreviousDailyActiveUsers = p.ActiveUserCount;
+                p.PreviousMonthActiveUsers = p.ActiveUserCount;
+                p.PreviousMonthlyRevenue = p.MonthlyRevenue;
+                if (p.HasCompletedFirstMonth) {
+                    p.SnapshotMonthlyUsers = p.ActiveUserCount;
+                    p.SnapshotMonthlyRevenue = (long)p.MonthlyRevenue;
+                    p.SnapshotMonthlySales = p.ActiveUserCount;
+                }
             }
+        }
+
+        if (_freshWorldGeneration) {
+            foreach (var compKvp in _gameState.competitorState.competitors) {
+                var comp = compKvp.Value;
+                if (comp.ActiveProductIds == null) continue;
+                long cashAccum = 0L;
+                int pidCount = comp.ActiveProductIds.Count;
+                for (int pi = 0; pi < pidCount; pi++) {
+                    if (_gameState.productState.shippedProducts.TryGetValue(comp.ActiveProductIds[pi], out var prod))
+                        cashAccum += prod.TotalLifetimeRevenue;
+                }
+                comp.Finance.Cash += cashAccum;
+            }
+            _freshWorldGeneration = false;
         }
 
         if (!startPaused)
@@ -386,6 +418,15 @@ public class GameController : MonoBehaviour
         }
     }
     
+    private static long EstimateShapedLifetimeTotal(double currentMonthly, float tailDecayFactor, int ageInMonths) {
+        if (tailDecayFactor <= 0f || ageInMonths <= 0) return (long)(currentMonthly * ageInMonths);
+        if (tailDecayFactor >= 0.999f) return (long)(currentMonthly * ageInMonths);
+        double monthDecay = Math.Pow(tailDecayFactor, 1.0 / ageInMonths);
+        double peak = currentMonthly / tailDecayFactor;
+        double total = peak * (1.0 - Math.Pow(monthDecay, ageInMonths)) / (1.0 - monthDecay);
+        return (long)Math.Max(total, currentMonthly * ageInMonths);
+    }
+
     private void LoadOrCreateGameState()
     {
         if (NewGameData.IsNewGame)
