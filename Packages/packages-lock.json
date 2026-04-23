@@ -1,13 +1,13 @@
 {
   "dependencies": {
     "com.adjoint.editor": {
-      "version": "https://github.com/adjointdev/adjoint-beta-dist.git#v1.5.5",
+      "version": "https://github.com/adjointdev/adjoint-beta-dist.git#v1.5.6",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.0.2"
       },
-      "hash": "c52648b9dce61ba8baa325ece4608343eadd6c24"
+      "hash": "a960fb27d519b1008dde19126ad5b8012df31719"
     },
     "com.bezi.sidekick": {
       "version": "file:com.bezi.sidekick",

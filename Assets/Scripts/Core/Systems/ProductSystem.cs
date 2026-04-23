@@ -1480,7 +1480,7 @@ public class ProductSystem : ISystem
         product.ProjectedMonthlyRevenue = product.DailyRevenue * 30;
     }
 
-    private float GetCompetitorUnitPrice(Product product) {
+    public float GetCompetitorUnitPrice(Product product) {
         if (product.PriceOverride > 0f) return product.PriceOverride;
         if (product.TemplateId != null && _templateLookup != null
             && _templateLookup.TryGetValue(product.TemplateId, out var tmpl)

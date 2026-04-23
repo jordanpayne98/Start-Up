@@ -183,8 +183,18 @@ public class GameController : MonoBehaviour
                 p.SnapshotMonthlySales = p.ActiveUserCount;
                 if (p.IsCompetitorProduct && p.TicksSinceShip > 0) {
                     int ageInMonths = p.TicksSinceShip / (TimeState.TicksPerDay * 30);
-                    if (ageInMonths > 0)
+                    if (ageInMonths > 0) {
                         p.TotalLifetimeRevenue = (long)p.MonthlyRevenue * ageInMonths;
+                        if (!p.IsSubscriptionBased) {
+                            float unitPrice = _productSystem.GetCompetitorUnitPrice(p);
+                            if (unitPrice > 0f) {
+                                int currentMonthlySales = (int)(p.MonthlyRevenue / unitPrice);
+                                p.TotalUnitsSold = currentMonthlySales * ageInMonths;
+                                p.PreviousMonthUnitsSold = p.TotalUnitsSold;
+                                p.PeakMonthlySales = Math.Max(p.PeakMonthlySales, currentMonthlySales);
+                            }
+                        }
+                    }
                 }
             }
         }
