@@ -235,15 +235,6 @@ public class CompetitorSystem : ISystem
                 }
             }
 
-            if (cfg.startingDevProducts != null)
-            {
-                for (int p = 0; p < cfg.startingDevProducts.Length; p++)
-                {
-                    var sdp = cfg.startingDevProducts[p];
-                    CreateStartingDevProduct(comp, sdp);
-                }
-            }
-
             if (cfg.scheduledUpdates != null && startingProductIds != null)
             {
                 for (int p = 0; p < cfg.scheduledUpdates.Length; p++)
@@ -508,76 +499,6 @@ public class CompetitorSystem : ISystem
             comp.NicheMarketShare[sp.niche] = sp.marketSharePercent;
     }
 
-    private void CreateStartingDevProduct(Competitor comp, StartingDevProduct sdp)
-    {
-        var productId = new ProductId(_productState.nextProductId++);
-
-        int devTicks = sdp.devMonthsRemaining * 30 * TimeState.TicksPerDay;
-        int targetReleaseTick = devTicks;
-
-        ProductNiche resolvedNiche = IsTemplateForCategoryTier2(sdp.category) ? ProductNiche.None : sdp.niche;
-        string templateId = resolvedNiche != ProductNiche.None
-            ? FindTemplateForNiche(resolvedNiche)
-            : FindTemplateForCategory(sdp.category);
-
-        string[] featureIds = sdp.featureIds != null && sdp.featureIds.Length > 0
-            ? sdp.featureIds
-            : null;
-
-        ProductPhaseRuntime[] phases;
-        if (_productSystem != null && templateId != null)
-        {
-            phases = _productSystem.BuildPhasesForTemplate(templateId, featureIds, 1f);
-        }
-        else
-        {
-            phases = new ProductPhaseRuntime[]
-            {
-                new ProductPhaseRuntime
-                {
-                    phaseType = ProductPhaseType.Programming,
-                    phaseQuality = 0f,
-                    totalWorkRequired = 1000f,
-                    workCompleted = 0f,
-                    isComplete = false,
-                    isUnlocked = true
-                }
-            };
-        }
-
-        var product = new Product
-        {
-            Id = productId,
-            ProductName = sdp.productName,
-            OwnerCompanyId = comp.Id.ToCompanyId(),
-            IsInDevelopment = true,
-            IsShipped = false,
-            IsOnMarket = false,
-            CreationTick = -devTicks,
-            TargetReleaseTick = targetReleaseTick,
-            OriginalReleaseTick = targetReleaseTick,
-            HasAnnouncedReleaseDate = true,
-            TemplateId = templateId,
-            Phases = phases,
-            TeamAssignments = new Dictionary<ProductTeamRole, TeamId>(),
-            ActiveUserCount = 0,
-            OverallQuality = 0f,
-            PopularityScore = 0f,
-            MonthlyRevenue = 0,
-            LifecycleStage = ProductLifecycleStage.PreLaunch,
-            Niche = resolvedNiche,
-            Category = sdp.category,
-            SelectedFeatureIds = featureIds,
-            TotalDevelopmentTicks = 0,
-            DroppedFeatureIds = new List<string>(),
-            SequelIds = new List<ProductId>()
-        };
-
-        _productState.developmentProducts[productId] = product;
-        comp.InDevelopmentProductIds.Add(productId);
-
-        _logger.Log($"[CompetitorSystem] Created in-dev product '{sdp.productName}' for '{comp.CompanyName}' (releases tick {targetReleaseTick}).");
-    }
 
     private void AutoSeedPlatformApplications(Competitor comp, IRng rng)
     {
@@ -1197,12 +1118,19 @@ public class CompetitorSystem : ISystem
 
         product.OverallQuality = finalQuality;
         product.IsShipped = true;
-        product.ShipTick = tick;
         product.IsOnMarket = true;
         product.IsInDevelopment = false;
         product.LifecycleStage = ProductLifecycleStage.Launch;
         product.HasAnnouncedReleaseDate = false;
         product.TotalDevelopmentTicks = EstimateDevTicks(product.TemplateId, finalQuality);
+
+        if (tick < 0) {
+            _logger.Log($"[CompetitorSystem][BUG] InstantShipCompetitorProduct called with tick={tick} for '{product.ProductName}' (id={productId.Value}, creation={product.CreationTick}, target={product.TargetReleaseTick}).");
+        }
+
+        product.ShipTick = tick;
+        product.TicksSinceShip = 0;
+        product.LastStageChangeTick = tick;
 
         float maintenanceRatio = archetypeCfg != null ? archetypeCfg.maintenanceBudgetRatio : 0.1f;
         long initialBudget = (long)(comp.Finance.MonthlyRevenue * maintenanceRatio / Math.Max(1, comp.ActiveProductIds.Count + 1));
@@ -1630,7 +1558,8 @@ public class CompetitorSystem : ISystem
                     if (!TryPickStartingNiche(rng, out nicheForProduct))
                         break;
                 }
-                bool willComplete = (p == 0);
+                bool isWorldStart = (tick == 0);
+                bool willComplete = (p == 0) || isWorldStart;
                 Product product = GenerateCompetitorProduct(comp, nicheForProduct, tick, suppressDevEvent: willComplete);
                 if (product != null && willComplete) {
                     InstantShipCompetitorProduct(comp, product.Id, tick);

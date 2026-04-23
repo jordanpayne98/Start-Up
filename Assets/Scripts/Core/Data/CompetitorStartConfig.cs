@@ -16,15 +16,6 @@ public struct StartingProduct {
 }
 
 [Serializable]
-public struct StartingDevProduct {
-    public ProductCategory category;
-    public ProductNiche niche;
-    public string productName;
-    [Range(1, 12)] public int devMonthsRemaining;
-    public string[] featureIds;
-}
-
-[Serializable]
 public struct ScheduledProductUpdate {
     public int productIndex;
     [Range(1, 12)] public int monthsUntilUpdate;
@@ -45,9 +36,6 @@ public class CompetitorStartConfig : ScriptableObject {
 
     [Header("Starting Products")]
     public StartingProduct[] startingProducts;
-
-    [Header("Products In Development")]
-    public StartingDevProduct[] startingDevProducts;
 
     [Header("Scheduled Updates")]
     public ScheduledProductUpdate[] scheduledUpdates;
