@@ -1,0 +1,178 @@
+.market-read-container {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.08);
+    border-left-color:   rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    margin-top: var(--spacing-sm);
+}
+
+.market-read__title {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Tags row */
+.market-read__tags-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.market-read__tag {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-sm);
+    padding: 3px 8px;
+    margin-right: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.07);
+    border-left-color:   rgba(255, 255, 255, 0.07);
+    border-bottom-color: rgba(255, 255, 255, 0.07);
+    border-right-color:  rgba(255, 255, 255, 0.07);
+}
+
+.market-read__tag:focus {
+    border-top-color:    rgba(255, 255, 255, 0.20);
+    border-left-color:   rgba(255, 255, 255, 0.20);
+    border-bottom-color: rgba(255, 255, 255, 0.20);
+    border-right-color:  rgba(255, 255, 255, 0.20);
+}
+
+.market-read__tag-title {
+    font-size: var(--font-xs);
+    color: var(--text-light);
+    -unity-font-style: bold;
+    margin-right: var(--spacing-xs);
+    white-space: nowrap;
+}
+
+/* Tag tier borders */
+.market-read__tag--mild {
+    border-left-width: 3px;
+    border-left-color: rgba(161, 161, 170, 0.40);
+    padding-left: 6px;
+}
+
+.market-read__tag--moderate {
+    border-left-width: 3px;
+    border-left-color: rgba(251, 191, 36, 0.60);
+    padding-left: 6px;
+}
+
+.market-read__tag--strong {
+    border-left-width: 3px;
+    border-left-color: rgba(52, 211, 153, 0.60);
+    padding-left: 6px;
+}
+
+/* Strength chip */
+.market-read__strength-chip {
+    font-size: var(--font-xs);
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    background-color: rgba(161, 161, 170, 0.18);
+    color: var(--text-secondary);
+    -unity-font-style: bold;
+}
+
+.market-read__strength-chip--mild {
+    background-color: rgba(161, 161, 170, 0.18);
+    color: var(--text-secondary);
+}
+
+.market-read__strength-chip--moderate {
+    background-color: rgba(251, 191, 36, 0.20);
+    color: rgba(251, 191, 36, 1.0);
+}
+
+.market-read__strength-chip--strong {
+    background-color: rgba(52, 211, 153, 0.20);
+    color: rgba(52, 211, 153, 1.0);
+}
+
+/* Empty state */
+.market-read__empty-label {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    -unity-font-style: italic;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    padding: var(--spacing-sm) 0;
+}
+
+/* Delta feedback */
+.market-read__delta {
+    font-size: var(--font-xs);
+    color: rgba(251, 191, 36, 0.85);
+    -unity-font-style: italic;
+    -unity-text-align: middle-center;
+    margin-top: 3px;
+    padding: 2px var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    background-color: rgba(251, 191, 36, 0.08);
+    transition-property: opacity;
+    transition-duration: 0.3s;
+}
+
+/* Identity card in product detail */
+.identity-container {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.08);
+    border-left-color:   rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    border-right-color:  rgba(0, 0, 0, 0.25);
+    margin-bottom: 12px;
+}
+
+.identity__title {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    color: var(--text-light);
+    margin-bottom: var(--spacing-sm);
+}
+
+.identity__section-label {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.identity__tags-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-sm);
+}
+
+.identity__tag {
+    background-color: rgba(161, 161, 170, 0.12);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    padding: 2px 8px;
+    font-size: var(--font-xs);
+    margin-right: var(--spacing-xs);
+    margin-bottom: 3px;
+}
+
+.identity__shifts {
+    margin-top: var(--spacing-xs);
+    border-top-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.06);
+    padding-top: var(--spacing-xs);
+}
+
+.identity__shift-label {
+    font-size: var(--font-xs);
+    color: var(--accent-warning);
+    margin-bottom: 2px;
+}

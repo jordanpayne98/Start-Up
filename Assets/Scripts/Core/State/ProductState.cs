@@ -257,6 +257,11 @@ public class Product
 
     public float FanAppealBonus;  // set at launch, used by MarketShareResolver for appeal calc
 
+    // --- Product Identity ---
+    public ProductIdentitySnapshot IdentityAtShip;
+    public ProductIdentitySnapshot CurrentIdentity;
+    public float ExpectedSelectedRatioAtShip;
+
     // --- Crisis ---
     public int CrisisLevel;
     public int LastCrisisTick;

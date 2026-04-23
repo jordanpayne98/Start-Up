@@ -37,10 +37,24 @@ public class ProductDetailViewModel : IViewModel
     public bool HasMarketingTeamAssigned { get; private set; }
     public bool IsMarketingUnderfunded { get; private set; }
 
+    // Market Identity display properties
+    public ProductIdentitySnapshot IdentityAtShip { get; private set; }
+    public ProductIdentitySnapshot CurrentIdentity { get; private set; }
+    public bool HasIdentity => IdentityAtShip.IsValid;
+    public string ShipTag1 { get; private set; }
+    public string ShipTag2 { get; private set; }
+    public string ShipTag3 { get; private set; }
+    public string CurrentTag1 { get; private set; }
+    public string CurrentTag2 { get; private set; }
+    public string CurrentTag3 { get; private set; }
+    public string[] ShiftLabels { get; private set; }
+    public bool HasShifts => ShiftLabels != null && ShiftLabels.Length > 0;
+
     private readonly List<string> _teamAssignments = new List<string>();
     private ProductTemplateDefinition[] _templates;
     private long _estimatedMaintDrain;
     private long _estimatedMktDrain;
+    private readonly List<string> _shiftLabelsCache = new List<string>();
 
     public void SetTemplates(ProductTemplateDefinition[] templates) {
         _templates = templates;
@@ -97,6 +111,11 @@ public class ProductDetailViewModel : IViewModel
             MarketingMonthsCoverage = "--";
             HasMarketingTeamAssigned = false;
             IsMarketingUnderfunded = false;
+            IdentityAtShip = default;
+            CurrentIdentity = default;
+            ShipTag1 = ""; ShipTag2 = ""; ShipTag3 = "";
+            CurrentTag1 = ""; CurrentTag2 = ""; CurrentTag3 = "";
+            ShiftLabels = null;
             return;
         }
 
@@ -241,5 +260,55 @@ public class ProductDetailViewModel : IViewModel
 
         ReviewVM.SetProduct(id);
         ReviewVM.RefreshFromProduct(product);
+
+        IdentityAtShip = product.IdentityAtShip;
+        CurrentIdentity = product.CurrentIdentity;
+        ShipTag1 = TagToLabel(IdentityAtShip.PrimaryTag);
+        ShipTag2 = TagToLabel(IdentityAtShip.SecondaryTag);
+        ShipTag3 = TagToLabel(IdentityAtShip.TertiaryTag);
+        CurrentTag1 = TagToLabel(CurrentIdentity.PrimaryTag);
+        CurrentTag2 = TagToLabel(CurrentIdentity.SecondaryTag);
+        CurrentTag3 = TagToLabel(CurrentIdentity.TertiaryTag);
+        ComputeShiftLabels();
+    }
+
+    private string TagToLabel(ProductIdentityTag tag) {
+        switch (tag) {
+            case ProductIdentityTag.Accessible:    return "Accessible";
+            case ProductIdentityTag.Premium:       return "Premium";
+            case ProductIdentityTag.Safe:          return "Safe";
+            case ProductIdentityTag.Experimental:  return "Experimental";
+            case ProductIdentityTag.Specialist:    return "Specialist";
+            case ProductIdentityTag.Broad:         return "Broad";
+            case ProductIdentityTag.Refined:       return "Refined";
+            case ProductIdentityTag.FeatureHeavy:  return "Feature-Heavy";
+            case ProductIdentityTag.Chaotic:       return "Chaotic";
+            case ProductIdentityTag.Disciplined:   return "Disciplined";
+            case ProductIdentityTag.Standard:      return "Standard";
+            case ProductIdentityTag.Balanced:      return "Balanced";
+            case ProductIdentityTag.General:       return "General";
+            case ProductIdentityTag.Flexible:      return "Flexible";
+            default:                               return "";
+        }
+    }
+
+    private void ComputeShiftLabels() {
+        _shiftLabelsCache.Clear();
+        if (!IdentityAtShip.IsValid || !CurrentIdentity.IsValid) {
+            ShiftLabels = null;
+            return;
+        }
+        int threshold = 20;
+        if (System.Math.Abs((int)CurrentIdentity.PricePositioning - (int)IdentityAtShip.PricePositioning) >= threshold)
+            _shiftLabelsCache.Add("Price: " + TagToLabel(IdentityAtShip.PrimaryTag) + " -> " + TagToLabel(CurrentIdentity.PrimaryTag));
+        if (System.Math.Abs((int)CurrentIdentity.InnovationRisk - (int)IdentityAtShip.InnovationRisk) >= threshold)
+            _shiftLabelsCache.Add("Innovation risk shifted significantly");
+        if (System.Math.Abs((int)CurrentIdentity.AudienceBreadth - (int)IdentityAtShip.AudienceBreadth) >= threshold)
+            _shiftLabelsCache.Add("Audience breadth shifted significantly");
+        if (System.Math.Abs((int)CurrentIdentity.FeatureScope - (int)IdentityAtShip.FeatureScope) >= threshold)
+            _shiftLabelsCache.Add("Feature scope shifted significantly");
+        if (System.Math.Abs((int)CurrentIdentity.ProductionDiscipline - (int)IdentityAtShip.ProductionDiscipline) >= threshold)
+            _shiftLabelsCache.Add("Production discipline shifted significantly");
+        ShiftLabels = _shiftLabelsCache.Count > 0 ? _shiftLabelsCache.ToArray() : null;
     }
 }

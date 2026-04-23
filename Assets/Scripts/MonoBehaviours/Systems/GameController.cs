@@ -833,6 +833,10 @@ public class GameController : MonoBehaviour
             _eventBus.Raise(new ProductPhaseIterationCompletedEvent(_gameState.currentTick, productId, phaseType, newQuality));
         };
         _productSystem.OnShipWarning += OnProductShipWarning;
+        _productSystem.OnProductIdentityChanged += (productId, prev, curr) =>
+        {
+            _eventBus.Raise(new ProductIdentityChangedEvent(_gameState.currentTick, productId, prev, curr));
+        };
 
         // MarketSystem
         IRng marketRng = RngFactory.CreateStream(_gameState.masterSeed, "market");

@@ -27,7 +27,7 @@
 }
 
 .create-product-left {
-    width: 320px;
+    width: 400px;
     overflow: scroll;
     padding: var(--spacing-md) var(--spacing-lg);
     border-right-width: 1px;

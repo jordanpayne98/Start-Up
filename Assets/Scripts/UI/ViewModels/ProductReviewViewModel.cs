@@ -25,6 +25,8 @@ public class ProductReviewViewModel : IViewModel
     public List<OutletScoreData> OutletScores => _outletScores;
     public List<DimensionScoreData> DimensionScores => _dimensionScores;
     public bool HasReview { get; private set; }
+    public string IdentityCommentary { get; private set; }
+    public bool HasIdentityCommentary => !string.IsNullOrEmpty(IdentityCommentary);
 
     private readonly List<OutletScoreData> _outletScores = new List<OutletScoreData>(7);
     private readonly List<DimensionScoreData> _dimensionScores = new List<DimensionScoreData>(6);
@@ -48,6 +50,9 @@ public class ProductReviewViewModel : IViewModel
         _dimensionScores.Clear();
         ProductName = product?.ProductName ?? "Unknown";
         var result = product?.ReviewResult;
+        IdentityCommentary = product != null
+            ? ProductIdentityHelper.BuildReviewerCommentary(product.IdentityAtShip)
+            : null;
         PopulateFromResult(result);
     }
 
@@ -55,16 +60,23 @@ public class ProductReviewViewModel : IViewModel
         _outletScores.Clear();
         _dimensionScores.Clear();
 
+        Product found = null;
         ProductReviewResult result = null;
         if (state.ShippedProducts != null && state.ShippedProducts.TryGetValue(_productId, out var p)) {
             ProductName = p.ProductName ?? "Unknown";
             result = p.ReviewResult;
+            found = p;
         } else if (state.ArchivedProducts != null && state.ArchivedProducts.TryGetValue(_productId, out var a)) {
             ProductName = a.ProductName ?? "Unknown";
             result = a.ReviewResult;
+            found = a;
         } else {
             ProductName = "Unknown";
         }
+
+        IdentityCommentary = found != null
+            ? ProductIdentityHelper.BuildReviewerCommentary(found.IdentityAtShip)
+            : null;
 
         PopulateFromResult(result);
     }

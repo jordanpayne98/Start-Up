@@ -1373,6 +1373,124 @@ public class CreateProductViewModel : IViewModel
         _allTemplates = allTemplates;
     }
 
+    // ── Identity Preview ──────────────────────────────────────────────────────
+    private GenerationSystem _generationSystem;
+    private PlatformSystem _platformSystem;
+    private ProductState _productState;
+    private TuningConfig _tuning;
+
+    public ProductIdentityPreview IdentityPreview { get; private set; }
+    public bool HasIdentityPreview => IdentityPreview.Snapshot.IsValid;
+
+    private MarketReadPanelDisplay _marketReadDisplay;
+    private MarketReadPanelDisplay _previousMarketRead;
+    public MarketReadPanelDisplay MarketReadDisplay => _marketReadDisplay;
+    public bool HasMarketRead => _marketReadDisplay.HasAnyReads;
+    public MarketReadDelta MarketReadDelta { get; private set; }
+
+    public void SetIdentitySystems(GenerationSystem generationSystem, PlatformSystem platformSystem, ProductState productState, TuningConfig tuning) {
+        _generationSystem = generationSystem;
+        _platformSystem = platformSystem;
+        _productState = productState;
+        _tuning = tuning;
+    }
+
+    private void RefreshIdentityPreview() {
+        if (_selectedTemplate == null || _generationSystem == null || _platformSystem == null || _productState == null || _tuning == null) {
+            IdentityPreview = default;
+            _marketReadDisplay = default;
+            MarketReadDelta = default;
+            return;
+        }
+        int currentTick = _lastState != null ? _lastState.CurrentDay * TimeState.TicksPerDay : 0;
+        int targetReleaseTick = SelectedTargetDay > 0
+            ? SelectedTargetDay * TimeState.TicksPerDay
+            : currentTick + EstimatedDevDays * TimeState.TicksPerDay;
+        IdentityPreview = ProductIdentityHelper.ComputePreview(this, _selectedTemplate, _generationSystem, _platformSystem, _productState, _tuning, currentTick, targetReleaseTick);
+
+        bool hadPreviousReads = _previousMarketRead.HasAnyReads;
+        _previousMarketRead = _marketReadDisplay;
+
+        var context = BuildMarketReadContext(currentTick, targetReleaseTick);
+        var previewSnapshot = IdentityPreview.Snapshot;
+        MarketReadResolver.Resolve(in previewSnapshot, in context, ref _marketReadDisplay);
+
+        if (hadPreviousReads)
+            MarketReadDelta = MarketReadResolver.ComparePanels(in _previousMarketRead, in _marketReadDisplay);
+        else
+            MarketReadDelta = default;
+    }
+
+    private MarketReadResolver.MarketReadContext BuildMarketReadContext(int currentTick, int targetReleaseTick) {
+        float priceNorm = _selectedTemplate?.economyConfig != null && _selectedTemplate.economyConfig.pricePerUnit > 0f
+            ? _selectedTemplate.economyConfig.pricePerUnit : 1f;
+        float priceVsNormPct = priceNorm > 0f ? ((Price / priceNorm) - 1f) * 100f : 0f;
+
+        int selectedCount = 0;
+        int trendingCount = 0;
+        int expectedTotal = 0;
+        int selectedExpected = 0;
+        int currentGen = _generationSystem != null ? _generationSystem.GetCurrentGeneration() : 1;
+
+        if (_selectedTemplate?.availableFeatures != null) {
+            int af = _selectedTemplate.availableFeatures.Length;
+            for (int i = 0; i < af; i++) {
+                var feat = _selectedTemplate.availableFeatures[i];
+                if (feat == null) continue;
+                var stage = FeatureDemandHelper.GetDemandStage(currentGen, feat.demandIntroductionGen, feat.demandMaturitySpeed, feat.isFoundational, 0f);
+                bool isExpected = feat.isFoundational || stage == FeatureDemandStage.Standard;
+                if (isExpected) expectedTotal++;
+                bool isSelected = false;
+                int fc = _features.Count;
+                for (int j = 0; j < fc; j++) {
+                    if (_features[j].FeatureId == feat.featureId && _features[j].IsSelected) { isSelected = true; break; }
+                }
+                if (!isSelected) continue;
+                selectedCount++;
+                if (stage == FeatureDemandStage.Emerging || stage == FeatureDemandStage.Growing) trendingCount++;
+                if (isExpected) selectedExpected++;
+            }
+        }
+
+        int expectedSkipped = expectedTotal - selectedExpected;
+        float coverageRatio = (_selectedTemplate?.availableFeatures != null && _selectedTemplate.availableFeatures.Length > 0)
+            ? (float)selectedCount / _selectedTemplate.availableFeatures.Length : 0f;
+
+        float avgToolQuality = 0f;
+        if (_productState?.shippedProducts != null) {
+            var selectedToolIds = GetSelectedToolIds();
+            if (selectedToolIds != null && selectedToolIds.Length > 0) {
+                float total = 0f; int tcount = 0;
+                for (int i = 0; i < selectedToolIds.Length; i++) {
+                    if (_productState.shippedProducts.TryGetValue(selectedToolIds[i], out var tool)) { total += tool.OverallQuality; tcount++; }
+                }
+                avgToolQuality = tcount > 0 ? (total / tcount) / 100f : 0f;
+            }
+        }
+
+        float expectedTicks = _tuning != null ? ReviewSystem.ComputeExpectedTicks(_selectedTemplate, _tuning) : 1f;
+        float plannedTicks = targetReleaseTick > currentTick ? (float)(targetReleaseTick - currentTick) : expectedTicks;
+        float schedulePressure = expectedTicks > 0f ? (float)Math.Max(0f, Math.Min(1f, 1f - (plannedTicks / expectedTicks))) : 0f;
+
+        return new MarketReadResolver.MarketReadContext {
+            PriceVsNormPct = priceVsNormPct,
+            CoverageRatio = coverageRatio,
+            PlatformCount = _selectedPlatformIds.Count,
+            TotalAvailablePlatforms = _availablePlatforms.Count,
+            AvgToolQuality = avgToolQuality,
+            SelectedFeatureCount = selectedCount,
+            TrendingFeatureCount = trendingCount,
+            ExpectedFeaturesSkipped = expectedSkipped < 0 ? 0 : expectedSkipped,
+            SchedulePressure = schedulePressure,
+            PivotCount = 0,
+            DelayCount = 0,
+            HasPrice = Price > 0f,
+            HasFeatures = selectedCount > 0,
+            HasPlatforms = _selectedPlatformIds.Count > 0,
+            HasReleaseDate = SelectedTargetDay > 0
+        };
+    }
+
     // ── IViewModel ───────────────────────────────────────────────────────────
     public void Refresh(IReadOnlyGameState state)
     {
@@ -2606,6 +2724,7 @@ public class CreateProductViewModel : IViewModel
         float hwDevCost = IsConsoleTemplate ? HardwareDevCostAdd : 0;
         CalculatedCost = (int)(cost * platformMultiplier * stanceMultiplier) + (int)hwDevCost + TotalSelectedUpfrontCost;
         CanAfford = _lastState != null && _lastState.Money >= CalculatedCost;
+        RefreshIdentityPreview();
     }
 
     private void RecalculateCompletion()

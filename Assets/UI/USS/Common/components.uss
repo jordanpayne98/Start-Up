@@ -428,7 +428,7 @@
 /* Tooltip */
 .tooltip {
     display: none;
-    max-width: 280px;
+    max-width: 320px;
     background-color: var(--bg-elevated);
     border-radius: var(--radius-md);
     padding: var(--spacing-sm) var(--spacing-md);
@@ -480,6 +480,9 @@
     font-size: var(--font-xs);
     color: var(--text-light);
     -unity-font-style: bold;
+    white-space: normal;
+    flex-shrink: 1;
+    max-width: 180px;
 }
 
 .tooltip__stat-row--header {

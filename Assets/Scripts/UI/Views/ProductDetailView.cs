@@ -46,6 +46,18 @@ public class ProductDetailView : IGameView
     private ElementPool _dimensionPool;
     private ElementPool _outletPool;
 
+    // ── Market Identity ────────────────────────────────────────────────────────
+    private VisualElement _identityContainer;
+    private Label _shipTag1;
+    private Label _shipTag2;
+    private Label _shipTag3;
+    private Label _currentTag1;
+    private Label _currentTag2;
+    private Label _currentTag3;
+    private VisualElement _identityShifts;
+    private readonly List<Label> _shiftLabelPool = new List<Label>();
+    private const int MaxShiftLabels = 5;
+
     private readonly List<string> _scratchTeams = new List<string>();
 
     public ProductDetailView(IModalPresenter modal, INavigationService navigation) {
@@ -176,6 +188,55 @@ public class ProductDetailView : IGameView
 
         body.Add(_reviewSection);
 
+        // Market Identity card
+        _identityContainer = new VisualElement();
+        _identityContainer.AddToClassList("identity-container");
+
+        var idTitle = new Label("Market Identity");
+        idTitle.AddToClassList("identity__title");
+        _identityContainer.Add(idTitle);
+
+        var shipLabel = new Label("At Launch");
+        shipLabel.AddToClassList("identity__section-label");
+        _identityContainer.Add(shipLabel);
+
+        var shipTagsRow = new VisualElement();
+        shipTagsRow.AddToClassList("identity__tags-row");
+        _shipTag1 = new Label(); _shipTag1.AddToClassList("identity__tag");
+        _shipTag2 = new Label(); _shipTag2.AddToClassList("identity__tag");
+        _shipTag3 = new Label(); _shipTag3.AddToClassList("identity__tag");
+        shipTagsRow.Add(_shipTag1);
+        shipTagsRow.Add(_shipTag2);
+        shipTagsRow.Add(_shipTag3);
+        _identityContainer.Add(shipTagsRow);
+
+        var currentLabel = new Label("Current");
+        currentLabel.AddToClassList("identity__section-label");
+        _identityContainer.Add(currentLabel);
+
+        var currentTagsRow = new VisualElement();
+        currentTagsRow.AddToClassList("identity__tags-row");
+        _currentTag1 = new Label(); _currentTag1.AddToClassList("identity__tag");
+        _currentTag2 = new Label(); _currentTag2.AddToClassList("identity__tag");
+        _currentTag3 = new Label(); _currentTag3.AddToClassList("identity__tag");
+        currentTagsRow.Add(_currentTag1);
+        currentTagsRow.Add(_currentTag2);
+        currentTagsRow.Add(_currentTag3);
+        _identityContainer.Add(currentTagsRow);
+
+        _identityShifts = new VisualElement();
+        _identityShifts.AddToClassList("identity__shifts");
+        for (int s = 0; s < MaxShiftLabels; s++) {
+            var sl = new Label();
+            sl.AddToClassList("identity__shift-label");
+            sl.style.display = DisplayStyle.None;
+            _shiftLabelPool.Add(sl);
+            _identityShifts.Add(sl);
+        }
+        _identityContainer.Add(_identityShifts);
+
+        body.Add(_identityContainer);
+
         // Crisis row
         _crisisRow = new VisualElement();
         _crisisRow.AddToClassList("card");
@@ -289,6 +350,43 @@ public class ProductDetailView : IGameView
         }
 
         BindReviewSection(_vm.ReviewVM);
+        BindIdentitySection();
+    }
+
+    private void BindIdentitySection() {
+        if (_identityContainer == null || _vm == null) return;
+        if (!_vm.HasIdentity) {
+            _identityContainer.style.display = DisplayStyle.None;
+            return;
+        }
+        _identityContainer.style.display = DisplayStyle.Flex;
+
+        SetTagLabel(_shipTag1, _vm.ShipTag1);
+        SetTagLabel(_shipTag2, _vm.ShipTag2);
+        SetTagLabel(_shipTag3, _vm.ShipTag3);
+        SetTagLabel(_currentTag1, _vm.CurrentTag1);
+        SetTagLabel(_currentTag2, _vm.CurrentTag2);
+        SetTagLabel(_currentTag3, _vm.CurrentTag3);
+
+        int shiftCount = _vm.ShiftLabels != null ? _vm.ShiftLabels.Length : 0;
+        bool hasShifts = shiftCount > 0;
+        _identityShifts.style.display = hasShifts ? DisplayStyle.Flex : DisplayStyle.None;
+        int poolCount = _shiftLabelPool.Count;
+        for (int i = 0; i < poolCount; i++) {
+            if (i < shiftCount) {
+                _shiftLabelPool[i].text = _vm.ShiftLabels[i];
+                _shiftLabelPool[i].style.display = DisplayStyle.Flex;
+            } else {
+                _shiftLabelPool[i].style.display = DisplayStyle.None;
+            }
+        }
+    }
+
+    private void SetTagLabel(Label label, string text) {
+        if (label == null) return;
+        bool hasText = !string.IsNullOrEmpty(text);
+        label.style.display = hasText ? DisplayStyle.Flex : DisplayStyle.None;
+        if (hasText) label.text = text;
     }
 
     private void BindReviewSection(ProductReviewViewModel reviewVm) {
@@ -320,6 +418,11 @@ public class ProductDetailView : IGameView
         _mktCoverageLabel = null;
         _monthlyRevenueLabel = null;
         _lifetimeSalesLabel = null;
+        _identityContainer = null;
+        _shipTag1 = null; _shipTag2 = null; _shipTag3 = null;
+        _currentTag1 = null; _currentTag2 = null; _currentTag3 = null;
+        _identityShifts = null;
+        _shiftLabelPool.Clear();
         _vm = null;
     }
 

@@ -50,6 +50,9 @@ public class ProductSystem : ISystem
     public event Action<ProductId> OnProductSaleStarted;
     public event Action<ProductId> OnProductSaleEnded;
 
+    // Identity events
+    public event Action<ProductId, ProductIdentitySnapshot, ProductIdentitySnapshot> OnProductIdentityChanged;
+
     // Marketing / Hype events
     public event Action<ProductId> OnMarketingStarted;
     public event Action<ProductId> OnMarketingStopped;
@@ -110,6 +113,13 @@ public class ProductSystem : ISystem
         ShipWarning,
     }
 
+    private struct PendingIdentityChange
+    {
+        public ProductId ProductId;
+        public ProductIdentitySnapshot Previous;
+        public ProductIdentitySnapshot Current;
+    }
+
     private struct PendingEvent
     {
         public PendingEventType Type;
@@ -158,6 +168,7 @@ public class ProductSystem : ISystem
     private int _currentTick;
     private Dictionary<string, ProductTemplateDefinition> _templateLookup;
     private List<PendingEvent> _pendingEvents;
+    private List<PendingIdentityChange> _pendingIdentityChanges;
     private TuningConfig _tuning;
     private readonly HashSet<ProductId> _shipWarningSent = new HashSet<ProductId>();
 
@@ -175,6 +186,7 @@ public class ProductSystem : ISystem
         _logger = logger ?? new NullLogger();
         _templateLookup = new Dictionary<string, ProductTemplateDefinition>();
         _pendingEvents = new List<PendingEvent>(32);
+        _pendingIdentityChanges = new List<PendingIdentityChange>(4);
         _phaseUnlockQueue = new List<int>(8);
         _completedPhaseTypes = new List<ProductPhaseType>(8);
         _productIds = new List<ProductId>(16);
@@ -932,6 +944,15 @@ public class ProductSystem : ISystem
         float baseChance = _tuning?.CrisisBaseChancePerMonth ?? 0.05f;
         float escalation = _tuning?.CrisisChanceEscalationPerMonth ?? 0.04f;
 
+        // Identity-based crisis chance modifiers
+        if (product.IdentityAtShip.IsValid)
+        {
+            if (product.IdentityAtShip.ProductionDiscipline >= 40)
+                baseChance *= 0.85f;
+            else if (product.IdentityAtShip.ProductionDiscipline <= -40)
+                baseChance *= 1.20f;
+        }
+
         int nextLevel = product.CrisisLevel + 1;
         if (nextLevel > 3) return;
 
@@ -1171,7 +1192,8 @@ public class ProductSystem : ISystem
         if (product.ReviewResult == null && _reviewSystem != null && _templateLookup.TryGetValue(product.TemplateId, out var reviewTemplate)) {
             float savedQuality = product.OverallQuality;
             product.OverallQuality = ComputeWeightedQuality(product, reviewTemplate);
-            product.ReviewResult = _reviewSystem.GenerateReviews(product, reviewTemplate, product.FeatureRelevanceAtShip);
+            product.ReviewResult = _reviewSystem.GenerateReviews(product, reviewTemplate, product.FeatureRelevanceAtShip,
+                product.IdentityAtShip.IsValid ? (ProductIdentitySnapshot?)product.IdentityAtShip : null);
             product.PublicReceptionScore = product.ReviewResult.AggregateScore;
             product.OverallQuality = savedQuality;
         } else if (product.ReviewResult != null) {
@@ -1207,6 +1229,55 @@ public class ProductSystem : ISystem
         product.LifecycleStage = ProductLifecycleStage.Launch;
         product.IsOnMarket = true;
         product.TicksSinceShip = 0;
+
+        // Apply identity-based launch modifiers (section 12.2)
+        if (product.IdentityAtShip.IsValid && product.ReviewResult != null)
+        {
+            var snap = product.IdentityAtShip;
+            float aggScore = product.ReviewResult.AggregateScore;
+            float stab = product.ReviewResult.GetDimensionScore(ReviewDimension.Stability);
+            float val  = product.ReviewResult.GetDimensionScore(ReviewDimension.Value);
+
+            if (snap.PricePositioning >= 40)
+            {
+                if (aggScore >= 75f && val >= 50f)
+                    finalSales = (int)(finalSales * 1.05f);
+                else if (aggScore < 70f)
+                    finalSales = (int)(finalSales * 0.95f);
+            }
+
+            if (snap.InnovationRisk >= 40)
+            {
+                if (aggScore >= 70f)
+                    hypeLaunchMult += 0.05f;
+                if (product.BugsRemaining > 10f)
+                    finalSales = (int)(finalSales * 0.90f);
+            }
+
+            if (snap.AudienceBreadth >= 40 && product.ExpectedSelectedRatioAtShip >= 0.70f)
+                finalSales = (int)(finalSales * 1.08f);
+
+            if (snap.AudienceBreadth <= -40 && aggScore >= 75f)
+                finalSales = (int)(finalSales * 1.08f);
+
+            if (snap.FeatureScope <= -40 && stab >= 70f)
+                product.TailDecayFactor *= 1.05f;
+
+            if (isSubscription)
+            {
+                product.TotalSubscribers = finalSales;
+                product.ActiveUserCount = finalSales;
+                launchRevenue = (int)(finalSales * subPrice);
+            }
+            else
+            {
+                product.PeakMonthlySales = finalSales;
+                product.TotalUnitsSold = finalSales;
+                product.ActiveUserCount = finalSales;
+                launchRevenue = (int)(finalSales * pricePerUnit);
+            }
+            product.LaunchRevenue = launchRevenue;
+        }
 
         // Scale lifecycle growth stage threshold by retention months relative to default 12 months
         float retentionScale = nicheRetentionMonths / 12f;
@@ -1286,7 +1357,17 @@ public class ProductSystem : ISystem
         {
             float savedQuality = product.OverallQuality;
             product.OverallQuality = ComputeWeightedQuality(product, reviewTemplate);
-            product.ReviewResult = _reviewSystem.GenerateReviews(product, reviewTemplate, product.FeatureRelevanceAtShip);
+
+            if (!product.IdentityAtShip.IsValid)
+            {
+                product.IdentityAtShip = ProductIdentityHelper.ComputeAtShip(
+                    product, reviewTemplate, _generationSystem, _platformSystem, _state, _tuning);
+                product.CurrentIdentity = product.IdentityAtShip;
+                product.ExpectedSelectedRatioAtShip = ComputeExpectedSelectedRatio(product, reviewTemplate);
+            }
+
+            product.ReviewResult = _reviewSystem.GenerateReviews(product, reviewTemplate, product.FeatureRelevanceAtShip,
+                product.IdentityAtShip.IsValid ? (ProductIdentitySnapshot?)product.IdentityAtShip : null);
             product.PublicReceptionScore = product.ReviewResult.AggregateScore;
             product.OverallQuality = savedQuality;
         }
@@ -1362,6 +1443,12 @@ public class ProductSystem : ISystem
             float decayThisDay = config.tailDecayRate / 30f;
             if (product.IsMaintained)
                 decayThisDay = Math.Max(0f, decayThisDay - config.maintenancePopDecayReduction / 30f);
+
+            // Feature-heavy identity modifier: +10% decay if no updates after 60 days
+            if (product.IdentityAtShip.IsValid && product.IdentityAtShip.FeatureScope >= 40 &&
+                product.UpdateCount == 0 && product.TicksSinceShip > TimeState.TicksPerDay * 60)
+                decayThisDay *= 1.10f;
+
             product.TailDecayFactor = Math.Max(config.minTailFactor, product.TailDecayFactor * (1f - decayThisDay));
         }
 
@@ -1866,6 +1953,14 @@ public class ProductSystem : ISystem
             }
         }
         _pendingEvents.Clear();
+
+        int identityChangeCount = _pendingIdentityChanges.Count;
+        for (int i = 0; i < identityChangeCount; i++)
+        {
+            var ic = _pendingIdentityChanges[i];
+            OnProductIdentityChanged?.Invoke(ic.ProductId, ic.Previous, ic.Current);
+        }
+        _pendingIdentityChanges.Clear();
     }
 
     // ─── Update Tick Helpers ───────────────────────────────────────────────────
@@ -2032,6 +2127,29 @@ public class ProductSystem : ISystem
         }
 
         _pendingEvents.Add(new PendingEvent { Type = PendingEventType.LogUpdate, ProductId = product.Id, UpdateType = update.updateType });
+
+        RecomputeCurrentIdentity(product, _currentTick);
+    }
+
+    private void RecomputeCurrentIdentity(Product product, int tick)
+    {
+        if (!product.IsShipped) return;
+        if (!_templateLookup.TryGetValue(product.TemplateId, out var template)) return;
+
+        var previous = product.CurrentIdentity;
+        var next = ProductIdentityHelper.ComputeCurrent(product, template, _generationSystem, _platformSystem, _state, _tuning);
+        product.CurrentIdentity = next;
+
+        if (!previous.IsValid) return;
+        bool significantChange =
+            Math.Abs((int)next.PricePositioning - (int)previous.PricePositioning) >= 20 ||
+            Math.Abs((int)next.InnovationRisk - (int)previous.InnovationRisk) >= 20 ||
+            Math.Abs((int)next.AudienceBreadth - (int)previous.AudienceBreadth) >= 20 ||
+            Math.Abs((int)next.FeatureScope - (int)previous.FeatureScope) >= 20 ||
+            Math.Abs((int)next.ProductionDiscipline - (int)previous.ProductionDiscipline) >= 20;
+
+        if (significantChange)
+            _pendingIdentityChanges.Add(new PendingIdentityChange { ProductId = product.Id, Previous = previous, Current = next });
     }
 
     private static ProductPhaseType MapRoleToPhase(ProductTeamRole role)
@@ -2709,11 +2827,20 @@ public class ProductSystem : ISystem
 
         _state.shippedProducts[cmd.ProductId] = product;
 
+        // Compute product identity at ship (must happen before reviews to enable profile adjustment)
+        if (_templateLookup.TryGetValue(product.TemplateId, out var identityTemplate)) {
+            product.IdentityAtShip = ProductIdentityHelper.ComputeAtShip(
+                product, identityTemplate, _generationSystem, _platformSystem, _state, _tuning);
+            product.CurrentIdentity = product.IdentityAtShip;
+            product.ExpectedSelectedRatioAtShip = ComputeExpectedSelectedRatio(product, identityTemplate);
+        }
+
         // Generate review result at ship time so the modal can display it immediately
         if (_reviewSystem != null && _templateLookup.TryGetValue(product.TemplateId, out var shipReviewTemplate)) {
             float savedQuality = product.OverallQuality;
             product.OverallQuality = ComputeWeightedQuality(product, shipReviewTemplate);
-            product.ReviewResult = _reviewSystem.GenerateReviews(product, shipReviewTemplate, product.FeatureRelevanceAtShip);
+            product.ReviewResult = _reviewSystem.GenerateReviews(product, shipReviewTemplate, product.FeatureRelevanceAtShip,
+                product.IdentityAtShip.IsValid ? (ProductIdentitySnapshot?)product.IdentityAtShip : null);
             product.PublicReceptionScore = product.ReviewResult.AggregateScore;
             product.OverallQuality = savedQuality;
         }
@@ -4884,6 +5011,33 @@ public class ProductSystem : ISystem
 
         float raw = (avgInnovation - missingPenaltySum * 0.1f) / 50f;
         return Math.Max(0.2f, Math.Min(0.95f, raw * diversityMod));
+    }
+
+    private float ComputeExpectedSelectedRatio(Product product, ProductTemplateDefinition template)
+    {
+        if (template.availableFeatures == null || template.availableFeatures.Length == 0) return 1f;
+        int currentGen = _generationSystem != null ? _generationSystem.GetCurrentGeneration() : 1;
+        int expectedCount = 0;
+        int selectedExpectedCount = 0;
+        int poolLen = template.availableFeatures.Length;
+        for (int f = 0; f < poolLen; f++)
+        {
+            var featDef = template.availableFeatures[f];
+            if (featDef == null) continue;
+            var stage = FeatureDemandHelper.GetDemandStage(currentGen, featDef.demandIntroductionGen, featDef.demandMaturitySpeed, featDef.isFoundational, 0f);
+            bool isExpected = featDef.isFoundational || stage == FeatureDemandStage.Standard;
+            if (!isExpected) continue;
+            expectedCount++;
+            if (product.SelectedFeatureIds != null)
+            {
+                int selLen = product.SelectedFeatureIds.Length;
+                for (int s = 0; s < selLen; s++)
+                {
+                    if (product.SelectedFeatureIds[s] == featDef.featureId) { selectedExpectedCount++; break; }
+                }
+            }
+        }
+        return expectedCount > 0 ? (float)selectedExpectedCount / expectedCount : 1f;
     }
 
     private int GetTemplateFeaturePoolSize(string templateId)

@@ -11,6 +11,7 @@ public class ProductReviewModalView : IGameView
     private Label _titleLabel;
     private Label _aggregateScoreLabel;
     private Label _aggregateRatingLabel;
+    private Label _identityCommentaryLabel;
     private VisualElement _dimensionsContainer;
     private VisualElement _outletsContainer;
     private Button _dismissButton;
@@ -74,6 +75,14 @@ public class ProductReviewModalView : IGameView
 
         header.Add(scoreBadge);
         _root.Add(header);
+
+        _identityCommentaryLabel = new Label();
+        _identityCommentaryLabel.AddToClassList("identity-commentary");
+        _identityCommentaryLabel.AddToClassList("text-sm");
+        _identityCommentaryLabel.AddToClassList("text-muted");
+        _identityCommentaryLabel.style.marginTop = 6;
+        _identityCommentaryLabel.style.marginBottom = 2;
+        _root.Add(_identityCommentaryLabel);
 
         var dimensionsCard = new VisualElement();
         dimensionsCard.AddToClassList("card");
@@ -233,6 +242,9 @@ public class ProductReviewModalView : IGameView
         _aggregateScoreLabel.text = _vm.AggregateScoreLabel;
         _aggregateRatingLabel.text = _vm.AggregateScoreRating;
 
+        _identityCommentaryLabel.text = _vm.HasIdentityCommentary ? _vm.IdentityCommentary : string.Empty;
+        _identityCommentaryLabel.style.display = _vm.HasIdentityCommentary ? DisplayStyle.Flex : DisplayStyle.None;
+
         var dims = _vm.DimensionScores;
         int dimCount = dims.Count;
         int rowCount = _dimensionRows.Count;
@@ -284,6 +296,7 @@ public class ProductReviewModalView : IGameView
 
     public void Dispose() {
         if (_dismissButton != null) _dismissButton.clicked -= OnDismissClicked;
+        _identityCommentaryLabel = null;
         _vm = null;
     }
 

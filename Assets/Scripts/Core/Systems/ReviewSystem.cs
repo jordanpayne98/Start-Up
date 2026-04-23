@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class ReviewSystem {
     private const int DimensionCount = 6;
@@ -23,7 +24,7 @@ public class ReviewSystem {
         _tuning = tuning;
     }
 
-    public ProductReviewResult GenerateReviews(Product product, ProductTemplateDefinition template, float featureRelevance) {
+    public ProductReviewResult GenerateReviews(Product product, ProductTemplateDefinition template, float featureRelevance, ProductIdentitySnapshot? identity = null) {
         float[] rawDimensions = ComputeRawDimensions(product, template, featureRelevance);
         ApplyAntiInflation(rawDimensions, product);
 
@@ -56,6 +57,43 @@ public class ReviewSystem {
             float volatilityRange = outlet.volatility;
             float noise = (_rng.NextFloat01() * 2f - 1f) * volatilityRange;
             outletScore += noise;
+
+            if (identity.HasValue && identity.Value.IsValid) {
+                var snap = identity.Value;
+                float polishScore = rawDimensions[(int)ReviewDimension.Polish];
+                float stabilityScore = rawDimensions[(int)ReviewDimension.Stability];
+                float innovationScore = rawDimensions[(int)ReviewDimension.Innovation];
+                float valueScore = rawDimensions[(int)ReviewDimension.Value];
+                float functionalityScore = rawDimensions[(int)ReviewDimension.Functionality];
+
+                int profileAdjustment = 0;
+
+                if (snap.PricePositioning >= 40 && polishScore < 55f)
+                    profileAdjustment -= 4;
+                if (snap.PricePositioning >= 40 && polishScore >= 75f && valueScore >= 50f)
+                    profileAdjustment += 2;
+
+                if (snap.InnovationRisk >= 40 && innovationScore >= 70f)
+                    profileAdjustment += 3;
+                if (snap.InnovationRisk >= 40 && stabilityScore < 50f)
+                    profileAdjustment -= 3;
+
+                if (snap.AudienceBreadth >= 40 && functionalityScore < 55f)
+                    profileAdjustment -= 3;
+
+                if (snap.FeatureScope >= 40 && (polishScore < 55f || stabilityScore < 55f))
+                    profileAdjustment -= 3;
+
+                if (snap.ProductionDiscipline >= 40 && stabilityScore >= 65f)
+                    profileAdjustment += 2;
+
+                if (snap.ProductionDiscipline <= -40 && (stabilityScore < 55f || product.DateShiftCount >= 2))
+                    profileAdjustment -= 3;
+
+                profileAdjustment = Mathf.Clamp(profileAdjustment, -6, 6);
+                outletScore += profileAdjustment;
+            }
+
             if (outletScore > 90f) {
                 float excess = outletScore - 90f;
                 outletScore = 90f + excess * (10f / (10f + excess));
@@ -139,7 +177,7 @@ public class ReviewSystem {
         dims[(int)ReviewDimension.Value] = valueScore < 0f ? 0f : valueScore > 100f ? 100f : valueScore;
 
         // Polish: dev time adequacy
-        float expectedTicks = ComputeExpectedTicks(template);
+        float expectedTicks = ComputeExpectedTicks(template, _tuning);
         float actualTicks = product.TotalDevelopmentTicks;
         float timeRatio = expectedTicks > 0f ? actualTicks / expectedTicks : 1f;
         float polishScore;
@@ -156,9 +194,9 @@ public class ReviewSystem {
         return dims;
     }
 
-    private float ComputeExpectedTicks(ProductTemplateDefinition template) {
+    public static float ComputeExpectedTicks(ProductTemplateDefinition template, TuningConfig tuning) {
         if (template.phases == null) return 1f;
-        float workMultiplier = _tuning?.ProductBaseWorkMultiplier ?? 100f;
+        float workMultiplier = tuning?.ProductBaseWorkMultiplier ?? 100f;
         int featureCount = template.availableFeatures != null ? template.availableFeatures.Length : 0;
         float difficultyScale = 1.0f + (template.difficultyTier - 1) * 0.75f;
         float featureScale = 1.0f + featureCount * 0.12f + (float)Math.Pow(featureCount, 1.5) * 0.02f;
