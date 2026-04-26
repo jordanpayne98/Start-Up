@@ -51,6 +51,7 @@ public class GameController : MonoBehaviour
     private ContractFactory _contractFactory;
     private ReputationSystem _reputationSystem;
     private MoraleSystem _moraleSystem;
+    private FatigueSystem _fatigueSystem;
     private LoanSystem _loanSystem;
     private InterviewSystem _interviewSystem;
     private NegotiationSystem _negotiationSystem;
@@ -69,6 +70,8 @@ public class GameController : MonoBehaviour
     private StockSystem _stockSystem;
     
     private AIDecisionSystem _aiDecisionSystem;
+    private TeamChemistrySystem _teamChemistrySystem;
+    private IRng _chemistryRng;
     private DisruptionSystem _disruptionSystem;
     private TaxSystem _taxSystem;
     private PlatformSystem _platformSystem;
@@ -119,6 +122,9 @@ public class GameController : MonoBehaviour
     public TaxSystem TaxSystem => _taxSystem;
     public PlatformSystem PlatformSystem => _platformSystem;
     public GenerationSystem GenerationSystem => _generationSystem;
+    public FatigueSystem FatigueSystem => _fatigueSystem;
+
+    public TeamChemistrySystem TeamChemistrySystem => _teamChemistrySystem;
     public ProductTemplateDefinition[] ProductTemplates => productTemplates;
     public MarketNicheData[] MarketNiches => marketNiches;
     public HardwareGenerationConfig[] HardwareGenerationConfigs => hardwareGenerationConfigs;
@@ -441,6 +447,26 @@ public class GameController : MonoBehaviour
         return (long)Math.Max(total, 0);
     }
 
+    private static void MigrateInterviewState(InterviewState state, int currentTick)
+    {
+        if (state?.activeInterviews == null) return;
+        var keys = new System.Collections.Generic.List<int>(state.activeInterviews.Keys);
+        int count = keys.Count;
+        for (int i = 0; i < count; i++)
+        {
+            int key = keys[i];
+            var intv = state.activeInterviews[key];
+            if (intv.startTick > 0 && intv.knowledgeLevel <= 0f)
+            {
+                // Legacy interview with no knowledge data — mark as complete
+                intv.knowledgeLevel = 100f;
+                intv.lastRevealThreshold = 100;
+                intv.completedTick = currentTick;
+                state.activeInterviews[key] = intv;
+            }
+        }
+    }
+
     private void LoadOrCreateGameState()
     {
         if (NewGameData.IsNewGame)
@@ -569,6 +595,7 @@ public class GameController : MonoBehaviour
             emp.morale = 100;
             emp.isActive = true;
             emp.salary = 0;
+            emp.personality = PersonalitySystem.GeneratePersonality(founderRng);
 
             _gameState.employeeState.employees[empId] = emp;
         }
@@ -576,36 +603,9 @@ public class GameController : MonoBehaviour
         NewGameData.Clear();
     }
 
-    private static readonly int[] FallbackTiersDeveloper    = { 2, 3, 3, 3, 4, 4, 4, 4, 4 };
-    private static readonly int[] FallbackTiersDesigner     = { 3, 2, 4, 3, 3, 4, 4, 4, 4 };
-    private static readonly int[] FallbackTiersQAEngineer   = { 3, 3, 2, 4, 4, 4, 3, 4, 4 };
-    private static readonly int[] FallbackTiersHR           = { 4, 4, 4, 4, 4, 2, 3, 3, 3 };
-    private static readonly int[] FallbackTiersSoundEngineer = { 3, 3, 4, 3, 2, 4, 4, 4, 4 };
-    private static readonly int[] FallbackTiersVFXArtist    = { 3, 3, 4, 2, 3, 4, 4, 4, 4 };
-    private static readonly int[] FallbackTiersAccountant   = { 3, 4, 4, 4, 4, 4, 3, 2, 3 };
-    private static readonly int[] FallbackTiersMarketer     = { 4, 3, 4, 4, 4, 3, 3, 4, 2 };
-
-    private static int[] GetFallbackTiers(EmployeeRole role)
-    {
-        switch (role)
-        {
-            case EmployeeRole.Developer:    return FallbackTiersDeveloper;
-            case EmployeeRole.Designer:     return FallbackTiersDesigner;
-            case EmployeeRole.QAEngineer:   return FallbackTiersQAEngineer;
-            case EmployeeRole.HR:           return FallbackTiersHR;
-            case EmployeeRole.SoundEngineer: return FallbackTiersSoundEngineer;
-            case EmployeeRole.VFXArtist:    return FallbackTiersVFXArtist;
-            case EmployeeRole.Accountant:   return FallbackTiersAccountant;
-            case EmployeeRole.Marketer:     return FallbackTiersMarketer;
-            default:                        return FallbackTiersDeveloper;
-        }
-    }
-
     private int[] GenerateFounderSkills(int tier, EmployeeRole role, IRng rng)
     {
-        int[] roleTiers = _roleTierTable != null
-            ? _roleTierTable.GetTiers(role)
-            : GetFallbackTiers(role);
+        int[] roleTiers = _roleTierTable.GetTiers(role);
 
         const int skillCount = 9;
         var skills = new int[skillCount];
@@ -705,12 +705,25 @@ public class GameController : MonoBehaviour
         _teamSystem.SetEmployeeSystem(_employeeSystem);
 
         if (_gameState.moraleState == null) _gameState.moraleState = MoraleState.CreateNew();
+        if (_gameState.fatigueState == null) _gameState.fatigueState = FatigueState.CreateNew();
         if (_gameState.loanState == null) _gameState.loanState = LoanState.CreateNew();
 
         _moraleRng = RngFactory.CreateStream(_gameState.masterSeed, "morale");
 
         _moraleSystem = new MoraleSystem(_gameState.moraleState, _employeeSystem, _gameState.teamState, _gameState.contractState, _gameState.productState, _eventBus, _logger);
+        _fatigueSystem = new FatigueSystem(_gameState.fatigueState, _employeeSystem, _gameState.teamState, _logger);
+        _moraleSystem.SetFatigueSystem(_fatigueSystem);
         _loanSystem = new LoanSystem(_gameState.loanState, _reputationSystem, _financeSystem, _logger);
+
+        if (_gameState.chemistryState == null) _gameState.chemistryState = ChemistryState.CreateNew();
+        _chemistryRng = RngFactory.CreateStream(_gameState.masterSeed, "chemistry");
+        _teamChemistrySystem = new TeamChemistrySystem(
+            _gameState.chemistryState,
+            _teamSystem,
+            _employeeSystem,
+            _moraleSystem,
+            _eventBus,
+            _chemistryRng);
 
         // Hiring pipeline systems
         if (_gameState.interviewState == null) _gameState.interviewState = InterviewState.CreateNew();
@@ -720,8 +733,9 @@ public class GameController : MonoBehaviour
 
         IRng interviewRng = RngFactory.CreateStream(_gameState.masterSeed, "interviews");
         IRng headhuntingRng = RngFactory.CreateStream(_gameState.masterSeed, "headhunting");
+        IRng negotiationRng = RngFactory.CreateStream(_gameState.masterSeed, "negotiation");
         _interviewSystem = new InterviewSystem(_gameState.interviewState, _gameState.employeeState, _financeSystem, _eventBus, _logger, interviewRng);
-        _negotiationSystem = new NegotiationSystem(_gameState.negotiationState, _gameState.employeeState, _interviewSystem, _logger);
+        _negotiationSystem = new NegotiationSystem(_gameState.negotiationState, _gameState.employeeState, _interviewSystem, _eventBus, negotiationRng, _roleTierTable, _logger);
         _hrSystem = new HRSystem(
             _gameState.hrState,
             _gameState.employeeState,
@@ -737,8 +751,13 @@ public class GameController : MonoBehaviour
         _employeeSystem.SetInterviewSystem(_interviewSystem);
         _employeeSystem.SetNegotiationSystem(_negotiationSystem);
         _employeeSystem.SetHRSystem(_hrSystem);
-        _negotiationSystem.SetHRSystem(_hrSystem);
         _interviewSystem.SetHRSystem(_hrSystem);
+
+        // Save migration: convert any interviews that loaded with legacy fields (all zeros)
+        // to knowledge 100 so they appear complete. Old saves had completionTick set;
+        // since the field no longer exists, knowledgeLevel stays 0. Treat any interview
+        // with startTick > 0 but knowledgeLevel == 0 as complete to avoid infinite interviews.
+        MigrateInterviewState(_gameState.interviewState, _gameState.currentTick);
 
         // AbilitySystem — CA/PA system
         _roleTierTable = new RoleTierTable();
@@ -770,6 +789,11 @@ public class GameController : MonoBehaviour
         _contractSystem.SetProductSystem(_productSystem);
         _contractSystem.SetMoraleSystem(_moraleSystem);
         _productSystem.SetMoraleSystem(_moraleSystem);
+        _contractSystem.SetFatigueSystem(_fatigueSystem);
+        _productSystem.SetFatigueSystem(_fatigueSystem);
+        _contractSystem.SetChemistrySystem(_teamChemistrySystem);
+        _productSystem.SetChemistrySystem(_teamChemistrySystem);
+        _teamChemistrySystem.SetFatigueSystem(_fatigueSystem);
         var safeProductTemplates = (productTemplates != null && productTemplates.Length > 0)
             ? productTemplates
             : new ProductTemplateDefinition[0];
@@ -1012,7 +1036,9 @@ public class GameController : MonoBehaviour
         _systems.Add(_platformSystem);
         _systems.Add(_contractSystem);
         _systems.Add(_reputationSystem);
+        _systems.Add(_fatigueSystem);
         _systems.Add(_moraleSystem);
+        _systems.Add(_teamChemistrySystem);
         _systems.Add(_loanSystem);
         _systems.Add(_interviewSystem);
         _systems.Add(_negotiationSystem);
@@ -1044,6 +1070,7 @@ public class GameController : MonoBehaviour
         _employeeSystem.OnContractRenewed += OnContractRenewed;
         _employeeSystem.OnContractRenewalRequested += OnContractRenewalRequested;
         _teamSystem.OnTeamCreated += OnTeamCreated;
+        _teamSystem.OnTeamDeleted += OnTeamDeleted;
         _teamSystem.OnEmployeeAssignedToTeam += OnEmployeeAssignedToTeam;
         _teamSystem.OnEmployeeRemovedFromTeam += OnEmployeeRemovedFromTeam;
         _teamSystem.OnCrunchModeChanged += OnTeamCrunchModeChanged;
@@ -1064,15 +1091,18 @@ public class GameController : MonoBehaviour
         _negotiationSystem.OnOfferRejected += _recruitmentReputationSystem.OnOfferRejectedHandler;
 
         _negotiationSystem.OnOfferAccepted += OnNegotiationAccepted;
-        _interviewSystem.OnInterviewFirstReportReady += OnInterviewFirstReportReady;
-        _interviewSystem.OnInterviewFinalReportReady += OnInterviewFinalReportReady;
+        _negotiationSystem.OnOfferRejected += OnNegotiationRejected;
+        _interviewSystem.OnInterviewThresholdReached += OnInterviewThresholdReached;
 
         // New subscriptions for interrupt conditions
         _hrSystem.OnSearchCompleted += OnHRSearchCompleted;
         _hrSystem.OnCandidatesReadyForReview += OnHRCandidatesReadyForReview;
         _hrSystem.OnCandidateAccepted += OnHRCandidateAccepted;
+        _hrSystem.OnPoolFull += OnHRPoolFull;
         _eventBus.Subscribe<CandidateWithdrewEvent>(OnCandidateWithdrew);
         _eventBus.Subscribe<CompetitorHiredCandidateEvent>(OnCompetitorHiredCandidate);
+        _eventBus.Subscribe<CandidateLostPatienceEvent>(OnCandidateLostPatience);
+        _eventBus.Subscribe<EmployeeFrustratedEvent>(OnEmployeeFrustrated);
 
         _contractSystem.RefreshContractPool(_gameState.currentTick);
         _gameState.contractState.lastPoolRefreshTick = _gameState.currentTick;
@@ -1292,8 +1322,6 @@ public class GameController : MonoBehaviour
                 for (int mi = 0; mi < migCount; mi++) {
                     var key = keys[mi];
                     var mdata = _gameState.moraleState.employeeMorale[key];
-                    mdata.crunchDaysActive = 0;
-                    mdata.recentCrunchDays = 0;
                     mdata.currentMorale = 60f;
                     _gameState.moraleState.employeeMorale[key] = mdata;
                 }
@@ -1336,6 +1364,127 @@ public class GameController : MonoBehaviour
             }
             _gameState.version = 11;
             _logger.Log("[GameController] Save migration v10->v11 complete: Stale competitor salary recurring costs purged.");
+        }
+
+        if (_gameState.version < 12)
+        {
+            // Team type enum was redesigned: Contracts/Programming/SFX/VFX → Development,
+            // Accounting → Development (deletion not possible post-deserialization; converter handled remapping).
+            // ProductTeamRole: Programming/SFX/VFX → Development.
+            // Both remappings are handled transparently by LegacyTeamTypeConverter and
+            // LegacyProductTeamRoleConverter during deserialization.
+            // Purge duplicate Development role assignments in product TeamAssignments:
+            // (old saves may have had Programming+SFX+VFX all remapped to Development in the same product)
+            if (_gameState.productState != null)
+            {
+                var devProducts = _gameState.productState.developmentProducts;
+                if (devProducts != null)
+                {
+                    foreach (var kvp in devProducts)
+                    {
+                        var p = kvp.Value;
+                        if (p?.TeamAssignments == null) continue;
+                    }
+                }
+                var shippedProducts = _gameState.productState.shippedProducts;
+                if (shippedProducts != null)
+                {
+                    foreach (var kvp in shippedProducts)
+                    {
+                        var p = kvp.Value;
+                        if (p?.TeamAssignments == null) continue;
+                    }
+                }
+            }
+            _gameState.version = 12;
+            _logger.Log("[GameController] Save migration v11->v12 complete: TeamType and ProductTeamRole enums remapped to 5-lane model.");
+        }
+
+        if (_gameState.version < 13)
+        {
+            // Assign personality to all existing employees using deterministic per-entity RNG
+            if (_gameState.employeeState?.employees != null)
+            {
+                foreach (var kvp in _gameState.employeeState.employees)
+                {
+                    var emp = kvp.Value;
+                    if (emp == null) continue;
+                    var personalityRng = new RngStream(unchecked(emp.id.Value ^ (int)0xBEEF1234));
+                    emp.personality = PersonalitySystem.GeneratePersonality(personalityRng);
+                }
+            }
+
+            // Assign personality to all existing candidates
+            if (_gameState.employeeState?.availableCandidates != null)
+            {
+                var cands = _gameState.employeeState.availableCandidates;
+                int cCount = cands.Count;
+                for (int i = 0; i < cCount; i++)
+                {
+                    var c = cands[i];
+                    if (c == null) continue;
+                    var personalityRng = new RngStream(unchecked(c.CandidateId ^ (int)0xCAFEDEAD));
+                    c.personality = PersonalitySystem.GeneratePersonality(personalityRng);
+                }
+            }
+
+            // Initialize empty chemistry state
+            if (_gameState.chemistryState == null)
+                _gameState.chemistryState = ChemistryState.CreateNew();
+
+            _gameState.version = 13;
+            _logger.Log("[GameController] Save migration v12->v13 complete: Personality assigned to all employees and candidates; ChemistryState initialized.");
+        }
+
+        if (_gameState.version < 14)
+        {
+            // Initialize FatigueState for all existing employees.
+            // Transfer crunchDaysActive and recentCrunchDays from MoraleData if present.
+            if (_gameState.fatigueState == null)
+                _gameState.fatigueState = FatigueState.CreateNew();
+
+            if (_gameState.employeeState?.employees != null)
+            {
+                foreach (var kvp in _gameState.employeeState.employees)
+                {
+                    var emp = kvp.Value;
+                    if (emp == null) continue;
+                    if (!_gameState.fatigueState.employeeFatigue.ContainsKey(kvp.Key))
+                    {
+                        _gameState.fatigueState.employeeFatigue[kvp.Key] = new FatigueData(100f);
+                    }
+                }
+            }
+
+            // Reset morale to 60 to account for the narrowed multiplier range
+            if (_gameState.moraleState?.employeeMorale != null)
+            {
+                var moraleKeys = new System.Collections.Generic.List<EmployeeId>(_gameState.moraleState.employeeMorale.Keys);
+                int mCount = moraleKeys.Count;
+                for (int mi = 0; mi < mCount; mi++)
+                {
+                    var key = moraleKeys[mi];
+                    var mdata = _gameState.moraleState.employeeMorale[key];
+                    mdata.currentMorale = 60f;
+                    _gameState.moraleState.employeeMorale[key] = mdata;
+                }
+            }
+
+            _gameState.version = 14;
+            _logger.Log("[GameController] Save migration v13->v14 complete: FatigueState initialized for all employees; morale reset to 60.");
+        }
+
+        if (_gameState.version < 15)
+        {
+            foreach (var kvp in _gameState.employeeState.employees)
+            {
+                var emp = kvp.Value;
+                if (emp == null) continue;
+                if (emp.preferredRole == default)
+                    emp.preferredRole = emp.role;
+            }
+            _gameState.version = 15;
+            _logger.Log("[GameController] Save migration v14->v15 complete: preferredRole initialized for all employees.");
         }
 
         // Always run: convert BreakoutMonthsRemaining -> BreakoutDaysRemaining for products that pre-date daily revenue
@@ -1507,7 +1656,20 @@ public class GameController : MonoBehaviour
                 }
                 int employeeCount = compRng.Range(minCount, maxCount + 1);
 
-                var hiredIds = _employeeSystem.BulkHireForCompany(comp.Id.ToCompanyId(), comp.Archetype, employeeCount, compRng, _gameState.currentTick);
+                float ftRatio = 0.65f;
+                float salaryMod = 1.0f;
+                if (competitorArchetypeConfigs != null) {
+                    for (int ci = 0; ci < competitorArchetypeConfigs.Length; ci++) {
+                        var cfg = competitorArchetypeConfigs[ci];
+                        if (cfg != null && cfg.archetype == comp.Archetype) {
+                            ftRatio = cfg.fullTimeRatio;
+                            salaryMod = cfg.salaryTierModifier;
+                            break;
+                        }
+                    }
+                }
+
+                var hiredIds = _employeeSystem.BulkHireForCompany(comp.Id.ToCompanyId(), comp.Archetype, employeeCount, compRng, _gameState.currentTick, ftRatio, salaryMod);
                 for (int i = 0; i < hiredIds.Count; i++)
                     comp.EmployeeIds.Add(hiredIds[i]);
 
@@ -1518,7 +1680,7 @@ public class GameController : MonoBehaviour
                 CompanyId companyId = comp.Id.ToCompanyId();
                 var teamIds = new System.Collections.Generic.List<TeamId>(teamCount);
                 for (int t = 0; t < teamCount; t++) {
-                    TeamId teamId = _teamSystem.CreateTeam(TeamType.Programming, _gameState.currentTick, companyId);
+                    TeamId teamId = _teamSystem.CreateTeam(TeamType.Development, _gameState.currentTick, companyId);
                     teamIds.Add(teamId);
                 }
                 int empCount = comp.EmployeeIds.Count;
@@ -1557,12 +1719,18 @@ public class GameController : MonoBehaviour
         
         _logger.Log($"[Day {dayOfMonth}, Month {month}, Year {year}] Day changed");
         
-        // Day-boundary processing: daily recurring costs -> morale -> bankruptcy check
+        // Day-boundary processing: daily recurring costs -> energy -> morale -> bankruptcy check
         _financeSystem.ProcessDaily(_gameState.currentTick);
         
+        // Energy processing (must run before morale)
+        _fatigueSystem.ProcessDailyEnergy(day);
+
         // Morale processing
         IRng moraleRng = _moraleRng;
         _moraleSystem.ProcessDailyMorale(day, moraleRng);
+
+        // Chemistry processing
+        _teamChemistrySystem?.ProcessDailyChemistry(_gameState.currentTick);
         
         // Reputation penalty for extended debt
         if (_financeSystem.ConsecutiveDaysNegativeCash >= 3) {
@@ -1659,6 +1827,16 @@ public class GameController : MonoBehaviour
                 $"employee-{employeeId.Value}"
             );
             _moraleSystem.InitializeEmployee(employeeId, 100f);
+            _fatigueSystem.InitializeEmployee(employeeId);
+
+            _eventBus.Raise(new EmployeeHiredEvent(
+                _gameState.currentTick,
+                employeeId,
+                employee.name,
+                employee.Contract.Type,
+                GetContractLengthOption(employee.Contract),
+                employee.salary
+            ));
         }
 
         int totalEmployees = _employeeSystem.EmployeeCountForCompany(CompanyId.Player);
@@ -1670,6 +1848,11 @@ public class GameController : MonoBehaviour
             ComputeTotalRevenue()
         ));
     }
+
+    private static ContractLengthOption GetContractLengthOption(ContractTerms contract)
+    {
+        return contract.Length;
+    }
     
     private void OnEmployeeFired(EmployeeId employeeId)
     {
@@ -1680,6 +1863,7 @@ public class GameController : MonoBehaviour
         }
 
         _teamSystem.RemoveEmployeeFromTeam(employeeId);
+        _fatigueSystem.RemoveEmployee(employeeId);
 
         int totalEmployees = _employeeSystem.EmployeeCountForCompany(CompanyId.Player);
         _eventBus.Raise(new EmployeeCountChangedEvent(_gameState.currentTick, totalEmployees, employeeId, false));
@@ -1700,6 +1884,7 @@ public class GameController : MonoBehaviour
         }
 
         _teamSystem.RemoveEmployeeFromTeam(employeeId);
+        _fatigueSystem.RemoveEmployee(employeeId);
 
         int totalEmployees = _employeeSystem.EmployeeCountForCompany(CompanyId.Player);
         _eventBus.Raise(new EmployeeCountChangedEvent(_gameState.currentTick, totalEmployees, employeeId, false));
@@ -1760,6 +1945,11 @@ public class GameController : MonoBehaviour
         {
             _eventBus.Raise(new TeamCreatedEvent(_gameState.currentTick, teamId, team.name));
         }
+    }
+
+    private void OnTeamDeleted(TeamId teamId)
+    {
+        _eventBus.Raise(new TeamDeletedEvent(_gameState.currentTick, teamId));
     }
     
     private void OnEmployeeAssignedToTeam(EmployeeId employeeId, TeamId teamId)
@@ -2022,10 +2212,17 @@ public class GameController : MonoBehaviour
             HRSkill = candidate.HRSkill,
             Salary = candidate.Salary,
             Role = candidate.Role,
+            PreferredRole = candidate.Role,
             PotentialAbility = candidate.PotentialAbility,
-            Mode = HiringMode.HR
+            Mode = HiringMode.HR,
+            Personality = candidate.personality
         });
         _logger.Log($"[HRSystem] Accepted HR candidate {candidate.Name} — queued HireEmployeeCommand");
+    }
+
+    private void OnHRPoolFull(int poolCount, int poolMax, int rejectedCount)
+    {
+        _eventBus.Raise(new CandidatePoolFullEvent(_gameState.currentTick, poolCount, poolMax, rejectedCount));
     }
     
     private void OnProductLaunched(ProductId productId, int launchRevenue)
@@ -2076,6 +2273,26 @@ public class GameController : MonoBehaviour
         _interruptCandidateExpired = true;
     }
 
+    private void OnCandidateLostPatience(CandidateLostPatienceEvent evt)
+    {
+        int candidateCount = _gameState.employeeState.availableCandidates.Count;
+        for (int i = candidateCount - 1; i >= 0; i--)
+        {
+            if (_gameState.employeeState.availableCandidates[i].CandidateId == evt.CandidateId)
+            {
+                _gameState.employeeState.availableCandidates.RemoveAt(i);
+                break;
+            }
+        }
+        _interruptCandidateExpired = true;
+    }
+
+    private void OnEmployeeFrustrated(EmployeeFrustratedEvent evt)
+    {
+        if (_moraleSystem != null)
+            _moraleSystem.ApplyDirectMoraleDelta(evt.EmployeeId, -15f);
+    }
+
     private void OnCompetitorHiredCandidate(CompetitorHiredCandidateEvent evt)
     {
         if (_inboxSystem == null) return;
@@ -2096,36 +2313,17 @@ public class GameController : MonoBehaviour
         CandidateExpiryHelper.AssignExpiryTicks(_gameState.employeeState, _moraleRng, tick, _tuning);
     }
 
-    private void OnInterviewFirstReportReady(int candidateId)
+    private void OnInterviewThresholdReached(int candidateId, int threshold)
     {
-        _interruptInterviewComplete = true;
-        StopAdvance();
-        _logger.Log($"[GameController] Interview first report ready for candidate {candidateId} — simulation paused");
-    }
-
-    private void OnInterviewFinalReportReady(int candidateId)
-    {
-        _interruptInterviewComplete = true;
-        StopAdvance();
-
-        // Inbox notification with candidate name
-        string candidateName = "A candidate";
-        var candidates = _gameState.employeeState.availableCandidates;
-        int count = candidates.Count;
-        for (int i = 0; i < count; i++)
+        if (threshold == 100)
         {
-            if (candidates[i].CandidateId == candidateId)
-            {
-                candidateName = candidates[i].Name;
-                break;
-            }
+            _interruptInterviewComplete = true;
+            StopAdvance();
+            _logger.Log($"[GameController] Interview complete for candidate id:{candidateId} — simulation paused");
         }
-        _eventBus.Raise(new InterviewFinalReportEvent(_gameState.currentTick, candidateId, candidateName));
-
-        _logger.Log($"[GameController] Interview final report ready for {candidateName} (id:{candidateId}) — simulation paused");
     }
 
-    private void OnNegotiationAccepted(int candidateId, int agreedSalary)
+    private void OnNegotiationAccepted(int candidateId, int agreedSalary, EmploymentOffer offer)
     {
         // Find the candidate and auto-trigger the hire command
         int candidateCount = _gameState.employeeState.availableCandidates.Count;
@@ -2144,13 +2342,35 @@ public class GameController : MonoBehaviour
                     Skills = candidate.Skills,
                     HRSkill = candidate.HRSkill,
                     Salary = agreedSalary,
-                    Role = candidate.Role,
-                    PotentialAbility = candidate.PotentialAbility
+                    Role = offer.Role != default ? offer.Role : candidate.Role,
+                    PotentialAbility = candidate.PotentialAbility,
+                    Personality = candidate.personality,
+                    EmploymentType = offer.Type,
+                    ContractLength = offer.Length,
+                    PreferredRole = candidate.Role
                 };
                 QueueCommand(hireCmd);
                 break;
             }
         }
+    }
+
+    private void OnNegotiationRejected(int candidateId)
+    {
+        string candidateName = "A candidate";
+        int declineExpiryTick = _gameState.currentTick + 7 * TimeState.TicksPerDay;
+        int candidateCount = _gameState.employeeState.availableCandidates.Count;
+        for (int i = 0; i < candidateCount; i++)
+        {
+            if (_gameState.employeeState.availableCandidates[i].CandidateId == candidateId)
+            {
+                candidateName = _gameState.employeeState.availableCandidates[i].Name;
+                break;
+            }
+        }
+        _eventBus.Raise(new CandidateDeclinedEvent(
+            _gameState.currentTick, candidateId, candidateName,
+            string.Empty, declineExpiryTick, DeclineReason.SalaryTooLow));
     }
     
     private void OnProductShipWarning(ProductId productId, string productName, int incompletePhasesCount, int daysRemaining)
@@ -2361,6 +2581,7 @@ public class GameController : MonoBehaviour
             _hrSystem.OnSearchCompleted -= OnHRSearchCompleted;
             _hrSystem.OnCandidatesReadyForReview -= OnHRCandidatesReadyForReview;
             _hrSystem.OnCandidateAccepted -= OnHRCandidateAccepted;
+            _hrSystem.OnPoolFull -= OnHRPoolFull;
         }
 
         if (_negotiationSystem != null)
@@ -2370,17 +2591,18 @@ public class GameController : MonoBehaviour
                 _negotiationSystem.OnOfferRejected -= _recruitmentReputationSystem.OnOfferRejectedHandler;
             }
             _negotiationSystem.OnOfferAccepted -= OnNegotiationAccepted;
+            _negotiationSystem.OnOfferRejected -= OnNegotiationRejected;
         }
 
         if (_interviewSystem != null)
         {
-            _interviewSystem.OnInterviewFirstReportReady -= OnInterviewFirstReportReady;
-            _interviewSystem.OnInterviewFinalReportReady -= OnInterviewFinalReportReady;
+            _interviewSystem.OnInterviewThresholdReached -= OnInterviewThresholdReached;
         }
         
         if (_teamSystem != null)
         {
             _teamSystem.OnTeamCreated -= OnTeamCreated;
+            _teamSystem.OnTeamDeleted -= OnTeamDeleted;
             _teamSystem.OnEmployeeAssignedToTeam -= OnEmployeeAssignedToTeam;
             _teamSystem.OnEmployeeRemovedFromTeam -= OnEmployeeRemovedFromTeam;
             _teamSystem.OnCrunchModeChanged -= OnTeamCrunchModeChanged;

@@ -1,11 +1,7 @@
 public enum TeamType {
-    Contracts = 0,
-    Programming = 1,
-    Design = 2,
-    SFX = 3,
-    VFX = 4,
-    Marketing = 5,
-    Accounting = 6,
-    HR = 7,
-    QA = 8
+    Design      = 0,
+    Development = 1,
+    QA          = 2,
+    Marketing   = 3,
+    HR          = 4
 }

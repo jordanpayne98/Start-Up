@@ -42,7 +42,6 @@ public interface IReadOnlyGameState : IAbilityReadModel
     // Role accessors
     IReadOnlyList<TeamMemberRoleData> GetTeamMemberRoles(TeamId teamId);
     int LastCandidateGenerationTick { get; }
-    int CandidateGenerationInterval { get; }
     float CandidateGenerationSpeedMultiplier { get; }
     bool CanRerollCandidates { get; }
     int CandidateRerollCost { get; }
@@ -88,18 +87,26 @@ public interface IReadOnlyGameState : IAbilityReadModel
     bool GetCandidateHasSentFollowUp(int candidateId);
     int GetCandidateWithdrawalDeadlineTick(int candidateId);
 
-    // New interview pipeline (two-phase report)
+    // New interview pipeline (knowledge-based)
     bool IsFirstReportReady(int candidateId);
     bool IsFinalReportReady(int candidateId);
     bool CanStartInterview(int candidateId);
     bool CanStartInterview(int candidateId, HiringMode mode);
     float GetInterviewProgressPercent(int candidateId);
+    float GetInterviewKnowledgeLevel(int candidateId);
+    int GetAbilityStarEstimate(int candidateId);
+    int GetPotentialStarEstimate(int candidateId);
+    string GetInterviewConfidenceLabel(int candidateId);
+    string GetInterviewConfidenceClass(int candidateId);
+    string GetInterviewReliabilityLabel(int candidateId);
+    string GetInterviewReliabilityClass(int candidateId);
     TeamId GetInterviewingTeamId(int candidateId);
     bool IsCandidateHardRejected(int candidateId);
 
     // New negotiation: deterministic salary demand
     int GetEffectiveSalaryDemand(int candidateId);
     bool IsSalaryRevealed(int candidateId);
+    bool IsOfferOnCooldown(int candidateId);
     int GetNegotiationSkillAverage(TeamId teamId);
     string GetRecommendationLabel(int candidateId);
     HRTeamStatus GetHRTeamStatus(TeamId teamId);
@@ -123,11 +130,20 @@ public interface IReadOnlyGameState : IAbilityReadModel
     TeamType GetTeamType(TeamId teamId);
     IReadOnlyList<CandidateData> PendingReviewCandidates { get; }
     bool HasActiveHRSearch(TeamId teamId);
-    HRSearchPreviewData GetHRSearchPreview(TeamId teamId, int minAbility, int minPotentialStars, int desiredSkillCount = 0, int searchCount = 1);
 
     // Negotiation
     ActiveNegotiation? GetNegotiation(int candidateId);
     bool HasActiveNegotiation(int candidateId);
+    int GetCandidateMaxPatience(int candidateId);
+    int GetCandidateCurrentPatience(int candidateId);
+    bool HasPendingCounterOffer(int candidateId);
+    CounterOffer? GetPendingCounterOffer(int candidateId);
+    NegotiationStatus GetNegotiationStatus(int candidateId);
+
+    // Employee Negotiation (renewal)
+    bool HasEmployeeNegotiation(EmployeeId id);
+    EmployeeNegotiation? GetEmployeeNegotiation(EmployeeId id);
+    bool IsEmployeeOnNegotiationCooldown(EmployeeId id);
 
     // HiringMode-aware ability estimate
     CandidatePotentialEstimate GetCandidatePotentialEstimate(int candidateId, HiringMode mode);
@@ -197,4 +213,14 @@ public interface IReadOnlyGameState : IAbilityReadModel
 
     // Tuning
     float ProductBaseWorkMultiplier { get; }
+
+    // Personality & Chemistry
+    Personality GetEmployeePersonality(EmployeeId employeeId);
+    TeamChemistrySnapshot GetTeamChemistry(TeamId teamId);
+    int GetProjectedChemistryChange(TeamId teamId, EmployeeId candidate);
+
+    // Energy / Fatigue
+    float GetEmployeeEnergy(EmployeeId employeeId);
+    EnergyBand GetEmployeeEnergyBand(EmployeeId employeeId);
+    float GetTeamAverageEnergy(TeamId teamId);
 }

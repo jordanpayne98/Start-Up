@@ -13,6 +13,7 @@ public class ToastNotificationController : MonoBehaviour
         public bool IsNewsArticle;
         public string NewsHeadline;
         public ScreenId NavTarget;
+        public int TabHint;
     }
 
     private readonly Queue<ToastEntry> _queue = new Queue<ToastEntry>();
@@ -64,7 +65,7 @@ public class ToastNotificationController : MonoBehaviour
         _eventBus.Subscribe<CandidateDeclinedEvent>(OnCandidateDeclined);
         _eventBus.Subscribe<CandidateHardRejectedEvent>(OnCandidateHardRejected);
         _eventBus.Subscribe<CandidatesGeneratedEvent>(OnCandidatesGenerated);
-        _eventBus.Subscribe<InterviewFinalReportEvent>(OnInterviewFinalReport);
+        _eventBus.Subscribe<InterviewThresholdEvent>(OnInterviewThresholdReached);
         _eventBus.Subscribe<HRCandidatesReadyForReviewEvent>(OnHRCandidatesReadyForReview);
         _eventBus.Subscribe<TeamIdleMoraleAlertEvent>(OnTeamIdleMoraleAlert);
         _eventBus.Subscribe<NewsArticleAddedEvent>(OnNewsArticleAdded);
@@ -76,6 +77,17 @@ public class ToastNotificationController : MonoBehaviour
         _eventBus.Subscribe<StockPurchasedEvent>(OnStockPurchased);
         _eventBus.Subscribe<MinorDisruptionStartedEvent>(OnMinorDisruptionStarted);
         _eventBus.Subscribe<MonthlyNewsReportEvent>(OnMonthlyNewsReport);
+        _eventBus.Subscribe<RenewalWindowOpenedEvent>(OnRenewalWindowOpened);
+        _eventBus.Subscribe<RenewalChangeRequestedEvent>(OnRenewalChangeRequested);
+        _eventBus.Subscribe<RenewalEscalationEvent>(OnRenewalEscalation);
+        _eventBus.Subscribe<RenewalRequestRejectedEvent>(OnRenewalRequestRejected);
+        _eventBus.Subscribe<EmployeeDepartedEvent>(OnEmployeeDeparted);
+        _eventBus.Subscribe<ContractRenewedEvent>(OnContractRenewed);
+        _eventBus.Subscribe<CandidatePoolFullEvent>(OnCandidatePoolFull);
+        _eventBus.Subscribe<EmployeeHiredEvent>(OnEmployeeHired);
+        _eventBus.Subscribe<CounterOfferReceivedEvent>(OnCounterOfferReceived);
+        _eventBus.Subscribe<CandidateLostPatienceEvent>(OnCandidateLostPatience);
+        _eventBus.Subscribe<EmployeeFrustratedEvent>(OnEmployeeFrustrated);
     }
 
     public void Dispose()
@@ -89,7 +101,7 @@ public class ToastNotificationController : MonoBehaviour
         _eventBus.Unsubscribe<CandidateDeclinedEvent>(OnCandidateDeclined);
         _eventBus.Unsubscribe<CandidateHardRejectedEvent>(OnCandidateHardRejected);
         _eventBus.Unsubscribe<CandidatesGeneratedEvent>(OnCandidatesGenerated);
-        _eventBus.Unsubscribe<InterviewFinalReportEvent>(OnInterviewFinalReport);
+        _eventBus.Unsubscribe<InterviewThresholdEvent>(OnInterviewThresholdReached);
         _eventBus.Unsubscribe<HRCandidatesReadyForReviewEvent>(OnHRCandidatesReadyForReview);
         _eventBus.Unsubscribe<TeamIdleMoraleAlertEvent>(OnTeamIdleMoraleAlert);
         _eventBus.Unsubscribe<NewsArticleAddedEvent>(OnNewsArticleAdded);
@@ -101,6 +113,17 @@ public class ToastNotificationController : MonoBehaviour
         _eventBus.Unsubscribe<StockPurchasedEvent>(OnStockPurchased);
         _eventBus.Unsubscribe<MinorDisruptionStartedEvent>(OnMinorDisruptionStarted);
         _eventBus.Unsubscribe<MonthlyNewsReportEvent>(OnMonthlyNewsReport);
+        _eventBus.Unsubscribe<RenewalWindowOpenedEvent>(OnRenewalWindowOpened);
+        _eventBus.Unsubscribe<RenewalChangeRequestedEvent>(OnRenewalChangeRequested);
+        _eventBus.Unsubscribe<RenewalEscalationEvent>(OnRenewalEscalation);
+        _eventBus.Unsubscribe<RenewalRequestRejectedEvent>(OnRenewalRequestRejected);
+        _eventBus.Unsubscribe<EmployeeDepartedEvent>(OnEmployeeDeparted);
+        _eventBus.Unsubscribe<ContractRenewedEvent>(OnContractRenewed);
+        _eventBus.Unsubscribe<CandidatePoolFullEvent>(OnCandidatePoolFull);
+        _eventBus.Unsubscribe<EmployeeHiredEvent>(OnEmployeeHired);
+        _eventBus.Unsubscribe<CounterOfferReceivedEvent>(OnCounterOfferReceived);
+        _eventBus.Unsubscribe<CandidateLostPatienceEvent>(OnCandidateLostPatience);
+        _eventBus.Unsubscribe<EmployeeFrustratedEvent>(OnEmployeeFrustrated);
     }
 
     private void OnDestroy() => Dispose();
@@ -143,22 +166,24 @@ public class ToastNotificationController : MonoBehaviour
     }
 
     private void OnCandidateFollowUp(CandidateFollowUpEvent evt) =>
-        Enqueue(new ToastEntry { MailId = 0, Message = evt.CandidateName + " is following up", Priority = MailPriority.Warning, NavTarget = ScreenId.HRCandidates });
+        Enqueue(new ToastEntry { MailId = 0, Message = evt.CandidateName + " is following up", Priority = MailPriority.Warning, NavTarget = ScreenId.HRCandidates, TabHint = (int)HRTab.Candidates });
 
     private void OnCandidateDeclined(CandidateDeclinedEvent evt) =>
-        Enqueue(new ToastEntry { MailId = 0, Message = evt.CandidateName + " declined your offer", Priority = MailPriority.Warning, NavTarget = ScreenId.HRCandidates });
+        Enqueue(new ToastEntry { MailId = 0, Message = evt.CandidateName + " declined your offer", Priority = MailPriority.Warning, NavTarget = ScreenId.HRCandidates, TabHint = (int)HRTab.Candidates });
 
     private void OnCandidateHardRejected(CandidateHardRejectedEvent evt) =>
-        Enqueue(new ToastEntry { MailId = 0, Message = "A candidate has closed the door", Priority = MailPriority.Warning, NavTarget = ScreenId.HRCandidates });
+        Enqueue(new ToastEntry { MailId = 0, Message = "A candidate has closed the door", Priority = MailPriority.Warning, NavTarget = ScreenId.HRCandidates, TabHint = (int)HRTab.Candidates });
 
     private void OnCandidatesGenerated(CandidatesGeneratedEvent evt) =>
-        Enqueue(new ToastEntry { MailId = 0, Message = evt.Count + " new candidates available", Priority = MailPriority.Info, NavTarget = ScreenId.HRCandidates });
+        Enqueue(new ToastEntry { MailId = 0, Message = evt.Count + " new candidates available", Priority = MailPriority.Info, NavTarget = ScreenId.HRCandidates, TabHint = (int)HRTab.Candidates });
 
-    private void OnInterviewFinalReport(InterviewFinalReportEvent evt) =>
-        Enqueue(new ToastEntry { MailId = 0, Message = evt.CandidateName + " interview complete", Priority = MailPriority.Info, NavTarget = ScreenId.HRCandidates });
+    private void OnInterviewThresholdReached(InterviewThresholdEvent evt) {
+        if (evt.ThresholdReached == 100)
+            Enqueue(new ToastEntry { MailId = 0, Message = evt.CandidateName + " interview complete", Priority = MailPriority.Info, NavTarget = ScreenId.HRCandidates, TabHint = (int)HRTab.Candidates });
+    }
 
     private void OnHRCandidatesReadyForReview(HRCandidatesReadyForReviewEvent evt) =>
-        Enqueue(new ToastEntry { MailId = 0, Message = "HR Search Complete: " + evt.CandidateCount + " candidates found", Priority = MailPriority.Info, NavTarget = ScreenId.HRCandidates });
+        Enqueue(new ToastEntry { MailId = 0, Message = "HR Search Complete: " + evt.CandidateCount + " candidates found", Priority = MailPriority.Info, NavTarget = ScreenId.HRCandidates, TabHint = (int)HRTab.Candidates });
 
     private void OnTeamIdleMoraleAlert(TeamIdleMoraleAlertEvent evt) =>
         Enqueue(new ToastEntry { MailId = 0, Message = evt.TeamName + " morale warning: no contract assigned", Priority = MailPriority.Warning, NavTarget = ScreenId.ProductionContracts });
@@ -206,6 +231,44 @@ public class ToastNotificationController : MonoBehaviour
 
     private void OnMonthlyNewsReport(MonthlyNewsReportEvent evt) =>
         Enqueue(new ToastEntry { MailId = 0, Message = "Monthly Market Report available", Priority = MailPriority.Info, NavTarget = ScreenId.DashboardInbox });
+
+    private void OnRenewalWindowOpened(RenewalWindowOpenedEvent evt) =>
+        Enqueue(new ToastEntry { MailId = 0, Message = evt.Name + "'s contract expiring in " + evt.DaysUntilExpiry + " days", Priority = MailPriority.Info, NavTarget = ScreenId.HREmployees, TabHint = (int)HRTab.Employees });
+
+    private void OnRenewalChangeRequested(RenewalChangeRequestedEvent evt) =>
+        Enqueue(new ToastEntry { MailId = 0, Message = evt.Name + " is requesting renewal changes", Priority = MailPriority.Warning, NavTarget = ScreenId.HREmployees, TabHint = (int)HRTab.Employees });
+
+    private void OnRenewalEscalation(RenewalEscalationEvent evt)
+    {
+        if (evt.IsFinalStrike)
+            Enqueue(new ToastEntry { MailId = 0, Message = evt.Name + " refusing renewal — immediate action required", Priority = MailPriority.Critical, NavTarget = ScreenId.HREmployees, TabHint = (int)HRTab.Employees });
+        else
+            Enqueue(new ToastEntry { MailId = 0, Message = "Urgent: " + evt.Name + " demands contract change", Priority = MailPriority.Warning, NavTarget = ScreenId.HREmployees, TabHint = (int)HRTab.Employees });
+    }
+
+    private void OnRenewalRequestRejected(RenewalRequestRejectedEvent evt) =>
+        Enqueue(new ToastEntry { MailId = 0, Message = evt.Name + ": high departure risk", Priority = MailPriority.Warning, NavTarget = ScreenId.HREmployees, TabHint = (int)HRTab.Employees });
+
+    private void OnEmployeeDeparted(EmployeeDepartedEvent evt) =>
+        Enqueue(new ToastEntry { MailId = 0, Message = evt.Name + " has left the company", Priority = MailPriority.Warning, NavTarget = ScreenId.HREmployees, TabHint = (int)HRTab.Employees });
+
+    private void OnContractRenewed(ContractRenewedEvent evt) =>
+        Enqueue(new ToastEntry { MailId = 0, Message = "Contract renewed", Priority = MailPriority.Info, NavTarget = ScreenId.HREmployees, TabHint = (int)HRTab.Employees });
+
+    private void OnCandidatePoolFull(CandidatePoolFullEvent evt) =>
+        Enqueue(new ToastEntry { MailId = 0, Message = "Candidate pool full — HR candidates were rejected", Priority = MailPriority.Warning, NavTarget = ScreenId.HRCandidates, TabHint = (int)HRTab.Candidates });
+
+    private void OnEmployeeHired(EmployeeHiredEvent evt) =>
+        Enqueue(new ToastEntry { MailId = 0, Message = evt.Name + " accepted your offer and has joined the company", Priority = MailPriority.Info, NavTarget = ScreenId.HREmployees, TabHint = (int)HRTab.Employees });
+
+    private void OnCounterOfferReceived(CounterOfferReceivedEvent evt) =>
+        Enqueue(new ToastEntry { MailId = 0, Message = evt.CandidateName + " sent a counter-offer", Priority = MailPriority.Warning, NavTarget = ScreenId.HRCandidates, TabHint = (int)HRTab.Candidates });
+
+    private void OnCandidateLostPatience(CandidateLostPatienceEvent evt) =>
+        Enqueue(new ToastEntry { MailId = 0, Message = evt.CandidateName + " left the pool", Priority = MailPriority.Warning, NavTarget = ScreenId.HRCandidates, TabHint = (int)HRTab.Candidates });
+
+    private void OnEmployeeFrustrated(EmployeeFrustratedEvent evt) =>
+        Enqueue(new ToastEntry { MailId = 0, Message = evt.EmployeeName + " frustrated — 30 day cooldown", Priority = MailPriority.Warning, NavTarget = ScreenId.HREmployees, TabHint = (int)HRTab.Employees });
 
     private void ShowNewsToast(string headline, bool wasMitigated)
     {
@@ -303,8 +366,12 @@ public class ToastNotificationController : MonoBehaviour
         toast.Add(label);
 
         toast.RegisterCallback<ClickEvent>(_ => {
-            if (_nav != null)
-                _nav.NavigateTo(_current.NavTarget);
+            if (_nav != null) {
+                if (_current.TabHint >= 0)
+                    _nav.NavigateTo(_current.NavTarget, _current.TabHint);
+                else
+                    _nav.NavigateTo(_current.NavTarget);
+            }
             HideCurrentAndShowNext();
         });
 

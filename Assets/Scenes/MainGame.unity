@@ -189,8 +189,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WindowManager
   uiDocument: {fileID: 831741532}
-  customFont: {fileID: 12800000, guid: 9ca7318547edb8c4b8d80b6021868060, type: 3}
-  globalStyleSheet: {fileID: 7433441132597879392, guid: 761492e8f98ef5345881b338fa2fec32, type: 3}
+  customFont: {fileID: 12800000, guid: f23a072f76211694aad8e25c22a6297a, type: 3}
+  candidateDetailAsset: {fileID: 9197481963319205126, guid: 581d4bf274aa3d545978ba1d1490f3f9, type: 3}
   _tooltipRegistry: {fileID: 11400000, guid: 4b7bc558638ad4b4581006f769fad26b, type: 2}
 --- !u!114 &831741535
 MonoBehaviour:
@@ -246,21 +246,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 17bffca69cf7da54d91d7e9e35fb9af1, type: 2}
   - {fileID: 11400000, guid: 734aa51d71600ed479b39009d140e5dc, type: 2}
   productTemplates:
-  - {fileID: 11400000, guid: 7af895e7efe2ab143b93b59684f2298f, type: 2}
   - {fileID: 11400000, guid: 0b99ff3f00bc6d040b851d3585691955, type: 2}
-  - {fileID: 11400000, guid: 96d5d2e0bb17e6f43bab3b10a702981a, type: 2}
-  - {fileID: 11400000, guid: a632584674c331749aae94308896b1d3, type: 2}
   - {fileID: 11400000, guid: 51e74375ccd7f194c85c2a7b2f33c6f9, type: 2}
   - {fileID: 11400000, guid: ba41bb14c9f64914ea64adcd586197ca, type: 2}
   - {fileID: 11400000, guid: 2271221c3a8cb794bbee827dabbe8e2f, type: 2}
   - {fileID: 11400000, guid: cb958e31b98000049b5b8827d4dfdc5c, type: 2}
-  - {fileID: 11400000, guid: 55bcd2c80e18ac54186a76ce3537ced9, type: 2}
-  - {fileID: 11400000, guid: d4d9ddfb85ec4254ab1906c8034c1706, type: 2}
   - {fileID: 11400000, guid: 85577ccbb3de2e149a5904c1caf6bee2, type: 2}
-  - {fileID: 11400000, guid: 3b4b3796f131f064a8613b3458285117, type: 2}
   - {fileID: 11400000, guid: 7aa1f9213083b354883abc253cf6ba2f, type: 2}
-  - {fileID: 11400000, guid: 6c9dac812df2a93429a456b441729682, type: 2}
-  - {fileID: 11400000, guid: e146353fec441934abf691c7a9ceff18, type: 2}
   reviewOutlets:
   - {fileID: 11400000, guid: 8be537b55d0a2434192b55dd53905988, type: 2}
   - {fileID: 11400000, guid: 6230abe46dad6fb4488cd365c5ca579f, type: 2}
@@ -284,14 +276,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 60a656ba54aaab64b9594c49594050fa, type: 2}
   - {fileID: 11400000, guid: e3e79cd5275fe4949ad7ac2e36637789, type: 2}
   - {fileID: 11400000, guid: 3734d426effb2124aaacafd07f07099b, type: 2}
-  - {fileID: 11400000, guid: aaf50d2f9ac6b4148b7750f3dbc79992, type: 2}
-  - {fileID: 11400000, guid: 758b0036ee47048419f377681b64c1fd, type: 2}
-  - {fileID: 11400000, guid: ea575b3abc3f9c04b8c77d8217fd89ff, type: 2}
-  - {fileID: 11400000, guid: 7c74da262d8ff7145876fec3412b69c0, type: 2}
-  - {fileID: 11400000, guid: ef3580ecaf573b245acd24d19a85e662, type: 2}
-  - {fileID: 11400000, guid: 55b79ab8b7456284ba60b026d253c57b, type: 2}
-  - {fileID: 11400000, guid: b941e51ade944e0448c68980dbb04a34, type: 2}
-  - {fileID: 11400000, guid: 9071a7da8b925c448a4f17de88a2437c, type: 2}
   competitorArchetypeConfigs:
   - {fileID: 11400000, guid: f7d495d9c699a3c4d971fb7886e6f9fb, type: 2}
   - {fileID: 11400000, guid: 3658e7b59bec55f498bf1d9e40ec9b97, type: 2}
@@ -352,6 +336,7 @@ GameObject:
   - component: {fileID: 1282946192}
   - component: {fileID: 1282946191}
   - component: {fileID: 1282946193}
+  - component: {fileID: 1282946194}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -469,6 +454,66 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!81 &1282946194
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282946190}
+  m_Enabled: 1
+--- !u!1 &1441343960
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1441343962}
+  - component: {fileID: 1441343963}
+  m_Layer: 0
+  m_Name: Music Source
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1441343962
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1441343960}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1441343963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1441343960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 223848f99d2e19744b509f8dacf9ced8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MusicPlaylist
+  tracks:
+  - {fileID: 8300000, guid: c26426342a9ab9c4c8fa04a3026fe100, type: 3}
+  - {fileID: 8300000, guid: 966ff2e442cdb2746b9eb2a4ab645913, type: 3}
+  - {fileID: 8300000, guid: 60f85fe2823a0834ab2ee573780e01e1, type: 3}
+  - {fileID: 8300000, guid: 5ea6b1898010ac849be3e50b95d2c07f, type: 3}
+  - {fileID: 8300000, guid: 2d37a0ff20a2b7a478e781c50bc2edf4, type: 3}
+  volume: 0.2
+  fadeDuration: 2
 --- !u!1 &2109055185
 GameObject:
   m_ObjectHideFlags: 0
@@ -556,3 +601,4 @@ SceneRoots:
   - {fileID: 2109055187}
   - {fileID: 1282946192}
   - {fileID: 831741533}
+  - {fileID: 1441343962}

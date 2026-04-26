@@ -157,6 +157,7 @@ public class PauseMenuView : IGameView {
         _btnExit = new Button { text = "Exit Game" };
         _btnExit.AddToClassList("btn-danger");
         _btnExit.AddToClassList("pause-panel__btn");
+        _btnExit.AddToClassList("pause-panel__btn--last");
         _btnExit.clicked += OnExitClicked;
         panel.Add(_btnExit);
 

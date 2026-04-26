@@ -1,73 +1,61 @@
-// SalaryDemandCalculator Version: Clean v1
-using System;
-
-/// <summary>
-/// Pure static helper. Computes the exact salary demand per hiring path.
-/// No Unity refs, no state, no allocations.
-/// </summary>
+// SalaryDemandCalculator Version: Clean v2
+// Pure static helper — no Unity refs, no state, no allocations.
 public static class SalaryDemandCalculator
 {
-    // Fallback const values — used when no TuningConfig is supplied
-    public const float HRMultiplier        = 0.80f;
-    public const float InterviewMultiplier = 0.90f;
-    public const float DirectMultiplier    = 1.15f;
-    public const float MaxNegotiationDiscount = 0.15f;
     private const int MinimumWage = 500;
 
-    /// <summary>
-    /// Returns the effective monthly salary demand for a candidate given their current hiring path state.
-    /// </summary>
-    public static int GetEffectiveDemand(CandidateData candidate, float avgNegotiationSkill,
-        int resolvedStage = -1, TuningConfig tuning = null)
+    // ─── Unified demand formula ───────────────────────────────────────────────
+
+    public static int ComputeDemand(EmployeeRole role, int[] skills, int ability, int potential,
+        int age, HiddenAttributes hidden)
+    {
+        int baseSalary = SalaryBand.GetBase(role);
+
+        float caFactor = 1f + (float)System.Math.Max(0, ability - 40) / 100f;
+        if (caFactor > 1.8f) caFactor = 1.8f;
+
+        float paFactor = 1f + (System.Math.Max(0, potential - ability) / 200f) * 0.15f;
+        if (paFactor > 1.15f) paFactor = 1.15f;
+
+        float ageFactor;
+        if      (age < 22) ageFactor = 0.90f;
+        else if (age <= 28) ageFactor = 0.95f;
+        else if (age <= 35) ageFactor = 1.00f;
+        else if (age <= 42) ageFactor = 1.05f;
+        else               ageFactor = 1.10f;
+
+        float ambitionContrib    = (hidden.Ambition     - 1) * (0.25f / 19f);
+        float workEthicContrib   = (hidden.WorkEthic    - 1) * (0.08f / 19f);
+        float creativeContrib    = (hidden.Creative     - 1) * (0.05f / 19f);
+        float adaptDiscount      = (hidden.Adaptability - 1) * (0.08f / 19f);
+        float personalityFactor  = 1f + ambitionContrib + workEthicContrib + creativeContrib - adaptDiscount;
+
+        int demand = Round50(baseSalary * caFactor * paFactor * ageFactor * personalityFactor);
+        return demand < MinimumWage ? MinimumWage : demand;
+    }
+
+    // Convenience overload for CandidateData — ability derived from skills via AbilityCalculator.
+    public static int ComputeDemand(CandidateData candidate)
     {
         if (candidate == null) return 0;
-
-        if (candidate.IsTargeted)
-            return ComputeHRDemand(candidate.Salary, avgNegotiationSkill, tuning);
-
-        int stage = resolvedStage >= 0 ? resolvedStage : candidate.InterviewStage;
-        if (stage >= 3)
-            return ComputeInterviewedDemand(candidate.Salary, tuning);
-
-        return ComputeDirectDemand(candidate.Salary, tuning);
+        int[] tiers = candidate.GetRoleTiersForSalary();
+        int ability = AbilityCalculator.ComputeAbility(candidate.Skills, tiers);
+        return ComputeDemand(candidate.Role, candidate.Skills, ability,
+            candidate.PotentialAbility, candidate.Age, candidate.HiddenAttributes);
     }
 
-    public static int ComputeHRDemand(int baseSalary, float avgNegotiationSkill,
-        TuningConfig tuning = null)
+    // Convenience overload for Employee — ability derived from role-weighted skills.
+    public static int ComputeDemand(Employee employee)
     {
-        float hrMult   = tuning != null ? tuning.SalaryHRMultiplier           : HRMultiplier;
-        float maxDisc  = tuning != null ? tuning.SalaryMaxNegotiationDiscount  : MaxNegotiationDiscount;
-        int   minWage  = tuning != null ? tuning.SalaryMinimumWage             : MinimumWage;
-        float globalMult = tuning != null ? tuning.SalaryGlobalMultiplier : 1f;
-
-        float skill = avgNegotiationSkill;
-        if (skill < 0f) skill = 0f;
-        if (skill > 20f) skill = 20f;
-
-        float negotiationDiscount = (skill / 20f) * maxDisc;
-        int result = Round50(baseSalary * hrMult * (1f - negotiationDiscount) * globalMult);
-        return result < minWage ? minWage : result;
+        if (employee == null) return 0;
+        int[] tiers = employee.GetRoleTiersForSalary();
+        int ability = AbilityCalculator.ComputeAbility(employee.skills, tiers);
+        return ComputeDemand(employee.role, employee.skills, ability,
+            employee.potentialAbility, employee.age, employee.hiddenAttributes);
     }
 
-    public static int ComputeInterviewedDemand(int baseSalary, TuningConfig tuning = null)
-    {
-        float mult    = tuning != null ? tuning.SalaryInterviewMultiplier : InterviewMultiplier;
-        int   minWage = tuning != null ? tuning.SalaryMinimumWage         : MinimumWage;
-        float globalMult = tuning != null ? tuning.SalaryGlobalMultiplier : 1f;
-        int result = Round50(baseSalary * mult * globalMult);
-        return result < minWage ? minWage : result;
-    }
+    // ─── Unchanged utilities ──────────────────────────────────────────────────
 
-    public static int ComputeDirectDemand(int baseSalary, TuningConfig tuning = null)
-    {
-        float mult    = tuning != null ? tuning.SalaryDirectMultiplier : DirectMultiplier;
-        int   minWage = tuning != null ? tuning.SalaryMinimumWage      : MinimumWage;
-        float globalMult = tuning != null ? tuning.SalaryGlobalMultiplier : 1f;
-        int result = Round50(baseSalary * mult * globalMult);
-        return result < minWage ? minWage : result;
-    }
-
-    /// <summary>Whether the exact salary demand is visible to the player for this candidate.</summary>
     public static bool IsSalaryRevealed(CandidateData candidate)
     {
         if (candidate == null) return false;
@@ -76,28 +64,8 @@ public static class SalaryDemandCalculator
         return false;
     }
 
-    public static int ComputeRenewalDemand(Employee emp)
-    {
-        if (emp == null) return 0;
-        int baseSalary = SalaryBand.GetBase(emp.role);
-        float uniform = 1f / SkillTypeHelper.SkillTypeCount;
-        float sum = 0f;
-        for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++)
-            sum += emp.skills[i] * uniform;
-        int ca = (int)(sum * 10f);
-        if (ca < 0) ca = 0;
-        if (ca > 200) ca = 200;
-        float caFactor = 1f + (float)System.Math.Max(0, ca - 40) / 100f;
-        if (caFactor > 1.8f) caFactor = 1.8f;
-        float ambFactor = 1f + (emp.hiddenAttributes.Ambition - 1) * (0.30f / 19f);
-        int salary = (int)(baseSalary * caFactor * ambFactor);
-        salary = ((salary + 50) / 100) * 100;
-        if (salary < MinimumWage) salary = MinimumWage;
-        return salary;
-    }
-
     public static int Round50(float value)
     {
-        return (int)Math.Round(value / 50f) * 50;
+        return (int)System.Math.Round(value / 50f) * 50;
     }
 }

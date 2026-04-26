@@ -70,6 +70,8 @@ public class ContractSystem : ISystem
     private FinanceSystem _financeSystem;
     private ReputationSystem _reputationSystem;
     private MoraleSystem _moraleSystem;
+    private FatigueSystem _fatigueSystem;
+    private TeamChemistrySystem _chemistrySystem;
     private IRng _rng;
     private ILogger _logger;
     private readonly List<PendingEvent> _pendingEvents;
@@ -137,6 +139,16 @@ public class ContractSystem : ISystem
     public void SetMoraleSystem(MoraleSystem moraleSystem)
     {
         _moraleSystem = moraleSystem;
+    }
+
+    public void SetFatigueSystem(FatigueSystem fatigueSystem)
+    {
+        _fatigueSystem = fatigueSystem;
+    }
+
+    public void SetChemistrySystem(TeamChemistrySystem chemistrySystem)
+    {
+        _chemistrySystem = chemistrySystem;
     }
 
     public void RefreshContractPool(int currentTick)
@@ -228,9 +240,9 @@ public class ContractSystem : ISystem
             return false;
         }
 
-        if (_teamSystem.GetTeamType(teamId) != TeamType.Contracts)
+        if (_teamSystem.GetTeamType(teamId) != TeamType.Development)
         {
-            _logger.LogWarning($"Cannot assign team {teamId.Value} to contract: Only Contracts teams can be assigned to contracts");
+            _logger.LogWarning($"Cannot assign team {teamId.Value} to contract: Only Development teams can be assigned to contracts");
             return false;
         }
 
@@ -327,6 +339,7 @@ public class ContractSystem : ISystem
         var teamResult = TeamWorkEngine.AggregateTeam(
             team.members,
             _employeeSystem,
+            _fatigueSystem,
             contract.RequiredSkill,
             _roleTierTable,
             _tuning?.TeamOverheadPerMember ?? 0.04f,
@@ -335,18 +348,18 @@ public class ContractSystem : ISystem
         int resolvedMin     = contract.MinContributors > 0 ? contract.MinContributors : 1;
         int resolvedOptimal = contract.OptimalContributors > 0 ? contract.OptimalContributors : resolvedMin + 1;
 
-        int contributors = teamResult.Contributors;
+        float effectiveCapacity = teamResult.EffectiveCapacity;
 
         float speedCoverage;
-        if (contributors <= 0)
+        if (effectiveCapacity <= 0f)
             speedCoverage = 0f;
-        else if (contributors < resolvedOptimal)
-            speedCoverage = 0.60f + 0.40f * (contributors / (float)resolvedOptimal);
+        else if (effectiveCapacity < resolvedOptimal)
+            speedCoverage = 0.60f + 0.40f * (effectiveCapacity / resolvedOptimal);
         else
             speedCoverage = 1.0f;
 
-        if (contributors > resolvedOptimal) {
-            float excessRatio = (float)(contributors - resolvedOptimal) / resolvedOptimal;
+        if (effectiveCapacity > resolvedOptimal) {
+            float excessRatio = (effectiveCapacity - resolvedOptimal) / resolvedOptimal;
             float diminishingFactor = 1f / (1f + excessRatio * 0.6f);
             speedCoverage *= diminishingFactor;
         }
@@ -360,14 +373,30 @@ public class ContractSystem : ISystem
         float workRate = _tuning != null ? _tuning.WorkRatePerSkillPoint : FallbackWorkRatePerSkillPoint;
         float variance = 0.95f + _rng.NextFloat01() * 0.10f;
 
-        float crunchMult = team.isCrunching ? 1.15f : 1f;
+        float crunchMult = team.isCrunching ? 1.10f : 1f;
+
+        ChemistryBand chemBand = ChemistryBand.Neutral;
+        float conflictSpeedMult = 1f;
+        float conflictQualityMult = 1f;
+        if (_chemistrySystem != null)
+        {
+            chemBand = _chemistrySystem.GetTeamChemistry(team.id).Band;
+            float rawConflictSpeed = _chemistrySystem.GetTeamSpeedPenalty(team.id);
+            float rawConflictQuality = _chemistrySystem.GetTeamQualityPenalty(team.id);
+            conflictSpeedMult = 1f + rawConflictSpeed;
+            conflictQualityMult = 1f + rawConflictQuality;
+        }
+        float chemistrySpeedMod = TeamWorkEngine.GetChemistrySpeedMod(chemBand);
+        float chemistryQualityMod = TeamWorkEngine.GetChemistryQualityMod(chemBand);
 
         float workThisTick = TeamWorkEngine.ComputeWorkPerTick(
             in teamResult,
             workRate,
             speedCoverage * speedRangeMult,
             variance,
-            GetPhaseSkillUpgradeMultiplier(contract.RequiredSkill) * crunchMult);
+            GetPhaseSkillUpgradeMultiplier(contract.RequiredSkill) * crunchMult,
+            chemistrySpeedMod,
+            conflictSpeedMult);
 
         contract.WorkCompleted += workThisTick;
         if (contract.WorkCompleted > contract.TotalWorkRequired)
@@ -379,7 +408,9 @@ public class ContractSystem : ISystem
             contract.TargetSkill,
             contract.ExcellenceSkill,
             teamResult.CoverageQualityMod,
-            teamResult.AvgMorale);
+            teamResult.AvgMorale,
+            chemistryQualityMod,
+            conflictQualityMult);
         contract.QualityScore = quality;
 #if UNITY_EDITOR
         UnityEngine.Debug.Log($"[ContractSystem] {contract.Name} (id={contract.Id.Value}) | AvgQualitySkill={teamResult.AvgQualitySkill:F3} Contributors={teamResult.Contributors}/{teamResult.ActiveCount} coverageMod={teamResult.CoverageQualityMod:F3} quality={quality:F2}%");
@@ -446,7 +477,7 @@ public class ContractSystem : ISystem
 
                     if (assignedTeam.isCrunching) {
                         assignedTeam.isCrunching = false;
-                        _moraleSystem?.ResetCrunchTracking(assignedTeam.members);
+                        _fatigueSystem?.ResetCrunchTracking(assignedTeam.members);
                     }
                 }
 
@@ -681,7 +712,7 @@ public class ContractSystem : ISystem
 
     private void TryAutoAssignTeam(ContractId contractId)
     {
-        var candidates = _teamSystem.GetFreeTeamsByType(TeamType.Contracts);
+        var candidates = _teamSystem.GetFreeTeamsByType(TeamType.Development);
         int count = candidates.Count;
         for (int i = 0; i < count; i++)
         {
@@ -694,7 +725,7 @@ public class ContractSystem : ISystem
             _logger.Log($"[ContractSystem] Auto-assigned team {candidateId.Value} to contract {contractId.Value}");
             return;
         }
-        _logger.Log($"[ContractSystem] No free Contracts team available for auto-assign to contract {contractId.Value}");
+        _logger.Log($"[ContractSystem] No free Development team available for auto-assign to contract {contractId.Value}");
     }
 
     public void Dispose()

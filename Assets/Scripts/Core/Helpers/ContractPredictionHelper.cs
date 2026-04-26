@@ -51,10 +51,13 @@ public static class ContractPredictionHelper
 
             TeamWorkEngine.ComputeEffectiveSkills(
                 visibleSkill, ca, emp.morale,
+                100f,
                 emp.hiddenAttributes.WorkEthic,
                 emp.hiddenAttributes.Creative,
                 emp.hiddenAttributes.Adaptability,
                 isRoleFit,
+                emp.personality,
+                50f,
                 out float speedSkill, out float qualitySkill);
 
             totalSpeedSkill += speedSkill;

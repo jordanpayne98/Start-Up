@@ -393,8 +393,12 @@ public class InboxView : IGameView
         {
             case MailActionType.Navigate:
                 var navTarget = action.NavTarget;
-                if (navTarget.HasValue)
-                    _nav.NavigateTo(navTarget.Value);
+                if (navTarget.HasValue) {
+                    if (action.TabHint >= 0)
+                        _nav.NavigateTo(navTarget.Value, action.TabHint);
+                    else
+                        _nav.NavigateTo(navTarget.Value);
+                }
                 break;
 
             case MailActionType.OpenModal:
@@ -501,30 +505,33 @@ public class InboxView : IGameView
     {
         if (string.IsNullOrEmpty(modalKey)) return;
 
-        if (modalKey.StartsWith("HRCandidateReview:"))
-        {
-            // Format: "HRCandidateReview:<id1,id2,...>:<teamId>:<criteriaLabel>"
-            var parts = modalKey.Split(':');
-            if (parts.Length >= 4)
-            {
-                var idStrings = parts[1].Split(',');
-                var candidateIds = new List<int>(idStrings.Length);
-                for (int i = 0; i < idStrings.Length; i++)
-                {
-                    if (int.TryParse(idStrings[i], out int id))
-                        candidateIds.Add(id);
-                }
-                // parts[2] = teamId (not used directly), parts[3] = criteriaLabel
-                string criteriaLabel = parts.Length > 3 ? parts[3] : "";
-                _modal.OpenHRCandidateReview(candidateIds, "HR Team", criteriaLabel);
-            }
-        }
-
         if (modalKey.StartsWith("ProductDetail:"))
         {
             var idStr = modalKey.Substring("ProductDetail:".Length);
             if (int.TryParse(idStr, out int rawId))
                 _modal.OpenProductDetail(new ProductId(rawId));
+        }
+
+        if (modalKey == "ContractRenewal")
+        {
+            _modal.OpenRenewalModal();
+        }
+
+        if (modalKey.StartsWith("ContractRenewal:"))
+        {
+            var idStr = modalKey.Substring("ContractRenewal:".Length);
+            if (int.TryParse(idStr, out int rawId))
+                _modal.OpenRenewalModal(new EmployeeId(rawId));
+        }
+
+        if (modalKey.StartsWith("CounterOffer:"))
+        {
+            var idStr = modalKey.Substring("CounterOffer:".Length);
+            if (int.TryParse(idStr, out int candidateId))
+            {
+                _nav.NavigateTo(ScreenId.HRCandidates, (int)HRTab.Candidates);
+                _modal.ShowCandidateDetailModal(candidateId, showCounterOffer: true);
+            }
         }
     }
 }

@@ -81,7 +81,20 @@ public class Employee
     public bool contractRenewalPending;    // true = waiting for player Accept/Decline
     public int renewalDemand;              // cached salary demand at renewal trigger; 0 = not computed
     public bool isFounder;                 // founders never quit, retire, or decay; grow skills 1.5x faster
+    public EmployeeRole preferredRole;     // candidate's original preferred role at hire time
     public CompanyId ownerCompanyId;
+    public Personality personality;
+
+    // Employment arrangement — populated at hire, updated on renewal
+    public ContractTerms Contract;
+    public CandidatePreferences OriginalPreferences;
+    public RenewalState Renewal;
+    public int StrikeCount;
+
+    // Computed convenience properties backed by Contract
+    public float WorkCapacity    => Contract.WorkCapacity;
+    public float EffectiveOutput => Contract.EffectiveOutput;
+    public EmploymentType ArrangementType => Contract.Type;
 
     // Backward-compat properties for save migration and existing code
     public int programmingSkill { get => skills[(int)SkillType.Programming]; set => skills[(int)SkillType.Programming] = value; }
@@ -90,6 +103,23 @@ public class Employee
 
     public int GetSkill(SkillType type) => skills[(int)type];
     public void SetSkill(SkillType type, int value) => skills[(int)type] = value;
+
+    // Returns the indexed tier array for this employee's role — used by SalaryDemandCalculator.
+    public int[] GetRoleTiersForSalary()
+    {
+        return s_RoleTierTable.GetTiers(role);
+    }
+
+    private static readonly RoleTierTable s_RoleTierTable = BuildDefaultTierTable();
+
+    private static RoleTierTable BuildDefaultTierTable()
+    {
+        var table = new RoleTierTable();
+        var profiles = UnityEngine.Resources.LoadAll<RoleTierProfile>("RoleTiers");
+        for (int i = 0; i < profiles.Length; i++)
+            table.Register(profiles[i]);
+        return table;
+    }
 
     private Employee() { }
 
@@ -111,6 +141,7 @@ public class Employee
         this.isActive = true;
         this.role = role;
         this.hrSkill = hrSkill;
+        this.personality = Personality.Professional;
     }
 
     public Employee(EmployeeId id, string name, Gender gender, int age, int[] skills, int salary, int hireDate, EmployeeRole role, int hrSkill = 0)
@@ -133,6 +164,7 @@ public class Employee
         this.isActive = true;
         this.role = role;
         this.hrSkill = hrSkill;
+        this.personality = Personality.Professional;
     }
 }
 
@@ -144,7 +176,7 @@ public class EmployeeState
     public int nextCandidateId;
     public List<CandidateData> availableCandidates = new List<CandidateData>();
     public int lastCandidateGenerationTick;
-    public int candidateGenerationInterval = 15 * 4800; // 15 days × TicksPerDay
+    public int candidateGenerationInterval = 15 * 4800; // DEPRECATED: monthly refresh uses calendar check
     public int lastYearProcessed;
     public int candidatePoolSeed;
     public int candidateRerollsUsedThisCycle;
@@ -155,7 +187,7 @@ public class EmployeeState
         {
             nextEmployeeId = 1,
             nextCandidateId = 1,
-            lastCandidateGenerationTick = -(15 * 4800), // 15 days so pool generates immediately on day 1
+            lastCandidateGenerationTick = -1,
             candidatePoolSeed = System.Environment.TickCount,
             candidateRerollsUsedThisCycle = 0
         };

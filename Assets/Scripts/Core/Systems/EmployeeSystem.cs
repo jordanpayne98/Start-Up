@@ -17,7 +17,6 @@ public class EmployeeSystem : ISystem
     // Candidate pool — fallback defaults (live values in TuningConfig)
     public const int CandidatePoolSize = 20;
     public const int CandidateListMax = 40;
-    public const int CandidateRefreshIntervalDays = 15;
 
     // Age / Retirement — fallback defaults
     private const int DefaultRetirementAge          = 65;
@@ -25,7 +24,6 @@ public class EmployeeSystem : ISystem
     private const int DefaultRetirementCheckStartAge = 60;
 
     private const int TicksPerYear = TimeState.TicksPerDay * TimeState.DaysPerYear;
-    private const int RenewalGraceDays = 60;
     private const int MinContractYears = 1;
     private const int MaxContractYearsExclusive = 3;
 
@@ -66,6 +64,7 @@ public class EmployeeSystem : ISystem
     private bool _pendingCandidateGeneratedEvent;
     private int _pendingCandidateGeneratedTick;
     private int _pendingCandidateGeneratedCount;
+    private bool _pendingShortlistEvent;
 
     // Scratch key list for dictionary iteration in tick path — avoids foreach allocations
     private readonly List<EmployeeId> _employeeKeysScratch = new List<EmployeeId>();
@@ -81,11 +80,22 @@ public class EmployeeSystem : ISystem
     // Transferred event buffer
     private struct TransferredEvent { public EmployeeId Id; public CompanyId From; public CompanyId To; }
     private readonly List<TransferredEvent> _transferredBuffer = new List<TransferredEvent>();
+
+    // Renewal event buffers
+    private struct RenewalWindowOpenedData { public EmployeeId Id; public string Name; public EmploymentType CurrentType; public int DaysUntilExpiry; }
+    private readonly List<RenewalWindowOpenedData> _renewalWindowOpenedBuffer = new List<RenewalWindowOpenedData>();
+    private struct RenewalChangeRequestedData { public EmployeeId Id; public string Name; public bool RequestsTypeChange; public EmploymentType RequestedType; public bool RequestsLengthChange; public ContractLengthOption RequestedLength; }
+    private readonly List<RenewalChangeRequestedData> _renewalChangeRequestedBuffer = new List<RenewalChangeRequestedData>();
+    private struct RenewalEscalationData { public EmployeeId Id; public string Name; public int StrikeCount; public bool IsFinalStrike; }
+    private readonly List<RenewalEscalationData> _renewalEscalationBuffer = new List<RenewalEscalationData>();
+    private struct RenewalRequestRejectedData { public EmployeeId Id; public string Name; }
+    private readonly List<RenewalRequestRejectedData> _renewalRequestRejectedBuffer = new List<RenewalRequestRejectedData>();
+    private struct EmployeeDepartedData { public EmployeeId Id; public string Name; public string Reason; }
+    private readonly List<EmployeeDepartedData> _employeeDepartedBuffer = new List<EmployeeDepartedData>();
     
     // Tuning-aware accessors — fall back to compile-time defaults
     private int PoolSize             => _tuning != null ? _tuning.CandidatePoolSize             : CandidatePoolSize;
     private int ListMax              => _tuning != null ? _tuning.CandidateListMax               : CandidateListMax;
-    private int RefreshIntervalDays  => _tuning != null ? _tuning.CandidateRefreshIntervalDays   : CandidateRefreshIntervalDays;
     private int RetirementAge        => _tuning != null ? _tuning.RetirementAge                  : DefaultRetirementAge;
     private int DecayWindowStartAge  => _tuning != null ? _tuning.DecayWindowStartAge            : DefaultDecayWindowStartAge;
     private int RetirementCheckStartAge => _tuning != null ? _tuning.RetirementCheckStartAge     : DefaultRetirementCheckStartAge;
@@ -259,6 +269,17 @@ public class EmployeeSystem : ISystem
 
     public EmployeeId HireEmployee(string name, Gender gender, int age, int[] skills, int salary, int currentTick, EmployeeRole role, int hrSkill = 0, int potentialAbility = 0)
     {
+        var offer = new EmploymentOffer
+        {
+            Type          = EmploymentType.FullTime,
+            Length        = ContractLengthOption.Standard,
+            MonthlySalary = salary
+        };
+        return HireEmployee(name, gender, age, skills, currentTick, role, hrSkill, potentialAbility, offer, default);
+    }
+
+    public EmployeeId HireEmployee(string name, Gender gender, int age, int[] skills, int currentTick, EmployeeRole role, int hrSkill, int potentialAbility, EmploymentOffer offer, CandidatePreferences originalPreferences)
+    {
         var employeeId = new EmployeeId(_state.nextEmployeeId++);
 
         if (age <= 0) age = 25;
@@ -281,6 +302,8 @@ public class EmployeeSystem : ISystem
             hrSkill = resolved;
         }
 
+        int salary = offer.MonthlySalary;
+
         var employee = new Employee(
             employeeId,
             name,
@@ -293,13 +316,24 @@ public class EmployeeSystem : ISystem
             hrSkill
         );
 
+        employee.Contract = ContractTerms.FromOffer(offer, currentTick);
+        employee.OriginalPreferences = originalPreferences;
+
         _state.employees[employeeId] = employee;
         _activeEmployeesDirty = true;
 
         if (potentialAbility > 0)
             employee.potentialAbility = potentialAbility;
 
-        employee.contractExpiryTick = currentTick + _rng.Range(MinContractYears, MaxContractYearsExclusive) * TicksPerYear;
+        int contractTicks = employee.Contract.ContractMonths * TimeState.TicksPerDay * 30;
+        employee.contractExpiryTick = currentTick + contractTicks;
+        int strikeCarry = employee.Renewal.StrikeCount;
+        employee.Renewal = new RenewalState
+        {
+            Phase       = RenewalPhase.Active,
+            ExpiryTick  = employee.contractExpiryTick,
+            StrikeCount = strikeCarry
+        };
 
         _abilitySystem?.OnEmployeeHired(employeeId, employee);
 
@@ -307,7 +341,7 @@ public class EmployeeSystem : ISystem
 
         _hiredBuffer.Add(employeeId);
 
-        _logger.Log($"[Tick {currentTick}] Hired {name} (ID: {employeeId.Value}) [{role}] Age:{age} - Skills:[{string.Join(",", clampedSkills)}] HR:{hrSkill} Salary:${salary}/month");
+        _logger.Log($"[Tick {currentTick}] Hired {name} (ID: {employeeId.Value}) [{role}] Age:{age} - Skills:[{string.Join(",", clampedSkills)}] HR:{hrSkill} Salary:${salary}/month [{offer.Type}/{offer.Length}]");
 
         return employeeId;
     }
@@ -449,7 +483,7 @@ public class EmployeeSystem : ISystem
 
     // Creates count real Employee objects owned by companyId, using the shared candidate pipeline.
     // Skill quality is scaled by archetype tier. Returns created EmployeeId list (allocated once at spawn, not in tick path).
-    public List<EmployeeId> BulkHireForCompany(CompanyId companyId, CompetitorArchetype archetype, int count, IRng rng, int hireTick)
+    public List<EmployeeId> BulkHireForCompany(CompanyId companyId, CompetitorArchetype archetype, int count, IRng rng, int hireTick, float fullTimeRatio = 0.65f, float salaryTierModifier = 1.0f)
     {
         var result = new List<EmployeeId>(count);
         float qualityMultiplier = GetArchetypeQualityMultiplier(archetype);
@@ -458,6 +492,20 @@ public class EmployeeSystem : ISystem
         {
             EmployeeRole role = RollRoleForArchetype(archetype, rng);
             var candidate = CandidateData.GenerateCandidate(rng, qualityMultiplier, role);
+
+            int ftRoll = rng.Range(0, 100);
+            EmploymentType empType = ftRoll < (int)(fullTimeRatio * 100f) ? EmploymentType.FullTime : EmploymentType.PartTime;
+            float ptRatio = empType == EmploymentType.PartTime ? 0.60f : 1.0f;
+            int baseSalary = SalaryBand.GetBase(role);
+            int scaledSalary = SalaryDemandCalculator.Round50(baseSalary * salaryTierModifier * ptRatio);
+            if (scaledSalary < 500) scaledSalary = 500;
+
+            var compOffer = new EmploymentOffer
+            {
+                Type          = empType,
+                Length        = ContractLengthOption.Standard,
+                MonthlySalary = scaledSalary
+            };
 
             var employeeId = new EmployeeId(_state.nextEmployeeId++);
             int age = rng.Range(22, 45);
@@ -469,11 +517,21 @@ public class EmployeeSystem : ISystem
             for (int s = 0; s < skillLen; s++)
                 clampedSkills[s] = candidate.Skills[s] < 1 ? 1 : candidate.Skills[s];
 
-            var employee = new Employee(employeeId, candidate.Name, candidate.Gender, age, clampedSkills, candidate.Salary, hireTick, role);
+            var employee = new Employee(employeeId, candidate.Name, candidate.Gender, age, clampedSkills, scaledSalary, hireTick, role);
             employee.ownerCompanyId = companyId;
             employee.potentialAbility = candidate.PotentialAbility;
             employee.hiddenAttributes = candidate.HiddenAttributes;
-            employee.contractExpiryTick = hireTick + rng.Range(MinContractYears, MaxContractYearsExclusive) * TicksPerYear;
+            employee.personality = candidate.personality;
+            employee.Contract = ContractTerms.FromOffer(compOffer, hireTick);
+            employee.OriginalPreferences = candidate.Preferences;
+            int compContractTicks = employee.Contract.ContractMonths * TimeState.TicksPerDay * 30;
+            employee.contractExpiryTick = hireTick + compContractTicks;
+            employee.Renewal = new RenewalState
+            {
+                Phase      = RenewalPhase.Active,
+                ExpiryTick = employee.contractExpiryTick,
+                StrikeCount = 0
+            };
 
             _state.employees[employeeId] = employee;
             _activeEmployeesDirty = true;
@@ -602,7 +660,7 @@ public class EmployeeSystem : ISystem
         {
             _lastDayProcessed = currentDay;
 
-            ProcessContractExpiry(tick);
+            TickRenewals(tick);
 
             _expiredCandidateBuffer.Clear();
             CandidateExpiryHelper.TickExpiryTimers(_state, _interviewSystem, _negotiationSystem, tick, _expiredCandidateBuffer);
@@ -673,6 +731,13 @@ public class EmployeeSystem : ISystem
             _pendingCandidateGeneratedEvent = false;
         }
 
+        // Flush shortlist event — signals candidate list mutated for immediate UI refresh
+        if (_pendingShortlistEvent)
+        {
+            _eventBus?.Raise(new CandidatesGeneratedEvent(tick, 0));
+            _pendingShortlistEvent = false;
+        }
+
         // Flush retired events
         count = _retiredBuffer.Count;
         for (int i = 0; i < count; i++)
@@ -715,9 +780,58 @@ public class EmployeeSystem : ISystem
             _eventBus?.Raise(new EmployeeTransferredEvent(tick, t.Id, t.From, t.To));
         }
         _transferredBuffer.Clear();
+
+        // Flush renewal window opened events
+        count = _renewalWindowOpenedBuffer.Count;
+        for (int i = 0; i < count; i++)
+        {
+            var d = _renewalWindowOpenedBuffer[i];
+            _eventBus?.Raise(new RenewalWindowOpenedEvent(tick, d.Id, d.Name, d.CurrentType, d.DaysUntilExpiry));
+        }
+        _renewalWindowOpenedBuffer.Clear();
+
+        // Flush renewal change requested events
+        count = _renewalChangeRequestedBuffer.Count;
+        for (int i = 0; i < count; i++)
+        {
+            var d = _renewalChangeRequestedBuffer[i];
+            _eventBus?.Raise(new RenewalChangeRequestedEvent(tick, d.Id, d.Name, d.RequestsTypeChange, d.RequestedType, d.RequestsLengthChange, d.RequestedLength));
+        }
+        _renewalChangeRequestedBuffer.Clear();
+
+        // Flush renewal escalation events
+        count = _renewalEscalationBuffer.Count;
+        for (int i = 0; i < count; i++)
+        {
+            var d = _renewalEscalationBuffer[i];
+            _eventBus?.Raise(new RenewalEscalationEvent(tick, d.Id, d.Name, d.StrikeCount, d.IsFinalStrike));
+        }
+        _renewalEscalationBuffer.Clear();
+
+        // Flush renewal request rejected events
+        count = _renewalRequestRejectedBuffer.Count;
+        for (int i = 0; i < count; i++)
+        {
+            var d = _renewalRequestRejectedBuffer[i];
+            _eventBus?.Raise(new RenewalRequestRejectedEvent(tick, d.Id, d.Name));
+        }
+        _renewalRequestRejectedBuffer.Clear();
+
+        // Flush employee departed events
+        count = _employeeDepartedBuffer.Count;
+        for (int i = 0; i < count; i++)
+        {
+            var d = _employeeDepartedBuffer[i];
+            _eventBus?.Raise(new EmployeeDepartedEvent(tick, d.Id, d.Name, d.Reason));
+            OnEmployeeQuit?.Invoke(d.Id);
+        }
+        _employeeDepartedBuffer.Clear();
     }
 
-    private void ProcessContractExpiry(int tick)
+    private const int RenewalWindowMonths = 2;
+    private const int RenewalWindowTicks = RenewalWindowMonths * 30 * TimeState.TicksPerDay;
+
+    private void TickRenewals(int tick)
     {
         _employeeKeysScratch.Clear();
         foreach (var kvp in _state.employees)
@@ -730,30 +844,166 @@ public class EmployeeSystem : ISystem
             if (!emp.isActive) continue;
             if (emp.isFounder) continue;
 
-            if (emp.contractExpiryTick == 0)
+            // Legacy save migration: seed RenewalState if not yet initialized
+            if (emp.Renewal.Phase == RenewalPhase.Active && emp.Renewal.ExpiryTick == 0)
             {
-                emp.contractExpiryTick = tick + _rng.Range(MinContractYears, MaxContractYearsExclusive) * TicksPerYear;
+                if (emp.contractExpiryTick > 0)
+                {
+                    emp.Renewal = new RenewalState
+                    {
+                        Phase       = RenewalPhase.Active,
+                        ExpiryTick  = emp.contractExpiryTick,
+                        StrikeCount = emp.Renewal.StrikeCount
+                    };
+                }
+                else
+                {
+                    int legacyTicks = _rng.Range(MinContractYears, MaxContractYearsExclusive) * TicksPerYear;
+                    emp.contractExpiryTick = tick + legacyTicks;
+                    emp.Renewal = new RenewalState
+                    {
+                        Phase       = RenewalPhase.Active,
+                        ExpiryTick  = emp.contractExpiryTick,
+                        StrikeCount = 0
+                    };
+                    continue;
+                }
+            }
+
+            // ── Phase: Active → check if window should open ──────────────────
+            if (emp.Renewal.Phase == RenewalPhase.Active)
+            {
+                int windowStartTick = emp.Renewal.ExpiryTick - RenewalWindowTicks;
+                if (tick < windowStartTick) continue;
+
+                int daysUntilExpiry = (emp.Renewal.ExpiryTick - tick) / TimeState.TicksPerDay;
+
+                // Strike 3: employee refuses renewal outright
+                if (emp.Renewal.StrikeCount >= 2)
+                {
+                    emp.Renewal = new RenewalState
+                    {
+                        Phase          = RenewalPhase.WindowOpen,
+                        WindowOpenTick = tick,
+                        ExpiryTick     = emp.Renewal.ExpiryTick,
+                        StrikeCount    = emp.Renewal.StrikeCount
+                    };
+                    emp.contractRenewalPending = true;
+                    emp.contractExpiryTick = emp.Renewal.ExpiryTick;
+                    _renewalWindowOpenedBuffer.Add(new RenewalWindowOpenedData { Id = emp.id, Name = emp.name, CurrentType = emp.Contract.Type, DaysUntilExpiry = daysUntilExpiry });
+                    _renewalEscalationBuffer.Add(new RenewalEscalationData { Id = emp.id, Name = emp.name, StrikeCount = emp.Renewal.StrikeCount, IsFinalStrike = true });
+                    emp.renewalDemand = 0;
+                    _renewalRequestedBuffer.Add(emp.id);
+                    _logger.Log($"[Tick {tick}] {emp.name} renewal window: FINAL STRIKE ({emp.Renewal.StrikeCount} strikes) — will not renew");
+                    continue;
+                }
+
+                // Strike 2: escalation warning but still can renew
+                bool hasEscalation = emp.Renewal.StrikeCount == 1;
+
+                // Build change request based on preference mismatch
+                bool typeChange = false;
+                bool lengthChange = false;
+                EmploymentType requestedType = emp.Contract.Type;
+                ContractLengthOption requestedLength = ContractLengthOption.Standard;
+
+                if (emp.OriginalPreferences.FtPtPref == FtPtPreference.PrefersFullTime && emp.Contract.Type == EmploymentType.PartTime)
+                {
+                    typeChange = true;
+                    requestedType = EmploymentType.FullTime;
+                }
+                else if (emp.OriginalPreferences.FtPtPref == FtPtPreference.PrefersPartTime && emp.Contract.Type == EmploymentType.FullTime)
+                {
+                    typeChange = true;
+                    requestedType = EmploymentType.PartTime;
+                }
+
+                ContractLengthOption currentLength = GetContractLengthFromMonths(emp.Contract.ContractMonths, emp.Contract.Type);
+                if (emp.OriginalPreferences.LengthPref == LengthPreference.PrefersSecurity && currentLength == ContractLengthOption.Short)
+                {
+                    lengthChange = true;
+                    requestedLength = ContractLengthOption.Long;
+                }
+                else if (emp.OriginalPreferences.LengthPref == LengthPreference.PrefersFlexibility && currentLength == ContractLengthOption.Long)
+                {
+                    lengthChange = true;
+                    requestedLength = ContractLengthOption.Short;
+                }
+                else
+                {
+                    requestedLength = currentLength;
+                }
+
+                bool hasChangeRequest = typeChange || lengthChange;
+
+                emp.Renewal = new RenewalState
+                {
+                    Phase              = RenewalPhase.WindowOpen,
+                    WindowOpenTick     = tick,
+                    ExpiryTick         = emp.Renewal.ExpiryTick,
+                    StrikeCount        = emp.Renewal.StrikeCount,
+                    HasChangeRequest   = hasChangeRequest,
+                    RequestedType      = requestedType,
+                    RequestedLength    = requestedLength,
+                    RequestedTypeChange   = typeChange,
+                    RequestedLengthChange = lengthChange
+                };
+                emp.contractRenewalPending = true;
+                emp.contractExpiryTick = emp.Renewal.ExpiryTick;
+
+                _renewalWindowOpenedBuffer.Add(new RenewalWindowOpenedData { Id = emp.id, Name = emp.name, CurrentType = emp.Contract.Type, DaysUntilExpiry = daysUntilExpiry });
+
+                if (hasChangeRequest)
+                    _renewalChangeRequestedBuffer.Add(new RenewalChangeRequestedData { Id = emp.id, Name = emp.name, RequestsTypeChange = typeChange, RequestedType = requestedType, RequestsLengthChange = lengthChange, RequestedLength = requestedLength });
+
+                if (hasEscalation)
+                    _renewalEscalationBuffer.Add(new RenewalEscalationData { Id = emp.id, Name = emp.name, StrikeCount = 2, IsFinalStrike = false });
+
+                // Keep legacy event chain alive for inbox system compatibility
+                SkillTier renewTier = DeriveEmployeeTier(emp);
+                int renewMarket = GetBenchmarkSalary(renewTier);
+                if (renewMarket <= 0) renewMarket = emp.salary;
+                emp.renewalDemand = SalaryModifierCalculator.ComputeRenewalDemand(emp, renewMarket, emp.Contract.Type, GetContractLengthFromMonths(emp.Contract.ContractMonths, emp.Contract.Type), emp.Renewal.StrikeCount);
+                _renewalRequestedBuffer.Add(emp.id);
+
+                _logger.Log($"[Tick {tick}] {emp.name} renewal window opened — {daysUntilExpiry}d left, strikes:{emp.Renewal.StrikeCount}, changeReq:{hasChangeRequest}");
                 continue;
             }
 
-            if (tick < emp.contractExpiryTick) continue;
+            // ── Phase: WindowOpen → check for expiry departure ───────────────
+            if (emp.Renewal.Phase == RenewalPhase.WindowOpen)
+            {
+                if (tick < emp.Renewal.ExpiryTick) continue;
 
-            if (emp.contractRenewalPending)
-            {
+                // Final strike employees always depart; others depart if window expired without renewal
+                emp.Renewal = new RenewalState
+                {
+                    Phase       = RenewalPhase.Departed,
+                    ExpiryTick  = emp.Renewal.ExpiryTick,
+                    StrikeCount = emp.Renewal.StrikeCount
+                };
                 emp.isActive = false;
+                emp.contractRenewalPending = false;
                 _activeEmployeesDirty = true;
-                _quitEventBuffer.Add(emp.id);
-                _logger.Log($"[Tick {tick}] {emp.name} quit — contract renewal ignored");
+                _employeeDepartedBuffer.Add(new EmployeeDepartedData { Id = emp.id, Name = emp.name, Reason = "Contract expired without renewal" });
+                _logger.Log($"[Tick {tick}] {emp.name} departed — contract expired without renewal");
             }
-            else
-            {
-                int demand = SalaryDemandCalculator.ComputeRenewalDemand(emp);
-                emp.contractRenewalPending = true;
-                emp.renewalDemand = demand;
-                emp.contractExpiryTick = tick + RenewalGraceDays * TimeState.TicksPerDay;
-                _renewalRequestedBuffer.Add(emp.id);
-                _logger.Log($"[Tick {tick}] {emp.name} requesting contract renewal at ${demand}/mo");
-            }
+        }
+    }
+
+    private static ContractLengthOption GetContractLengthFromMonths(int months, EmploymentType type)
+    {
+        if (type == EmploymentType.FullTime)
+        {
+            if (months <= 6)  return ContractLengthOption.Short;
+            if (months <= 12) return ContractLengthOption.Standard;
+            return ContractLengthOption.Long;
+        }
+        else
+        {
+            if (months <= 3) return ContractLengthOption.Short;
+            if (months <= 6) return ContractLengthOption.Standard;
+            return ContractLengthOption.Long;
         }
     }
 
@@ -910,7 +1160,9 @@ public class EmployeeSystem : ISystem
         for (int i = _state.availableCandidates.Count - 1; i >= 0; i--)
         {
             var c = _state.availableCandidates[i];
-            bool hasProgress = c.InterviewStage > 0;
+            bool hasProgress = _interviewSystem != null
+                ? _interviewSystem.GetKnowledgeLevel(c.CandidateId) > 0f
+                : c.InterviewStage > 0;
             if (!hasProgress)
                 _state.availableCandidates.RemoveAt(i);
         }
@@ -940,31 +1192,27 @@ public class EmployeeSystem : ISystem
             if (hiredId.Value >= 0 && _state.employees.TryGetValue(hiredId, out var hiredEmployee))
             {
                 hiredEmployee.ownerCompanyId = hire.CompanyId;
-
-                // Manual hiring penalties applied after hire
-                if (hire.Mode == HiringMode.Manual)
+                hiredEmployee.personality = hire.Personality;
+                hiredEmployee.preferredRole = hire.PreferredRole != default ? hire.PreferredRole : hire.Role;
+                if (hire.Role != default)
+                    hiredEmployee.role = hire.Role;
+                var offer = new EmploymentOffer
                 {
-                    // 1. Lower morale
-                    hiredEmployee.morale = hiredEmployee.morale - 5 < 0 ? 0 : hiredEmployee.morale - 5;
-
-                    // 2. Downward bias on each hidden attribute (shave 0-3 off each)
-                    var attrs = hiredEmployee.hiddenAttributes;
-                    int lr = attrs.LearningRate - _rng.Range(0, 4);
-                    int we = attrs.WorkEthic    - _rng.Range(0, 4);
-                    int ad = attrs.Adaptability - _rng.Range(0, 4);
-                    int am = attrs.Ambition     - _rng.Range(0, 4);
-                    int cr = attrs.Creative     - _rng.Range(0, 4);
-                    hiredEmployee.hiddenAttributes = new HiddenAttributes
-                    {
-                        LearningRate = lr < 1 ? 1 : lr,
-                        WorkEthic    = we < 1 ? 1 : we,
-                        Adaptability = ad < 1 ? 1 : ad,
-                        Ambition     = am < 1 ? 1 : am,
-                        Creative     = cr < 1 ? 1 : cr
-                    };
-
-                    _logger.Log($"[Tick {command.Tick}] Manual hire penalties applied to {hire.Name}: morale-5, attr downbias");
-                }
+                    Type          = hire.EmploymentType,
+                    Length        = hire.ContractLength,
+                    MonthlySalary = hire.Salary,
+                    Role          = hire.Role
+                };
+                hiredEmployee.Contract = ContractTerms.FromOffer(offer, command.Tick);
+                int hireTicks = hiredEmployee.Contract.ContractMonths * TimeState.TicksPerDay * 30;
+                hiredEmployee.contractExpiryTick = command.Tick + hireTicks;
+                int strikeCarryHire = hiredEmployee.Renewal.StrikeCount;
+                hiredEmployee.Renewal = new RenewalState
+                {
+                    Phase       = RenewalPhase.Active,
+                    ExpiryTick  = hiredEmployee.contractExpiryTick,
+                    StrikeCount = strikeCarryHire
+                };
 
                 _state.employees[hiredId] = hiredEmployee;
             }
@@ -986,19 +1234,102 @@ public class EmployeeSystem : ISystem
                 }
             }
         }
+        else if (command is ShortlistCandidateCommand shortlist)
+        {
+            int count = _state.availableCandidates.Count;
+            bool found = false;
+            for (int i = 0; i < count; i++)
+            {
+                if (_state.availableCandidates[i].CandidateId == shortlist.CandidateId)
+                {
+                    var c = _state.availableCandidates[i];
+                    c.IsTargeted = true;
+                    if (shortlist.DurationDays == -1)
+                        c.ExpiryTick = int.MaxValue;
+                    else if (shortlist.DurationDays > 0)
+                        c.ExpiryTick = command.Tick + shortlist.DurationDays * TimeState.TicksPerDay;
+                    else
+                        c.ExpiryTick = int.MaxValue;
+                    _state.availableCandidates[i] = c;
+                    _logger.Log($"[Tick {command.Tick}] Candidate {shortlist.CandidateId} shortlisted — IsTargeted=true, ExpiryTick={c.ExpiryTick}");
+                    _pendingShortlistEvent = true;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+                _logger.Log($"[Tick {command.Tick}] ShortlistCandidateCommand: candidate {shortlist.CandidateId} not found");
+        }
         else if (command is RenewContractCommand renew)
         {
-            if (_state.employees.TryGetValue(renew.EmployeeId, out var emp) && emp.isActive && emp.contractRenewalPending)
+            if (!_state.employees.TryGetValue(renew.EmployeeId, out var emp)) return;
+            if (!emp.isActive || emp.Renewal.Phase != RenewalPhase.WindowOpen) return;
+
+            // Strike 3: employee refuses renewal regardless
+            if (emp.Renewal.StrikeCount >= 2)
             {
-                int oldSalary = emp.salary;
-                emp.salary = emp.renewalDemand;
-                emp.contractRenewalPending = false;
-                emp.contractExpiryTick = command.Tick + _rng.Range(MinContractYears, MaxContractYearsExclusive) * TicksPerYear;
-                emp.renewalDemand = 0;
-                _activeEmployeesDirty = true;
-                _renewedBuffer.Add(new RenewedEvent { Id = renew.EmployeeId, NewSalary = emp.salary, OldSalary = oldSalary });
-                _logger.Log($"[Tick {command.Tick}] Contract renewed for {emp.name}: ${oldSalary} → ${emp.salary}/mo");
+                _logger.Log($"[Tick {command.Tick}] Cannot renew {emp.name} — final strike, employee refused");
+                return;
             }
+
+            int oldSalary = emp.salary;
+
+            // Determine effective type/length — use employee's requested if player accepts, otherwise use provided
+            EmploymentType effectiveType   = renew.NewType;
+            ContractLengthOption effectiveLength = renew.NewLength;
+
+            // Strike management
+            if (emp.Renewal.HasChangeRequest && !renew.AcceptsRequest)
+            {
+                emp.Renewal = new RenewalState
+                {
+                    Phase              = RenewalPhase.Active,
+                    ExpiryTick         = 0,
+                    StrikeCount        = emp.Renewal.StrikeCount + 1,
+                    HasChangeRequest   = false,
+                    RequestedType      = default,
+                    RequestedLength    = default,
+                    RequestedTypeChange   = false,
+                    RequestedLengthChange = false
+                };
+                _renewalRequestRejectedBuffer.Add(new RenewalRequestRejectedData { Id = emp.id, Name = emp.name });
+            }
+            else
+            {
+                int resetStrikes = renew.AcceptsRequest ? 0 : emp.Renewal.StrikeCount;
+                emp.Renewal = new RenewalState
+                {
+                    Phase       = RenewalPhase.Active,
+                    ExpiryTick  = 0,
+                    StrikeCount = resetStrikes
+                };
+            }
+
+            // Compute renewal salary using market benchmark
+            SkillTier tier = DeriveEmployeeTier(emp);
+            int marketRate = GetBenchmarkSalary(tier);
+            if (marketRate <= 0) marketRate = emp.salary;
+            int newSalary = SalaryModifierCalculator.ComputeRenewalDemand(emp, marketRate, effectiveType, effectiveLength, emp.Renewal.StrikeCount);
+
+            // Build new contract terms
+            var renewalOffer = new EmploymentOffer { Type = effectiveType, Length = effectiveLength, MonthlySalary = newSalary };
+            emp.Contract = ContractTerms.FromOffer(renewalOffer, command.Tick);
+            emp.salary = newSalary;
+            emp.contractRenewalPending = false;
+            emp.renewalDemand = 0;
+            _activeEmployeesDirty = true;
+
+            int renewContractTicks = emp.Contract.ContractMonths * TimeState.TicksPerDay * 30;
+            emp.contractExpiryTick = command.Tick + renewContractTicks;
+            emp.Renewal = new RenewalState
+            {
+                Phase       = RenewalPhase.Active,
+                ExpiryTick  = emp.contractExpiryTick,
+                StrikeCount = emp.Renewal.StrikeCount
+            };
+
+            _renewedBuffer.Add(new RenewedEvent { Id = renew.EmployeeId, NewSalary = newSalary, OldSalary = oldSalary });
+            _logger.Log($"[Tick {command.Tick}] Contract renewed for {emp.name}: ${oldSalary} → ${newSalary}/mo [{effectiveType}/{effectiveLength}]");
         }
         else if (command is DeclineRenewalCommand decline)
         {
@@ -1006,6 +1337,7 @@ public class EmployeeSystem : ISystem
             {
                 emp.isActive = false;
                 emp.contractRenewalPending = false;
+                emp.Renewal = new RenewalState { Phase = RenewalPhase.Departed, ExpiryTick = emp.Renewal.ExpiryTick, StrikeCount = emp.Renewal.StrikeCount };
                 _activeEmployeesDirty = true;
                 _quitEventBuffer.Add(decline.EmployeeId);
                 _logger.Log($"[Tick {command.Tick}] {emp.name} quit — contract renewal declined by player");
@@ -1015,23 +1347,33 @@ public class EmployeeSystem : ISystem
     
     private void CheckCandidateGenerationSchedule(int currentTick)
     {
-        int ticksSinceLastGeneration = currentTick - _state.lastCandidateGenerationTick;
-        
-        float genSpeedMultiplier = 1f;
-        int adjustedInterval = genSpeedMultiplier > 0f
-            ? (int)(_state.candidateGenerationInterval / genSpeedMultiplier)
-            : _state.candidateGenerationInterval;
-        int minInterval = RefreshIntervalDays * TimeState.TicksPerDay;
-        if (adjustedInterval < minInterval) adjustedInterval = minInterval;
-        
-        if (ticksSinceLastGeneration >= adjustedInterval)
-        {
+        int currentDay = currentTick / TimeState.TicksPerDay;
+        int lastGenDay = _state.lastCandidateGenerationTick / TimeState.TicksPerDay;
+        int currentMonth = TimeState.GetMonth(currentDay);
+        int currentYear = TimeState.GetYear(currentDay);
+        int lastGenMonth = TimeState.GetMonth(lastGenDay);
+        int lastGenYear = TimeState.GetYear(lastGenDay);
+        int dayOfMonth = TimeState.GetDayOfMonth(currentDay);
+        bool isNewMonth = (currentYear > lastGenYear) || (currentYear == lastGenYear && currentMonth > lastGenMonth);
+        if (isNewMonth && dayOfMonth == 1) {
             _pendingCandidateGeneration = true;
         }
     }
     
     private void GenerateNewCandidates(int count)
     {
+        // Bulk-clear stale market candidates before filling new slots.
+        // Candidates mid-interview or with accumulated knowledge are preserved.
+        for (int i = _state.availableCandidates.Count - 1; i >= 0; i--)
+        {
+            var c = _state.availableCandidates[i];
+            if (c.IsTargeted) continue;
+            bool inInterview = _interviewSystem != null && _interviewSystem.IsInterviewInProgress(c.CandidateId);
+            bool hasKnowledge = _interviewSystem != null && _interviewSystem.GetKnowledgeLevel(c.CandidateId) > 0f;
+            if (!inInterview && !hasKnowledge)
+                _state.availableCandidates.RemoveAt(i);
+        }
+
         // Count only auto-generated (non-targeted) candidates against the pool limit.
         // HR-sourced (IsTargeted) candidates occupy their own space up to CandidateListMax.
         int autoGenCount = 0;

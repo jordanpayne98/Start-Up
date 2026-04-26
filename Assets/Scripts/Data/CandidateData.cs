@@ -26,6 +26,7 @@ public class CandidateData
     public bool HasSentFollowUp;        // true once the follow-up inbox message is sent
     public int FollowUpSentTick;        // tick when the follow-up was sent
     public int WithdrawalDeadlineTick;  // set when follow-up sends; candidate withdraws at this tick
+    public int LastOfferTick;           // tick when the last offer was made; 0 = no offer sent
 
     // Backward-compat properties
     public int ProgrammingSkill { get => Skills[(int)SkillType.Programming]; set => Skills[(int)SkillType.Programming] = value; }
@@ -36,33 +37,27 @@ public class CandidateData
     public int CurrentAbility;             // set to ca at generation; 0 = lazy-compute fallback on old saves
     public int PotentialAbility;           // 0-200; 0 = not yet generated
     public HiddenAttributes HiddenAttributes;
+    public Personality personality;
+
+    // Employment preference fields — generated in GenerateCandidate, revealed via interview/HR
+    public CandidatePreferences Preferences;
+    public bool PreferencesRevealed;   // true = player has seen exact FT/PT + length preference
+    public bool PreferencesHinted;     // true = player has seen a vague hint about preferences
 
     public int GetSkill(SkillType type) => Skills[(int)type];
 
-    // Compute salary that this candidate demands.
-    // Base = role band, scaled by CA and Ambition.
-    public int ComputeSalary()
+    // Returns the indexed tier array for this candidate's role — used by SalaryDemandCalculator.
+    public int[] GetRoleTiersForSalary()
     {
         GetRoleTiers(Role, out int[] tiers, out _, out _);
-        int ability = AbilityCalculator.ComputeAbility(Skills, tiers);
-        int ambition = HiddenAttributes.Ambition; // 1-20
+        return tiers;
+    }
 
-        // Base bands per role – same order as EmployeeRole enum
-        int baseSalary = SalaryBand.GetBase(Role);
-
-        // Ability contribution: +1% per Ability point above 40, capped at +80%
-        float caFactor = 1f + (float)System.Math.Max(0, ability - 40) / 100f;
-        if (caFactor > 1.8f) caFactor = 1.8f;
-
-        // Ambition contribution: ambition 1 → +0%, ambition 20 → +30%
-        float ambFactor = 1f + (ambition - 1) * (0.30f / 19f);
-
-        int salary = (int)(baseSalary * caFactor * ambFactor);
-
-        // Round to nearest 100
-        salary = ((salary + 50) / 100) * 100;
-        if (salary < 1000) salary = 1000;
-        return salary;
+    // Compute salary that this candidate demands.
+    // Delegates to SalaryDemandCalculator unified formula.
+    public int ComputeSalary()
+    {
+        return SalaryDemandCalculator.ComputeDemand(this);
     }
 
     // 0–100, pure computed — no RNG, no alloc
@@ -125,58 +120,41 @@ public class CandidateData
         }
     }
 
-    // Role-skill tier mapping — hardcoded to match RoleTierProfile ScriptableObject assets.
+    // Role-skill tier mapping derived from RoleTierProfile canonical values.
     // Tier values: 2 = Primary (1.0x cost), 3 = Secondary (1.5x), 4 = Tertiary (2.0x).
     // SkillType indices: 0=Prog, 1=Design, 2=QA, 3=VFX, 4=SFX, 5=HR, 6=Neg, 7=Acct, 8=Mktg
     private static void GetRoleTiers(EmployeeRole role, out int[] tiers, out int[] primaryIndices, out int[] secondaryIndices)
     {
-        switch (role)
-        {
-            case EmployeeRole.Developer:
-                tiers = new[] { 2, 3, 3, 3, 4, 4, 4, 4, 4 };
-                primaryIndices = new[] { 0 };
-                secondaryIndices = new[] { 1, 2, 3 };
-                break;
-            case EmployeeRole.Designer:
-                tiers = new[] { 3, 2, 4, 3, 3, 4, 4, 4, 4 };
-                primaryIndices = new[] { 1 };
-                secondaryIndices = new[] { 0, 3, 4 };
-                break;
-            case EmployeeRole.QAEngineer:
-                tiers = new[] { 3, 3, 2, 4, 4, 4, 3, 4, 4 };
-                primaryIndices = new[] { 2 };
-                secondaryIndices = new[] { 0, 1, 6 };
-                break;
-            case EmployeeRole.HR:
-                tiers = new[] { 4, 4, 4, 4, 4, 2, 3, 3, 3 };
-                primaryIndices = new[] { 5 };
-                secondaryIndices = new[] { 6, 7, 8 };
-                break;
-            case EmployeeRole.SoundEngineer:
-                tiers = new[] { 3, 3, 4, 3, 2, 4, 4, 4, 4 };
-                primaryIndices = new[] { 4 };
-                secondaryIndices = new[] { 0, 1, 3 };
-                break;
-            case EmployeeRole.VFXArtist:
-                tiers = new[] { 3, 3, 4, 2, 3, 4, 4, 4, 4 };
-                primaryIndices = new[] { 3 };
-                secondaryIndices = new[] { 0, 1, 4 };
-                break;
-            case EmployeeRole.Accountant:
-                tiers = new[] { 3, 4, 4, 4, 4, 4, 3, 2, 3 };
-                primaryIndices = new[] { 7 };
-                secondaryIndices = new[] { 0, 6, 8 };
-                break;
-            case EmployeeRole.Marketer:
-                tiers = new[] { 4, 3, 4, 4, 4, 3, 3, 4, 2 };
-                primaryIndices = new[] { 8 };
-                secondaryIndices = new[] { 1, 5, 6 };
-                break;
-            default:
-                tiers = new[] { 2, 3, 3, 3, 4, 4, 4, 4, 4 };
-                primaryIndices = new[] { 0 };
-                secondaryIndices = new[] { 1, 2, 3 };
-                break;
+        tiers = s_RoleTierTable.GetTiers(role);
+        DeriveTierIndices(tiers, out primaryIndices, out secondaryIndices);
+    }
+
+    private static readonly RoleTierTable s_RoleTierTable = BuildDefaultTierTable();
+
+    private static RoleTierTable BuildDefaultTierTable()
+    {
+        var table = new RoleTierTable();
+        var profiles = UnityEngine.Resources.LoadAll<RoleTierProfile>("RoleTiers");
+        for (int i = 0; i < profiles.Length; i++)
+            table.Register(profiles[i]);
+        return table;
+    }
+
+    private static void DeriveTierIndices(int[] tiers, out int[] primaryIndices, out int[] secondaryIndices)
+    {
+        int pCount = 0;
+        int sCount = 0;
+        for (int i = 0; i < tiers.Length; i++) {
+            if (tiers[i] == 2) pCount++;
+            else if (tiers[i] == 3) sCount++;
+        }
+        primaryIndices = new int[pCount];
+        secondaryIndices = new int[sCount];
+        int pi = 0;
+        int si = 0;
+        for (int i = 0; i < tiers.Length; i++) {
+            if (tiers[i] == 2) primaryIndices[pi++] = i;
+            else if (tiers[i] == 3) secondaryIndices[si++] = i;
         }
     }
     
@@ -433,6 +411,76 @@ public class CandidateData
 
         // Salary derived from CA, role base band, and Ambition
         candidateData.Salary = candidateData.ComputeSalary();
+        candidateData.personality = PersonalitySystem.GeneratePersonality(rng);
+
+        // ── Preference generation (Section 10.3) ─────────────────────────────
+        // Core roles: 65% FT / 20% Flex / 15% PT
+        // Support roles: 40% FT / 35% Flex / 25% PT
+        // Age influence: older (>40) shifts 8% toward FT; younger (<28) shifts 7% toward PT
+        bool isCoreRole = role == EmployeeRole.Developer || role == EmployeeRole.Designer || role == EmployeeRole.QAEngineer;
+
+        int wFT  = isCoreRole ? 65 : 40;
+        int wFlex = isCoreRole ? 20 : 35;
+        int wPT  = isCoreRole ? 15 : 25;
+
+        // Age influence on FT/PT: older → more FT, younger → more PT
+        if (age > 40)
+        {
+            int shift = 8;
+            wFT  += shift;
+            wPT  -= shift < wPT ? shift : wPT;
+        }
+        else if (age < 28)
+        {
+            int shift = 7;
+            wPT  += shift;
+            wFT  -= shift < wFT ? shift : wFT;
+        }
+
+        int ftPtTotal = wFT + wFlex + wPT;
+        int ftPtRoll = rng.Range(0, ftPtTotal);
+        FtPtPreference ftPtPref;
+        if (ftPtRoll < wFT)
+            ftPtPref = FtPtPreference.PrefersFullTime;
+        else if (ftPtRoll < wFT + wFlex)
+            ftPtPref = FtPtPreference.Flexible;
+        else
+            ftPtPref = FtPtPreference.PrefersPartTime;
+
+        // Length preference: 40% Security / 35% NoPreference / 25% Flexibility
+        // Age influence: older (>40) shifts 5% toward Security; younger (<28) shifts 5% toward Flexibility
+        int wSec = 40;
+        int wNone = 35;
+        int wFlex2 = 25;
+
+        if (age > 40)
+        {
+            int shift = 5;
+            wSec   += shift;
+            wFlex2 -= shift < wFlex2 ? shift : wFlex2;
+        }
+        else if (age < 28)
+        {
+            int shift = 5;
+            wFlex2 += shift;
+            wSec   -= shift < wSec ? shift : wSec;
+        }
+
+        int lenTotal = wSec + wNone + wFlex2;
+        int lenRoll = rng.Range(0, lenTotal);
+        LengthPreference lengthPref;
+        if (lenRoll < wSec)
+            lengthPref = LengthPreference.PrefersSecurity;
+        else if (lenRoll < wSec + wNone)
+            lengthPref = LengthPreference.NoPreference;
+        else
+            lengthPref = LengthPreference.PrefersFlexibility;
+
+        candidateData.Preferences = new CandidatePreferences
+        {
+            FtPtPref  = ftPtPref,
+            LengthPref = lengthPref
+        };
 
         return candidateData;
     }

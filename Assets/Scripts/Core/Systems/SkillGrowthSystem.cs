@@ -38,7 +38,16 @@ public static class SkillGrowthSystem
 
         float overallQuality = ComputeOverallQuality(contract);
         float rawBaseXP = (contract.Difficulty / 10f) * (overallQuality / 100f) * maxXP;
-        rawBaseXP /= memberCount;
+
+        float totalEffective = 0f;
+        for (int i = 0; i < memberCount; i++)
+        {
+            var emp = employeeSystem.GetEmployee(team.members[i]);
+            if (emp == null || !emp.isActive) continue;
+            totalEffective += emp.EffectiveOutput;
+        }
+        if (totalEffective <= 0f) totalEffective = memberCount;
+        float perUnitXP = rawBaseXP / totalEffective;
 
         float[] weights = contract.Requirements.Weights;
 
@@ -50,7 +59,7 @@ public static class SkillGrowthSystem
 
             float variance = varianceMin + (rng.NextFloat01() * varianceRange);
             float ageDecay = GetAgeDecayMultiplier(employee.age, tuning);
-            float baseXP = rawBaseXP * variance * ageDecay;
+            float baseXP = perUnitXP * employee.EffectiveOutput * variance * ageDecay;
             if (employee.isFounder) baseXP *= 1.5f;
             if (baseXP < 0f) baseXP = 0f;
 
@@ -127,7 +136,15 @@ public static class SkillGrowthSystem
         float spilloverBase   = tuning != null ? tuning.SkillSpilloverRateBase     : DefaultSpilloverBase;
         float spilloverSpread = tuning != null ? tuning.SkillSpilloverRateSpread   : DefaultSpilloverSpread;
 
-        float perMember = xpPerDay / memberCount;
+        float totalEffective = 0f;
+        for (int i = 0; i < memberCount; i++)
+        {
+            var emp = employeeSystem.GetEmployee(team.members[i]);
+            if (emp == null || !emp.isActive) continue;
+            totalEffective += emp.EffectiveOutput;
+        }
+        if (totalEffective <= 0f) totalEffective = memberCount;
+        float perUnitXP = xpPerDay / totalEffective;
 
         for (int i = 0; i < memberCount; i++)
         {
@@ -136,7 +153,7 @@ public static class SkillGrowthSystem
             if (employee == null || !employee.isActive) continue;
 
             float ageDecay = GetAgeDecayMultiplier(employee.age, tuning);
-            float baseXP = perMember * ageDecay;
+            float baseXP = perUnitXP * employee.EffectiveOutput * ageDecay;
             if (baseXP < 0f) baseXP = 0f;
 
             int[] tiers = roleTierTable != null
@@ -199,7 +216,16 @@ public static class SkillGrowthSystem
         if (team.teamType != TeamType.Marketing) return;
         int memberCount = team.members.Count;
         if (memberCount == 0) return;
-        xpAmount /= memberCount;
+
+        float totalEffective = 0f;
+        for (int i = 0; i < memberCount; i++)
+        {
+            var emp = employeeSystem.GetEmployee(team.members[i]);
+            if (emp == null || !emp.isActive) continue;
+            totalEffective += emp.EffectiveOutput;
+        }
+        if (totalEffective <= 0f) totalEffective = memberCount;
+        float perUnitXP = xpAmount / totalEffective;
 
         for (int i = 0; i < memberCount; i++)
         {
@@ -211,7 +237,7 @@ public static class SkillGrowthSystem
             float varianceRange = tuning != null ? tuning.XPVarianceRange : DefaultVarianceRange;
             float variance = varianceMin + rng.NextFloat01() * varianceRange;
             float ageDecay = GetAgeDecayMultiplier(employee.age, tuning);
-            float finalXP = xpAmount * variance * ageDecay;
+            float finalXP = perUnitXP * employee.EffectiveOutput * variance * ageDecay;
 
             int[] tiers = roleTierTable != null
                 ? roleTierTable.GetTiers(employee.role)
@@ -248,13 +274,11 @@ public static class SkillGrowthSystem
     {
         switch (type)
         {
-            case TeamType.Programming: return SkillType.Programming;
+            case TeamType.Development: return null;
             case TeamType.Design:      return SkillType.Design;
             case TeamType.QA:          return SkillType.QA;
-            case TeamType.SFX:         return SkillType.SFX;
-            case TeamType.VFX:         return SkillType.VFX;
-            case TeamType.Accounting:  return SkillType.Accountancy;
             case TeamType.Marketing:   return SkillType.Marketing;
+            case TeamType.HR:          return SkillType.HR;
             default: return null;
         }
     }

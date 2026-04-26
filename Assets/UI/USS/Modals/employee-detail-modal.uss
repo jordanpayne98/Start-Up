@@ -1,0 +1,334 @@
+.employee-detail-modal {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: var(--bg-primary);
+    min-width: 580px;
+    max-width: 660px;
+}
+
+/* ── Header ── */
+.employee-detail-modal .modal-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background-color: var(--bg-secondary);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+}
+
+.employee-detail-modal .modal-title {
+    font-size: var(--font-xl);
+    -unity-font-style: bold;
+    color: var(--text-light);
+}
+
+/* ── Body ── */
+.employee-detail-modal__body {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.employee-detail-modal__content {
+    flex-direction: column;
+    padding: 16px 20px;
+}
+
+/* ── Radar chart ── */
+.employee-detail-modal__radar {
+    width: 100%;
+    height: 220px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+/* ── Footer ── */
+.employee-detail-modal .modal-footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-top-width: 1px;
+    border-top-color: var(--border-subtle);
+    background-color: var(--bg-secondary);
+}
+
+/* ── Detail sections ── */
+.detail-section {
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.detail-section__title {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+/* ── Detail grid ── */
+.detail-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.detail-cell {
+    flex-direction: column;
+    flex: 1;
+    min-width: 100px;
+    max-width: 150px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.detail-cell__label {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.detail-cell__value {
+    font-size: var(--font-sm);
+    color: var(--text-light);
+    -unity-font-style: bold;
+}
+
+/* ── Departure risk card ── */
+.card--warning-left {
+    flex-direction: column;
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    border-left-width: 3px;
+    border-left-color: var(--accent-warning);
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+/* ── Accent left card ── */
+.card--accent-left {
+    flex-direction: column;
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    border-left-width: 3px;
+    border-left-color: var(--accent-primary);
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+/* ── Info left card ── */
+.card--info-left {
+    flex-direction: column;
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    border-left-width: 3px;
+    border-left-color: var(--accent-info);
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+/* ── Two-column body ── */
+.modal-body--two-col {
+    flex-direction: row;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.modal-col--left {
+    flex-basis: 40%;
+    flex-shrink: 0;
+    flex-direction: column;
+    padding: 12px 10px 12px 16px;
+    overflow: hidden;
+    border-right-width: 1px;
+    border-right-color: var(--border-subtle);
+}
+
+.modal-col--right {
+    flex-basis: 60%;
+    flex-grow: 1;
+    flex-direction: column;
+    padding: 12px 16px 12px 10px;
+    overflow: hidden;
+}
+
+.modal-col--scroll {
+    flex-grow: 1;
+    flex-direction: column;
+    overflow: scroll;
+}
+
+/* ── Card section inside columns ── */
+.col-card {
+    flex-direction: column;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border-width: 1px;
+    border-color: var(--border-subtle);
+}
+
+.col-card__title {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+/* ── Role suitability row ── */
+.role-suit-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 3px 4px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 2px;
+}
+
+.role-suit-row--assigned {
+    background-color: var(--bg-selected);
+    border-width: 1px;
+    border-color: var(--accent-primary);
+}
+
+.role-suit-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.role-suit-dot--natural      { background-color: #4ADE80; }
+.role-suit-dot--accomplished  { background-color: #A3E635; }
+.role-suit-dot--competent     { background-color: #FACC15; }
+.role-suit-dot--awkward       { background-color: #FB923C; }
+.role-suit-dot--unsuitable    { background-color: #6B7280; }
+
+/* ── Skill table row ── */
+.skill-table-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 4px;
+    margin-bottom: 2px;
+}
+
+.skill-table-row__name {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    flex-grow: 1;
+}
+
+.skill-table-row__value {
+    font-size: var(--font-sm);
+    color: var(--text-light);
+    min-width: 40px;
+    -unity-text-align: middle-right;
+}
+
+.skill-row__value--up {
+    color: #4ADE80;
+}
+
+.skill-row__value--down {
+    color: #F87171;
+}
+
+/* ── Status bar ── */
+.employee-status-bar {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: var(--bg-secondary);
+    border-top-width: 1px;
+    border-top-color: var(--border-subtle);
+    flex-shrink: 0;
+}
+
+.status-bar__item {
+    flex-direction: row;
+    align-items: center;
+    margin-right: 16px;
+}
+
+.status-bar__label {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin-right: 4px;
+}
+
+.status-bar__value {
+    font-size: var(--font-sm);
+    color: var(--text-light);
+    -unity-font-style: bold;
+}
+
+/* ── Renewal negotiation card ── */
+.renewal-card {
+    flex-direction: column;
+    background-color: rgba(251, 191, 36, 0.06);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border-width: 1px;
+    border-color: rgba(251, 191, 36, 0.25);
+}
+
+.renewal-card__title {
+    font-size: var(--font-xs);
+    color: var(--accent-warning, #fbbf24);
+    -unity-font-style: bold;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.renewal-cooldown-label {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    -unity-font-style: italic;
+    margin-top: 4px;
+}
+
+.off-role-card {
+    flex-direction: column;
+    background-color: rgba(251, 113, 133, 0.06);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-left-width: 3px;
+    border-left-color: #fb7185;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+/* ── Renewal patience dots ── */
+.renewal-patience-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    margin-right: 4px;
+    flex-shrink: 0;
+}
+
+.renewal-patience-dot--safe     { background-color: #4ADE80; }
+.renewal-patience-dot--warning  { background-color: #FACC15; }
+.renewal-patience-dot--critical { background-color: #F87171; }
+.renewal-patience-dot--empty {
+    background-color: transparent;
+    border-width: 1px;
+    border-color: #6B7280;
+}

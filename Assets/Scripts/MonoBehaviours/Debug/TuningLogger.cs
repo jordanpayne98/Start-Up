@@ -32,7 +32,7 @@ public class TuningLogger : MonoBehaviour
 
     private void OnEnable()
     {
-        string logsDir = Path.Combine(Application.dataPath, "Logs");
+        string logsDir = Path.Combine(Application.dataPath, "..", "Logs");
         if (!Directory.Exists(logsDir))
             Directory.CreateDirectory(logsDir);
 

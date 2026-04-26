@@ -1,0 +1,68 @@
+.employees-screen {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+/* ── Header ── */
+.screen-header {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: var(--bg-secondary);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+}
+
+/* ── Sort bar ── */
+.employees-sort-bar {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: var(--bg-secondary);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+    flex-wrap: wrap;
+}
+
+/* ── Column header ── */
+.employees-col-header {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 16px;
+    background-color: var(--bg-secondary);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+}
+
+/* ── Scroll / list ── */
+.employees-scroll {
+    flex-grow: 1;
+}
+
+.employees-list {
+    flex-direction: column;
+}
+
+/* ── Employee row ── */
+.employees-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+    transition: background-color 150ms;
+}
+
+.employees-row:hover {
+    background-color: var(--bg-hover);
+}
+
+.employees-row__emp-col {
+    flex-direction: column;
+}
+
+.employees-row__cell {
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+}

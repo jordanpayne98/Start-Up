@@ -21,7 +21,7 @@ Button {
     border-radius: 6px;
     padding: 8px 12px;
     font-size: 14px;
-    cursor: link;
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
     transition: background-color 150ms;
 }
 

@@ -24,6 +24,9 @@ public class AbilitySystem : ISystem
         _logger        = logger        ?? new NullLogger();
     }
 
+    // Exposes the RoleTierTable so the read model can compute cross-role ability queries.
+    public RoleTierTable TierTable => _tierTable;
+
     // Called to invalidate the Ability cache for an employee after a skill change.
     public void InvalidateCA(EmployeeId id)
     {
@@ -104,59 +107,74 @@ public class AbilitySystem : ISystem
         return ca;
     }
 
-    // Returns fuzzy Potential estimate for a candidate based on HR Skill average (0–20).
-    // ≥14 tight / ≥7 medium / <7 wide.
-    // HR mode: uses sourcing team skill average.
-    // Manual mode: uses company-wide HR employee average; -1 = no HR employees → ShowAsUnknown = true.
-    public CandidatePotentialEstimate GetCandidateEstimate(CandidateData candidate, int hrSkillAverage, HiringMode mode = HiringMode.HR)
+    // Returns ability/potential estimate for a candidate.
+    // If interview is active or complete: delegates to InterviewSystem for noise-based estimates.
+    // If no interview: returns ShowAsUnknown = true (manual mode fallback).
+    public CandidatePotentialEstimate GetCandidateEstimate(CandidateData candidate, int hrSkillAverage, HiringMode mode = HiringMode.HR, bool interviewComplete = false, InterviewSystem interviewSystem = null)
     {
         if (candidate == null)
             return new CandidatePotentialEstimate { PotentialStarsMin = 1, PotentialStarsMax = 5 };
+
+        int[] tiers = _tierTable.GetTiers(candidate.Role);
+        int trueCA = AbilityCalculator.ComputeAbility(candidate.Skills, tiers);
+        if (trueCA > candidate.PotentialAbility) trueCA = candidate.PotentialAbility;
+
+        if (interviewSystem != null)
+        {
+            float knowledge = interviewSystem.GetKnowledgeLevel(candidate.CandidateId);
+            bool hasInterview = knowledge > 0f || interviewComplete;
+
+            if (hasInterview)
+            {
+                int abilityStars = interviewSystem.GetAbilityStarEstimate(candidate.CandidateId, trueCA, tiers);
+                int potentialStars = interviewSystem.GetPotentialStarEstimate(candidate.CandidateId, candidate.PotentialAbility);
+
+                if (abilityStars < 0) abilityStars = 0;
+                if (potentialStars < 0) potentialStars = 0;
+
+                bool showUnknown = abilityStars <= 0 && potentialStars <= 0;
+                if (showUnknown)
+                {
+                    return new CandidatePotentialEstimate
+                    {
+                        AbilityMin = 0, AbilityMax = 200,
+                        PotentialStarsMin = 1, PotentialStarsMax = 5,
+                        ShowAsUnknown = false
+                    };
+                }
+
+                int aMin = abilityStars > 0 ? abilityStars : 1;
+                int aMax = abilityStars > 0 ? abilityStars : 5;
+                int pMin = potentialStars > 0 ? potentialStars : 1;
+                int pMax = potentialStars > 0 ? potentialStars : 5;
+
+                return new CandidatePotentialEstimate
+                {
+                    AbilityMin = aMin,
+                    AbilityMax = aMax,
+                    PotentialStarsMin = pMin,
+                    PotentialStarsMax = pMax,
+                    ShowAsUnknown = false
+                };
+            }
+        }
 
         if (mode == HiringMode.Manual && hrSkillAverage == -1)
         {
             return new CandidatePotentialEstimate
             {
-                AbilityMin    = 0,
-                AbilityMax    = 200,
-                PotentialStarsMin = 1,
-                PotentialStarsMax = 5,
+                AbilityMin = 0, AbilityMax = 200,
+                PotentialStarsMin = 1, PotentialStarsMax = 5,
                 ShowAsUnknown = true
             };
         }
 
-        int truePA    = candidate.PotentialAbility;
-        int trueStars = AbilityCalculator.PotentialToStars(truePA);
-
-        int[] tiers = _tierTable.GetTiers(candidate.Role);
-        int trueCA = AbilityCalculator.ComputeAbility(candidate.Skills, tiers);
-
-        int tightThreshold  = _tuning != null ? _tuning.AbilityTightHRThreshold  : 14;
-        int mediumThreshold = _tuning != null ? _tuning.AbilityMediumHRThreshold : 7;
-        int tightCABlur     = _tuning != null ? _tuning.AbilityTightCABlur       : 5;
-        int mediumCABlur    = _tuning != null ? _tuning.AbilityMediumCABlur      : 12;
-        int wideCABlur      = _tuning != null ? _tuning.AbilityWideCABlur        : 25;
-
-        int caBlur   = hrSkillAverage >= tightThreshold ? tightCABlur : hrSkillAverage >= mediumThreshold ? mediumCABlur : wideCABlur;
-        int starBlur = hrSkillAverage >= mediumThreshold ? 0 : 1;
-
-        int caMin = trueCA - caBlur;
-        int caMax = trueCA + caBlur;
-        if (caMin < 0)   caMin = 0;
-        if (caMax > 200) caMax = 200;
-
-        int starsMin = trueStars - starBlur;
-        int starsMax = trueStars + starBlur;
-        if (starsMin < 1) starsMin = 1;
-        if (starsMax > 5) starsMax = 5;
-
+        // No interview started — return unknown
         return new CandidatePotentialEstimate
         {
-            AbilityMin    = caMin,
-            AbilityMax    = caMax,
-            PotentialStarsMin = starsMin,
-            PotentialStarsMax = starsMax,
-            ShowAsUnknown = false
+            AbilityMin = 0, AbilityMax = 200,
+            PotentialStarsMin = 1, PotentialStarsMax = 5,
+            ShowAsUnknown = true
         };
     }
 

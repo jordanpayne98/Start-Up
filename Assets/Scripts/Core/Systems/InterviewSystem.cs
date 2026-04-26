@@ -1,19 +1,21 @@
-// InterviewSystem Version: Clean v1
+// InterviewSystem Version: Knowledge v2
 using System;
 using System.Collections.Generic;
 
 public class InterviewSystem : ISystem
 {
-    // Two reveal events replace the old OnInterviewStageCompleted
-    public event Action<int> OnInterviewFirstReportReady;
-    public event Action<int> OnInterviewFinalReportReady;
     public event Action<int, TeamId> OnInterviewStarted;
+    // Fires (candidateId, thresholdLevel) where thresholdLevel = 20/40/60/80/100
+    public event Action<int, int> OnInterviewThresholdReached;
 
-    // Duration constants
-    public static readonly int MinDurationTicks = TimeState.TicksPerDay * 1;
-    public static readonly int MaxDurationTicks = TimeState.TicksPerDay * 3;
+    // Knowledge gain tuning
+    private const float BaseGainPerTick = 2.0f;
+    private const int MinDaysToComplete = 3;
+    // TeamSize → gain factor: index = min(memberCount-1, 3)
+    private static readonly float[] TeamSizeFactors = { 1.0f, 1.3f, 1.5f, 1.6f };
+    // Thresholds fired as knowledge crosses them
+    private static readonly int[] RevealThresholds = { 20, 40, 60, 80, 100 };
 
-    // Follow-up notification fires after 3 idle days post-final-report
     private const int FollowUpIdleDays = 3;
 
     private InterviewState _state;
@@ -24,16 +26,14 @@ public class InterviewSystem : ISystem
     private ILogger _logger;
     private IRng _rng;
 
-    // Pre-allocated scratch buffers — cleared each tick, no alloc in steady state
-    private readonly List<int> _completedScratch    = new List<int>();
-    private readonly List<int> _halfwayFiredScratch = new List<int>();
-    private readonly List<int> _keyScratch          = new List<int>();
+    // Pre-allocated scratch buffers — no alloc in steady state
+    private readonly List<int> _keyScratch = new List<int>();
+    private readonly List<int> _completedScratch = new List<int>();
 
-    // Pre-allocated event data buffers — reused per tick, no lambda closures
-    private readonly List<(int candidateId, TeamId teamId, int tick)> _startedBuffer    = new List<(int, TeamId, int)>();
-    private readonly List<int>                                         _halfwayBuffer    = new List<int>();
-    private readonly List<int>                                         _finalBuffer      = new List<int>();
-    private readonly List<(int candidateId, string name, int tick)>    _followUpBuffer   = new List<(int, string, int)>();
+    // Event data buffers — cleared per tick, fired in PostTick
+    private readonly List<(int candidateId, TeamId teamId, int tick)> _startedBuffer = new List<(int, TeamId, int)>();
+    private readonly List<(int candidateId, int threshold)> _thresholdBuffer = new List<(int, int)>();
+    private readonly List<(int candidateId, string name, int tick)> _followUpBuffer = new List<(int, string, int)>();
 
     public InterviewSystem(InterviewState state, EmployeeState employeeState,
         FinanceSystem financeSystem, GameEventBus eventBus, ILogger logger, IRng rng = null)
@@ -46,7 +46,6 @@ public class InterviewSystem : ISystem
         _rng = rng;
     }
 
-    /// <summary>Call after HRSystem is constructed to enable auto-assign.</summary>
     public void SetHRSystem(HRSystem hrSystem)
     {
         _hrSystem = hrSystem;
@@ -57,29 +56,38 @@ public class InterviewSystem : ISystem
     public bool IsInterviewInProgress(int candidateId)
     {
         if (!_state.activeInterviews.TryGetValue(candidateId, out var interview)) return false;
-        return !interview.isComplete;
+        return interview.knowledgeLevel < 100f;
     }
 
+    public bool IsComplete(int candidateId)
+    {
+        if (!_state.activeInterviews.TryGetValue(candidateId, out var interview)) return false;
+        return interview.knowledgeLevel >= 100f;
+    }
+
+    // Legacy accessors — kept for backward compatibility
     public bool IsFirstReportReady(int candidateId)
     {
         if (!_state.activeInterviews.TryGetValue(candidateId, out var interview)) return false;
-        return interview.halfwayFired;
+        return interview.knowledgeLevel >= 40f;
     }
 
     public bool IsFinalReportReady(int candidateId)
     {
-        if (!_state.activeInterviews.TryGetValue(candidateId, out var interview)) return false;
-        return interview.isComplete;
+        return IsComplete(candidateId);
+    }
+
+    public float GetKnowledgeLevel(int candidateId)
+    {
+        if (!_state.activeInterviews.TryGetValue(candidateId, out var interview)) return 0f;
+        return interview.knowledgeLevel;
     }
 
     public float GetInterviewProgressPercent(int candidateId, int currentTick)
     {
         if (!_state.activeInterviews.TryGetValue(candidateId, out var interview)) return 0f;
-        int total = interview.completionTick - interview.startTick;
-        if (total <= 0) return 1f;
-        int elapsed = currentTick - interview.startTick;
-        float p = (float)elapsed / total;
-        return p < 0f ? 0f : p > 1f ? 1f : p;
+        float pct = interview.knowledgeLevel / 100f;
+        return pct < 0f ? 0f : pct > 1f ? 1f : pct;
     }
 
     public TeamId GetAssignedTeamId(int candidateId)
@@ -98,27 +106,26 @@ public class InterviewSystem : ISystem
         CandidateData candidate = FindCandidate(candidateId);
         if (candidate == null) return false;
         if (IsInterviewInProgress(candidateId)) return false;
-        if (IsFinalReportReady(candidateId)) return false;
-
-        if (mode == HiringMode.Manual)
-            return true;
+        if (IsComplete(candidateId)) return false;
 
         if (_hrSystem == null) return false;
         return _hrSystem.GetBestAvailableHRTeam() != null;
     }
 
-    // Legacy accessor retained for snapshot compatibility
+    // Legacy stage mapping: 0=none, 1=in-progress, 2=halfway(knowledge>=40), 3=complete
     public int GetInterviewStage(int candidateId)
     {
-        if (IsInterviewInProgress(candidateId)) return 1;
-        if (IsFinalReportReady(candidateId)) return 3;
-        if (IsFirstReportReady(candidateId)) return 2;
+        if (!_state.activeInterviews.TryGetValue(candidateId, out var interview)) return 0;
+        float k = interview.knowledgeLevel;
+        if (k >= 100f) return 3;
+        if (k >= 40f)  return 2;
+        if (k > 0f)    return 1;
         return 0;
     }
 
     public bool IsHireable(int candidateId)
     {
-        return IsFinalReportReady(candidateId) && !IsInterviewInProgress(candidateId);
+        return IsComplete(candidateId) && !IsInterviewInProgress(candidateId);
     }
 
     public bool GetCandidateHasSentFollowUp(int candidateId)
@@ -133,6 +140,99 @@ public class InterviewSystem : ISystem
         CandidateData candidate = FindCandidate(candidateId);
         if (candidate == null) return 0;
         return candidate.WithdrawalDeadlineTick;
+    }
+
+    // ─── New knowledge query methods ─────────────────────────────────────────
+
+    /// <summary>Returns per-skill revealed values based on knowledge level and noise.
+    /// Unrevealed skills return -1. Primary skills (tier==2) revealed at knowledge 40;
+    /// all skills revealed at knowledge 40 but with range; final value at knowledge 100.</summary>
+    public int[] GetRevealedSkills(int candidateId, int[] trueSkills, int[] tiers)
+    {
+        if (trueSkills == null) return null;
+        int count = trueSkills.Length;
+        int[] result = new int[count];
+        if (!_state.activeInterviews.TryGetValue(candidateId, out var interview))
+        {
+            for (int i = 0; i < count; i++) result[i] = -1;
+            return result;
+        }
+
+        float k = interview.knowledgeLevel;
+        for (int i = 0; i < count; i++)
+        {
+            bool isPrimary = tiers != null && i < tiers.Length && tiers[i] == 2;
+
+            if (k < 40f)
+            {
+                result[i] = -1;
+            }
+            else if (k >= 40f && k < 100f)
+            {
+                // Show range midpoint with wide noise (+/-5), narrow at 60 (+/-2), tight at 80 (+/-1)
+                int rangeHalf = k >= 80f ? 1 : k >= 60f ? 2 : 5;
+                int noise = interview.GetSkillNoise(i < 9 ? i : 0);
+                int displayed = trueSkills[i] + noise;
+                if (displayed < 0) displayed = 0;
+                if (displayed > 20) displayed = 20;
+                result[i] = displayed;
+            }
+            else // k >= 100
+            {
+                int noise = interview.GetSkillNoise(i < 9 ? i : 0);
+                int displayed = trueSkills[i] + noise;
+                if (displayed < 0) displayed = 0;
+                if (displayed > 20) displayed = 20;
+                result[i] = displayed;
+            }
+        }
+        return result;
+    }
+
+    /// <summary>Returns estimated ability stars with noise offset. Returns -1 if knowledge < 60.</summary>
+    public int GetAbilityStarEstimate(int candidateId, int trueCA, int[] tiers)
+    {
+        if (!_state.activeInterviews.TryGetValue(candidateId, out var interview)) return -1;
+        if (interview.knowledgeLevel < 60f) return -1;
+        int trueStars = AbilityCalculator.AbilityToStars(trueCA);
+        int estimated = trueStars + interview.abilityStarNoise;
+        if (estimated < 1) estimated = 1;
+        if (estimated > 5) estimated = 5;
+        return estimated;
+    }
+
+    /// <summary>Returns estimated potential stars with noise offset. Returns -1 if knowledge < 80.</summary>
+    public int GetPotentialStarEstimate(int candidateId, int truePA)
+    {
+        if (!_state.activeInterviews.TryGetValue(candidateId, out var interview)) return -1;
+        if (interview.knowledgeLevel < 80f) return -1;
+        int trueStars = AbilityCalculator.PotentialToStars(truePA);
+        int estimated = trueStars + interview.potentialStarNoise;
+        if (estimated < 1) estimated = 1;
+        if (estimated > 5) estimated = 5;
+        return estimated;
+    }
+
+    /// <summary>Returns reliability label based on HR lead skill at time of interview start.</summary>
+    public string GetReliabilityLabel(int candidateId)
+    {
+        if (!_state.activeInterviews.TryGetValue(candidateId, out var interview)) return "Unreliable";
+        int skill = interview.hrLeadSkill;
+        if (skill >= 16) return "High";
+        if (skill >= 12) return "Moderate";
+        if (skill >= 8)  return "Low";
+        return "Unreliable";
+    }
+
+    /// <summary>Returns USS badge class based on HR lead skill.</summary>
+    public string GetReliabilityClass(int candidateId)
+    {
+        if (!_state.activeInterviews.TryGetValue(candidateId, out var interview)) return "reliability--unreliable";
+        int skill = interview.hrLeadSkill;
+        if (skill >= 16) return "reliability--high";
+        if (skill >= 12) return "reliability--moderate";
+        if (skill >= 8)  return "reliability--low";
+        return "reliability--unreliable";
     }
 
     // ─── Command: start interview ────────────────────────────────────────────
@@ -157,54 +257,65 @@ public class InterviewSystem : ISystem
             return false;
         }
 
-        if (IsFinalReportReady(candidateId))
+        if (IsComplete(candidateId))
         {
             _logger.LogWarning($"[InterviewSystem] Candidate {candidateId} already fully interviewed");
             return false;
         }
 
-        TeamId assignedTeamId = default;
-        int durationTicks;
-
-        if (mode == HiringMode.Manual)
+        TeamId? bestTeam = _hrSystem?.GetBestAvailableHRTeam();
+        if (bestTeam == null)
         {
-            // Manual mode: no HR team required, random 1–3 day duration
-            durationTicks = ComputeDuration();
-        }
-        else
-        {
-            TeamId? bestTeam = _hrSystem?.GetBestAvailableHRTeam();
-            if (bestTeam == null)
-            {
-                _logger.LogWarning($"[InterviewSystem] No available HR team to conduct interview for candidate {candidateId}");
-                return false;
-            }
-            assignedTeamId = bestTeam.Value;
-            durationTicks = ComputeDuration();
-            _hrSystem?.RegisterInterviewAssignment(assignedTeamId, candidateId);
+            _logger.LogWarning($"[InterviewSystem] No available HR team to conduct interview for candidate {candidateId}");
+            return false;
         }
 
-        int halfwayTicks = durationTicks / 2;
+        TeamId assignedTeamId = bestTeam.Value;
+
+        // Find HR lead skill (highest hrSkill member on team)
+        int hrLeadSkill = 0;
+        if (_hrSystem != null)
+        {
+            hrLeadSkill = _hrSystem.GetHighestHRSkill(assignedTeamId);
+        }
+
+        // Compute noise amplitudes from HR lead skill bracket
+        int noiseAmplitude = GetSkillNoiseAmplitude(hrLeadSkill);
+        int starNoiseAmplitude = GetStarNoiseAmplitude(hrLeadSkill);
 
         var interview = new ActiveInterview
         {
-            candidateId    = candidateId,
-            startTick      = currentTick,
-            completionTick = currentTick + durationTicks,
-            halfwayTick    = currentTick + halfwayTicks,
-            halfwayFired   = false,
-            isComplete     = false,
-            assignedTeamId = assignedTeamId,
-            mode           = mode
+            candidateId        = candidateId,
+            startTick          = currentTick,
+            assignedTeamId     = assignedTeamId,
+            mode               = mode,
+            knowledgeLevel     = 0f,
+            lastRevealThreshold = 0,
+            hrLeadId           = default,
+            hrLeadSkill        = hrLeadSkill,
+            completedTick      = 0
         };
 
+        // Compute deterministic skill noise offsets
+        if (_rng != null)
+        {
+            for (int i = 0; i < 9; i++)
+            {
+                int noise = _rng.Range(-noiseAmplitude, noiseAmplitude + 1);
+                interview.SetSkillNoise(i, noise);
+            }
+            interview.abilityStarNoise   = _rng.Range(-starNoiseAmplitude, starNoiseAmplitude + 1);
+            interview.potentialStarNoise = _rng.Range(-starNoiseAmplitude, starNoiseAmplitude + 1);
+        }
+
         _state.activeInterviews[candidateId] = interview;
+        _hrSystem?.RegisterInterviewAssignment(assignedTeamId, candidateId);
 
         _startedBuffer.Add((candidateId, assignedTeamId, currentTick));
 
         _logger.Log($"[InterviewSystem] Started {mode} interview for candidate {candidateId}" +
-            (mode == HiringMode.HR ? $" assigned to team {assignedTeamId.Value}" : "") +
-            $" (duration: {durationTicks} ticks)");
+            $" assigned to team {assignedTeamId.Value}" +
+            $" (hrLead skill:{hrLeadSkill} noiseAmp:{noiseAmplitude})");
         return true;
     }
 
@@ -221,9 +332,7 @@ public class InterviewSystem : ISystem
     public void Tick(int tick)
     {
         _completedScratch.Clear();
-        _halfwayFiredScratch.Clear();
-        _halfwayBuffer.Clear();
-        _finalBuffer.Clear();
+        _thresholdBuffer.Clear();
         _followUpBuffer.Clear();
 
         if (_state.activeInterviews.Count > 0)
@@ -232,63 +341,74 @@ public class InterviewSystem : ISystem
             foreach (var kvp in _state.activeInterviews)
                 _keyScratch.Add(kvp.Key);
 
+            float maxGainPerTick = ComputeMaxGainPerTick();
+
             int keyCount = _keyScratch.Count;
             for (int k = 0; k < keyCount; k++)
             {
                 int key = _keyScratch[k];
                 var interview = _state.activeInterviews[key];
-                if (interview.isComplete) continue;
+                if (interview.knowledgeLevel >= 100f) continue;
 
-                if (!interview.halfwayFired && tick >= interview.halfwayTick)
-                    _halfwayFiredScratch.Add(key);
+                int memberCount = _hrSystem != null ? _hrSystem.GetHRMemberCount(interview.assignedTeamId) : 1;
+                int avgSkill    = _hrSystem != null ? _hrSystem.GetHRSkillAverage(interview.assignedTeamId) : 0;
 
-                if (tick >= interview.completionTick)
+                int sizeIdx = memberCount - 1;
+                if (sizeIdx < 0) sizeIdx = 0;
+                if (sizeIdx >= TeamSizeFactors.Length) sizeIdx = TeamSizeFactors.Length - 1;
+                float sizeFactor = TeamSizeFactors[sizeIdx];
+                float skillFactor = 0.5f + (avgSkill / 20f) * 0.5f;
+
+                float gain = BaseGainPerTick * sizeFactor * skillFactor;
+                if (gain > maxGainPerTick) gain = maxGainPerTick;
+
+                interview.knowledgeLevel += gain;
+                if (interview.knowledgeLevel > 100f) interview.knowledgeLevel = 100f;
+
+                // Check threshold crossings: 20, 40, 60, 80, 100
+                int threshCount = RevealThresholds.Length;
+                for (int t = 0; t < threshCount; t++)
+                {
+                    int threshold = RevealThresholds[t];
+                    if (threshold > interview.lastRevealThreshold && interview.knowledgeLevel >= threshold)
+                    {
+                        _thresholdBuffer.Add((key, threshold));
+                        interview.lastRevealThreshold = threshold;
+                    }
+                }
+
+                if (interview.knowledgeLevel >= 100f)
+                {
+                    interview.completedTick = tick;
                     _completedScratch.Add(key);
-            }
+                }
 
-            // Apply halfway updates
-            int halfwayCount = _halfwayFiredScratch.Count;
-            for (int i = 0; i < halfwayCount; i++)
-            {
-                int candidateId = _halfwayFiredScratch[i];
-                var interview = _state.activeInterviews[candidateId];
-                interview.halfwayFired = true;
-                _state.activeInterviews[candidateId] = interview;
-
-                _halfwayBuffer.Add(candidateId);
-                _logger.Log($"[InterviewSystem] First report ready for candidate {candidateId}");
+                _state.activeInterviews[key] = interview;
             }
 
             int completedCount = _completedScratch.Count;
             for (int i = 0; i < completedCount; i++)
             {
                 int candidateId = _completedScratch[i];
-                var interview = _state.activeInterviews[candidateId];
-                interview.isComplete = true;
-                interview.halfwayFired = true;
-                _state.activeInterviews[candidateId] = interview;
-
                 _state.totalInterviewsCompleted++;
                 _hrSystem?.ReleaseInterviewAssignment(candidateId);
-
-                _finalBuffer.Add(candidateId);
-                _logger.Log($"[InterviewSystem] Final report ready for candidate {candidateId}");
+                _logger.Log($"[InterviewSystem] Interview complete (knowledge 100) for candidate {candidateId}");
             }
         }
 
-        // Follow-up notification fires after N idle days post-final-report
+        // Follow-up notification fires after N idle days post-completion
         int followUpIdleDays = FollowUpIdleDays;
         int candidateCount = _employeeState.availableCandidates.Count;
         for (int i = 0; i < candidateCount; i++)
         {
             var candidate = _employeeState.availableCandidates[i];
             if (candidate.HasSentFollowUp) continue;
-            if (!IsFinalReportReady(candidate.CandidateId)) continue;
+            if (!IsComplete(candidate.CandidateId)) continue;
             if (IsInterviewInProgress(candidate.CandidateId)) continue;
 
-            if (_state.activeInterviews.TryGetValue(candidate.CandidateId, out var completedIntv) && completedIntv.isComplete)
+            if (_state.activeInterviews.TryGetValue(candidate.CandidateId, out var completedIntv) && completedIntv.knowledgeLevel >= 100f)
             {
-                if ((tick - completedIntv.completionTick) >= followUpIdleDays * TimeState.TicksPerDay)
+                if ((tick - completedIntv.completedTick) >= followUpIdleDays * TimeState.TicksPerDay)
                 {
                     candidate.HasSentFollowUp = true;
                     candidate.FollowUpSentTick = tick;
@@ -312,13 +432,15 @@ public class InterviewSystem : ISystem
         }
         _startedBuffer.Clear();
 
-        int halfwayCount = _halfwayBuffer.Count;
-        for (int i = 0; i < halfwayCount; i++)
-            OnInterviewFirstReportReady?.Invoke(_halfwayBuffer[i]);
+        int threshCount = _thresholdBuffer.Count;
+        for (int i = 0; i < threshCount; i++)
+        {
+            var (candidateId, threshold) = _thresholdBuffer[i];
+            OnInterviewThresholdReached?.Invoke(candidateId, threshold);
 
-        int finalCount = _finalBuffer.Count;
-        for (int i = 0; i < finalCount; i++)
-            OnInterviewFinalReportReady?.Invoke(_finalBuffer[i]);
+            string candidateName = FindCandidateName(candidateId);
+            _eventBus?.Raise(new InterviewThresholdEvent(tick, candidateId, candidateName, threshold));
+        }
 
         int followUpCount = _followUpBuffer.Count;
         for (int i = 0; i < followUpCount; i++)
@@ -339,20 +461,35 @@ public class InterviewSystem : ISystem
     public void Dispose()
     {
         _startedBuffer.Clear();
-        _halfwayBuffer.Clear();
-        _finalBuffer.Clear();
+        _thresholdBuffer.Clear();
         _followUpBuffer.Clear();
-        OnInterviewFirstReportReady = null;
-        OnInterviewFinalReportReady = null;
         OnInterviewStarted = null;
+        OnInterviewThresholdReached = null;
     }
 
     // ─── Private helpers ─────────────────────────────────────────────────────
 
-    private int ComputeDuration()
+    private float ComputeMaxGainPerTick()
     {
-        if (_rng != null) return _rng.Range(MinDurationTicks, MaxDurationTicks + 1);
-        return MinDurationTicks + (MaxDurationTicks - MinDurationTicks) / 2;
+        // Enforce 3-day minimum: max gain = 100 / (3 * TicksPerDay)
+        int minTicks = MinDaysToComplete * TimeState.TicksPerDay;
+        return minTicks > 0 ? 100f / minTicks : BaseGainPerTick;
+    }
+
+    private static int GetSkillNoiseAmplitude(int hrLeadSkill)
+    {
+        if (hrLeadSkill >= 16) return 0;
+        if (hrLeadSkill >= 12) return 1;
+        if (hrLeadSkill >= 8)  return 2;
+        if (hrLeadSkill >= 4)  return 3;
+        return 4;
+    }
+
+    private static int GetStarNoiseAmplitude(int hrLeadSkill)
+    {
+        if (hrLeadSkill >= 14) return 0;
+        if (hrLeadSkill >= 7)  return 1;
+        return 2;
     }
 
     private CandidateData FindCandidate(int candidateId)
@@ -365,5 +502,15 @@ public class InterviewSystem : ISystem
         }
         return null;
     }
-}
 
+    private string FindCandidateName(int candidateId)
+    {
+        int count = _employeeState.availableCandidates.Count;
+        for (int i = 0; i < count; i++)
+        {
+            if (_employeeState.availableCandidates[i].CandidateId == candidateId)
+                return _employeeState.availableCandidates[i].Name;
+        }
+        return "A candidate";
+    }
+}

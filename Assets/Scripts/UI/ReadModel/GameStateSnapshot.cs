@@ -50,7 +50,6 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
     public void SetTaxSystem(TaxSystem ts) { _taxSystem = ts; }
 
     public int LastCandidateGenerationTick { get; private set; }
-    public int CandidateGenerationInterval { get; private set; }
     public float CandidateGenerationSpeedMultiplier { get; private set; }
     public bool CanRerollCandidates { get; private set; }
     public int CandidateRerollCost { get; private set; }
@@ -138,6 +137,8 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
     private HRSystem _hrSystem;
     private AbilitySystem _abilitySystem;
     private TuningConfig _tuning;
+    private TeamChemistrySystem _teamChemistrySystem;
+    private FatigueSystem _fatigueSystem;
 
     public int GetCategoryReputation(ProductCategory category) {
         if (_reputationSystem != null)
@@ -236,6 +237,53 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         return _negotiationSystem?.HasActiveNegotiation(candidateId) ?? false;
     }
 
+    public int GetCandidateMaxPatience(int candidateId) {
+        if (_negotiationSystem == null) return 0;
+        var neg = _negotiationSystem.GetNegotiation(candidateId);
+        return neg.HasValue ? neg.Value.maxPatience : 0;
+    }
+
+    public int GetCandidateCurrentPatience(int candidateId) {
+        if (_negotiationSystem == null) return 0;
+        var neg = _negotiationSystem.GetNegotiation(candidateId);
+        return neg.HasValue ? neg.Value.currentPatience : 0;
+    }
+
+    public bool HasPendingCounterOffer(int candidateId) {
+        if (_negotiationSystem == null) return false;
+        var neg = _negotiationSystem.GetNegotiation(candidateId);
+        return neg.HasValue && neg.Value.status == NegotiationStatus.CounterOffered && neg.Value.hasCounterOffer;
+    }
+
+    public CounterOffer? GetPendingCounterOffer(int candidateId) {
+        if (_negotiationSystem == null) return null;
+        var neg = _negotiationSystem.GetNegotiation(candidateId);
+        if (neg.HasValue && neg.Value.hasCounterOffer) return neg.Value.counterOffer;
+        return null;
+    }
+
+    public NegotiationStatus GetNegotiationStatus(int candidateId) {
+        if (_negotiationSystem == null) return NegotiationStatus.None;
+        var neg = _negotiationSystem.GetNegotiation(candidateId);
+        return neg.HasValue ? neg.Value.status : NegotiationStatus.None;
+    }
+
+    public bool IsOfferOnCooldown(int candidateId) {
+        return _negotiationSystem?.IsOfferOnCooldown(candidateId, CurrentTick) ?? false;
+    }
+
+    public bool HasEmployeeNegotiation(EmployeeId id) {
+        return _negotiationSystem?.GetEmployeeNegotiation(id) != null;
+    }
+
+    public EmployeeNegotiation? GetEmployeeNegotiation(EmployeeId id) {
+        return _negotiationSystem?.GetEmployeeNegotiation(id);
+    }
+
+    public bool IsEmployeeOnNegotiationCooldown(EmployeeId id) {
+        return _negotiationSystem?.IsEmployeeOnCooldown(id, CurrentTick) ?? false;
+    }
+
     public bool CanStartHRSearch(TeamId teamId) {
         if (_hrSystem != null) return _hrSystem.CanStartSearch(teamId);
         return false;
@@ -271,27 +319,9 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         return false;
     }
 
-    public HRSearchPreviewData GetHRSearchPreview(TeamId teamId, int minAbility, int minPotentialStars, int desiredSkillCount = 0, int searchCount = 1) {
-        if (_hrSystem == null) return new HRSearchPreviewData {
-            Cost = HRSearchConfig.BaseSearchCost,
-            DurationDays = HRSearchConfig.BaseDurationDays,
-            SuccessChance = HRSearchConfig.BaseSuccessChance,
-            CanAfford = false
-        };
-        int cost = _hrSystem.ComputeSearchCost(minAbility, minPotentialStars, desiredSkillCount, searchCount);
-        int durationDays = _hrSystem.ComputeDurationTicks(teamId) / TimeState.TicksPerDay;
-        float successChance = _hrSystem.ComputeSuccessChance(teamId);
-        return new HRSearchPreviewData {
-            Cost = cost,
-            DurationDays = durationDays,
-            SuccessChance = successChance,
-            CanAfford = Money >= cost
-        };
-    }
-
     public TeamType GetTeamType(TeamId teamId) {
         if (_teamSystem != null) return _teamSystem.GetTeamType(teamId);
-        return TeamType.Contracts;
+        return TeamType.Development;
     }
 
     public IEnumerable<Contract> GetAvailableContracts() {
@@ -379,7 +409,6 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
             _employeeToTeamMap = new Dictionary<EmployeeId, TeamId>();
             _teamState = null;
             LastCandidateGenerationTick = 0;
-            CandidateGenerationInterval = 33600;
             CandidateGenerationSpeedMultiplier = 1f;
             CanRerollCandidates = false;
             CandidateRerollCost = 0;
@@ -510,7 +539,6 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         CurrentReputationTier = reputationTier;
         _teamState = gameState.teamState;
         LastCandidateGenerationTick = gameState.employeeState?.lastCandidateGenerationTick ?? 0;
-        CandidateGenerationInterval = gameState.employeeState?.candidateGenerationInterval ?? 33600;
         CandidateGenerationSpeedMultiplier = 1f;
         CanRerollCandidates = (gameState.employeeState?.candidateRerollsUsedThisCycle ?? 1) < 1;
         CandidateRerollCost = 1000;
@@ -818,6 +846,11 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         return new HiddenAttributes();
     }
 
+    public int ComputeAbilityForRole(int[] skills, EmployeeRole role) {
+        if (_abilitySystem == null || skills == null) return 0;
+        return RoleSuitabilityCalculator.ComputeAbilityForRole(skills, _abilitySystem.TierTable.GetTiers(role));
+    }
+
     public CandidatePotentialEstimate GetCandidatePotentialEstimate(int candidateId) {
         if (_abilitySystem == null || AvailableCandidates == null)
             return new CandidatePotentialEstimate { PotentialStarsMin = 1, PotentialStarsMax = 5 };
@@ -828,7 +861,9 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
                 int hrSkillAvg = cand.IsTargeted
                     ? GetSourcingTeamHRSkillAverage(cand.SourcingTeamId)
                     : GetAllHREmployeesSkillAverage();
-                return _abilitySystem.GetCandidateEstimate(cand, hrSkillAvg, cand.IsTargeted ? HiringMode.HR : HiringMode.Manual);
+                return _abilitySystem.GetCandidateEstimate(cand, hrSkillAvg,
+                    cand.IsTargeted ? HiringMode.HR : HiringMode.Manual,
+                    false, _interviewSystem);
             }
         }
         return new CandidatePotentialEstimate { PotentialStarsMin = 1, PotentialStarsMax = 5 };
@@ -844,7 +879,8 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
                 int hrSkillAvg = mode == HiringMode.HR
                     ? GetSourcingTeamHRSkillAverage(cand.SourcingTeamId)
                     : GetAllHREmployeesSkillAverage();
-                return _abilitySystem.GetCandidateEstimate(cand, hrSkillAvg, mode);
+                return _abilitySystem.GetCandidateEstimate(cand, hrSkillAvg, mode,
+                    false, _interviewSystem);
             }
         }
         return new CandidatePotentialEstimate { PotentialStarsMin = 1, PotentialStarsMax = 5 };
@@ -895,6 +931,55 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
     public float GetInterviewProgressPercent(int candidateId) {
         if (_interviewSystem != null) return _interviewSystem.GetInterviewProgressPercent(candidateId, CurrentTick);
         return 0f;
+    }
+
+    public float GetInterviewKnowledgeLevel(int candidateId) {
+        if (_interviewSystem != null) return _interviewSystem.GetKnowledgeLevel(candidateId);
+        return 0f;
+    }
+
+    public int GetAbilityStarEstimate(int candidateId) {
+        if (_interviewSystem == null || _abilitySystem == null || AvailableCandidates == null) return -1;
+        int count = AvailableCandidates.Count;
+        for (int i = 0; i < count; i++) {
+            if (AvailableCandidates[i].CandidateId == candidateId) {
+                var cand = AvailableCandidates[i];
+                int[] tiers = null;
+                int trueCA = _abilitySystem.ComputeCandidateCA(cand);
+                return _interviewSystem.GetAbilityStarEstimate(candidateId, trueCA, tiers);
+            }
+        }
+        return -1;
+    }
+
+    public int GetPotentialStarEstimate(int candidateId) {
+        if (_interviewSystem == null || AvailableCandidates == null) return -1;
+        int count = AvailableCandidates.Count;
+        for (int i = 0; i < count; i++) {
+            if (AvailableCandidates[i].CandidateId == candidateId)
+                return _interviewSystem.GetPotentialStarEstimate(candidateId, AvailableCandidates[i].PotentialAbility);
+        }
+        return -1;
+    }
+
+    public string GetInterviewConfidenceLabel(int candidateId) {
+        if (_interviewSystem != null) return _interviewSystem.GetReliabilityLabel(candidateId);
+        return "Unreliable";
+    }
+
+    public string GetInterviewConfidenceClass(int candidateId) {
+        if (_interviewSystem != null) return _interviewSystem.GetReliabilityClass(candidateId);
+        return "reliability--unreliable";
+    }
+
+    public string GetInterviewReliabilityLabel(int candidateId) {
+        if (_interviewSystem != null) return _interviewSystem.GetReliabilityLabel(candidateId);
+        return "Unreliable";
+    }
+
+    public string GetInterviewReliabilityClass(int candidateId) {
+        if (_interviewSystem != null) return _interviewSystem.GetReliabilityClass(candidateId);
+        return "reliability--unreliable";
     }
 
     public TeamId GetInterviewingTeamId(int candidateId) {
@@ -1078,4 +1163,44 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
     }
 
     public float ProductBaseWorkMultiplier => _tuning?.ProductBaseWorkMultiplier ?? 100f;
+
+    public void SetTeamChemistrySystem(TeamChemistrySystem chemistrySystem) {
+        _teamChemistrySystem = chemistrySystem;
+    }
+
+    public void SetFatigueSystem(FatigueSystem fatigueSystem) {
+        _fatigueSystem = fatigueSystem;
+    }
+
+    public Personality GetEmployeePersonality(EmployeeId employeeId) {
+        if (_employeeState == null) return Personality.Professional;
+        if (_employeeState.employees.TryGetValue(employeeId, out var emp))
+            return emp.personality;
+        return Personality.Professional;
+    }
+
+    public TeamChemistrySnapshot GetTeamChemistry(TeamId teamId) {
+        if (_teamChemistrySystem != null) return _teamChemistrySystem.GetTeamChemistry(teamId);
+        return new TeamChemistrySnapshot { Score = 0, Band = ChemistryBand.Neutral };
+    }
+
+    public float GetEmployeeEnergy(EmployeeId employeeId) {
+        if (_fatigueSystem != null) return _fatigueSystem.GetEnergy(employeeId);
+        return 100f;
+    }
+
+    public EnergyBand GetEmployeeEnergyBand(EmployeeId employeeId) {
+        if (_fatigueSystem != null) return _fatigueSystem.GetEnergyBand(employeeId);
+        return EnergyBand.Fresh;
+    }
+
+    public float GetTeamAverageEnergy(TeamId teamId) {
+        if (_fatigueSystem != null) return _fatigueSystem.GetAverageTeamEnergy(teamId);
+        return 100f;
+    }
+
+    public int GetProjectedChemistryChange(TeamId teamId, EmployeeId candidate) {
+        if (_teamChemistrySystem != null) return _teamChemistrySystem.ProjectChemistryChange(teamId, candidate);
+        return 0;
+    }
 }

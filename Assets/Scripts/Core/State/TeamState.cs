@@ -80,7 +80,7 @@ public class Team
         this.name = name;
         this.members = new List<EmployeeId>();
         this.isActive = true;
-        this.teamType = TeamType.Contracts;
+        this.teamType = TeamType.Development;
         this.isCrunching = false;
     }
     

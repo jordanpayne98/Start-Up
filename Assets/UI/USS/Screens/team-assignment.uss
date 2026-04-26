@@ -1,0 +1,198 @@
+.team-assignment-screen {
+    flex-direction: column;
+    flex-grow: 1;
+    padding: var(--spacing-md);
+}
+
+.screen-header {
+    align-items: center;
+}
+
+/* Team card list */
+.team-card-list {
+    flex-direction: column;
+}
+
+/* Individual team card */
+.team-card {
+    padding: var(--spacing-sm);
+}
+
+/* Card header — always visible, clickable */
+.team-card__header {
+    cursor: pointer;
+    padding-bottom: 4px;
+    align-items: center;
+}
+
+.team-card__header:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Expand icon */
+.expand-icon {
+    font-size: 10px;
+    opacity: 0.6;
+    transition-duration: 0.15s;
+    transition-property: opacity;
+}
+
+/* Card body — collapsed by default */
+.team-card__body {
+    flex-direction: column;
+}
+
+/* Member list */
+.team-card__member-list {
+    flex-direction: column;
+}
+
+/* Member row */
+.team-member-row {
+    align-items: center;
+    border-radius: 4px;
+}
+
+.team-member-row:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Action buttons row */
+.team-card__actions {
+    flex-wrap: wrap;
+}
+
+/* Modals */
+.create-team-modal,
+.rename-team-modal,
+.add-member-modal {
+    flex-direction: column;
+    min-width: 360px;
+}
+
+.modal-title {
+    font-size: 16px;
+}
+
+.modal-footer {
+    border-top-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.08);
+    padding-top: 8px;
+    margin-top: 8px;
+}
+
+/* Input field */
+.input-field {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    color: var(--color-text-primary);
+    padding: 6px 8px;
+}
+
+.input-field:focus {
+    border-color: var(--color-accent);
+}
+
+/* Team type toggle buttons */
+.team-type-btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    -unity-font-style: bold;
+    font-size: 12px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+}
+
+.team-type-btn--selected.badge--role-development {
+    background-color: rgba(96, 165, 250, 0.3);
+    border-color: var(--role-programming);
+}
+
+.team-type-btn--selected.badge--role-design {
+    background-color: rgba(167, 139, 250, 0.3);
+    border-color: var(--role-design);
+}
+
+.team-type-btn--selected.badge--role-qa {
+    background-color: rgba(52, 211, 153, 0.3);
+    border-color: var(--role-qa);
+}
+
+.team-type-btn--selected.badge--role-negotiation {
+    background-color: rgba(45, 212, 191, 0.3);
+    border-color: var(--role-negotiation);
+}
+
+.team-type-btn--selected.badge--role-hr {
+    background-color: rgba(251, 191, 36, 0.3);
+    border-color: var(--role-hr);
+}
+
+/* Confirmation banner */
+.confirm-banner {
+    background-color: rgba(255, 80, 80, 0.08);
+    border-width: 1px;
+    border-color: rgba(255, 80, 80, 0.25);
+    border-radius: 4px;
+    align-items: center;
+}
+
+/* Danger ghost button variant */
+.btn-danger-ghost {
+    color: var(--color-danger);
+    border-color: rgba(255, 80, 80, 0.3);
+}
+
+.btn-danger-ghost:hover {
+    background-color: rgba(255, 80, 80, 0.08);
+}
+
+/* Empty state */
+.empty-state {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    opacity: 0.5;
+}
+
+.empty-state__icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+/* Filter pills */
+.filter-pill {
+    padding: 4px 10px;
+    border-radius: 10px;
+    border-width: 0;
+    opacity: 0.35;
+    -unity-font-style: bold;
+    font-size: 11px;
+}
+
+.filter-pill--active {
+    opacity: 1.0;
+}
+
+/* Selectable list rows */
+.list-item--selectable {
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.05);
+    padding: 4px 6px;
+}
+
+.list-item--selectable:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.list-item--selected {
+    background-color: rgba(96, 165, 250, 0.15);
+    border-color: rgba(96, 165, 250, 0.4);
+}

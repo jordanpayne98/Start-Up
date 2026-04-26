@@ -5,7 +5,6 @@ using System.Collections.Generic;
 public class ProductSystem : ISystem
 {
     private const float WorkRatePerSkillPoint = 0.016f;
-    private const float CrunchWorkMultiplier = 1.5f;
     private const float BugWorkMultiplier = 50f;
     private const int ProgressEventThrottleTicks = 480;
     public const int SaleEventCooldownTicks = 4800 * 30 * 3;
@@ -161,6 +160,8 @@ public class ProductSystem : ISystem
     private TimeSystem _timeSystem;
     private MarketSystem _marketSystem;
     private MoraleSystem _moraleSystem;
+    private FatigueSystem _fatigueSystem;
+    private TeamChemistrySystem _chemistrySystem;
     private PlatformSystem _platformSystem;
     private GenerationSystem _generationSystem;
     private HardwareGenerationConfig[] _hardwareGenerationConfigs;
@@ -226,6 +227,16 @@ public class ProductSystem : ISystem
     public void SetMoraleSystem(MoraleSystem moraleSystem)
     {
         _moraleSystem = moraleSystem;
+    }
+
+    public void SetFatigueSystem(FatigueSystem fatigueSystem)
+    {
+        _fatigueSystem = fatigueSystem;
+    }
+
+    public void SetChemistrySystem(TeamChemistrySystem chemistrySystem)
+    {
+        _chemistrySystem = chemistrySystem;
     }
 
     public void SetReputationSystem(ReputationSystem reputationSystem)
@@ -780,19 +791,28 @@ public class ProductSystem : ISystem
             var qaResult = TeamWorkEngine.AggregateTeam(
                 qaTeam.members,
                 _employeeSystem,
+                _fatigueSystem,
                 SkillType.QA,
                 _roleTierTable,
                 _tuning?.TeamOverheadPerMember ?? 0.04f,
                 optimalTeamSize: optimalSize);
 
             float baseWork = _tuning?.ProductBaseWorkMultiplier ?? 100f;
+            ChemistryBand maintChemBand = _chemistrySystem != null
+                ? _chemistrySystem.GetTeamChemistry(qaTeam.id).Band
+                : ChemistryBand.Neutral;
+            float maintConflictQuality = _chemistrySystem != null
+                ? 1f + _chemistrySystem.GetTeamQualityPenalty(qaTeam.id)
+                : 1f;
             product.MaintenanceQuality = TeamWorkEngine.ComputeQuality(
                 qaResult.AvgQualitySkill,
                 2f,
                 5f,
                 10f,
                 coverageMod,
-                qaResult.AvgMorale);
+                qaResult.AvgMorale,
+                TeamWorkEngine.GetChemistryQualityMod(maintChemBand),
+                maintConflictQuality);
         }
         else
         {
@@ -1979,11 +1999,18 @@ public class ProductSystem : ISystem
                     {
                         int optimalQASize = ComputeMaintenanceOptimalTeamSize(product);
                         var result = TeamWorkEngine.AggregateTeam(
-                            qaTeam.members, _employeeSystem, SkillType.QA,
+                            qaTeam.members, _employeeSystem, _fatigueSystem, SkillType.QA,
                             _roleTierTable, _tuning?.TeamOverheadPerMember ?? 0.04f,
                             optimalTeamSize: optimalQASize);
                         float variance = 0.95f + _rng.NextFloat01() * 0.10f;
-                        float work = TeamWorkEngine.ComputeWorkPerTick(in result, WorkRatePerSkillPoint, result.CoverageSpeedMod, variance);
+                        ChemistryBand bugFixChemBand = _chemistrySystem != null
+                            ? _chemistrySystem.GetTeamChemistry(qaTeam.id).Band
+                            : ChemistryBand.Neutral;
+                        float bugFixConflictSpeed = _chemistrySystem != null
+                            ? 1f + _chemistrySystem.GetTeamSpeedPenalty(qaTeam.id)
+                            : 1f;
+                        float work = TeamWorkEngine.ComputeWorkPerTick(in result, WorkRatePerSkillPoint, result.CoverageSpeedMod, variance,
+                            1f, TeamWorkEngine.GetChemistrySpeedMod(bugFixChemBand), bugFixConflictSpeed);
                         update.updateWorkCompleted += work;
                     }
                 }
@@ -2001,11 +2028,18 @@ public class ProductSystem : ISystem
                     if (assignedTeam != null)
                     {
                         var result = TeamWorkEngine.AggregateTeam(
-                            assignedTeam.members, _employeeSystem, skillType,
+                            assignedTeam.members, _employeeSystem, _fatigueSystem, skillType,
                             _roleTierTable, _tuning?.TeamOverheadPerMember ?? 0.04f,
                             optimalTeamSize: updateOptimalSize);
                         float variance = 0.95f + _rng.NextFloat01() * 0.10f;
-                        totalWork += TeamWorkEngine.ComputeWorkPerTick(in result, WorkRatePerSkillPoint, result.CoverageSpeedMod, variance, 0.25f);
+                        ChemistryBand updChemBand = _chemistrySystem != null
+                            ? _chemistrySystem.GetTeamChemistry(assignedTeam.id).Band
+                            : ChemistryBand.Neutral;
+                        float updConflictSpeed = _chemistrySystem != null
+                            ? 1f + _chemistrySystem.GetTeamSpeedPenalty(assignedTeam.id)
+                            : 1f;
+                        totalWork += TeamWorkEngine.ComputeWorkPerTick(in result, WorkRatePerSkillPoint, result.CoverageSpeedMod, variance,
+                            0.25f, TeamWorkEngine.GetChemistrySpeedMod(updChemBand), updConflictSpeed);
                     }
                 }
                 update.updateWorkCompleted += totalWork;
@@ -2113,7 +2147,7 @@ public class ProductSystem : ISystem
             var updateTeam = _teamSystem?.GetTeam(kvp.Value);
             if (updateTeam != null && updateTeam.isCrunching) {
                 updateTeam.isCrunching = false;
-                _moraleSystem?.ResetCrunchTracking(updateTeam.members);
+                _fatigueSystem?.ResetCrunchTracking(updateTeam.members);
             }
         }
 
@@ -2156,11 +2190,9 @@ public class ProductSystem : ISystem
     {
         switch (role)
         {
-            case ProductTeamRole.Programming: return ProductPhaseType.Programming;
+            case ProductTeamRole.Development: return ProductPhaseType.Programming;
             case ProductTeamRole.Design:      return ProductPhaseType.Design;
             case ProductTeamRole.QA:          return ProductPhaseType.QA;
-            case ProductTeamRole.SFX:         return ProductPhaseType.SFX;
-            case ProductTeamRole.VFX:         return ProductPhaseType.VFX;
             default:                          return ProductPhaseType.Programming;
         }
     }
@@ -2449,11 +2481,11 @@ public class ProductSystem : ISystem
             ProductTeamRole role;
             switch (phaseType)
             {
-                case ProductPhaseType.Programming: role = ProductTeamRole.Programming; break;
+                case ProductPhaseType.Programming: role = ProductTeamRole.Development; break;
                 case ProductPhaseType.Design:      role = ProductTeamRole.Design;      break;
                 case ProductPhaseType.QA:          role = ProductTeamRole.QA;          break;
-                case ProductPhaseType.SFX:         role = ProductTeamRole.SFX;         break;
-                case ProductPhaseType.VFX:         role = ProductTeamRole.VFX;         break;
+                case ProductPhaseType.SFX:         role = ProductTeamRole.Development; break;
+                case ProductPhaseType.VFX:         role = ProductTeamRole.Development; break;
                 default: continue;
             }
 
@@ -2503,7 +2535,7 @@ public class ProductSystem : ISystem
 
         if (_teamSystem != null) {
             var teamType = _teamSystem.GetTeamType(cmd.TeamId);
-            if (teamType == TeamType.HR || teamType == TeamType.Accounting) {
+            if (teamType == TeamType.HR) {
                 _logger.LogWarning($"[ProductSystem] AssignTeam failed: {teamType} teams cannot work on products.");
                 return;
             }
@@ -2772,7 +2804,7 @@ public class ProductSystem : ISystem
             var shippedTeam = _teamSystem?.GetTeam(kvp.Value);
             if (shippedTeam != null && shippedTeam.isCrunching) {
                 shippedTeam.isCrunching = false;
-                _moraleSystem?.ResetCrunchTracking(shippedTeam.members);
+                _fatigueSystem?.ResetCrunchTracking(shippedTeam.members);
             }
             _state.teamToProduct.Remove(kvp.Value);
             _teamSystem?.NotifyTeamFreed(kvp.Value);
@@ -3722,7 +3754,7 @@ public class ProductSystem : ISystem
             if (shippedTeam != null && shippedTeam.isCrunching)
             {
                 shippedTeam.isCrunching = false;
-                _moraleSystem?.ResetCrunchTracking(shippedTeam.members);
+                _fatigueSystem?.ResetCrunchTracking(shippedTeam.members);
             }
             _state.teamToProduct.Remove(kvp.Value);
             _teamSystem?.NotifyTeamFreed(kvp.Value);
@@ -4385,6 +4417,7 @@ public class ProductSystem : ISystem
         var primaryResult = TeamWorkEngine.AggregateTeam(
             primaryTeam.members,
             _employeeSystem,
+            _fatigueSystem,
             skill,
             _roleTierTable,
             _tuning?.TeamOverheadPerMember ?? 0.04f,
@@ -4392,13 +4425,23 @@ public class ProductSystem : ISystem
 
         float variance = 0.95f + _rng.NextFloat01() * 0.10f;
         float genreSkillMult = 1f;
-        float crunchMult = primaryTeam.isCrunching ? 1.15f : 1f;
+        float crunchMult = primaryTeam.isCrunching ? 1.10f : 1f;
+
+        ChemistryBand phaseChemBand = _chemistrySystem != null
+            ? _chemistrySystem.GetTeamChemistry(primaryTeam.id).Band
+            : ChemistryBand.Neutral;
+        float phaseConflictSpeed = _chemistrySystem != null
+            ? 1f + _chemistrySystem.GetTeamSpeedPenalty(primaryTeam.id)
+            : 1f;
+
         float primaryWork = TeamWorkEngine.ComputeWorkPerTick(
             in primaryResult,
             WorkRatePerSkillPoint,
             primaryResult.CoverageSpeedMod,
             variance,
-            genreSkillMult * crunchMult);
+            genreSkillMult * crunchMult,
+            TeamWorkEngine.GetChemistrySpeedMod(phaseChemBand),
+            phaseConflictSpeed);
 
         phase.workCompleted += primaryWork;
 
@@ -4613,6 +4656,7 @@ public class ProductSystem : ISystem
         var primaryResult = TeamWorkEngine.AggregateTeam(
             primaryTeam.members,
             _employeeSystem,
+            _fatigueSystem,
             skill,
             _roleTierTable,
             _tuning?.TeamOverheadPerMember ?? 0.04f,
@@ -4620,12 +4664,20 @@ public class ProductSystem : ISystem
 
         float variance = 0.95f + _rng.NextFloat01() * 0.10f;
         float genreSkillMult = 1f;
+        ChemistryBand calcChemBand = _chemistrySystem != null
+            ? _chemistrySystem.GetTeamChemistry(primaryTeam.id).Band
+            : ChemistryBand.Neutral;
+        float calcConflictSpeed = _chemistrySystem != null
+            ? 1f + _chemistrySystem.GetTeamSpeedPenalty(primaryTeam.id)
+            : 1f;
         float primaryWork = TeamWorkEngine.ComputeWorkPerTick(
             in primaryResult,
             WorkRatePerSkillPoint,
             primaryResult.CoverageSpeedMod,
             variance,
-            genreSkillMult);
+            genreSkillMult,
+            TeamWorkEngine.GetChemistrySpeedMod(calcChemBand),
+            calcConflictSpeed);
 
         return primaryWork;
     }
@@ -4646,6 +4698,7 @@ public class ProductSystem : ISystem
         var teamResult = TeamWorkEngine.AggregateTeam(
             primaryTeam.members,
             _employeeSystem,
+            _fatigueSystem,
             skill,
             _roleTierTable,
             _tuning?.TeamOverheadPerMember ?? 0.04f,
@@ -4673,13 +4726,22 @@ public class ProductSystem : ISystem
             excelThresh *= scopeMult;
         }
 
+        ChemistryBand qualChemBand = _chemistrySystem != null
+            ? _chemistrySystem.GetTeamChemistry(primaryTeam.id).Band
+            : ChemistryBand.Neutral;
+        float qualConflictQuality = _chemistrySystem != null
+            ? 1f + _chemistrySystem.GetTeamQualityPenalty(primaryTeam.id)
+            : 1f;
+
         float baseQuality = TeamWorkEngine.ComputeQuality(
             teamResult.AvgQualitySkill,
             minThresh,
             targetThresh,
             excelThresh,
             teamResult.CoverageQualityMod,
-            teamResult.AvgMorale);
+            teamResult.AvgMorale,
+            TeamWorkEngine.GetChemistryQualityMod(qualChemBand),
+            qualConflictQuality);
         float toolLift = GetToolQualityLift(product);
         float quality = baseQuality * (1f + toolLift);
         return Math.Clamp(quality, 0f, 100f);

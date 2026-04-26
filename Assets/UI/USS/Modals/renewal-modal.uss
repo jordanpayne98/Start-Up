@@ -1,0 +1,346 @@
+.renewal-modal {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: var(--bg-primary);
+    min-width: 640px;
+    max-width: 640px;
+}
+
+/* ── Header ── */
+.renewal-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background-color: var(--bg-secondary);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+}
+
+.renewal-header__left {
+    flex-direction: row;
+    align-items: center;
+}
+
+.renewal-title {
+    font-size: var(--font-lg);
+    -unity-font-style: bold;
+    color: var(--text-light);
+    margin-right: 10px;
+}
+
+.renewal-count {
+    font-size: var(--font-sm);
+}
+
+/* ── Scroll ── */
+.renewal-scroll {
+    flex-grow: 1;
+    max-height: 480px;
+}
+
+.renewal-list {
+    flex-direction: column;
+}
+
+/* ── Footer ── */
+.renewal-footer {
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 12px 20px;
+    border-top-width: 1px;
+    border-top-color: var(--border-subtle);
+    background-color: var(--bg-secondary);
+}
+
+/* ── Renewal Row (collapsed) ── */
+.renewal-row {
+    flex-direction: column;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+    transition: background-color 150ms;
+}
+
+.renewal-row__collapsed {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 16px;
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+}
+
+.renewal-row__collapsed:hover {
+    background-color: var(--bg-hover);
+}
+
+.renewal-row--resolved .renewal-row__collapsed {
+    opacity: 0.5;
+}
+
+.renewal-row--resolved .renewal-row__collapsed:hover {
+    background-color: transparent;
+}
+
+.renewal-row__name-col {
+    flex-direction: column;
+    flex: 2;
+    margin-right: 8px;
+}
+
+.renewal-row__name {
+    font-size: var(--font-md);
+    color: var(--text-light);
+    -unity-font-style: bold;
+}
+
+.renewal-row__role {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.renewal-row__badges {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    flex: 3;
+    margin-right: 8px;
+}
+
+.renewal-row__badge-gap {
+    margin-right: 4px;
+    margin-bottom: 2px;
+}
+
+.renewal-row__salary-col {
+    flex: 1;
+    align-items: flex-end;
+}
+
+.renewal-row__salary {
+    font-size: var(--font-sm);
+    color: var(--text-light);
+    -unity-font-style: bold;
+}
+
+.renewal-row__expiry {
+    font-size: var(--font-xs);
+    margin-top: 2px;
+}
+
+.renewal-row__chevron {
+    width: 20px;
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+    margin-left: 8px;
+}
+
+/* ── Offer Card (expanded inline) ── */
+.renewal-offer-card {
+    display: none;
+    flex-direction: column;
+    margin: 0 16px 12px 16px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.12);
+    border-left-color:   var(--accent-primary);
+    border-bottom-color: rgba(0, 0, 0, 0.30);
+    border-right-color:  rgba(0, 0, 0, 0.30);
+    border-left-width: 3px;
+    padding: 14px 16px;
+}
+
+.renewal-offer-card--visible {
+    display: flex;
+}
+
+/* ── Escalation bar ── */
+.escalation-indicator {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: var(--radius-md);
+    margin-bottom: 10px;
+}
+
+.escalation-indicator--hidden {
+    display: none;
+}
+
+.escalation-text {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+}
+
+/* ── Terms grid ── */
+.terms-section-label {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    margin-top: 10px;
+}
+
+.terms-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.terms-cell {
+    flex-direction: column;
+    flex: 1;
+    min-width: 120px;
+    margin-right: 8px;
+    margin-bottom: 6px;
+}
+
+.terms-cell__label {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.terms-cell__value {
+    font-size: var(--font-sm);
+    color: var(--text-light);
+    -unity-font-style: bold;
+}
+
+/* ── Request card ── */
+.request-card {
+    flex-direction: column;
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    border-left-width: 3px;
+    border-left-color: var(--accent-info);
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+.request-card--hidden {
+    display: none;
+}
+
+.request-card__header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.request-card__title {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    color: var(--accent-info);
+    margin-right: 8px;
+}
+
+.request-card__details {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+}
+
+.request-card__btn-accept {
+    align-self: flex-start;
+    margin-top: 6px;
+}
+
+/* ── Offer builder ── */
+.offer-builder {
+    flex-direction: column;
+    margin-top: 10px;
+}
+
+.offer-tabs-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.offer-tab-group {
+    flex-direction: row;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: 2px;
+}
+
+.offer-tab-group__label {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    align-self: center;
+    margin-right: 8px;
+}
+
+/* ── Offer summary ── */
+.offer-summary {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--bg-primary);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    margin-top: 8px;
+    margin-bottom: 10px;
+}
+
+.offer-summary__salary {
+    font-size: var(--font-xl);
+    -unity-font-style: bold;
+    color: var(--text-light);
+}
+
+.offer-summary__meta {
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.offer-summary__meta-row {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+}
+
+/* ── Offer actions ── */
+.offer-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.offer-actions__btn {
+    margin-left: 8px;
+}
+
+/* ── Resolved badge overlay ── */
+.resolved-badge-row {
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 4px 16px 8px 16px;
+}
+
+.resolved-badge-row--hidden {
+    display: none;
+}
+
+/* ── Strike count indicator dots ── */
+.strike-dots {
+    flex-direction: row;
+    align-items: center;
+    margin-left: 4px;
+}
+
+.strike-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: var(--bg-tertiary);
+    margin-right: 3px;
+}
+
+.strike-dot--filled {
+    background-color: var(--accent-danger);
+}

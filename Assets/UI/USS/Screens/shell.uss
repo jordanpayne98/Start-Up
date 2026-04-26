@@ -29,7 +29,7 @@
     border-left-width: 0;
 }
 
-.top-bar__module:first-child {
+.top-bar__module--first {
     margin-left: 0;
 }
 
@@ -327,6 +327,11 @@
     width: 900px;
     min-height: 640px;
     padding: 0;
+}
+
+.modal-content--compact {
+    min-height: auto;
+    width: 520px;
 }
 
 .modal-header {

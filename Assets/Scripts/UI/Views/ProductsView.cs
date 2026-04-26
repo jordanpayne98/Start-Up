@@ -2999,7 +2999,7 @@ public class ProductsView : IGameView
             _createProductVm.SetTemplates(definitions);
         }
 
-        _createProductView = new CreateProductView(_dispatcher, _tooltipProvider, definitions, niches,
+        _createProductView = new CreateProductView(_dispatcher, _modal, _tooltipProvider, definitions, niches,
             updateId, sequelOfId);
         _createProductView.OnCancelRequested += OnCreateCancelled;
         _createProductView.OnProductCreated += OnCreateConfirmed;

@@ -1,0 +1,405 @@
+/* ─── Two-Column Layout ────────────────────────────────── */
+.modal-body--two-col {
+    flex-direction: row;
+    gap: 16px;
+}
+
+.modal-col--left {
+    width: 40%;
+    flex-shrink: 0;
+}
+
+.modal-col--right {
+    flex-grow: 1;
+}
+
+/* ─── Skill Table ──────────────────────────────────────── */
+.skill-row {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 2px 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.skill-row__name {
+    font-size: 12px;
+}
+
+.skill-row__value {
+    font-size: 12px;
+    min-width: 24px;
+    -unity-text-align: middle-right;
+}
+
+.skill-row__value--up {
+    color: #4ADE80;
+}
+
+.skill-row__value--down {
+    color: #F87171;
+}
+
+.skill-row__value--unknown {
+    color: #6B7280;
+}
+
+/* ─── Role Suitability Rows (detail view) ──────────────── */
+.role-suitability-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 8px;
+}
+
+.role-suitability-row--preferred {
+    border-left-width: 2px;
+    border-left-color: var(--accent-secondary);
+}
+
+.suitability-dot--unknown {
+    background-color: #6B7280;
+}
+
+/* ─── Status Bar ───────────────────────────────────────── */
+.status-bar {
+    flex-direction: row;
+    gap: 12px;
+    padding: 8px 16px;
+    border-top-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.status-bar__item {
+    flex-direction: column;
+    align-items: center;
+}
+
+
+    flex-grow: 1;
+    flex-direction: column;
+    padding: var(--spacing-lg);
+    background-color: var(--bg-primary);
+    min-width: 480px;
+}
+
+/* --- Modal Header --- */
+.modal-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-md);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+}
+
+/* --- Detail View / Offer View / Counter Offer View swap --- */
+.detail-view {
+    flex-direction: column;
+}
+
+.offer-view {
+    flex-direction: column;
+}
+
+.counter-offer-view {
+    flex-direction: column;
+}
+
+/* --- Detail Row --- */
+.detail-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xs);
+}
+
+.detail-row__value--hint {
+    color: var(--text-secondary);
+    -unity-font-style: italic;
+}
+
+/* --- Arrangement Toggle --- */
+.offer-toggle-btn {
+    flex-grow: 1;
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border-width: 1px;
+    border-color: var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-sm);
+    margin-right: var(--spacing-xs);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.offer-toggle-btn:last-child {
+    margin-right: 0;
+}
+
+.offer-toggle-btn:hover {
+    background-color: var(--bg-elevated);
+}
+
+.offer-toggle-btn.offer-toggle-btn--active {
+    background-color: var(--bg-selected);
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+/* --- Length Cards --- */
+.length-card {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: var(--bg-tertiary);
+    border-width: 1px;
+    border-color: var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-right: var(--spacing-xs);
+    align-items: center;
+    justify-content: center;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.length-card:last-child {
+    margin-right: 0;
+}
+
+.length-card:hover {
+    background-color: var(--bg-elevated);
+    border-color: var(--border-strong);
+}
+
+.length-card.length-card--selected {
+    background-color: var(--bg-selected);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+/* --- Mismatch Section --- */
+.mismatch-section {
+    flex-direction: column;
+    background-color: rgba(251, 113, 133, 0.08);
+    border-width: 1px;
+    border-color: rgba(251, 113, 133, 0.25);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+}
+
+.mismatch-warning {
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-xs);
+}
+
+.mismatch-warning:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Counter-Offer Banner --- */
+.counter-banner {
+    background-color: rgba(251, 191, 36, 0.1);
+    border-width: 1px;
+    border-color: rgba(251, 191, 36, 0.35);
+}
+
+/* --- Comparison Grid --- */
+.comparison-grid {
+    flex-direction: row;
+    align-items: center;
+}
+
+.comparison-row {
+    margin-bottom: var(--spacing-xs);
+}
+
+.comparison-row.counter-row--differs {
+    background-color: rgba(251, 191, 36, 0.08);
+    border-radius: var(--radius-sm);
+    padding-left: var(--spacing-xs);
+    padding-right: var(--spacing-xs);
+}
+
+.comparison-col {
+    flex-basis: 30%;
+    text-align: right;
+    -unity-text-align: middle-right;
+}
+
+.comparison-col__header {
+    flex-basis: 30%;
+    text-align: right;
+    -unity-text-align: middle-right;
+    color: var(--text-secondary);
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+}
+
+.comparison-col--counter {
+    color: var(--accent-warning, #fbbf24);
+}
+
+/* --- Counter Badge (candidate list card) --- */
+.counter-badge {
+    background-color: rgba(251, 113, 133, 0.15);
+    color: #fb7185;
+    border-width: 1px;
+    border-color: rgba(251, 113, 133, 0.4);
+}
+
+/* --- Counter Expiry --- */
+.counter-expiry {
+    color: var(--text-secondary);
+    font-size: var(--font-sm);
+}
+
+/* --- Patience Dots --- */
+.patience-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: var(--bg-elevated);
+    border-width: 1px;
+    border-color: var(--border-subtle);
+    margin-right: 3px;
+}
+
+.patience-dot--active {
+    background-color: var(--accent-warning, #fbbf24);
+    border-color: var(--accent-warning, #fbbf24);
+}
+
+/* --- Modal Footer --- */
+.candidate-detail-modal .modal-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+    border-top-width: 1px;
+    border-top-color: var(--border-subtle);
+}
+
+/* --- Reject Overlay --- */
+.reject-overlay {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ─── Role Selector ────────────────────────────────────── */
+.role-selector-row {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    margin-bottom: 2px;
+    cursor: link;
+    transition: background-color var(--transition-fast);
+}
+
+.role-selector-row:hover {
+    background-color: var(--bg-elevated);
+}
+
+.role-selector-row.role-selector-row--selected {
+    background-color: var(--bg-selected);
+    border-width: 1px;
+    border-color: var(--accent-primary);
+}
+
+.role-selector-row.role-selector-row--preferred {
+    border-left-width: 2px;
+    border-left-color: var(--accent-secondary);
+}
+
+/* ─── Suitability Dots ─────────────────────────────────── */
+.suitability-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.suitability-dot--natural {
+    background-color: #4ADE80;
+}
+
+.suitability-dot--accomplished {
+    background-color: #A3E635;
+}
+
+.suitability-dot--competent {
+    background-color: #FACC15;
+}
+
+.suitability-dot--awkward {
+    background-color: #FB923C;
+}
+
+.suitability-dot--unsuitable {
+    background-color: #6B7280;
+}
+
+/* ─── Salary Slider ────────────────────────────────────── */
+.salary-slider {
+    margin-bottom: var(--spacing-xs);
+    flex-grow: 1;
+}
+
+/* ─── Acceptance Bar ───────────────────────────────────── */
+.acceptance-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: var(--bg-tertiary);
+    overflow: hidden;
+}
+
+.acceptance-bar__fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width var(--transition-fast);
+}
+
+.acceptance-bar__fill.acceptance-bar--high {
+    background-color: #4ADE80;
+}
+
+.acceptance-bar__fill.acceptance-bar--medium {
+    background-color: #FACC15;
+}
+
+.acceptance-bar__fill.acceptance-bar--low {
+    background-color: #F87171;
+}
+
+/* ─── Patience Dots ────────────────────────────────────── */
+.patience-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    margin-right: 4px;
+    flex-shrink: 0;
+}
+
+.patience-dot--safe {
+    background-color: #4ADE80;
+}
+
+.patience-dot--warning {
+    background-color: #FACC15;
+}
+
+.patience-dot--critical {
+    background-color: #F87171;
+}
+
+.patience-dot--empty {
+    background-color: transparent;
+    border-width: 1px;
+    border-color: #6B7280;
+}

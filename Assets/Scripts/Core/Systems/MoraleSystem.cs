@@ -1,6 +1,7 @@
-// MoraleSystem Version: Clean v1
+// MoraleSystem Version: Clean v2 (Part 5 — Energy/Morale Refactor)
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class MoraleSystem : ISystem
 {
@@ -14,6 +15,7 @@ public class MoraleSystem : ISystem
     private ProductState _productState;
     private GameEventBus _eventBus;
     private ILogger _logger;
+    private FatigueSystem _fatigueSystem;
     private List<EmployeeId> _employeeKeys;
 
     // Event buffers — pre-allocated, no per-tick allocation
@@ -27,11 +29,11 @@ public class MoraleSystem : ISystem
 
     private TuningConfig _tuning;
 
-    // Single authoritative morale multiplier. Range [0.85, 1.10].
-    // 0.25 spread means a 100-morale employee works 29% harder than a 0-morale one.
-    public static float MoraleMultiplier(float morale)
-    {
-        return 0.85f + (morale / 100f) * 0.25f;
+    // Single authoritative morale multiplier. Range [0.95, 1.05].
+    // Narrow 10% spread — energy carries the 25% spread via EnergyMultiplier.
+    public static float MoraleMultiplier(float morale) {
+        float raw = 1.0f + (morale - 60f) * 0.00125f;
+        return Mathf.Clamp(raw, 0.95f, 1.05f);
     }
 
     public MoraleSystem(MoraleState state, EmployeeSystem employeeSystem,
@@ -51,6 +53,10 @@ public class MoraleSystem : ISystem
 
     public void SetTuningConfig(TuningConfig tuning) {
         _tuning = tuning;
+    }
+
+    public void SetFatigueSystem(FatigueSystem fatigueSystem) {
+        _fatigueSystem = fatigueSystem;
     }
 
     public void InitializeEmployee(EmployeeId employeeId, float startingMorale = 60f) {
@@ -77,8 +83,23 @@ public class MoraleSystem : ISystem
         return MoraleMultiplier(GetMorale(employeeId));
     }
 
+    // Instant morale delta — used by TeamChemistrySystem for conflict events (bypasses daily clamp).
+    public void ApplyDirectMoraleDelta(EmployeeId employeeId, float delta) {
+        if (!_state.employeeMorale.TryGetValue(employeeId, out var data)) return;
+        var employee = _employeeSystem.GetEmployee(employeeId);
+        if (employee == null || !employee.isActive) return;
+
+        float newMorale = data.currentMorale + delta;
+        if (newMorale < 0f) newMorale = 0f;
+        if (newMorale > 100f) newMorale = 100f;
+
+        data.currentMorale = newMorale;
+        _state.employeeMorale[employeeId] = data;
+        employee.morale = (int)newMorale;
+        _moraleChangedBuffer.Add((employeeId, newMorale));
+    }
+
     // Called by GameController when a contract is completed.
-    // base +3, quality bonus, upgrade bonus all applied per team member.
     public void ApplyContractCompletedBonus(List<EmployeeId> teamMembers, float quality) {
         if (teamMembers == null) return;
 
@@ -118,7 +139,6 @@ public class MoraleSystem : ISystem
     }
 
     // Called by GameController when a contract fails.
-    // penalty is a positive integer representing the magnitude of loss.
     public void ApplyContractFailedPenalty(List<EmployeeId> teamMembers, int penalty) {
         if (teamMembers == null) return;
 
@@ -139,18 +159,6 @@ public class MoraleSystem : ISystem
             employee.morale = (int)newMorale;
 
             _moraleChangedBuffer.Add((empId, newMorale));
-        }
-    }
-
-    // Resets crunch tracking for the given members — called when crunch is auto-cancelled.
-    public void ResetCrunchTracking(List<EmployeeId> members) {
-        if (members == null) return;
-        int count = members.Count;
-        for (int i = 0; i < count; i++) {
-            var empId = members[i];
-            if (!_state.employeeMorale.TryGetValue(empId, out var data)) continue;
-            data.crunchDaysActive = 0;
-            _state.employeeMorale[empId] = data;
         }
     }
 
@@ -240,28 +248,17 @@ public class MoraleSystem : ISystem
             _employeeKeys.Add(key);
         }
 
-        float quitThreshold       = _tuning != null ? _tuning.QuitThreshold              : QuitThreshold;
-        float idleAlertThreshold  = _tuning != null ? _tuning.IdleAlertMoraleThreshold   : IdleAlertMoraleThreshold;
-        float quitChanceBase      = _tuning != null ? _tuning.QuitChanceBase             : 0.025f;
-        float quitAmbitionScale   = _tuning != null ? _tuning.QuitChanceAmbitionScale    : 0.05f;
-        float equilibriumTarget   = _tuning != null ? _tuning.MoraleEquilibriumTarget    : 60f;
-        float equilibriumCoeff    = _tuning != null ? _tuning.MoraleEquilibriumCoefficient : 0.07f;
-        float overloadSevere      = _tuning != null ? _tuning.MoraleOverloadSevere       : 2.0f;
-        float overloadModerate    = _tuning != null ? _tuning.MoraleOverloadModerate     : 0.75f;
-        float overloadMild        = _tuning != null ? _tuning.MoraleOverloadMild         : 0.25f;
-        float wrongFuncSevere     = _tuning != null ? _tuning.MoraleWrongFuncSevere      : 1.5f;
-        float wrongFuncModerate   = _tuning != null ? _tuning.MoraleWrongFuncModerate    : 0.75f;
-        float wrongFuncMild       = _tuning != null ? _tuning.MoraleWrongFuncMild        : 0.25f;
-        float satisfactionFull    = _tuning != null ? _tuning.MoraleSatisfactionFull     : 1.5f;
-        float satisfactionPartial = _tuning != null ? _tuning.MoraleSatisfactionPartial  : 0.75f;
-        float prodSatFull         = _tuning != null ? _tuning.MoraleProductSatisfactionFull    : 1.0f;
-        float prodSatPartial      = _tuning != null ? _tuning.MoraleProductSatisfactionPartial : 0.5f;
-        float prodOverloadSevere  = _tuning != null ? _tuning.MoraleProductOverloadSevere   : 1.0f;
-        float prodOverloadModerate = _tuning != null ? _tuning.MoraleProductOverloadModerate : 0.5f;
-        float prodOverloadMild    = _tuning != null ? _tuning.MoraleProductOverloadMild     : 0.1f;
-        float workingBonus        = _tuning != null ? _tuning.MoraleWorkingBonus            : 0.3f;
-        float penaltyFloor        = _tuning != null ? _tuning.MoraleDailyPenaltyFloor       : 3.0f;
-        int keyCount = _employeeKeys.Count;        for (int i = 0; i < keyCount; i++) {
+        float quitThreshold      = _tuning != null ? _tuning.QuitThreshold              : QuitThreshold;
+        float idleAlertThreshold = _tuning != null ? _tuning.IdleAlertMoraleThreshold   : IdleAlertMoraleThreshold;
+        float quitChanceBase     = _tuning != null ? _tuning.QuitChanceBase             : 0.025f;
+        float quitAmbitionScale  = _tuning != null ? _tuning.QuitChanceAmbitionScale    : 0.05f;
+        float equilibriumTarget  = 60f;
+        float equilibriumCoeff   = 0.03f;
+        float lowRecovFloor      = 0.20f;
+        float workingBonus       = 0.15f;
+
+        int keyCount = _employeeKeys.Count;
+        for (int i = 0; i < keyCount; i++) {
             var empId = _employeeKeys[i];
             var employee = _employeeSystem.GetEmployee(empId);
             if (employee == null || !employee.isActive) continue;
@@ -275,29 +272,28 @@ public class MoraleSystem : ISystem
             bool teamHasContract = isOnTeam && _contractState.teamAssignments.ContainsKey(teamId);
             bool teamHasProduct = isOnTeam && _productState != null && _productState.teamToProduct.ContainsKey(teamId);
 
-            // Equilibrium pull — always applied, draws morale toward equilibriumTarget
+            // 1. Equilibrium pull: gap * 0.03, clamped [-1.2, +1.2]
             float gap = equilibriumTarget - data.currentMorale;
-            float absGap = gap >= 0f ? gap : -gap;
-            float pullStrength = equilibriumCoeff * (1f + absGap / 30f);
-            moraleChange += gap * pullStrength;
+            float delta = gap * equilibriumCoeff;
+            if (delta > 1.2f) delta = 1.2f;
+            if (delta < -1.2f) delta = -1.2f;
+            moraleChange += delta;
 
-            float lowThreshold = _tuning != null ? _tuning.MoraleLowRecoveryThreshold : 30f;
-            float lowBonus = _tuning != null ? _tuning.MoraleLowRecoveryBonus : 0.5f;
-            if (data.currentMorale < lowThreshold)
-                moraleChange += lowBonus;
+            // 2. Low-morale recovery floor
+            if (data.currentMorale < 30f)
+                moraleChange += lowRecovFloor;
 
             if (isOnTeam) {
                 if (!teamHasContract && !teamHasProduct) {
-                    // Idle: team has no contract — idle is neutral (no decay)
-
+                    // Idle path
                     data.consecutiveIdleDays++;
 
                     int idleRecoveryStart = _tuning != null ? _tuning.IdleRecoveryStartDay : 3;
-                    int idleBoredomStart = _tuning != null ? _tuning.IdleBoredomStartDay : 8;
-                    int idleDecayStart = _tuning != null ? _tuning.IdleDecayStartDay : 61;
-                    float idleRecoveryBonus = _tuning != null ? _tuning.IdleRecoveryBonus : 15f;
-                    float idleBoredomRate = _tuning != null ? _tuning.IdleBoredomDecayPerDay : 0.2f;
-                    float idleDecayRate = _tuning != null ? _tuning.IdleDecayPerDay : 0.5f;
+                    int idleBoredomStart  = _tuning != null ? _tuning.IdleBoredomStartDay  : 8;
+                    int idleDecayStart    = _tuning != null ? _tuning.IdleDecayStartDay    : 61;
+                    float idleRecoveryBonus  = _tuning != null ? _tuning.IdleRecoveryBonus      : 15f;
+                    float idleBoredomRate    = _tuning != null ? _tuning.IdleBoredomDecayPerDay  : 0.25f;
+                    float idleDecayRate      = _tuning != null ? _tuning.IdleDecayPerDay          : 0.50f;
 
                     // Idle alert: fire once per team when boredom phase begins
                     if (data.consecutiveIdleDays == idleBoredomStart && !data.idleAlertSent) {
@@ -311,65 +307,61 @@ public class MoraleSystem : ISystem
                                 }
                             }
                             data.idleAlertSent = true;
-
                             _idleAlertBuffer.Add((currentDay * TimeState.TicksPerDay, teamId, alertTeam.name));
                             _logger.Log($"[MoraleSystem] Team {alertTeam.name} idle morale alert fired");
                         }
                     }
 
-                    if (data.consecutiveIdleDays == idleRecoveryStart)
-                    {
+                    if (data.consecutiveIdleDays == idleRecoveryStart) {
                         moraleChange += idleRecoveryBonus;
-                        _logger.Log($"[MoraleSystem] Employee {empId.Value} idle {idleRecoveryStart} days — relief bonus +{idleRecoveryBonus}");
-                    }
-                    else if (data.consecutiveIdleDays >= idleDecayStart)
-                    {
-                        float weeksOverThreshold = (data.consecutiveIdleDays - idleDecayStart) / 7f;
-                        float scaledDecay = idleDecayRate + weeksOverThreshold * 0.1f;
+                    } else if (data.consecutiveIdleDays >= idleDecayStart) {
+                        float weeksOver = (data.consecutiveIdleDays - idleDecayStart) / 7f;
+                        float scaledDecay = idleDecayRate + weeksOver * 0.1f;
                         float maxDecay = _tuning != null ? _tuning.IdleDecayMax : 2.0f;
                         if (scaledDecay > maxDecay) scaledDecay = maxDecay;
                         moraleChange -= scaledDecay;
-                    }
-                    else if (data.consecutiveIdleDays >= idleBoredomStart)
-                    {
+                    } else if (data.consecutiveIdleDays >= idleBoredomStart) {
                         moraleChange -= idleBoredomRate;
                     }
+                    // days 1-7 idle: 0 delta (spec)
+
                 } else {
-                    // Team has work — reset idle alert and idle counter
-                    if (data.idleAlertSent) {
-                        data.idleAlertSent = false;
-                    }
+                    // Working path
+                    if (data.idleAlertSent) data.idleAlertSent = false;
                     data.consecutiveIdleDays = 0;
 
                     moraleChange += workingBonus;
 
                     if (teamHasContract) {
-                        // Get the assigned contract
                         ContractId contractId = _contractState.teamAssignments[teamId];
                         if (_contractState.activeContracts.TryGetValue(contractId, out var contract)) {
-                            // Overload penalty
                             int optimal = contract.OptimalContributors > 0 ? contract.OptimalContributors : 1;
-                            int memberCount = _teamState.teams.TryGetValue(teamId, out var contractTeam) ? contractTeam.MemberCount : 1;
-                            if (memberCount < (int)(optimal * 0.5f))        moraleChange -= overloadSevere;
-                            else if (memberCount < (int)(optimal * 0.75f))  moraleChange -= overloadModerate;
-                            else if (memberCount < optimal)                  moraleChange -= overloadMild;
-                            // else: optimal or above, no penalty
+                            float effectiveCapacity = 1f;
+                            if (_teamState.teams.TryGetValue(teamId, out var contractTeam)) {
+                                effectiveCapacity = TeamWorkEngine.ComputeEffectiveCapacity(contractTeam.members, _employeeSystem);
+                                if (effectiveCapacity <= 0f) effectiveCapacity = contractTeam.MemberCount;
+                            }
 
-                            // Wrong-function penalty
+                            // 4. Contract overload penalties: severe -1.00, mid -0.40, light -0.15
+                            if (effectiveCapacity < optimal * 0.5f)        moraleChange -= 1.00f;
+                            else if (effectiveCapacity < optimal * 0.75f)  moraleChange -= 0.40f;
+                            else if (effectiveCapacity < optimal)           moraleChange -= 0.15f;
+
+                            // 5. Contract wrong-role penalties
                             bool isRoleFit = TeamWorkEngine.IsRoleFitForSkill(employee.role, contract.RequiredSkill);
                             if (!isRoleFit) {
                                 int skillValue = employee.GetSkill(contract.RequiredSkill);
-                                if (skillValue == 0)      moraleChange -= wrongFuncSevere;
-                                else if (skillValue < 3)  moraleChange -= wrongFuncModerate;
-                                else                      moraleChange -= wrongFuncMild;
+                                if (skillValue == 0)      moraleChange -= 0.80f;
+                                else if (skillValue < 3)  moraleChange -= 0.40f;
+                                else                      moraleChange -= 0.15f;
                             }
 
-                            // Job satisfaction bonus
+                            // 6. Contract job satisfaction bonus
                             if (isRoleFit) {
-                                if (memberCount >= optimal)
-                                    moraleChange += satisfactionFull;
-                                else if (memberCount >= (int)(optimal * 0.75f))
-                                    moraleChange += satisfactionPartial;
+                                if (effectiveCapacity >= optimal)
+                                    moraleChange += 0.75f;
+                                else if (effectiveCapacity >= optimal * 0.75f)
+                                    moraleChange += 0.35f;
                             }
                         }
                     } else if (teamHasProduct && _productState.teamToProduct.TryGetValue(teamId, out var productId)) {
@@ -381,22 +373,24 @@ public class MoraleSystem : ISystem
                         if (product != null && product.Phases != null) {
                             int phaseCount = product.Phases.Length;
 
-                            // Count unlocked phases to determine optimal baseline
                             int unlockedPhaseCount = 0;
                             for (int p = 0; p < phaseCount; p++) {
-                                if (product.Phases[p].isUnlocked)
-                                    unlockedPhaseCount++;
+                                if (product.Phases[p].isUnlocked) unlockedPhaseCount++;
                             }
 
-                            // Overload: use unlocked phase count as organic optimal baseline (min 2)
-                            int memberCount = _teamState.teams.TryGetValue(teamId, out var productTeam) ? productTeam.MemberCount : 1;
+                            float effectiveCapacity = 1f;
+                            if (_teamState.teams.TryGetValue(teamId, out var productTeam)) {
+                                effectiveCapacity = TeamWorkEngine.ComputeEffectiveCapacity(productTeam.members, _employeeSystem);
+                                if (effectiveCapacity <= 0f) effectiveCapacity = productTeam.MemberCount;
+                            }
                             int optimal = Math.Max(2, unlockedPhaseCount);
-                            if (memberCount < (int)(optimal * 0.5f))        moraleChange -= prodOverloadSevere;
-                            else if (memberCount < (int)(optimal * 0.75f))  moraleChange -= prodOverloadModerate;
-                            else if (memberCount < optimal)                  moraleChange -= prodOverloadMild;
 
-                            // Phase-matching wrong-function penalty:
-                            // Check if the employee's role fits ANY phase in the product, not just the active one.
+                            // 7. Product overload penalties: severe -0.75, mid -0.30, light -0.10
+                            if (effectiveCapacity < optimal * 0.5f)        moraleChange -= 0.75f;
+                            else if (effectiveCapacity < optimal * 0.75f)  moraleChange -= 0.30f;
+                            else if (effectiveCapacity < optimal)           moraleChange -= 0.10f;
+
+                            // 8. Product wrong-function penalty
                             bool employeeHasMatchingPhase = false;
                             for (int p = 0; p < phaseCount; p++) {
                                 SkillType phaseSkill = TeamWorkEngine.MapPhaseToSkill(product.Phases[p].phaseType);
@@ -407,61 +401,97 @@ public class MoraleSystem : ISystem
                             }
 
                             if (!employeeHasMatchingPhase) {
-                                // Role has no relevance to any phase of this product — flat penalty
-                                moraleChange -= 1.0f;
+                                moraleChange -= 0.50f;
                             }
-                            // else: role matches at least one phase — no wrong-function penalty
 
-                            // Product satisfaction bonus
+                            // 9. Product fit bonus: strong +0.50, weaker +0.25
                             if (employeeHasMatchingPhase) {
-                                if (memberCount >= optimal)
-                                    moraleChange += prodSatFull;
-                                else if (memberCount >= (int)(optimal * 0.75f))
-                                    moraleChange += prodSatPartial;
+                                if (effectiveCapacity >= optimal)
+                                    moraleChange += 0.50f;
+                                else if (effectiveCapacity >= optimal * 0.75f)
+                                    moraleChange += 0.25f;
                             }
                         }
                     }
                 }
             }
 
-            bool teamIsCrunching = false;
-            if (isOnTeam && _teamState.teams.TryGetValue(teamId, out var crunchTeam))
-                teamIsCrunching = crunchTeam.isCrunching;
+            // 11. Energy pressure from FatigueSystem
+            if (_fatigueSystem != null) {
+                float energy = _fatigueSystem.GetEnergy(empId);
+                bool inBurnout = _fatigueSystem.IsBurnout(empId);
 
-            if (teamIsCrunching) {
-                data.crunchDaysActive++;
-                if (data.recentCrunchDays < 14) data.recentCrunchDays++;
+                if (energy < 40f) moraleChange -= 0.35f;
+                if (energy < 25f) moraleChange -= 0.60f;
+                if (energy < 10f) moraleChange -= 0.90f;
+                if (inBurnout && energy < 25f) moraleChange -= 0.50f;
+            }
 
-                float crunchPenalty;
-                if (data.crunchDaysActive <= 2)       crunchPenalty = 0.5f;
-                else if (data.crunchDaysActive <= 5)  crunchPenalty = 1.5f;
-                else if (data.crunchDaysActive <= 9)  crunchPenalty = 2.5f;
-                else                                  crunchPenalty = 4.0f;
+            // 12. Salary competitiveness pressure (skip founders with salary 0)
+            if (!employee.isFounder || employee.salary > 0) {
+                int marketRate = SalaryBand.GetBase(employee.role);
+                float effectiveOutput = employee.EffectiveOutput > 0f ? employee.EffectiveOutput : 1.0f;
+                float employeeCostPerOutput = employee.salary / effectiveOutput;
+                float marketCostPerOutput = marketRate;
+                float salaryDelta = (employeeCostPerOutput - marketCostPerOutput) / marketCostPerOutput;
 
-                moraleChange -= crunchPenalty;
+                float salaryWellAbove    = _tuning != null ? _tuning.SalaryPressureWellAbove    : 0.15f;
+                float salaryAboveMarket  = _tuning != null ? _tuning.SalaryPressureAboveMarket  : 0.05f;
+                float salaryBelowMarket  = _tuning != null ? _tuning.SalaryPressureBelowMarket  : -0.10f;
+                float salaryFarBelow     = _tuning != null ? _tuning.SalaryPressureFarBelow     : -0.25f;
 
-                if (data.recentCrunchDays >= 8)
-                    moraleChange -= 1.0f;
-            } else {
-                if (data.crunchDaysActive > 0) {
-                    data.crunchDaysActive = 0;
-                }
-                if (data.recentCrunchDays > 0) {
-                    data.recentCrunchDays--;
-                    moraleChange += 1.5f;
+                if (salaryDelta >= 0.20f)       moraleChange += salaryWellAbove;
+                else if (salaryDelta >= 0.10f)  moraleChange += salaryAboveMarket;
+                else if (salaryDelta >= -0.10f) { /* at market — neutral */ }
+                else if (salaryDelta >= -0.20f) moraleChange += salaryBelowMarket;
+                else                            moraleChange += salaryFarBelow;
+            }
+
+            // 13. Preference satisfaction pressure
+            {
+                float prefMatchBoth    = _tuning != null ? _tuning.PrefMatchBothBonus        : 0.10f;
+                float prefMatchOne     = _tuning != null ? _tuning.PrefMatchOneBonus          : 0.05f;
+                float prefMismatchOne  = _tuning != null ? _tuning.PrefMismatchOnePenalty     : -0.08f;
+                float prefMismatchBoth = _tuning != null ? _tuning.PrefMismatchBothPenalty    : -0.20f;
+                float strikeScale      = _tuning != null ? _tuning.StrikeEscalationMultiplier : 0.5f;
+
+                bool hasKnownPrefs = employee.Contract.HiredTick > 0;
+                if (hasKnownPrefs) {
+                    PreferenceMatchState matchState = SalaryModifierCalculator.ComputePreferenceMatch(
+                        employee.OriginalPreferences,
+                        employee.Contract.Type,
+                        employee.Contract.Length);
+
+                    float prefDelta = 0f;
+                    switch (matchState) {
+                        case PreferenceMatchState.BothMatched:          prefDelta = prefMatchBoth;    break;
+                        case PreferenceMatchState.OneMatchedOneNeutral: prefDelta = prefMatchOne;     break;
+                        case PreferenceMatchState.BothNeutral:          prefDelta = 0f;               break;
+                        case PreferenceMatchState.OneMismatched:        prefDelta = prefMismatchOne;  break;
+                        case PreferenceMatchState.BothMismatched:       prefDelta = prefMismatchBoth; break;
+                    }
+
+                    // Strike escalation: applies only to dissatisfaction
+                    if (prefDelta < 0f && employee.StrikeCount >= 1) {
+                        float escalation = 1.0f + employee.StrikeCount * strikeScale;
+                        prefDelta *= escalation;
+                    }
+
+                    moraleChange += prefDelta;
                 }
             }
 
-            if (moraleChange < -penaltyFloor)
-                moraleChange = -penaltyFloor;
+            // 14. Clamp daily change: [-2.5, +1.5]
+            if (moraleChange > 1.5f)  moraleChange = 1.5f;
+            if (moraleChange < -2.5f) moraleChange = -2.5f;
 
+            // 15. Clamp morale [0, 100]
             float newMorale = data.currentMorale + moraleChange;
             if (newMorale < 0f) newMorale = 0f;
             if (newMorale > 100f) newMorale = 100f;
 
             data.currentMorale = newMorale;
             _state.employeeMorale[empId] = data;
-
             employee.morale = (int)newMorale;
 
             if (data.currentMorale < quitThreshold) {
@@ -476,11 +506,8 @@ public class MoraleSystem : ISystem
         }
     }
 
-    public void PreTick(int tick) {
-    }
-
-    public void Tick(int tick) {
-    }
+    public void PreTick(int tick) { }
+    public void Tick(int tick) { }
 
     public void PostTick(int tick) {
         int moraleCount = _moraleChangedBuffer.Count;
@@ -504,8 +531,7 @@ public class MoraleSystem : ISystem
         _idleAlertBuffer.Clear();
     }
 
-    public void ApplyCommand(ICommand command) {
-    }
+    public void ApplyCommand(ICommand command) { }
 
     public void Dispose() {
         _moraleChangedBuffer.Clear();

@@ -15,7 +15,7 @@ public partial class RadarChartElement : VisualElement {
 
     private const int MaxAxes = 9;
     private const int GridRings = 4;
-    private const float LabelPadding = 48f;
+    private const float LabelPadding = 70f;
     private const float VertexDotRadius = 3f;
     private const float StrokeWidth = 2f;
 
@@ -23,21 +23,47 @@ public partial class RadarChartElement : VisualElement {
     private static readonly Color StrokeColor = new Color(0.3f, 0.79f, 0.69f, 0.85f);
     private static readonly Color GridColor = new Color(1f, 1f, 1f, 0.08f);
     private static readonly Color AxisColor = new Color(1f, 1f, 1f, 0.05f);
+    private static readonly Color AccentSuccess = new Color(0.290f, 0.871f, 0.502f);
+    private static readonly Color AccentDanger = new Color(0.973f, 0.443f, 0.443f);
+    private static readonly Color TextSecondary = new Color(0.627f, 0.647f, 0.686f);
 
     private readonly AxisData[] _axes = new AxisData[MaxAxes];
+    private readonly Color[] _skillLevelColors = new Color[MaxAxes];
+    private bool _useSkillLevelColors;
     private int _axisCount;
-    private readonly Label[] _labels = new Label[MaxAxes];
+    private bool _hidden;
+
+    private readonly VisualElement[] _labelSlots = new VisualElement[MaxAxes];
+    private readonly Label[] _nameLabels = new Label[MaxAxes];
+    private readonly Label[] _levelLabels = new Label[MaxAxes];
 
     public RadarChartElement() {
         generateVisualContent += OnGenerateVisualContent;
 
         for (int i = 0; i < MaxAxes; i++) {
-            var label = new Label();
-            label.style.position = Position.Absolute;
-            label.style.fontSize = 10;
-            label.pickingMode = PickingMode.Ignore;
-            Add(label);
-            _labels[i] = label;
+            var slot = new VisualElement();
+            slot.AddToClassList("skill-label");
+            slot.style.position = Position.Absolute;
+            slot.style.flexDirection = FlexDirection.Row;
+            slot.pickingMode = PickingMode.Ignore;
+
+            var name = new Label();
+            name.AddToClassList("skill-label__name");
+            name.style.fontSize = 11;
+            name.pickingMode = PickingMode.Ignore;
+
+            var level = new Label();
+            level.AddToClassList("skill-label__level");
+            level.style.fontSize = 11;
+            level.pickingMode = PickingMode.Ignore;
+
+            slot.Add(name);
+            slot.Add(level);
+            Add(slot);
+
+            _labelSlots[i] = slot;
+            _nameLabels[i] = name;
+            _levelLabels[i] = level;
         }
 
         RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
@@ -48,12 +74,51 @@ public partial class RadarChartElement : VisualElement {
         for (int i = 0; i < _axisCount; i++) {
             _axes[i] = axes[i];
         }
+        _useSkillLevelColors = false;
         for (int i = 0; i < MaxAxes; i++) {
-            _labels[i].style.display = i < _axisCount ? DisplayStyle.Flex : DisplayStyle.None;
+            _labelSlots[i].style.display = i < _axisCount ? DisplayStyle.Flex : DisplayStyle.None;
         }
+        _hidden = false;
         PositionLabels();
         MarkDirtyRepaint();
         RegisterCallbackOnce<GeometryChangedEvent>(OnGeometryChangedOnce);
+    }
+
+    public void SetData(RadarChartData data) {
+        int count = data.Skills != null ? Mathf.Min(data.Skills.Length, MaxAxes) : 0;
+        _axisCount = count;
+        for (int i = 0; i < count; i++) {
+            var sp = data.Skills[i];
+            _axes[i] = new AxisData {
+                Name = sp.SkillName,
+                NormalizedValue = sp.Level / 20f,
+                DeltaDirection = sp.Level > sp.PreviousLevel ? 1 : sp.Level < sp.PreviousLevel ? -1 : 0,
+                RawValue = Mathf.RoundToInt(sp.Level),
+                LabelColor = sp.SkillNameColor
+            };
+            _skillLevelColors[i] = sp.Level > sp.PreviousLevel
+                ? AccentSuccess
+                : sp.Level < sp.PreviousLevel
+                    ? AccentDanger
+                    : TextSecondary;
+        }
+        _useSkillLevelColors = true;
+        for (int i = 0; i < MaxAxes; i++) {
+            _labelSlots[i].style.display = i < count ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+        _hidden = false;
+        PositionLabels();
+        MarkDirtyRepaint();
+        RegisterCallbackOnce<GeometryChangedEvent>(OnGeometryChangedOnce);
+    }
+
+    public void ClearData() {
+        _axisCount = 0;
+        _hidden = true;
+        for (int i = 0; i < MaxAxes; i++) {
+            _labelSlots[i].style.display = DisplayStyle.None;
+        }
+        MarkDirtyRepaint();
     }
 
     private void OnGeometryChanged(GeometryChangedEvent evt) {
@@ -83,35 +148,44 @@ public partial class RadarChartElement : VisualElement {
             float lx = cx + cosA * (radius + LabelPadding * 0.6f);
             float ly = cy + Mathf.Sin(angle) * (radius + LabelPadding * 0.6f);
 
-            var label = _labels[i];
-            label.style.left = lx;
-            label.style.top = ly;
+            var slot = _labelSlots[i];
+            slot.style.left = lx;
+            slot.style.top = ly;
 
-            if (cosA < -0.1f) {
-                label.style.unityTextAlign = TextAnchor.MiddleRight;
-                label.style.translate = new Translate(Length.Percent(-100), Length.Percent(-50));
+            bool isLeftSide = cosA < -0.1f;
+            if (isLeftSide) {
+                slot.style.translate = new Translate(Length.Percent(-100), Length.Percent(-50));
             } else if (cosA > 0.1f) {
-                label.style.unityTextAlign = TextAnchor.MiddleLeft;
-                label.style.translate = new Translate(Length.Percent(0), Length.Percent(-50));
+                slot.style.translate = new Translate(Length.Percent(0), Length.Percent(-50));
             } else {
-                label.style.unityTextAlign = TextAnchor.MiddleCenter;
-                label.style.translate = new Translate(Length.Percent(-50), Length.Percent(-50));
+                slot.style.translate = new Translate(Length.Percent(-50), Length.Percent(-50));
             }
+            slot.style.flexDirection = FlexDirection.Row;
 
             var axis = _axes[i];
-            label.style.color = axis.LabelColor;
-            if (axis.DeltaDirection > 0) {
-                label.text = axis.Name + " " + axis.RawValue + " \u25B2";
-            } else if (axis.DeltaDirection < 0) {
-                label.text = axis.Name + " " + axis.RawValue + " \u25BC";
+            _nameLabels[i].style.color = axis.LabelColor;
+
+            if (_useSkillLevelColors) {
+                if (isLeftSide) {
+                    _levelLabels[i].text = axis.RawValue + " ";
+                    _nameLabels[i].text = axis.Name;
+                } else {
+                    _nameLabels[i].text = axis.Name;
+                    _levelLabels[i].text = " " + axis.RawValue;
+                }
+                _levelLabels[i].style.color = _skillLevelColors[i];
+                _levelLabels[i].style.display = DisplayStyle.Flex;
             } else {
-                label.text = axis.Name + " " + axis.RawValue;
+                string arrow = axis.DeltaDirection > 0 ? " \u25B2" : axis.DeltaDirection < 0 ? " \u25BC" : "";
+                _nameLabels[i].text = axis.Name + " " + axis.RawValue + arrow;
+                _levelLabels[i].text = string.Empty;
+                _levelLabels[i].style.display = DisplayStyle.None;
             }
         }
     }
 
     private void OnGenerateVisualContent(MeshGenerationContext ctx) {
-        if (_axisCount < 3) return;
+        if (_hidden || _axisCount < 3) return;
         float totalWidth = contentRect.width;
         float totalHeight = contentRect.height;
         if (totalWidth <= 0f || totalHeight <= 0f) return;

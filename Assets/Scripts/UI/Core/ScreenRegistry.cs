@@ -1,11 +1,14 @@
 using System.Collections.Generic;
+using UnityEngine.UIElements;
 
 public class ScreenRegistry
 {
     private readonly Dictionary<ScreenId, ScreenConfig> _configs = new Dictionary<ScreenId, ScreenConfig>();
     private NavNode _navigationTree;
 
-    public ScreenRegistry(ICommandDispatcher dispatcher, IModalPresenter modal, INavigationService nav, ITooltipProvider tooltip) {
+    public ScreenRegistry(ICommandDispatcher dispatcher, IModalPresenter modal, INavigationService nav, ITooltipProvider tooltip,
+        VisualTreeAsset candidateDetailAsset = null) {
+        CandidateDetailAsset = candidateDetailAsset;
         // --- Dashboard ---
         RegisterScreen(new ScreenConfig {
             ScreenId = ScreenId.DashboardInbox,
@@ -22,32 +25,6 @@ public class ScreenRegistry
             UxmlPath = "Assets/UI/UXML/Screens/PortalCalendar.uxml",
             ViewFactory = () => new CalendarView(modal),
             ViewModelFactory = () => new CalendarViewModel()
-        });
-
-        // --- HR ---
-        RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.HREmployees,
-            Category = NavCategory.HR,
-            DisplayName = "Employees",
-            UxmlPath = "Assets/UI/UXML/Screens/StaffEmployees.uxml",
-            ViewFactory = () => new EmployeesView(dispatcher, modal, tooltip),
-            ViewModelFactory = () => new EmployeesViewModel()
-        });
-        RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.HRTeams,
-            Category = NavCategory.HR,
-            DisplayName = "Teams",
-            UxmlPath = "Assets/UI/UXML/Screens/StaffTeams.uxml",
-            ViewFactory = () => new TeamsView(dispatcher, modal, tooltip),
-            ViewModelFactory = () => new TeamsViewModel()
-        });
-        RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.HRCandidates,
-            Category = NavCategory.HR,
-            DisplayName = "Candidates",
-            UxmlPath = "Assets/UI/UXML/Screens/StaffHR.uxml",
-            ViewFactory = () => new HRView(dispatcher, modal),
-            ViewModelFactory = () => new HRViewModel()
         });
 
         // --- Business: Finance ---
@@ -148,6 +125,46 @@ public class ScreenRegistry
             ViewModelFactory = () => new ReputationViewModel()
         });
 
+        // --- HR Portal ---
+        RegisterScreen(new ScreenConfig {
+            ScreenId = ScreenId.HRPortalLanding,
+            Category = NavCategory.HR,
+            DisplayName = "HR Portal",
+            UxmlPath = "Assets/UI/UXML/Screens/HRPortal.uxml",
+            ViewFactory = () => new HRPortalLandingView(dispatcher, nav),
+            ViewModelFactory = () => new HRPortalLandingViewModel()
+        });
+        RegisterScreen(new ScreenConfig {
+            ScreenId = ScreenId.HREmployees,
+            Category = NavCategory.HR,
+            DisplayName = "Employees",
+            UxmlPath = "Assets/UI/UXML/Screens/HRPortal.uxml",
+            ViewFactory = () => new EmployeesView(dispatcher, modal, nav),
+            ViewModelFactory = () => new EmployeesViewModel()
+        });
+        RegisterScreen(new ScreenConfig {
+            ScreenId = ScreenId.HRCandidates,
+            Category = NavCategory.HR,
+            DisplayName = "Candidates",
+            ViewFactory = () => new CandidateMarketView(dispatcher, modal, nav, tooltip),
+            ViewModelFactory = () => new CandidateMarketViewModel()
+        });
+        RegisterScreen(new ScreenConfig {
+            ScreenId = ScreenId.HRAssignments,
+            Category = NavCategory.HR,
+            DisplayName = "Assignments",
+            ViewFactory = () => new HRAssignmentsView(dispatcher, modal, nav, tooltip),
+            ViewModelFactory = () => new HRAssignmentsViewModel()
+        });
+        RegisterScreen(new ScreenConfig {
+            ScreenId = ScreenId.HRTeams,
+            Category = NavCategory.HR,
+            DisplayName = "Teams",
+            UxmlPath = "Assets/UI/UXML/Screens/HRPortal.uxml",
+            ViewFactory = () => new TeamAssignmentView(dispatcher, modal, nav),
+            ViewModelFactory = () => new TeamAssignmentViewModel()
+        });
+
         BuildNavigationTree();
     }
 
@@ -165,22 +182,23 @@ public class ScreenRegistry
         dashboard.AddChild(new NavNode { Id = "dashboard-reputation", Label = "Reputation", ScreenId = ScreenId.DashboardReputation, Hotkey = "R" });
         root.AddChild(dashboard);
 
-        // HR
-        var hr = new NavNode { Id = "hr", Label = "HR", Icon = "♟", Hotkey = "2" };
-        hr.AddChild(new NavNode { Id = "hr-employees",  Label = "Employees",  ScreenId = ScreenId.HREmployees,  Hotkey = "E" });
-        hr.AddChild(new NavNode { Id = "hr-teams",      Label = "Teams",      ScreenId = ScreenId.HRTeams,      Hotkey = "T" });
-        hr.AddChild(new NavNode { Id = "hr-candidates", Label = "Candidates", ScreenId = ScreenId.HRCandidates, Hotkey = "H" });
+        // HR Portal
+        var hr = new NavNode { Id = "hr", Label = "HR Portal", Icon = "◉", Hotkey = "2", ScreenId = ScreenId.HRPortalLanding };
+        hr.AddChild(new NavNode { Id = "hr-candidates",   Label = "Candidates",  ScreenId = ScreenId.HRCandidates,  Hotkey = "C" });
+        hr.AddChild(new NavNode { Id = "hr-assignments",  Label = "Assignments", ScreenId = ScreenId.HRAssignments, Hotkey = "A" });
+        hr.AddChild(new NavNode { Id = "hr-employees",    Label = "Employees",   ScreenId = ScreenId.HREmployees,   Hotkey = "E" });
+        hr.AddChild(new NavNode { Id = "hr-teams",        Label = "Teams",       ScreenId = ScreenId.HRTeams,       Hotkey = "T" });
         root.AddChild(hr);
 
         // Finance
-        var finance = new NavNode { Id = "finance", Label = "Finance", Icon = "◈", Hotkey = "3" };
+        var finance = new NavNode { Id = "finance", Label = "Finance", Icon = "◈", Hotkey = "4" };
         finance.AddChild(new NavNode { Id = "finance-overview",    Label = "Financial Overview",  ScreenId = ScreenId.FinanceOverview,         Hotkey = "F" });
         finance.AddChild(new NavNode { Id = "finance-stock",       Label = "Stock / Investments", ScreenId = ScreenId.FinanceStockInvestments, Hotkey = "S" });
         finance.AddChild(new NavNode { Id = "finance-investments", Label = "My Investments",      ScreenId = ScreenId.FinanceMyInvestments,    Hotkey = "I" });
         root.AddChild(finance);
 
         // Production
-        var production = new NavNode { Id = "production", Label = "Production", Icon = "⚙", Hotkey = "4" };
+        var production = new NavNode { Id = "production", Label = "Production", Icon = "⚙", Hotkey = "5" };
         production.AddChild(new NavNode { Id = "production-contracts", Label = "Contracts", ScreenId = ScreenId.ProductionContracts, Hotkey = "C" });
 
         var productsGroup = new NavNode { Id = "production-products-group", Label = "Products", Icon = "", Hotkey = "P" };
@@ -191,13 +209,13 @@ public class ScreenRegistry
         root.AddChild(production);
 
         // Market
-        var market = new NavNode { Id = "market", Label = "Market", Icon = "◆", Hotkey = "5" };
+        var market = new NavNode { Id = "market", Label = "Market", Icon = "◆", Hotkey = "6" };
         market.AddChild(new NavNode { Id = "market-overview", Label = "Market Overview",  ScreenId = ScreenId.MarketOverview,        Hotkey = "O" });
         market.AddChild(new NavNode { Id = "market-browser",  Label = "Products Browser", ScreenId = ScreenId.MarketProductsBrowser, Hotkey = "B" });
         root.AddChild(market);
 
         // Competitors
-        var competitors = new NavNode { Id = "competitors", Label = "Competitors", Icon = "⚔", Hotkey = "6" };
+        var competitors = new NavNode { Id = "competitors", Label = "Competitors", Icon = "⚔", Hotkey = "7" };
         competitors.AddChild(new NavNode { Id = "competitors-list",     Label = "Competitor List",   ScreenId = ScreenId.CompetitorsList,             Hotkey = "L" });
         competitors.AddChild(new NavNode { Id = "competitors-industry", Label = "Industry Overview", ScreenId = ScreenId.CompetitorsIndustryOverview, Hotkey = "V" });
         root.AddChild(competitors);
@@ -211,4 +229,6 @@ public class ScreenRegistry
         if (_configs.TryGetValue(id, out var config)) return config;
         return default;
     }
+
+    public VisualTreeAsset CandidateDetailAsset { get; private set; }
 }

@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 public class CreateProductView : IGameView
 {
     private readonly ICommandDispatcher _dispatcher;
+    private readonly IModalPresenter _modal;
     private readonly ITooltipProvider _tooltip;
     private readonly ProductTemplateDefinition[] _definitions;
     private readonly MarketNicheData[] _nicheData;
@@ -59,21 +60,6 @@ public class CreateProductView : IGameView
     private Label _wastedInterestLabel;
     private Label _scopeLabel;
 
-    // ── Market Read (tag-based) ────────────────────────────────────────────────
-    private VisualElement _marketReadContainer;
-    private VisualElement _marketReadCard0;
-    private VisualElement _marketReadCard1;
-    private VisualElement _marketReadCard2;
-    private Label _cardTitle0;
-    private Label _cardTitle1;
-    private Label _cardTitle2;
-    private Label _cardStrength0;
-    private Label _cardStrength1;
-    private Label _cardStrength2;
-    private Label _marketReadEmptyLabel;
-    private Label _marketReadDeltaLabel;
-    private IVisualElementScheduledItem _deltaHideSchedule;
-
     // ── Radar Chart ───────────────────────────────────────────────────────────
     private UI.Elements.RadarChartElement _radarChart;
 
@@ -118,8 +104,6 @@ public class CreateProductView : IGameView
     private const int MaxValidationMessages = 12;
     private VisualElement _validationContainer;
     private Label[] _validationMessages;
-    private Button _startDevBtnBar;
-
     // ── Page navigation ───────────────────────────────────────────────────────
     private int _currentPage;
     private VisualElement[] _pages;
@@ -175,11 +159,12 @@ public class CreateProductView : IGameView
     public event Action OnCancelRequested;
     public event Action OnProductCreated;
 
-    public CreateProductView(ICommandDispatcher dispatcher, ITooltipProvider tooltip,
+    public CreateProductView(ICommandDispatcher dispatcher, IModalPresenter modal, ITooltipProvider tooltip,
         ProductTemplateDefinition[] definitions, MarketNicheData[] nicheData,
         ProductId? updateProductId = null, ProductId? sequelOfId = null)
     {
         _dispatcher = dispatcher;
+        _modal = modal;
         _tooltip = tooltip;
         _definitions = definitions;
         _nicheData = nicheData;
@@ -227,7 +212,6 @@ public class CreateProductView : IGameView
 
         BuildProductSummarySection(leftPanel.contentContainer);
         BuildProductFitSection(leftPanel.contentContainer);
-        BuildMarketReadSection(leftPanel.contentContainer);
         BuildEstimatesSection(leftPanel.contentContainer);
         BuildDependencyMetricsSection(leftPanel.contentContainer);
         BuildPricingSection(leftPanel.contentContainer);
@@ -305,64 +289,6 @@ public class CreateProductView : IGameView
         _scopeLabel = AddMetricRow(section, "Scope");
 
         parent.Add(section);
-    }
-
-    private void BuildMarketReadSection(VisualElement parent) {
-        _marketReadContainer = new VisualElement();
-        _marketReadContainer.AddToClassList("market-read-container");
-
-        var sectionTitle = new Label("MARKET READ");
-        sectionTitle.AddToClassList("market-read__title");
-        _marketReadContainer.Add(sectionTitle);
-
-        var tagsRow = new VisualElement();
-        tagsRow.AddToClassList("market-read__tags-row");
-
-        _marketReadCard0 = BuildMarketReadTag(out _cardTitle0, out _cardStrength0);
-        _marketReadCard1 = BuildMarketReadTag(out _cardTitle1, out _cardStrength1);
-        _marketReadCard2 = BuildMarketReadTag(out _cardTitle2, out _cardStrength2);
-
-        var emptyTooltipData = new TooltipData();
-        _marketReadCard0.SetRichTooltip(emptyTooltipData, _tooltip.TooltipService);
-        _marketReadCard1.SetRichTooltip(emptyTooltipData, _tooltip.TooltipService);
-        _marketReadCard2.SetRichTooltip(emptyTooltipData, _tooltip.TooltipService);
-
-        _marketReadCard0.focusable = true;
-        _marketReadCard1.focusable = true;
-        _marketReadCard2.focusable = true;
-
-        tagsRow.Add(_marketReadCard0);
-        tagsRow.Add(_marketReadCard1);
-        tagsRow.Add(_marketReadCard2);
-        _marketReadContainer.Add(tagsRow);
-
-        _marketReadEmptyLabel = new Label();
-        _marketReadEmptyLabel.AddToClassList("market-read__empty-label");
-        _marketReadEmptyLabel.style.display = DisplayStyle.None;
-        _marketReadContainer.Add(_marketReadEmptyLabel);
-
-        _marketReadDeltaLabel = new Label();
-        _marketReadDeltaLabel.AddToClassList("market-read__delta");
-        _marketReadDeltaLabel.style.display = DisplayStyle.None;
-        _marketReadContainer.Add(_marketReadDeltaLabel);
-
-        parent.Add(_marketReadContainer);
-    }
-
-    private static VisualElement BuildMarketReadTag(out Label title, out Label strength) {
-        var tag = new VisualElement();
-        tag.AddToClassList("market-read__tag");
-        tag.style.display = DisplayStyle.None;
-
-        title = new Label();
-        title.AddToClassList("market-read__tag-title");
-        tag.Add(title);
-
-        strength = new Label();
-        strength.AddToClassList("market-read__strength-chip");
-        tag.Add(strength);
-
-        return tag;
     }
 
     private void BuildRadarChartSection(VisualElement parent)
@@ -781,11 +707,6 @@ public class CreateProductView : IGameView
         _nextPageBtn.AddToClassList("btn-secondary");
         _nextPageBtn.clicked += OnNextPageClicked;
         footer.Add(_nextPageBtn);
-
-        _startDevBtnBar = new Button { text = "Start Development" };
-        _startDevBtnBar.AddToClassList("btn-primary");
-        _startDevBtnBar.clicked += OnStartDevClicked;
-        footer.Add(_startDevBtnBar);
 
         parent.Add(footer);
     }
@@ -1260,7 +1181,6 @@ public class CreateProductView : IGameView
         BindFeatures();
         BindHardwarePageVisibility();
         BindPlatformToggles();
-        BindMarketRead();
     }
 
     private void RefreshAfterChange() {
@@ -1280,7 +1200,6 @@ public class CreateProductView : IGameView
         BindFeatures();
         BindPlatformToggles();
         BindHardwarePageVisibility();
-        BindMarketRead();
     }
 
     private void ShowPage(int page)
@@ -1687,65 +1606,6 @@ public class CreateProductView : IGameView
         _viewModel.SetIdentitySystems(gc.GenerationSystem, gc.PlatformSystem, gs.productState, gc.Tuning);
     }
 
-    private void BindMarketRead() {
-        if (_marketReadContainer == null || _viewModel == null) return;
-        var display = _viewModel.MarketReadDisplay;
-        if (!display.HasAnyReads) {
-            _marketReadCard0.style.display = DisplayStyle.None;
-            _marketReadCard1.style.display = DisplayStyle.None;
-            _marketReadCard2.style.display = DisplayStyle.None;
-            _marketReadEmptyLabel.style.display = DisplayStyle.Flex;
-            _marketReadEmptyLabel.text = display.EmptyStateText;
-            _marketReadDeltaLabel.style.display = DisplayStyle.None;
-            return;
-        }
-        _marketReadEmptyLabel.style.display = DisplayStyle.None;
-        BindMarketReadTag(_marketReadCard0, _cardTitle0, _cardStrength0, display.CardCount > 0 ? display.Card0 : default, display.CardCount > 0);
-        BindMarketReadTag(_marketReadCard1, _cardTitle1, _cardStrength1, display.CardCount > 1 ? display.Card1 : default, display.CardCount > 1);
-        BindMarketReadTag(_marketReadCard2, _cardTitle2, _cardStrength2, display.CardCount > 2 ? display.Card2 : default, display.CardCount > 2);
-
-        var delta = _viewModel.MarketReadDelta;
-        if (delta.HasDelta) {
-            _marketReadDeltaLabel.text = delta.Message;
-            _marketReadDeltaLabel.style.display = DisplayStyle.Flex;
-            if (_deltaHideSchedule != null) _deltaHideSchedule.Pause();
-            _deltaHideSchedule = _marketReadDeltaLabel.schedule.Execute(HideDeltaLabel);
-            _deltaHideSchedule.ExecuteLater(2000);
-        }
-    }
-
-    private void HideDeltaLabel() {
-        if (_marketReadDeltaLabel != null)
-            _marketReadDeltaLabel.style.display = DisplayStyle.None;
-        _deltaHideSchedule = null;
-    }
-
-    private static void BindMarketReadTag(VisualElement tag, Label title, Label strength, MarketReadCardDisplay data, bool visible) {
-        if (!visible || !data.IsVisible) {
-            tag.style.display = DisplayStyle.None;
-            return;
-        }
-        tag.style.display = DisplayStyle.Flex;
-        title.text = data.Title ?? "";
-        strength.text = data.StrengthText ?? "";
-
-        strength.RemoveFromClassList("market-read__strength-chip--mild");
-        strength.RemoveFromClassList("market-read__strength-chip--moderate");
-        strength.RemoveFromClassList("market-read__strength-chip--strong");
-        switch (data.StrengthTier) {
-            case 1: strength.AddToClassList("market-read__strength-chip--mild"); break;
-            case 2: strength.AddToClassList("market-read__strength-chip--moderate"); break;
-            case 3: strength.AddToClassList("market-read__strength-chip--strong"); break;
-        }
-
-        tag.EnableInClassList("market-read__tag--mild",     data.StrengthTier == 1);
-        tag.EnableInClassList("market-read__tag--moderate", data.StrengthTier == 2);
-        tag.EnableInClassList("market-read__tag--strong",   data.StrengthTier == 3);
-
-        var info = tag.userData as TooltipInfo;
-        if (info != null) info.DirectData = data.Tooltip;
-    }
-
     private void BindRadarChart()
     {
         _radarChart.SetAxisCount(_viewModel.MarketProfile.Length);
@@ -1897,8 +1757,6 @@ public class CreateProductView : IGameView
         bool canStart = _viewModel.CanStartDevelopment;
         SetClass(_startDevBtn, "btn-start-dev--disabled", !canStart);
         _startDevBtn.SetEnabled(canStart);
-        SetClass(_startDevBtnBar, "btn-start-dev--disabled", !canStart);
-        _startDevBtnBar.SetEnabled(canStart);
     }
 
     private void BindReleaseDate()
@@ -2087,7 +1945,6 @@ public class CreateProductView : IGameView
     {
         if (_cancelBtn != null) _cancelBtn.clicked -= OnCancelClicked;
         if (_startDevBtn != null) _startDevBtn.clicked -= OnStartDevClicked;
-        if (_startDevBtnBar != null) _startDevBtnBar.clicked -= OnStartDevClicked;
         if (_prevPageBtn != null) _prevPageBtn.clicked -= OnPrevPageClicked;
         if (_nextPageBtn != null) _nextPageBtn.clicked -= OnNextPageClicked;
 
@@ -2183,9 +2040,6 @@ public class CreateProductView : IGameView
         _predecessorInfoLabel = null;
         _modeApplied = false;
 
-        if (_deltaHideSchedule != null) { _deltaHideSchedule.Pause(); _deltaHideSchedule = null; }
-        _marketReadDeltaLabel = null;
-
         _viewModel = null;
         _root = null;
     }
@@ -2254,6 +2108,15 @@ public class CreateProductView : IGameView
     private void OnStartDevClicked()
     {
         if (_viewModel == null || !_viewModel.CanStartDevelopment) return;
+
+        var modalView = new ProductPlanReviewModalView(_modal);
+        modalView.OnConfirmed += OnPlanReviewConfirmed;
+        _modal.ShowModal(modalView, _viewModel);
+    }
+
+    private void OnPlanReviewConfirmed()
+    {
+        if (_viewModel == null) return;
 
         var assignments = _viewModel.GetTeamAssignments();
         var teamAssignmentArray = new TeamAssignment[assignments.Length];
@@ -2416,13 +2279,11 @@ public class CreateProductView : IGameView
 
     private static TeamType RoleToTeamType(ProductTeamRole role) {
         switch (role) {
-            case ProductTeamRole.Programming: return TeamType.Programming;
+            case ProductTeamRole.Development: return TeamType.Development;
             case ProductTeamRole.Design:      return TeamType.Design;
             case ProductTeamRole.QA:          return TeamType.QA;
-            case ProductTeamRole.SFX:         return TeamType.SFX;
-            case ProductTeamRole.VFX:         return TeamType.VFX;
             case ProductTeamRole.Marketing:   return TeamType.Marketing;
-            default:                          return TeamType.Contracts;
+            default:                          return TeamType.Development;
         }
     }
 

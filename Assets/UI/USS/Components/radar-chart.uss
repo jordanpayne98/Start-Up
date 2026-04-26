@@ -1,0 +1,33 @@
+.radar-chart-container {
+    height: 280px;
+    width: 100%;
+    position: relative;
+}
+
+.radar-chart {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-self: center;
+}
+
+.skill-label {
+    position: absolute;
+    font-size: 11px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.skill-label__name {
+    -unity-font-style: bold;
+}
+
+.skill-label__level {
+    margin-left: 4px;
+}
+
+.radar-chart--hidden {
+    display: none;
+}

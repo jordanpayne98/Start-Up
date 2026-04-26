@@ -11,10 +11,14 @@ public struct HireEmployeeCommand : ICommand
     public int HRSkill;
     public int Salary;
     public EmployeeRole Role;
+    public EmployeeRole PreferredRole;
     public bool BlindHire;
     public HiringMode Mode;
     public int PotentialAbility;
     public CompanyId CompanyId; // default(CompanyId) == CompanyId.Player
+    public Personality Personality;
+    public EmploymentType EmploymentType;
+    public ContractLengthOption ContractLength;
 
     // Backward-compat properties
     public int ProgrammingSkill { get => Skills != null && Skills.Length > 0 ? Skills[(int)SkillType.Programming] : 0; set { EnsureSkills(); Skills[(int)SkillType.Programming] = value; } }

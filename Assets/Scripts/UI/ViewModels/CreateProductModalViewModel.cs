@@ -1453,7 +1453,7 @@ public class CreateProductModalViewModel : IViewModel
             bool onContract = state.GetContractForTeam(team.id) != null;
             bool onProduct = state.IsTeamAssignedToProduct(team.id);
             TeamType teamType = state.GetTeamType(team.id);
-            if (teamType == TeamType.HR || teamType == TeamType.Accounting) continue;
+            if (teamType == TeamType.HR) continue;
             var display = new TeamSummaryDisplay {
                 Id = team.id,
                 Name = team.name,
@@ -2307,7 +2307,7 @@ public class CreateProductModalViewModel : IViewModel
         var employees = _lastState.ActiveEmployees;
         int ec = employees.Count;
         float totalSpeedSkill = 0f;
-        int activeCount = 0;
+        float effectiveCapacity = 0f;
         int memberCount = team.members.Count;
 
         for (int m = 0; m < memberCount; m++)
@@ -2325,21 +2325,24 @@ public class CreateProductModalViewModel : IViewModel
                 bool isRoleFit = TeamWorkEngine.IsRoleFitForSkill(emp.role, skillType);
                 TeamWorkEngine.ComputeEffectiveSkills(
                     emp.GetSkill(skillType), ca, emp.morale,
+                    100f,
                     emp.hiddenAttributes.WorkEthic,
                     emp.hiddenAttributes.Creative,
                     emp.hiddenAttributes.Adaptability,
                     isRoleFit,
+                    emp.personality,
+                    50f,
                     out float speedSkill, out _);
                 totalSpeedSkill += speedSkill;
-                activeCount++;
+                effectiveCapacity += emp.EffectiveOutput;
                 break;
             }
         }
 
-        if (activeCount == 0) return 10f * 0.016f;
+        if (effectiveCapacity <= 0f) return 10f * 0.016f;
 
-        float overhead = System.Math.Max(0.70f, 1f - 0.04f * (activeCount - 1));
-        float coverageSpeedMod = TeamWorkEngine.ComputeCoverageSpeedMod(activeCount, optimalTeamSize);
+        float overhead = System.Math.Max(0.70f, 1f - 0.04f * (effectiveCapacity - 1f));
+        float coverageSpeedMod = TeamWorkEngine.ComputeCoverageSpeedMod(effectiveCapacity, optimalTeamSize);
         return totalSpeedSkill * 0.016f * overhead * coverageSpeedMod;
     }
 
@@ -2414,12 +2417,9 @@ public class CreateProductModalViewModel : IViewModel
         ProductTeamRole matchingRole;
         switch (requiredSkill)
         {
-            case SkillType.Programming: matchingRole = ProductTeamRole.Programming; break;
-            case SkillType.Design:      matchingRole = ProductTeamRole.Design;      break;
-            case SkillType.QA:          matchingRole = ProductTeamRole.QA;          break;
-            case SkillType.SFX:         matchingRole = ProductTeamRole.SFX;         break;
-            case SkillType.VFX:         matchingRole = ProductTeamRole.VFX;         break;
-            default:                    matchingRole = ProductTeamRole.Programming;  break;
+            case SkillType.Design: matchingRole = ProductTeamRole.Design; break;
+            case SkillType.QA:     matchingRole = ProductTeamRole.QA;     break;
+            default:               matchingRole = ProductTeamRole.Development; break;
         }
 
         if (!_teamAssignments.TryGetValue(matchingRole, out TeamId teamId)) {

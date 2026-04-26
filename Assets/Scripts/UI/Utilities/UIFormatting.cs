@@ -158,7 +158,7 @@ public static class UIFormatting
     }
 
     // Returns the USS modifier class for the role pill (without the base "role-pill" class).
-    // Matches .role-pill--<modifier> in GlobalStyles.uss.
+    // Matches .role-pill--<modifier> in components.uss.
     public static string RolePillClass(EmployeeRole role) {
         switch (role) {
             case EmployeeRole.Developer:    return "role-pill--developer";
@@ -172,6 +172,9 @@ public static class UIFormatting
             default:                        return "role-pill--unknown";
         }
     }
+
+    // Alias for RolePillClass(EmployeeRole) — returns the USS modifier class for the role pill.
+    public static string GetRoleClass(EmployeeRole role) => RolePillClass(role);
 
     public static void ClearRolePillClasses(VisualElement el) {
         el.RemoveFromClassList("role-pill--developer");
@@ -227,29 +230,22 @@ public static class UIFormatting
 
     public static string FormatTeamType(TeamType type) {
         switch (type) {
-            case TeamType.Contracts:   return "Contracts";
-            case TeamType.Programming: return "Programming";
+            case TeamType.Development: return "Development";
             case TeamType.Design:      return "Design";
-            case TeamType.SFX:         return "SFX";
-            case TeamType.VFX:         return "VFX";
-            case TeamType.Marketing:   return "Marketing";
-            case TeamType.Accounting:  return "Accounting";
-            case TeamType.HR:          return "HR";
             case TeamType.QA:          return "QA";
+            case TeamType.Marketing:   return "Marketing";
+            case TeamType.HR:          return "HR";
             default: return type.ToString();
         }
     }
 
     public static string TeamTypeBadgeClass(TeamType type) {
         switch (type) {
-            case TeamType.Programming: return "badge--role-programming";
+            case TeamType.Development: return "badge--role-development";
             case TeamType.Design:      return "badge--role-design";
-            case TeamType.SFX:         return "badge--role-sfx";
-            case TeamType.VFX:         return "badge--role-vfx";
-            case TeamType.Marketing:   return "badge--role-negotiation";
-            case TeamType.Accounting:  return "badge--role-accountancy";
-            case TeamType.HR:          return "badge--role-hr";
             case TeamType.QA:          return "badge--role-qa";
+            case TeamType.Marketing:   return "badge--role-negotiation";
+            case TeamType.HR:          return "badge--role-hr";
             default:                   return "badge--neutral";
         }
     }
@@ -312,7 +308,60 @@ public static class UIFormatting
             case SkillType.HR:          return "HR";
             case SkillType.Negotiation: return "Nego";
             case SkillType.Accountancy: return "Acct";
+            case SkillType.Marketing:   return "Mktg";
             default:                    return "?";
+        }
+    }
+
+    public static string FormatPersonality(Personality p) {
+        switch (p) {
+            case Personality.Collaborative:  return "Collaborative";
+            case Personality.Professional:   return "Professional";
+            case Personality.Easygoing:      return "Easygoing";
+            case Personality.Independent:    return "Independent";
+            case Personality.Competitive:    return "Competitive";
+            case Personality.Perfectionist:  return "Perfectionist";
+            case Personality.Intense:        return "Intense";
+            case Personality.Abrasive:       return "Abrasive";
+            case Personality.Volatile:       return "Volatile";
+            default:                         return "Unknown";
+        }
+    }
+
+    public static string PersonalityBadgeClass(Personality p) {
+        switch (p) {
+            case Personality.Collaborative:  return "personality--collaborative";
+            case Personality.Professional:   return "personality--professional";
+            case Personality.Easygoing:      return "personality--easygoing";
+            case Personality.Independent:    return "personality--independent";
+            case Personality.Competitive:    return "personality--competitive";
+            case Personality.Perfectionist:  return "personality--perfectionist";
+            case Personality.Intense:        return "personality--intense";
+            case Personality.Abrasive:       return "personality--abrasive";
+            case Personality.Volatile:       return "personality--volatile";
+            default:                         return "personality--unknown";
+        }
+    }
+
+    public static string FormatChemistryBand(ChemistryBand band) {
+        switch (band) {
+            case ChemistryBand.Excellent: return "Excellent";
+            case ChemistryBand.Good:      return "Good";
+            case ChemistryBand.Neutral:   return "Neutral";
+            case ChemistryBand.Poor:      return "Poor";
+            case ChemistryBand.Toxic:     return "Toxic";
+            default:                      return "Neutral";
+        }
+    }
+
+    public static string ChemistryBandClass(ChemistryBand band) {
+        switch (band) {
+            case ChemistryBand.Excellent: return "chemistry--excellent";
+            case ChemistryBand.Good:      return "chemistry--good";
+            case ChemistryBand.Neutral:   return "chemistry--neutral";
+            case ChemistryBand.Poor:      return "chemistry--poor";
+            case ChemistryBand.Toxic:     return "chemistry--toxic";
+            default:                      return "chemistry--neutral";
         }
     }
 
@@ -368,5 +417,59 @@ public static class UIFormatting
             case 2: return FormatSkillShort((SkillType)topS[0]) + " / " + FormatSkillShort((SkillType)topS[1]);
             default: return FormatSkillShort((SkillType)topS[0]) + " / " + FormatSkillShort((SkillType)topS[1]) + " / " + FormatSkillShort((SkillType)topS[2]);
         }
+    }
+
+    public static string FormatEnergyBand(EnergyBand band) {
+        switch (band) {
+            case EnergyBand.Fresh:    return "Fresh";
+            case EnergyBand.Fit:      return "Fit";
+            case EnergyBand.Tiring:   return "Tiring";
+            case EnergyBand.Drained:  return "Drained";
+            case EnergyBand.Exhausted: return "Exhausted";
+            default:                  return "Unknown";
+        }
+    }
+
+    public static string EnergyBandClass(EnergyBand band) {
+        switch (band) {
+            case EnergyBand.Fresh:    return "energy-band--fresh";
+            case EnergyBand.Fit:      return "energy-band--fit";
+            case EnergyBand.Tiring:   return "energy-band--tiring";
+            case EnergyBand.Drained:  return "energy-band--drained";
+            case EnergyBand.Exhausted: return "energy-band--exhausted";
+            default:                  return "energy-band--fit";
+        }
+    }
+
+    public static string SuitabilityDotClass(RoleSuitability s) {
+        switch (s) {
+            case RoleSuitability.Natural:      return "suitability-dot--natural";
+            case RoleSuitability.Accomplished: return "suitability-dot--accomplished";
+            case RoleSuitability.Competent:    return "suitability-dot--competent";
+            case RoleSuitability.Awkward:      return "suitability-dot--awkward";
+            case RoleSuitability.Unsuitable:   return "suitability-dot--unsuitable";
+            default:                           return "suitability-dot--unsuitable";
+        }
+    }
+
+    public static Color GetSuitabilityColor(RoleSuitability s) {
+        switch (s) {
+            case RoleSuitability.Natural:      return new Color(0.290f, 0.871f, 0.502f);
+            case RoleSuitability.Accomplished: return new Color(0.639f, 0.898f, 0.208f);
+            case RoleSuitability.Competent:    return new Color(0.980f, 0.800f, 0.082f);
+            case RoleSuitability.Awkward:      return new Color(0.984f, 0.573f, 0.235f);
+            case RoleSuitability.Unsuitable:   return new Color(0.420f, 0.447f, 0.502f);
+            default:                           return new Color(0.420f, 0.447f, 0.502f);
+        }
+    }
+
+    public static string FormatPatience(int current, int max) {
+        if (max <= 0) return "";
+        var sb = new System.Text.StringBuilder(max * 2);
+        for (int i = 0; i < max; i++) {
+            if (i > 0) sb.Append(' ');
+            sb.Append(i < current ? '\u25CF' : '\u25CB');
+        }
+        return sb.ToString();
     }
 }

@@ -11,6 +11,7 @@ public class HRSystem : ISystem
     public event Action<HRSearchId> OnSearchRetrying;
     public event Action<HRCandidatesReadyForReviewEvent> OnCandidatesReadyForReview;
     public event Action<CandidateData> OnCandidateAccepted;
+    public event Action<int, int, int> OnPoolFull;
 
     private HRState _hrState;
     private EmployeeState _employeeState;
@@ -29,6 +30,8 @@ public class HRSystem : ISystem
     private List<HRSearchId> _pendingSearchStarted;
     private List<HRCandidatesReadyForReviewEvent> _pendingCandidatesReady;
     private List<CandidateData> _pendingCandidateAccepted;
+    private struct PoolFullData { public int PoolCount; public int PoolMax; public int RejectedCount; }
+    private List<PoolFullData> _pendingPoolFull;
 
     public bool HadCompletionThisTick { get; private set; }
 
@@ -52,6 +55,7 @@ public class HRSystem : ISystem
         _pendingSearchStarted = new List<HRSearchId>();
         _pendingCandidatesReady = new List<HRCandidatesReadyForReviewEvent>();
         _pendingCandidateAccepted = new List<CandidateData>();
+        _pendingPoolFull = new List<PoolFullData>();
 
         // Ensure assignment dict is initialised even on old saves
         if (_hrState.activeInterviewAssignments == null)
@@ -166,19 +170,42 @@ public class HRSystem : ISystem
 
     public int ComputeDurationTicks(TeamId teamId)
     {
-        int memberCount = GetHRMemberCount(teamId);
-        if (memberCount > HRSearchConfig.MaxTeamSizeForSpeedBonus)
-            memberCount = HRSearchConfig.MaxTeamSizeForSpeedBonus;
-        float speedFactor = 1.0f - memberCount * HRSearchConfig.TeamSizeSpeedBonusPerMember;
+        float effectiveCapacity = GetHREffectiveCapacity(teamId);
+        if (effectiveCapacity > HRSearchConfig.MaxTeamSizeForSpeedBonus)
+            effectiveCapacity = HRSearchConfig.MaxTeamSizeForSpeedBonus;
+        float speedFactor = 1.0f - effectiveCapacity * HRSearchConfig.TeamSizeSpeedBonusPerMember;
         float days = HRSearchConfig.BaseDurationDays * speedFactor;
         if (days < HRSearchConfig.MinDurationDays) days = HRSearchConfig.MinDurationDays;
         if (days > HRSearchConfig.BaseDurationDays) days = HRSearchConfig.BaseDurationDays;
         return (int)days * TimeState.TicksPerDay;
     }
 
+    public float GetHREffectiveCapacity(TeamId teamId)
+    {
+        var team = _teamSystem?.GetTeam(teamId);
+        if (team == null) return 0f;
+        float capacity = 0f;
+        int memberCount = team.members.Count;
+        for (int i = 0; i < memberCount; i++)
+        {
+            var empId = team.members[i];
+            var emp = _employeeState.employees.TryGetValue(empId, out var e) ? e : null;
+            if (emp == null || !emp.isActive) continue;
+            if (emp.role != EmployeeRole.HR) continue;
+            capacity += emp.EffectiveOutput;
+        }
+        return capacity;
+    }
+
     public int ComputeSearchCost(int minCA, int minPAStars, int desiredSkillCount = 0, int searchCount = 1)
     {
-        return HRSearchConfig.BaseSearchCost;
+        const int CostPerCAPoint  = 25;
+        const int CostPerPAStar   = 500;
+        int baseCost = HRSearchConfig.BaseSearchCost;
+        baseCost += minCA * CostPerCAPoint;
+        baseCost += minPAStars * CostPerPAStar;
+        baseCost *= searchCount;
+        return baseCost;
     }
 
     // ── Queries ───────────────────────────────────────────────────────
@@ -250,6 +277,24 @@ public class HRSystem : ISystem
         return count;
     }
 
+    /// <summary>Returns the highest hrSkill value among active HR employees on the given team. Returns 0 if none.</summary>
+    public int GetHighestHRSkill(TeamId teamId)
+    {
+        var team = _teamSystem?.GetTeam(teamId);
+        if (team == null) return 0;
+        int highest = 0;
+        int memberCount = team.members.Count;
+        for (int i = 0; i < memberCount; i++)
+        {
+            var empId = team.members[i];
+            var emp = _employeeState.employees.TryGetValue(empId, out var e) ? e : null;
+            if (emp == null || !emp.isActive) continue;
+            if (emp.role != EmployeeRole.HR) continue;
+            if (emp.hrSkill > highest) highest = emp.hrSkill;
+        }
+        return highest;
+    }
+
     /// <summary>Returns average HRSkill across all active HR employees company-wide.
     /// Returns -1 if no HR employees exist (sentinel for ShowAsUnknown).</summary>
     public int GetAllHREmployeesSkillAverage()
@@ -313,8 +358,17 @@ public class HRSystem : ISystem
                 int deliverCount = search.searchCount > 0 ? search.searchCount : 1;
                 var deliveredIds = new int[deliverCount];
 
+                int poolMax = EmployeeSystem.CandidatePoolSize;
+                int poolCountBefore = _employeeState.availableCandidates.Count;
+                int rejected = 0;
+
                 for (int d = 0; d < deliverCount; d++)
                 {
+                    if (_employeeState.availableCandidates.Count >= poolMax)
+                    {
+                        rejected++;
+                        continue;
+                    }
                     CandidateData candidate = GenerateTargetedCandidate(search);
                     candidate.IsTargeted = true;
                     candidate.IsPendingReview = true;
@@ -326,6 +380,9 @@ public class HRSystem : ISystem
                     _pendingSearchCompleted.Add(candidate);
                     _logger.Log($"[HRSystem] Search succeeded: {candidate.Name} ({candidate.Role}) CA roll:{roll} needed<{(int)(chance * 100f)}");
                 }
+
+                if (rejected > 0)
+                    _pendingPoolFull.Add(new PoolFullData { PoolCount = _employeeState.availableCandidates.Count, PoolMax = poolMax, RejectedCount = rejected });
 
                 // Build criteria label for inbox notification
                 string roleStr = search.targetRole.ToString();
@@ -382,6 +439,14 @@ public class HRSystem : ISystem
         for (int i = 0; i < ca; i++)
             OnCandidateAccepted?.Invoke(_pendingCandidateAccepted[i]);
         _pendingCandidateAccepted.Clear();
+
+        int pf = _pendingPoolFull.Count;
+        for (int i = 0; i < pf; i++)
+        {
+            var d = _pendingPoolFull[i];
+            OnPoolFull?.Invoke(d.PoolCount, d.PoolMax, d.RejectedCount);
+        }
+        _pendingPoolFull.Clear();
 
         int pe = _pendingEvents.Count;
         for (int i = 0; i < pe; i++)

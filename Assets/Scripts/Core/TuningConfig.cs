@@ -252,6 +252,60 @@ public class TuningConfig
         set { if (value != _idleDecayMax) { var o = _idleDecayMax; _idleDecayMax = value; OnParameterChanged?.Invoke("IdleDecayMax", o, value); } }
     }
 
+    private float _salaryPressureWellAbove = 0.15f;
+    public float SalaryPressureWellAbove {
+        get => _salaryPressureWellAbove;
+        set { if (value != _salaryPressureWellAbove) { var o = _salaryPressureWellAbove; _salaryPressureWellAbove = value; OnParameterChanged?.Invoke("SalaryPressureWellAbove", o, value); } }
+    }
+
+    private float _salaryPressureAboveMarket = 0.05f;
+    public float SalaryPressureAboveMarket {
+        get => _salaryPressureAboveMarket;
+        set { if (value != _salaryPressureAboveMarket) { var o = _salaryPressureAboveMarket; _salaryPressureAboveMarket = value; OnParameterChanged?.Invoke("SalaryPressureAboveMarket", o, value); } }
+    }
+
+    private float _salaryPressureBelowMarket = -0.10f;
+    public float SalaryPressureBelowMarket {
+        get => _salaryPressureBelowMarket;
+        set { if (value != _salaryPressureBelowMarket) { var o = _salaryPressureBelowMarket; _salaryPressureBelowMarket = value; OnParameterChanged?.Invoke("SalaryPressureBelowMarket", o, value); } }
+    }
+
+    private float _salaryPressureFarBelow = -0.25f;
+    public float SalaryPressureFarBelow {
+        get => _salaryPressureFarBelow;
+        set { if (value != _salaryPressureFarBelow) { var o = _salaryPressureFarBelow; _salaryPressureFarBelow = value; OnParameterChanged?.Invoke("SalaryPressureFarBelow", o, value); } }
+    }
+
+    private float _prefMatchBothBonus = 0.10f;
+    public float PrefMatchBothBonus {
+        get => _prefMatchBothBonus;
+        set { if (value != _prefMatchBothBonus) { var o = _prefMatchBothBonus; _prefMatchBothBonus = value; OnParameterChanged?.Invoke("PrefMatchBothBonus", o, value); } }
+    }
+
+    private float _prefMatchOneBonus = 0.05f;
+    public float PrefMatchOneBonus {
+        get => _prefMatchOneBonus;
+        set { if (value != _prefMatchOneBonus) { var o = _prefMatchOneBonus; _prefMatchOneBonus = value; OnParameterChanged?.Invoke("PrefMatchOneBonus", o, value); } }
+    }
+
+    private float _prefMismatchOnePenalty = -0.08f;
+    public float PrefMismatchOnePenalty {
+        get => _prefMismatchOnePenalty;
+        set { if (value != _prefMismatchOnePenalty) { var o = _prefMismatchOnePenalty; _prefMismatchOnePenalty = value; OnParameterChanged?.Invoke("PrefMismatchOnePenalty", o, value); } }
+    }
+
+    private float _prefMismatchBothPenalty = -0.20f;
+    public float PrefMismatchBothPenalty {
+        get => _prefMismatchBothPenalty;
+        set { if (value != _prefMismatchBothPenalty) { var o = _prefMismatchBothPenalty; _prefMismatchBothPenalty = value; OnParameterChanged?.Invoke("PrefMismatchBothPenalty", o, value); } }
+    }
+
+    private float _strikeEscalationMultiplier = 0.5f;
+    public float StrikeEscalationMultiplier {
+        get => _strikeEscalationMultiplier;
+        set { if (value != _strikeEscalationMultiplier) { var o = _strikeEscalationMultiplier; _strikeEscalationMultiplier = value; OnParameterChanged?.Invoke("StrikeEscalationMultiplier", o, value); } }
+    }
+
     // ── Skill Growth ────────────────────────────────────────────────────────────
     private int _maxXPPerContract = 2;
     public int MaxXPPerContract {
@@ -297,30 +351,6 @@ public class TuningConfig
     }
 
     // ── Salary Calculator ───────────────────────────────────────────────────────
-    private float _salaryHRMultiplier = 0.80f;
-    public float SalaryHRMultiplier {
-        get => _salaryHRMultiplier;
-        set { if (value != _salaryHRMultiplier) { var o = _salaryHRMultiplier; _salaryHRMultiplier = value; OnParameterChanged?.Invoke("SalaryHRMultiplier", o, value); } }
-    }
-
-    private float _salaryInterviewMultiplier = 0.90f;
-    public float SalaryInterviewMultiplier {
-        get => _salaryInterviewMultiplier;
-        set { if (value != _salaryInterviewMultiplier) { var o = _salaryInterviewMultiplier; _salaryInterviewMultiplier = value; OnParameterChanged?.Invoke("SalaryInterviewMultiplier", o, value); } }
-    }
-
-    private float _salaryDirectMultiplier = 1.15f;
-    public float SalaryDirectMultiplier {
-        get => _salaryDirectMultiplier;
-        set { if (value != _salaryDirectMultiplier) { var o = _salaryDirectMultiplier; _salaryDirectMultiplier = value; OnParameterChanged?.Invoke("SalaryDirectMultiplier", o, value); } }
-    }
-
-    private float _salaryMaxNegotiationDiscount = 0.15f;
-    public float SalaryMaxNegotiationDiscount {
-        get => _salaryMaxNegotiationDiscount;
-        set { if (value != _salaryMaxNegotiationDiscount) { var o = _salaryMaxNegotiationDiscount; _salaryMaxNegotiationDiscount = value; OnParameterChanged?.Invoke("SalaryMaxNegotiationDiscount", o, value); } }
-    }
-
     private int _salaryMinimumWage = 500;
     public int SalaryMinimumWage {
         get => _salaryMinimumWage;
@@ -497,12 +527,6 @@ public class TuningConfig
         set { if (value != _candidateListMax) { var o = _candidateListMax; _candidateListMax = value; OnParameterChanged?.Invoke("CandidateListMax", o, value); } }
     }
 
-    private int _candidateRefreshIntervalDays = 15;
-    public int CandidateRefreshIntervalDays {
-        get => _candidateRefreshIntervalDays;
-        set { if (value != _candidateRefreshIntervalDays) { var o = _candidateRefreshIntervalDays; _candidateRefreshIntervalDays = value; OnParameterChanged?.Invoke("CandidateRefreshIntervalDays", o, value); } }
-    }
-
     private int _retirementAge = 65;
     public int RetirementAge {
         get => _retirementAge;
@@ -534,34 +558,17 @@ public class TuningConfig
         set { if (value != _abilityFallbackPAMax) { var o = _abilityFallbackPAMax; _abilityFallbackPAMax = value; OnParameterChanged?.Invoke("AbilityFallbackPAMax", o, value); } }
     }
 
-    private int _abilityTightHRThreshold = 14;
-    public int AbilityTightHRThreshold {
-        get => _abilityTightHRThreshold;
-        set { if (value != _abilityTightHRThreshold) { var o = _abilityTightHRThreshold; _abilityTightHRThreshold = value; OnParameterChanged?.Invoke("AbilityTightHRThreshold", o, value); } }
+    // ── Interview Knowledge System ───────────────────────────────────────────────
+    private float _interviewBaseGainPerTick = 2.0f;
+    public float InterviewBaseGainPerTick {
+        get => _interviewBaseGainPerTick;
+        set { if (value != _interviewBaseGainPerTick) { var o = _interviewBaseGainPerTick; _interviewBaseGainPerTick = value; OnParameterChanged?.Invoke("InterviewBaseGainPerTick", o, value); } }
     }
 
-    private int _abilityMediumHRThreshold = 7;
-    public int AbilityMediumHRThreshold {
-        get => _abilityMediumHRThreshold;
-        set { if (value != _abilityMediumHRThreshold) { var o = _abilityMediumHRThreshold; _abilityMediumHRThreshold = value; OnParameterChanged?.Invoke("AbilityMediumHRThreshold", o, value); } }
-    }
-
-    private int _abilityTightCABlur = 5;
-    public int AbilityTightCABlur {
-        get => _abilityTightCABlur;
-        set { if (value != _abilityTightCABlur) { var o = _abilityTightCABlur; _abilityTightCABlur = value; OnParameterChanged?.Invoke("AbilityTightCABlur", o, value); } }
-    }
-
-    private int _abilityMediumCABlur = 12;
-    public int AbilityMediumCABlur {
-        get => _abilityMediumCABlur;
-        set { if (value != _abilityMediumCABlur) { var o = _abilityMediumCABlur; _abilityMediumCABlur = value; OnParameterChanged?.Invoke("AbilityMediumCABlur", o, value); } }
-    }
-
-    private int _abilityWideCABlur = 25;
-    public int AbilityWideCABlur {
-        get => _abilityWideCABlur;
-        set { if (value != _abilityWideCABlur) { var o = _abilityWideCABlur; _abilityWideCABlur = value; OnParameterChanged?.Invoke("AbilityWideCABlur", o, value); } }
+    private int _interviewMinDaysToComplete = 3;
+    public int InterviewMinDaysToComplete {
+        get => _interviewMinDaysToComplete;
+        set { if (value != _interviewMinDaysToComplete) { var o = _interviewMinDaysToComplete; _interviewMinDaysToComplete = value; OnParameterChanged?.Invoke("InterviewMinDaysToComplete", o, value); } }
     }
 
     // ── Finance System ──────────────────────────────────────────────────────────
@@ -1137,10 +1144,6 @@ public class TuningConfig
             case "LoanBaseInterestRate":               LoanBaseInterestRate               = Convert.ToSingle(value); break;
             case "LoanMinDurationMonths":              LoanMinDurationMonths              = Convert.ToInt32(value);  break;
             case "LoanMaxDurationMonths":              LoanMaxDurationMonths              = Convert.ToInt32(value);  break;
-            case "SalaryHRMultiplier":                 SalaryHRMultiplier                 = Convert.ToSingle(value); break;
-            case "SalaryInterviewMultiplier":          SalaryInterviewMultiplier          = Convert.ToSingle(value); break;
-            case "SalaryDirectMultiplier":             SalaryDirectMultiplier             = Convert.ToSingle(value); break;
-            case "SalaryMaxNegotiationDiscount":       SalaryMaxNegotiationDiscount       = Convert.ToSingle(value); break;
             case "SalaryMinimumWage":                  SalaryMinimumWage                  = Convert.ToInt32(value);  break;
             case "AbilityGlobalMax":                      AbilityGlobalMax                      = Convert.ToInt32(value);  break;
             case "PotentialGlobalMax":                     PotentialGlobalMax                     = Convert.ToInt32(value);  break;
@@ -1158,17 +1161,11 @@ public class TuningConfig
             case "HRMaxTeamSizeForSpeedBonus":         HRMaxTeamSizeForSpeedBonus         = Convert.ToInt32(value);  break;
             case "CandidatePoolSize":                  CandidatePoolSize                  = Convert.ToInt32(value);  break;
             case "CandidateListMax":                   CandidateListMax                   = Convert.ToInt32(value);  break;
-            case "CandidateRefreshIntervalDays":       CandidateRefreshIntervalDays       = Convert.ToInt32(value);  break;
             case "RetirementAge":                      RetirementAge                      = Convert.ToInt32(value);  break;
             case "DecayWindowStartAge":                DecayWindowStartAge                = Convert.ToInt32(value);  break;
             case "RetirementCheckStartAge":            RetirementCheckStartAge            = Convert.ToInt32(value);  break;
             case "AbilityFallbackPAMin":               AbilityFallbackPAMin               = Convert.ToInt32(value);  break;
             case "AbilityFallbackPAMax":               AbilityFallbackPAMax               = Convert.ToInt32(value);  break;
-            case "AbilityTightHRThreshold":            AbilityTightHRThreshold            = Convert.ToInt32(value);  break;
-            case "AbilityMediumHRThreshold":           AbilityMediumHRThreshold           = Convert.ToInt32(value);  break;
-            case "AbilityTightCABlur":                 AbilityTightCABlur                 = Convert.ToInt32(value);  break;
-            case "AbilityMediumCABlur":                AbilityMediumCABlur                = Convert.ToInt32(value);  break;
-            case "AbilityWideCABlur":                  AbilityWideCABlur                  = Convert.ToInt32(value);  break;
             case "FinanceBankruptDaysThreshold":       FinanceBankruptDaysThreshold       = Convert.ToInt32(value);  break;
             case "FinanceBankruptMissedThreshold":     FinanceBankruptMissedThreshold     = Convert.ToInt32(value);  break;
             case "FinanceInsolventDaysThreshold":      FinanceInsolventDaysThreshold      = Convert.ToInt32(value);  break;
@@ -1290,10 +1287,6 @@ public class TuningConfig
             { "LoanBaseInterestRate",               LoanBaseInterestRate },
             { "LoanMinDurationMonths",              LoanMinDurationMonths },
             { "LoanMaxDurationMonths",              LoanMaxDurationMonths },
-            { "SalaryHRMultiplier",                 SalaryHRMultiplier },
-            { "SalaryInterviewMultiplier",          SalaryInterviewMultiplier },
-            { "SalaryDirectMultiplier",             SalaryDirectMultiplier },
-            { "SalaryMaxNegotiationDiscount",       SalaryMaxNegotiationDiscount },
             { "SalaryMinimumWage",                  SalaryMinimumWage },
             { "AbilityGlobalMax",                      AbilityGlobalMax },
             { "PotentialGlobalMax",                     PotentialGlobalMax },
@@ -1311,17 +1304,11 @@ public class TuningConfig
             { "HRMaxTeamSizeForSpeedBonus",         HRMaxTeamSizeForSpeedBonus },
             { "CandidatePoolSize",                  CandidatePoolSize },
             { "CandidateListMax",                   CandidateListMax },
-            { "CandidateRefreshIntervalDays",       CandidateRefreshIntervalDays },
             { "RetirementAge",                      RetirementAge },
             { "DecayWindowStartAge",                DecayWindowStartAge },
             { "RetirementCheckStartAge",            RetirementCheckStartAge },
             { "AbilityFallbackPAMin",               AbilityFallbackPAMin },
             { "AbilityFallbackPAMax",               AbilityFallbackPAMax },
-            { "AbilityTightHRThreshold",            AbilityTightHRThreshold },
-            { "AbilityMediumHRThreshold",           AbilityMediumHRThreshold },
-            { "AbilityTightCABlur",                 AbilityTightCABlur },
-            { "AbilityMediumCABlur",                AbilityMediumCABlur },
-            { "AbilityWideCABlur",                  AbilityWideCABlur },
             { "FinanceBankruptDaysThreshold",       FinanceBankruptDaysThreshold },
             { "FinanceBankruptMissedThreshold",     FinanceBankruptMissedThreshold },
             { "FinanceInsolventDaysThreshold",      FinanceInsolventDaysThreshold },
@@ -1405,6 +1392,15 @@ public class TuningConfig
             { "IdleDecayStartDay",                    IdleDecayStartDay },
             { "IdleDecayPerDay",                      IdleDecayPerDay },
             { "IdleDecayMax",                         IdleDecayMax },
+            { "SalaryPressureWellAbove",              SalaryPressureWellAbove },
+            { "SalaryPressureAboveMarket",            SalaryPressureAboveMarket },
+            { "SalaryPressureBelowMarket",            SalaryPressureBelowMarket },
+            { "SalaryPressureFarBelow",               SalaryPressureFarBelow },
+            { "PrefMatchBothBonus",                   PrefMatchBothBonus },
+            { "PrefMatchOneBonus",                    PrefMatchOneBonus },
+            { "PrefMismatchOnePenalty",               PrefMismatchOnePenalty },
+            { "PrefMismatchBothPenalty",              PrefMismatchBothPenalty },
+            { "StrikeEscalationMultiplier",           StrikeEscalationMultiplier },
             { "ContractRewardMultiplier",             ContractRewardMultiplier },
             { "SalaryGlobalMultiplier",               SalaryGlobalMultiplier },
             { "CompetitorAggressionMultiplier",       CompetitorAggressionMultiplier },

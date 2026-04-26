@@ -6,9 +6,11 @@ public enum ScreenId
     DashboardReputation,
 
     // HR
+    HRPortalLanding,
+    HRCandidates,
+    HRAssignments,
     HREmployees,
     HRTeams,
-    HRCandidates,
 
     // Finance
     FinanceOverview,

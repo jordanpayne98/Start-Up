@@ -598,7 +598,7 @@ public class ProductsViewModel : IViewModel
             if (contractForTeam != null) continue;
             if (state.IsTeamAssignedToProduct(team.id)) continue;
             var teamType = state.GetTeamType(team.id);
-            if (teamType == TeamType.HR || teamType == TeamType.Accounting) continue;
+            if (teamType == TeamType.HR) continue;
 
             _availableTeams.Add(new TeamSummaryDisplay {
                 Id = team.id,

@@ -15,7 +15,7 @@
     padding: 6px 12px;
     font-size: var(--font-sm);
     -unity-font-style: bold;
-    cursor: link;
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
 }
 
 .bankruptcy-warning .btn-warning:hover {

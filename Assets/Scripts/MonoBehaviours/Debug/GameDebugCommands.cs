@@ -423,7 +423,7 @@ public class GameDebugCommands : MonoBehaviour, IDebugCommandHandler
 
     private bool CmdCreateTeam(string[] args, DebugConsole console)
     {
-        var teamType = TeamType.Contracts;
+        var teamType = TeamType.Development;
         if (args.Length > 0 && System.Enum.TryParse<TeamType>(args[0], true, out var parsed))
             teamType = parsed;
         _gameController.QueueCommand(new CreateTeamCommand

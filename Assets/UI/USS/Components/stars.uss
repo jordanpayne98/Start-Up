@@ -23,7 +23,6 @@
 
 .skill-locked {
     opacity: 0.35;
-    cursor: initial;
 }
 
 /* Skill row layout */

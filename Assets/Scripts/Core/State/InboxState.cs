@@ -12,6 +12,7 @@ public struct MailAction
     public MailActionType Type;
     public int NavTargetInt; // ScreenId cast to int; -1 = no target
     public string ModalKey;
+    public int TabHint; // tab index for ITabNavigable screens; -1 = no hint
 
     public ScreenId? NavTarget
     {

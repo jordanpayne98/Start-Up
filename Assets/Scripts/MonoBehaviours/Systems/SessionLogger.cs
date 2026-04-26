@@ -22,7 +22,7 @@ public class SessionLogger : MonoBehaviour
 
     private void OnEnable()
     {
-        string logsDir = Path.Combine(Application.dataPath, "Logs");
+        string logsDir = Path.Combine(Application.dataPath, "..", "Logs");
         if (!Directory.Exists(logsDir))
             Directory.CreateDirectory(logsDir);
 
@@ -121,7 +121,7 @@ public class SessionLogger : MonoBehaviour
 
         // Interview
         bus.Subscribe<InterviewStartedEvent>(OnInterviewStarted);
-        bus.Subscribe<InterviewFinalReportEvent>(OnInterviewFinalReport);
+        bus.Subscribe<InterviewThresholdEvent>(OnInterviewThresholdReached);
 
         // Time
         bus.Subscribe<DayChangedEvent>(OnDayChanged);
@@ -275,9 +275,9 @@ public class SessionLogger : MonoBehaviour
         Write("INTERVIEW", $"STARTED | Candidate ID:{e.CandidateId}");
     }
 
-    private void OnInterviewFinalReport(InterviewFinalReportEvent e)
+    private void OnInterviewThresholdReached(InterviewThresholdEvent e)
     {
-        Write("INTERVIEW", $"FINAL REPORT | {e.CandidateName} (ID:{e.CandidateId})");
+        Write("INTERVIEW", $"THRESHOLD {e.ThresholdReached} | {e.CandidateName} (ID:{e.CandidateId})");
     }
 
     // --- Time ---

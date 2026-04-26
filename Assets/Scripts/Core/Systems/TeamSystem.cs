@@ -58,9 +58,9 @@ public class TeamSystem : ISystem
         _employeeSystem = employeeSystem;
     }
 
-    public TeamId CreateTeam(TeamType type, int currentTick, CompanyId companyId = default)
+    public TeamId CreateTeam(TeamType type, int currentTick, CompanyId companyId = default, string customName = null)
     {
-        string name = GenerateTeamName(type, companyId);
+        string name = string.IsNullOrEmpty(customName) ? GenerateTeamName(type, companyId) : customName;
         var teamId = new TeamId(_state.nextTeamId++);
         var team = new Team(teamId, name);
         team.teamType = type;
@@ -221,7 +221,7 @@ public class TeamSystem : ISystem
     {
         if (_state.teams.TryGetValue(teamId, out var team))
             return team.teamType;
-        return TeamType.Contracts;
+        return TeamType.Development;
     }
 
     public TeamId? GetHRTeamId(CompanyId companyId = default)
@@ -317,7 +317,7 @@ public class TeamSystem : ISystem
     {
         if (command is CreateTeamCommand createTeam)
         {
-            CreateTeam(createTeam.TeamType, command.Tick, createTeam.CompanyId);
+            CreateTeam(createTeam.TeamType, command.Tick, createTeam.CompanyId, createTeam.Name);
         }
         else if (command is DeleteTeamCommand deleteTeam)
         {

@@ -66,7 +66,7 @@ public class InboxSystem
         _eventBus.Subscribe<CandidateWithdrewEvent>(OnCandidateWithdrew);
         _eventBus.Subscribe<CandidateDeclinedEvent>(OnCandidateDeclined);
         _eventBus.Subscribe<CandidateHardRejectedEvent>(OnCandidateHardRejected);
-        _eventBus.Subscribe<InterviewFinalReportEvent>(OnInterviewFinalReport);
+        _eventBus.Subscribe<InterviewThresholdEvent>(OnInterviewThresholdReached);
         _eventBus.Subscribe<HRCandidatesReadyForReviewEvent>(OnHRCandidatesReadyForReview);
         _eventBus.Subscribe<TeamIdleMoraleAlertEvent>(OnTeamIdleMoraleAlert);
         _eventBus.Subscribe<ContractRenewalRequestedEvent>(OnContractRenewalRequested);
@@ -75,8 +75,23 @@ public class InboxSystem
         _eventBus.Subscribe<TaxOverdueEvent>(OnTaxOverdue);
         _eventBus.Subscribe<TaxBankruptcyEvent>(OnTaxBankruptcyWarning);
         _eventBus.Subscribe<ProductCrisisEvent>(OnProductCrisisEvent);
-        // TODO: Subscribe<ContractDeadlineWarningEvent>(OnContractDeadlineWarning) when event is added
-        // TODO: Subscribe<LowCashWarningEvent>(OnLowCashWarning) when event is added
+        // Renewal notifications
+        _eventBus.Subscribe<RenewalWindowOpenedEvent>(OnRenewalWindowOpened);
+        _eventBus.Subscribe<RenewalChangeRequestedEvent>(OnRenewalChangeRequested);
+        _eventBus.Subscribe<RenewalEscalationEvent>(OnRenewalEscalation);
+        _eventBus.Subscribe<RenewalRequestRejectedEvent>(OnRenewalRequestRejected);
+        _eventBus.Subscribe<EmployeeDepartedEvent>(OnEmployeeDeparted);
+        _eventBus.Subscribe<ContractRenewedEvent>(OnContractRenewed);
+        // Hiring notifications
+        _eventBus.Subscribe<CandidatePoolFullEvent>(OnCandidatePoolFull);
+        _eventBus.Subscribe<EmployeeHiredEvent>(OnEmployeeHired);
+        // Negotiation notifications
+        _eventBus.Subscribe<CounterOfferReceivedEvent>(OnCounterOfferReceived);
+        _eventBus.Subscribe<PatienceLowEvent>(OnPatienceLow);
+        _eventBus.Subscribe<CandidateLostPatienceEvent>(OnCandidateLostPatience);
+        _eventBus.Subscribe<EmployeeFrustratedEvent>(OnEmployeeFrustrated);
+        _eventBus.Subscribe<EmployeeCooldownExpiredEvent>(OnEmployeeCooldownExpired);
+        _eventBus.Subscribe<CounterOfferExpiredEvent>(OnCounterOfferExpired);
     }
 
     public void Dispose()
@@ -92,7 +107,7 @@ public class InboxSystem
         _eventBus.Unsubscribe<CandidateWithdrewEvent>(OnCandidateWithdrew);
         _eventBus.Unsubscribe<CandidateDeclinedEvent>(OnCandidateDeclined);
         _eventBus.Unsubscribe<CandidateHardRejectedEvent>(OnCandidateHardRejected);
-        _eventBus.Unsubscribe<InterviewFinalReportEvent>(OnInterviewFinalReport);
+        _eventBus.Unsubscribe<InterviewThresholdEvent>(OnInterviewThresholdReached);
         _eventBus.Unsubscribe<HRCandidatesReadyForReviewEvent>(OnHRCandidatesReadyForReview);
         _eventBus.Unsubscribe<TeamIdleMoraleAlertEvent>(OnTeamIdleMoraleAlert);
         _eventBus.Unsubscribe<ContractRenewalRequestedEvent>(OnContractRenewalRequested);
@@ -101,6 +116,21 @@ public class InboxSystem
         _eventBus.Unsubscribe<TaxOverdueEvent>(OnTaxOverdue);
         _eventBus.Unsubscribe<TaxBankruptcyEvent>(OnTaxBankruptcyWarning);
         _eventBus.Unsubscribe<ProductCrisisEvent>(OnProductCrisisEvent);
+        _eventBus.Unsubscribe<RenewalWindowOpenedEvent>(OnRenewalWindowOpened);
+        _eventBus.Unsubscribe<RenewalChangeRequestedEvent>(OnRenewalChangeRequested);
+        _eventBus.Unsubscribe<RenewalEscalationEvent>(OnRenewalEscalation);
+        _eventBus.Unsubscribe<RenewalRequestRejectedEvent>(OnRenewalRequestRejected);
+        _eventBus.Unsubscribe<EmployeeDepartedEvent>(OnEmployeeDeparted);
+        _eventBus.Unsubscribe<ContractRenewedEvent>(OnContractRenewed);
+        _eventBus.Unsubscribe<CandidatePoolFullEvent>(OnCandidatePoolFull);
+        _eventBus.Unsubscribe<EmployeeHiredEvent>(OnEmployeeHired);
+        // Negotiation notifications
+        _eventBus.Unsubscribe<CounterOfferReceivedEvent>(OnCounterOfferReceived);
+        _eventBus.Unsubscribe<PatienceLowEvent>(OnPatienceLow);
+        _eventBus.Unsubscribe<CandidateLostPatienceEvent>(OnCandidateLostPatience);
+        _eventBus.Unsubscribe<EmployeeFrustratedEvent>(OnEmployeeFrustrated);
+        _eventBus.Unsubscribe<EmployeeCooldownExpiredEvent>(OnEmployeeCooldownExpired);
+        _eventBus.Unsubscribe<CounterOfferExpiredEvent>(OnCounterOfferExpired);
     }
 
     public void DismissItem(int mailId)
@@ -131,6 +161,30 @@ public class InboxSystem
             item.IsDismissed = true;
             item.IsRead = true;
             _state.Items[i] = item;
+        }
+        Invalidate();
+    }
+
+    public void DismissMailByModalKey(string modalKeyPrefix)
+    {
+        if (_state == null || string.IsNullOrEmpty(modalKeyPrefix)) return;
+        int count = _state.Items.Count;
+        for (int i = 0; i < count; i++)
+        {
+            var item = _state.Items[i];
+            if (item.IsDismissed) continue;
+            if (item.Actions == null) continue;
+            int actionCount = item.Actions.Length;
+            for (int j = 0; j < actionCount; j++)
+            {
+                if (item.Actions[j].ModalKey != null && item.Actions[j].ModalKey.StartsWith(modalKeyPrefix))
+                {
+                    item.IsDismissed = true;
+                    item.IsRead = true;
+                    _state.Items[i] = item;
+                    break;
+                }
+            }
         }
         Invalidate();
     }
@@ -244,7 +298,14 @@ public class InboxSystem
 
     private static MailAction Nav(string label, ScreenId target)
     {
-        var action = new MailAction { Label = label, Type = MailActionType.Navigate, ModalKey = null };
+        var action = new MailAction { Label = label, Type = MailActionType.Navigate, ModalKey = null, TabHint = -1 };
+        action.NavTarget = target;
+        return action;
+    }
+
+    private static MailAction NavTab(string label, ScreenId target, int tabHint)
+    {
+        var action = new MailAction { Label = label, Type = MailActionType.Navigate, ModalKey = null, TabHint = tabHint };
         action.NavTarget = target;
         return action;
     }
@@ -266,8 +327,8 @@ public class InboxSystem
             Category = MailCategory.Recruitment,
             Priority = MailPriority.Info,
             Title = "New Candidates Available",
-            Body = $"{evt.Count} candidates are ready to interview",
-            Actions = new[] { Nav("View Employees", ScreenId.HREmployees) }
+            Body = $"{evt.Count} new candidates in the hiring pool.",
+            Actions = new[] { NavTab("View Candidates", ScreenId.HRCandidates, (int)HRTab.Candidates) }
         });
     }
 
@@ -347,20 +408,26 @@ public class InboxSystem
             Priority = MailPriority.Warning,
             Title = "Candidate Following Up",
             Body = $"{evt.CandidateName} is waiting for a decision. They will withdraw in 3 days.",
-            Actions = new[] { Nav("View Employees", ScreenId.HREmployees) }
+            Actions = new[] { NavTab("View Employees", ScreenId.HRCandidates, (int)HRTab.Employees) }
         });
     }
 
     private void OnCandidateDeclined(CandidateDeclinedEvent evt)
     {
+        string body = evt.Reason switch
+        {
+            DeclineReason.SalaryTooLow        => $"{evt.CandidateName} declined your offer — the salary was below their expectation. You have 7 days to re-offer.",
+            DeclineReason.ArrangementMismatch => $"{evt.CandidateName} declined your offer — the arrangement doesn't match their preferences. You have 7 days to re-offer.",
+            _                                 => $"{evt.CandidateName} declined your offer. You have 7 days to re-offer."
+        };
         Prepend(new MailItem
         {
             Tick = evt.Tick,
             Category = MailCategory.HR,
             Priority = MailPriority.Warning,
             Title = "Offer Declined",
-            Body = $"{evt.CandidateName} declined your offer. {evt.ConditionText}. You have 7 days to re-offer.",
-            Actions = new[] { Nav("View Employees", ScreenId.HREmployees) }
+            Body = body,
+            Actions = new[] { NavTab("View Candidates", ScreenId.HRCandidates, (int)HRTab.Candidates) }
         });
     }
 
@@ -373,7 +440,7 @@ public class InboxSystem
             Priority = MailPriority.Warning,
             Title = "Candidate Withdrew",
             Body = $"{evt.CandidateName} accepted another offer.",
-            Actions = new[] { Nav("View Employees", ScreenId.HREmployees) }
+            Actions = new[] { NavTab("View Employees", ScreenId.HRCandidates, (int)HRTab.Employees) }
         });
     }
 
@@ -386,21 +453,24 @@ public class InboxSystem
             Priority = MailPriority.Warning,
             Title = "Candidate Closed Door",
             Body = "A candidate has exhausted their patience and will no longer consider offers.",
-            Actions = new[] { Nav("View Employees", ScreenId.HREmployees) }
+            Actions = new[] { NavTab("View Employees", ScreenId.HRCandidates, (int)HRTab.Employees) }
         });
     }
 
-    private void OnInterviewFinalReport(InterviewFinalReportEvent evt)
+    private void OnInterviewThresholdReached(InterviewThresholdEvent evt)
     {
-        Prepend(new MailItem
+        if (evt.ThresholdReached == 100)
         {
-            Tick = evt.Tick,
-            Category = MailCategory.HR,
-            Priority = MailPriority.Info,
-            Title = "Interview Complete",
-            Body = $"{evt.CandidateName} is ready for an offer.",
-            Actions = new[] { Nav("View Employees", ScreenId.HREmployees) }
-        });
+            Prepend(new MailItem
+            {
+                Tick = evt.Tick,
+                Category = MailCategory.HR,
+                Priority = MailPriority.Info,
+                Title = "Interview Complete",
+                Body = $"{evt.CandidateName}'s interview is complete. Preferences and exact salary expectation are now known. Ready for an offer.",
+                Actions = new[] { NavTab("View Candidates", ScreenId.HRCandidates, (int)HRTab.Candidates) }
+            });
+        }
     }
 
     private void OnHRCandidatesReadyForReview(HRCandidatesReadyForReviewEvent evt)
@@ -420,7 +490,7 @@ public class InboxSystem
             Actions = new[]
             {
                 Modal("Review Candidates", modalKey),
-                Nav("Go to HR", ScreenId.HRCandidates)
+                NavTab("Go to HR", ScreenId.HRCandidates, (int)HRTab.Candidates)
             }
         });
     }
@@ -460,6 +530,7 @@ public class InboxSystem
     private void OnContractRenewalRequested(ContractRenewalRequestedEvent evt)
     {
         int graceDays = (evt.DeadlineTick - evt.Tick) / TimeState.TicksPerDay;
+        string modalKey = "ContractRenewal:" + evt.EmployeeId.Value;
         Prepend(new MailItem
         {
             Tick = evt.Tick,
@@ -467,7 +538,7 @@ public class InboxSystem
             Priority = MailPriority.Warning,
             Title = "Contract Renewal Request",
             Body = $"{evt.EmployeeName} wants a new contract at {MoneyFormatter.FormatShort(evt.Demand)}/mo. They will leave in {graceDays} days if ignored.",
-            Actions = new[] { Nav("View Employees", ScreenId.HREmployees) }
+            Actions = new[] { Modal("Review Renewals", modalKey) }
         });
     }
 
@@ -587,5 +658,259 @@ public class InboxSystem
             RelatedProductId = evt.ProductId,
             Actions = new[] { Nav("View Products", ScreenId.ProductionProductsLive) }
         });
+    }
+
+    // R1
+    private void OnRenewalWindowOpened(RenewalWindowOpenedEvent evt)
+    {
+        string typeStr = evt.CurrentType == EmploymentType.FullTime ? "Full-Time" : "Part-Time";
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.HR,
+            Priority = MailPriority.Info,
+            Title = "Contract Expiring Soon",
+            Body = $"{evt.Name}'s {typeStr} contract expires in {evt.DaysUntilExpiry} days. Review their renewal terms.",
+            Actions = new[] { NavTab("View Employees", ScreenId.HREmployees, (int)HRTab.Employees) }
+        });
+    }
+
+    // R2
+    private void OnRenewalChangeRequested(RenewalChangeRequestedEvent evt)
+    {
+        string body;
+        if (evt.RequestsTypeChange && evt.RequestsLengthChange)
+        {
+            string typeStr = evt.RequestedType == EmploymentType.FullTime ? "Full-Time" : "Part-Time";
+            string lengthStr = ContractLengthToDisplay(evt.RequestedLength);
+            body = $"{evt.Name} is requesting a change to {typeStr} and a {lengthStr} contract length for their renewal.";
+        }
+        else if (evt.RequestsTypeChange)
+        {
+            string typeStr = evt.RequestedType == EmploymentType.FullTime ? "Full-Time" : "Part-Time";
+            body = $"{evt.Name} is requesting a switch to {typeStr} for their renewal.";
+        }
+        else
+        {
+            string lengthStr = ContractLengthToDisplay(evt.RequestedLength);
+            body = $"{evt.Name} is requesting a {lengthStr} contract length for their renewal.";
+        }
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.HR,
+            Priority = MailPriority.Warning,
+            Title = "Renewal Request: " + evt.Name,
+            Body = body,
+            Actions = new[] { NavTab("View Employees", ScreenId.HREmployees, (int)HRTab.Employees) }
+        });
+    }
+
+    // R3 / R4
+    private void OnRenewalEscalation(RenewalEscalationEvent evt)
+    {
+        if (evt.IsFinalStrike)
+        {
+            Prepend(new MailItem
+            {
+                Tick = evt.Tick,
+                Category = MailCategory.Alert,
+                Priority = MailPriority.Critical,
+                Title = evt.Name + " Refusing Renewal",
+                Body = $"{evt.Name} has refused to renew their contract. Their contract will expire without renewal unless immediate action is taken.",
+                Actions = new[] { NavTab("View Employees", ScreenId.HREmployees, (int)HRTab.Employees) }
+            });
+        }
+        else
+        {
+            Prepend(new MailItem
+            {
+                Tick = evt.Tick,
+                Category = MailCategory.HR,
+                Priority = MailPriority.Warning,
+                Title = "Urgent: " + evt.Name + " Demands Change",
+                Body = $"{evt.Name} is increasingly dissatisfied with their current arrangement. Failure to address their renewal request may result in them refusing to renew.",
+                Actions = new[] { NavTab("View Employees", ScreenId.HREmployees, (int)HRTab.Employees) }
+            });
+        }
+    }
+
+    // R5
+    private void OnRenewalRequestRejected(RenewalRequestRejectedEvent evt)
+    {
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.HR,
+            Priority = MailPriority.Warning,
+            Title = evt.Name + ": High Departure Risk",
+            Body = $"{evt.Name} is dissatisfied with their current arrangement. Ignoring their renewal preferences again may lead to them refusing renewal entirely.",
+            Actions = new[] { NavTab("View Employees", ScreenId.HREmployees, (int)HRTab.Employees) }
+        });
+    }
+
+    // R6
+    private void OnEmployeeDeparted(EmployeeDepartedEvent evt)
+    {
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.Alert,
+            Priority = MailPriority.Warning,
+            Title = evt.Name + " Has Left the Company",
+            Body = $"{evt.Name}'s contract expired without renewal and they have left the company.",
+            Actions = new[] { NavTab("View Employees", ScreenId.HREmployees, (int)HRTab.Employees) }
+        });
+    }
+
+    // R7
+    private void OnContractRenewed(ContractRenewedEvent evt)
+    {
+        string body = evt.NewSalary != evt.OldSalary
+            ? $"Their contract has been renewed. Salary adjusted from {MoneyFormatter.FormatShort(evt.OldSalary)}/mo to {MoneyFormatter.FormatShort(evt.NewSalary)}/mo."
+            : $"Their contract has been renewed at {MoneyFormatter.FormatShort(evt.NewSalary)}/mo with no changes.";
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.HR,
+            Priority = MailPriority.Info,
+            Title = "Contract Renewed",
+            Body = body,
+            Actions = new[] { NavTab("View Employees", ScreenId.HREmployees, (int)HRTab.Employees) }
+        });
+    }
+
+    // H2
+    private void OnCandidatePoolFull(CandidatePoolFullEvent evt)
+    {
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.HR,
+            Priority = MailPriority.Warning,
+            Title = "Candidate Pool Full",
+            Body = $"Your HR team found candidates, but the pool is full ({evt.PoolCount}/{evt.PoolMax}). Hire or dismiss existing candidates to make room.",
+            Actions = new[] { NavTab("View Candidates", ScreenId.HRCandidates, (int)HRTab.Candidates) }
+        });
+    }
+
+    // H4
+    private void OnEmployeeHired(EmployeeHiredEvent evt)
+    {
+        string typeStr = evt.Type == EmploymentType.FullTime ? "Full-Time" : "Part-Time";
+        string lengthStr = ContractLengthToDisplay(evt.Length);
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.HR,
+            Priority = MailPriority.Info,
+            Title = "Welcome: " + evt.Name,
+            Body = $"{evt.Name} accepted your offer. Hired as {typeStr}, {lengthStr} contract at {MoneyFormatter.FormatShort(evt.Salary)}/mo.",
+            Actions = new[] { NavTab("View Employees", ScreenId.HREmployees, (int)HRTab.Employees) }
+        });
+    }
+
+    // N1 — Counter-offer received
+    private void OnCounterOfferReceived(CounterOfferReceivedEvent evt)
+    {
+        string modalKey = "CounterOffer:" + evt.CandidateId;
+        DismissMailByModalKey(modalKey);
+        string roleName = RecommendationLabelBuilder.RoleLabel(evt.Counter.CounterRole);
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.HR,
+            Priority = MailPriority.Warning,
+            Title = "Counter Offer Received",
+            Body = $"{evt.CandidateName} has counter-offered: {MoneyFormatter.FormatShort(evt.Counter.CounterSalary)}/mo as {roleName}",
+            Actions = new[] { Modal("View Counter Offer", modalKey) }
+        });
+    }
+
+    // N2 — Patience low
+    private void OnPatienceLow(PatienceLowEvent evt)
+    {
+        string title = evt.IsEmployee ? "Employee Losing Patience" : "Candidate Losing Patience";
+        string body = $"{evt.Name} is losing patience. {evt.RemainingPatience} round(s) left.";
+        MailAction action = evt.IsEmployee
+            ? NavTab("View Employees", ScreenId.HREmployees, (int)HRTab.Employees)
+            : NavTab("View Candidates", ScreenId.HRCandidates, (int)HRTab.Candidates);
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.HR,
+            Priority = MailPriority.Warning,
+            Title = title,
+            Body = body,
+            Actions = new[] { action }
+        });
+    }
+
+    // N3 — Candidate lost patience
+    private void OnCandidateLostPatience(CandidateLostPatienceEvent evt)
+    {
+        DismissMailByModalKey("CounterOffer:" + evt.CandidateId);
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.HR,
+            Priority = MailPriority.Warning,
+            Title = "Candidate Left",
+            Body = $"{evt.CandidateName} has lost patience and left the hiring pool.",
+            Actions = new MailAction[0]
+        });
+    }
+
+    // N4 — Employee frustrated / cooldown started
+    private void OnEmployeeFrustrated(EmployeeFrustratedEvent evt)
+    {
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.HR,
+            Priority = MailPriority.Warning,
+            Title = "Employee Frustrated",
+            Body = $"{evt.EmployeeName} won't discuss renewal for 30 days.",
+            Actions = new[] { NavTab("View Employees", ScreenId.HREmployees, (int)HRTab.Employees) }
+        });
+    }
+
+    // N5 — Employee cooldown expired
+    private void OnEmployeeCooldownExpired(EmployeeCooldownExpiredEvent evt)
+    {
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.HR,
+            Priority = MailPriority.Info,
+            Title = "Employee Ready to Negotiate",
+            Body = $"{evt.EmployeeName} is willing to discuss renewal terms again.",
+            Actions = new[] { NavTab("View Employees", ScreenId.HREmployees, (int)HRTab.Employees) }
+        });
+    }
+
+    // N6 — Counter-offer expired (without patience exhaustion)
+    private void OnCounterOfferExpired(CounterOfferExpiredEvent evt)
+    {
+        DismissMailByModalKey("CounterOffer:" + evt.CandidateId);
+        Prepend(new MailItem
+        {
+            Tick = evt.Tick,
+            Category = MailCategory.HR,
+            Priority = MailPriority.Info,
+            Title = "Counter Offer Expired",
+            Body = $"{evt.CandidateName}'s counter-offer has expired.",
+            Actions = new MailAction[0]
+        });
+    }
+
+    private static string ContractLengthToDisplay(ContractLengthOption length)
+    {
+        switch (length)
+        {
+            case ContractLengthOption.Short:    return "Short";
+            case ContractLengthOption.Long:     return "Long";
+            default:                            return "Standard";
+        }
     }
 }

@@ -15,7 +15,7 @@
     border-left-width: 2px;
     border-left-color: transparent;
     transition: background-color 0.12s;
-    cursor: link;
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
 }
 
 .sidebar-group__header:hover {
@@ -95,7 +95,7 @@
     border-left-width: 2px;
     border-left-color: transparent;
     transition: background-color 0.12s, border-left-color 0.12s;
-    cursor: link;
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
 }
 
 .sidebar-item:hover {

@@ -1,0 +1,38 @@
+.contract-renewal-modal {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: var(--bg-primary);
+}
+
+/* ── Body ── */
+.contract-renewal-modal__body {
+    flex-direction: column;
+    padding: 16px 20px;
+}
+
+.contract-renewal-modal__card {
+    margin-bottom: 10px;
+}
+
+/* ── Footer ── */
+.contract-renewal-modal__footer {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 20px;
+    border-top-width: 1px;
+    border-top-color: var(--border-subtle);
+    background-color: var(--bg-secondary);
+}
+
+/* ── Delta label ── */
+.renewal-delta--positive {
+    color: var(--accent-danger);
+}
+
+.renewal-delta--negative {
+    color: var(--accent-success);
+}
+
+.renewal-delta--neutral {
+    color: var(--text-muted);
+}

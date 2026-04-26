@@ -182,14 +182,11 @@
 .badge--special  { background-color: rgba(167, 139, 250, 0.18); color: var(--accent-special); }
 
 /* Role badge classes */
-.badge--role-programming  { background-color: rgba(96, 165, 250, 0.18);  color: var(--role-programming); }
+.badge--role-development  { background-color: rgba(96, 165, 250, 0.18);  color: var(--role-programming); }
 .badge--role-design       { background-color: rgba(167, 139, 250, 0.18); color: var(--role-design); }
 .badge--role-qa           { background-color: rgba(52, 211, 153, 0.18);  color: var(--role-qa); }
-.badge--role-vfx          { background-color: rgba(251, 146, 60, 0.18);  color: var(--role-vfx); }
-.badge--role-sfx          { background-color: rgba(244, 114, 182, 0.18); color: var(--role-sfx); }
 .badge--role-hr           { background-color: rgba(251, 191, 36, 0.18);  color: var(--role-hr); }
 .badge--role-negotiation  { background-color: rgba(45, 212, 191, 0.18);  color: var(--role-negotiation); }
-.badge--role-accountancy  { background-color: rgba(148, 163, 184, 0.18); color: var(--role-accountancy); }
 
 /* Product category badge classes */
 .badge--cat-videogame     { background-color: rgba(129, 140, 248, 0.18); color: var(--cat-videogame); }
@@ -356,7 +353,7 @@
     font-size: var(--font-sm);
     color: var(--text-muted);
     -unity-font-style: bold;
-    cursor: link;
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
     padding: 0;
     margin: 0;
     -unity-text-align: middle-left;
@@ -569,7 +566,7 @@
 
 /* ── Clickable member name in Teams view ── */
 .member-name--clickable {
-    cursor: link;
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
     transition: color var(--transition-fast);
 }
 
@@ -626,10 +623,12 @@
 .tab-bar__item {
     border-radius: var(--radius-md);
     padding: 6px 12px;
-    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.04);
     color: var(--text-muted);
-    border-width: 0;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.06);
     font-size: var(--font-sm);
+    margin-right: 4px;
     transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
@@ -640,6 +639,50 @@
 }
 
 .tab-bar__item:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-light);
+}
+
+.tab-bar__item--active:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-light);
+}
+
+/* ── Screen-level tab bar (underline-indicator pattern) ── */
+.screen-tab-bar {
+    flex-direction: row;
+    background-color: var(--bg-secondary);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+}
+
+/* ── Sub-tab pill filter buttons ── */
+.sub-tab {
+    border-radius: var(--radius-md);
+    padding: 4px 10px;
+    font-size: var(--font-sm);
+    background-color: rgba(255, 255, 255, 0.04);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.06);
+    color: var(--text-muted);
+    margin-right: 4px;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.sub-tab:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-light);
+}
+
+.sub-tab--active {
+    background-color: var(--bg-tertiary);
+    color: var(--text-light);
+    border-color: rgba(76, 201, 176, 0.25);
+    -unity-font-style: bold;
+}
+
+.sub-tab--active:hover {
+    background-color: var(--bg-tertiary);
     color: var(--text-light);
 }
 
@@ -670,3 +713,268 @@
 .card--danger-left  { border-left-width: 3px; border-left-color: var(--accent-danger); }
 .card--info-left    { border-left-width: 3px; border-left-color: var(--accent-info); }
 .card--special-left { border-left-width: 3px; border-left-color: var(--accent-special); }
+
+/* ── Role Pills ── */
+.role-pill {
+    border-radius: 10px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 7px;
+    padding-right: 7px;
+    font-size: 10px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    color: var(--text-light);
+    border-width: 0;
+}
+
+.role-pill--developer              { background-color: var(--role-programming); }
+.role-pill--designer               { background-color: var(--role-design); }
+.role-pill--qa-engineer            { background-color: var(--role-qa);    color: rgb(10, 30, 10); }
+.role-pill--hr-specialist          { background-color: var(--role-hr);    color: rgb(40, 30, 0); }
+.role-pill--sfx-artist             { background-color: var(--role-sfx); }
+.role-pill--vfx-artist             { background-color: var(--role-vfx); }
+.role-pill--accountant             { background-color: var(--role-accountancy); }
+.role-pill--marketing-specialist   { background-color: var(--role-marketing); color: rgb(40, 30, 0); }
+.role-pill--unknown                { background-color: rgb(100, 100, 100); }
+.role-pill--founder                { background-color: rgba(251, 191, 36, 0.15); color: #FBBF24; border-width: 1px; border-color: rgba(251, 191, 36, 0.3); }
+
+/* ── Continue Button ── */
+.btn-continue {
+    background-color: var(--accent-success);
+    color: var(--text-light);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.22);
+    border-left-color:   rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+    border-radius: 5px;
+    padding: 8px 18px;
+    margin: 0;
+    font-size: 13px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    min-width: 90px;
+    transition: background-color 0.15s, scale 0.1s;
+}
+
+.btn-continue:hover {
+    background-color: rgb(72, 203, 156);
+    scale: 1.04;
+}
+
+.btn-continue:active {
+    background-color: rgb(42, 163, 116);
+    scale: 0.97;
+    border-top-color:    rgba(0, 0, 0, 0.20);
+    border-left-color:   rgba(0, 0, 0, 0.20);
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-right-color:  rgba(255, 255, 255, 0.10);
+}
+
+.btn-continue:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.btn-continue--advancing {
+    background-color: var(--accent-danger);
+}
+
+.btn-continue--advancing:hover {
+    background-color: rgb(250, 69, 80);
+}
+
+.btn-continue--advancing:active {
+    background-color: rgb(200, 30, 40);
+}
+
+/* ── Legacy Tab Buttons (modals) ── */
+.tab-button {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.75);
+    border-width: 0;
+    border-radius: 0;
+    padding: 12px 20px;
+    margin: 0;
+    font-size: 14px;
+    border-bottom-width: 3px;
+    border-bottom-color: transparent;
+    -unity-text-align: middle-center;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.tab-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.tab-selected {
+    background-color: transparent;
+    color: rgb(255, 255, 255);
+    border-bottom-color: rgb(223, 196, 138);
+}
+
+.tab-disabled {
+    opacity: 0.5;
+}
+
+.tab-disabled:hover {
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+/* ── Button Variants ── */
+.btn-base {
+    background-color: var(--accent-success);
+    color: var(--text-light);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.22);
+    border-left-color:   rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+    border-radius: 6px;
+    padding: 12px 20px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    transition: background-color 0.15s, scale 0.1s;
+}
+
+.btn-base:hover {
+    background-color: rgb(72, 203, 156);
+    scale: 1.03;
+}
+
+.btn-base:active {
+    background-color: rgb(42, 163, 116);
+    scale: 0.97;
+    border-top-color:    rgba(0, 0, 0, 0.20);
+    border-left-color:   rgba(0, 0, 0, 0.20);
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-right-color:  rgba(255, 255, 255, 0.10);
+}
+
+.btn-base:disabled {
+    background-color: var(--bg-tertiary);
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.btn-warning {
+    background-color: var(--accent-warning);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.22);
+    border-left-color:   rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+}
+
+.btn-warning:hover {
+    background-color: rgb(255, 175, 100);
+}
+
+.btn-warning:active {
+    background-color: rgb(220, 140, 50);
+    border-top-color:    rgba(0, 0, 0, 0.20);
+    border-left-color:   rgba(0, 0, 0, 0.20);
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-right-color:  rgba(255, 255, 255, 0.10);
+}
+
+.btn-info {
+    background-color: var(--accent-info);
+    border-width: 1px;
+    border-top-color:    rgba(255, 255, 255, 0.22);
+    border-left-color:   rgba(255, 255, 255, 0.22);
+    border-bottom-color: rgba(0, 0, 0, 0.28);
+    border-right-color:  rgba(0, 0, 0, 0.28);
+}
+
+.btn-info:hover {
+    background-color: rgb(90, 160, 250);
+}
+
+.btn-info:active {
+    background-color: rgb(50, 120, 210);
+    border-top-color:    rgba(0, 0, 0, 0.20);
+    border-left-color:   rgba(0, 0, 0, 0.20);
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-right-color:  rgba(255, 255, 255, 0.10);
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.btn-large {
+    padding: 16px 28px;
+    font-size: 16px;
+}
+
+/* ── Clickable Label ── */
+.clickable-label {
+    color: var(--accent-primary);
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+    -unity-font-style: normal;
+    transition: color var(--transition-fast);
+}
+
+.clickable-label:hover {
+    color: var(--accent-info);
+}
+
+/* ── Finance Health / Credit / Risk ── */
+.health-stable     { color: var(--accent-success); }
+.health-tight      { color: var(--accent-warning); }
+.health-distressed { color: var(--accent-danger); -unity-font-style: bold; }
+.health-insolvent  { color: var(--accent-danger); -unity-font-style: bold; }
+.health-bankrupt   { color: var(--accent-danger); -unity-font-style: bold; }
+
+.credit-poor      { color: var(--accent-danger);  }
+.credit-fair      { color: var(--accent-warning); }
+.credit-good      { color: var(--accent-success); }
+.credit-excellent { color: rgb(60, 220, 80); -unity-font-style: bold; }
+
+.risk-safe       { color: var(--accent-success); }
+.risk-standard   { color: var(--text-light);     }
+.risk-aggressive { color: var(--accent-warning); }
+.risk-extreme    { color: var(--accent-danger);  -unity-font-style: bold; }
+
+.finance-runway-warning  { color: var(--accent-warning); -unity-font-style: bold; }
+.finance-runway-critical { color: var(--accent-danger);  -unity-font-style: bold; }
+
+/* ── Timer / Refresh ── */
+.timer-warning {
+    color: var(--accent-warning);
+    -unity-font-style: bold-and-italic;
+}
+
+.timer-urgent {
+    color: var(--accent-danger);
+    -unity-font-style: bold-and-italic;
+}
+
+.refresh-bar-container {
+    height: 3px;
+    background-color: var(--bg-tertiary);
+    border-radius: 2px;
+    margin-bottom: 4px;
+    margin-left: 2px;
+    margin-right: 2px;
+    border-width: 1px;
+    border-top-color:    rgba(0, 0, 0, 0.38);
+    border-left-color:   rgba(0, 0, 0, 0.38);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+    border-right-color:  rgba(255, 255, 255, 0.06);
+}
+
+.refresh-bar {
+    height: 100%;
+    background-color: var(--accent-success);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.3s;
+}

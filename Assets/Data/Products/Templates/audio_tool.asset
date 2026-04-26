@@ -42,7 +42,7 @@ MonoBehaviour:
     prerequisites: 00000000
     qualitySoftCapBase: 80
   - phaseType: 4
-    primaryRole: 3
+    primaryRole: 0
     baseWorkUnits: 96
     prerequisites: 00000000
     qualitySoftCapBase: 80

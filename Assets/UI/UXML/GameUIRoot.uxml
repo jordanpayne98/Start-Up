@@ -11,10 +11,26 @@
     <ui:Style src="project://database/Assets/UI/USS/Components/HypeBar.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Components/accordion-sidebar.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Modals/competitor-detail-modal.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Modals/employee-detail-modal.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Modals/candidate-detail-modal.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Screens/create-product.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Components/plan-review.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/pause-menu.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/employees-screen.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/candidate-market.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/competitor-list.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/hr-assignments.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/hr-portal.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/industry-overview.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/my-investments.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/news-archive.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/products-browser.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/released-products.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/stock-investments.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Screens/team-assignment.uss" />
     <ui:VisualElement name="root" class="root">
         <ui:VisualElement name="top-bar" class="top-bar">
-            <ui:VisualElement name="module-company" class="top-bar__module top-bar__cluster-end">
+            <ui:VisualElement name="module-company" class="top-bar__module top-bar__module--first top-bar__cluster-end">
                 <ui:Label name="caption-company" text="COMPANY" class="top-bar__caption" />
                 <ui:Label name="company-name" class="top-bar__value" text="My Company" />
                 <ui:Label name="reputation-subtitle" class="top-bar__subtitle" text="★ Unknown" />

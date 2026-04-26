@@ -20,16 +20,7 @@ public class MainMenuController : MonoBehaviour {
         "Industry expert — peak starting capability"
     };
 
-    // Role skill tier weights: 2=Primary, 3=Secondary, 4=Tertiary
-    // SkillType indices: 0=Prog, 1=Design, 2=QA, 3=VFX, 4=SFX, 5=HR, 6=Neg, 7=Acct, 8=Mktg
-    private static readonly int[] RoleTiersDeveloper    = { 2, 3, 3, 3, 4, 4, 4, 4, 4 };
-    private static readonly int[] RoleTiersDesigner     = { 3, 2, 4, 3, 3, 4, 4, 4, 4 };
-    private static readonly int[] RoleTiersQAEngineer   = { 3, 3, 2, 4, 4, 4, 3, 4, 4 };
-    private static readonly int[] RoleTiersHR           = { 4, 4, 4, 4, 4, 2, 3, 3, 3 };
-    private static readonly int[] RoleTiersSoundEngineer = { 3, 3, 4, 3, 2, 4, 4, 4, 4 };
-    private static readonly int[] RoleTiersVFXArtist    = { 3, 3, 4, 2, 3, 4, 4, 4, 4 };
-    private static readonly int[] RoleTiersAccountant   = { 3, 4, 4, 4, 4, 4, 3, 2, 3 };
-    private static readonly int[] RoleTiersMarketer     = { 4, 3, 4, 4, 4, 3, 3, 4, 2 };
+    private RoleTierTable _roleTierTable;
 
     private int _gameSeed;
     private EmployeeRole[] _roleValues;
@@ -100,6 +91,7 @@ public class MainMenuController : MonoBehaviour {
     private void Start() {
         _roleValues = (EmployeeRole[])System.Enum.GetValues(typeof(EmployeeRole));
         _gameSeed = System.Environment.TickCount | 1;
+        LoadRoleTierTable();
         BuildTierChoices();
         BuildRoleChoices();
         QueryAndCacheElements();
@@ -133,6 +125,14 @@ public class MainMenuController : MonoBehaviour {
         }
     }
 
+    private void LoadRoleTierTable() {
+        var profiles = Resources.LoadAll<RoleTierProfile>("RoleTiers");
+        _roleTierTable = new RoleTierTable();
+        for (int i = 0; i < profiles.Length; i++) {
+            _roleTierTable.Register(profiles[i]);
+        }
+    }
+
     private void BuildRoleChoices() {
         for (int i = 0; i < _roleValues.Length; i++) {
             _roleChoices.Add(UIFormatting.FormatRole(_roleValues[i]));
@@ -145,22 +145,8 @@ public class MainMenuController : MonoBehaviour {
         }
     }
 
-    private int[] GetRoleTiers(EmployeeRole role) {
-        switch (role) {
-            case EmployeeRole.Developer:    return RoleTiersDeveloper;
-            case EmployeeRole.Designer:     return RoleTiersDesigner;
-            case EmployeeRole.QAEngineer:   return RoleTiersQAEngineer;
-            case EmployeeRole.HR:           return RoleTiersHR;
-            case EmployeeRole.SoundEngineer: return RoleTiersSoundEngineer;
-            case EmployeeRole.VFXArtist:    return RoleTiersVFXArtist;
-            case EmployeeRole.Accountant:   return RoleTiersAccountant;
-            case EmployeeRole.Marketer:     return RoleTiersMarketer;
-            default:                        return RoleTiersDeveloper;
-        }
-    }
-
     private int[] GenerateFounderSkills(int tier, EmployeeRole role, IRng rng) {
-        int[] roleTiers = GetRoleTiers(role);
+        int[] roleTiers = _roleTierTable.GetTiers(role);
         var skills = new int[SkillCount];
         for (int i = 0; i < SkillCount; i++) {
             int min, max;
@@ -549,7 +535,7 @@ public class MainMenuController : MonoBehaviour {
         leftCol.Add(roleTierRow);
 
         // Footer note
-        var founderNote = new Label("PA: 200 | Permanent | No Salary | +50% Skill Growth");
+        var founderNote = new Label("PA: 200 | Permanent | No Salary");
         founderNote.AddToClassList("founder-note");
         leftCol.Add(founderNote);
 

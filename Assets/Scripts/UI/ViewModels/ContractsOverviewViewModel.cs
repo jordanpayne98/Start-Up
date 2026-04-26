@@ -79,13 +79,13 @@ public class ContractsOverviewViewModel : IViewModel
         for (int t = 0; t < teamCount; t++)
         {
             var team = activeTeams[t];
-            if (state.GetTeamType(team.id) != TeamType.Contracts) continue;
+            if (state.GetTeamType(team.id) != TeamType.Development) continue;
             _teams.Add(new TeamSummaryDisplay {
                 Id = team.id,
                 Name = team.name,
                 MemberCount = team.members?.Count ?? 0,
                 ContractName = "",
-                TeamType = UIFormatting.FormatTeamType(TeamType.Contracts),
+                TeamType = UIFormatting.FormatTeamType(TeamType.Development),
                 AvgMorale = 0
             });
         }

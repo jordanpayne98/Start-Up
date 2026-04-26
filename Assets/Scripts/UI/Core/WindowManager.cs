@@ -9,7 +9,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
 {
     [SerializeField] private UIDocument uiDocument;
     [SerializeField] private Font customFont;
-    [SerializeField] private StyleSheet globalStyleSheet;
+    [SerializeField] private VisualTreeAsset candidateDetailAsset;
 
     private GameController _gameController;
     public GameController GameController => _gameController;
@@ -105,7 +105,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         }
 
         _eventBus = _gameController.EventBus;
-        _registry = new ScreenRegistry(this, this, this, this);
+        _registry = new ScreenRegistry(this, this, this, this, candidateDetailAsset);
         _topBarViewModel = new TopBarViewModel();
 
         Initialize(uiDocument);
@@ -159,11 +159,6 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
             Debug.LogError("[WindowManager] Root VisualElement is null!");
             return;
         }
-
-        // Load GlobalStyles.uss so its classes (role pills, shared utilities) are
-        // available to all C#-built views that don't reference a UXML stylesheet.
-        if (globalStyleSheet != null && !_root.styleSheets.Contains(globalStyleSheet))
-            _root.styleSheets.Add(globalStyleSheet);
 
         // Apply custom font to root element so it cascades to all children
         if (customFont != null) {
@@ -299,42 +294,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         _currentModalViewModel = modalVM;
 
         // Subscribe to action events on known modal view models
-        if (modalVM is HireConfirmationViewModel hireVM) {
-            Action<int, int> onOffer = (candidateId, salary) => {
-                QueueCommand(new MakeOfferCommand { CandidateId = candidateId, OfferedSalary = salary });
-                RefreshAll();
-            };
-            hireVM.OnMakeOffer += onOffer;
-            hireVM.OnDismiss += DismissModal;
-            _modalCleanup = () => {
-                hireVM.OnMakeOffer -= onOffer;
-                hireVM.OnDismiss -= DismissModal;
-            };
-        }
-        else if (modalVM is InterviewProgressViewModel interviewVM) {
-            Action<int> onStart = candidateId => {
-                QueueCommand(new StartInterviewCommand { CandidateId = candidateId, Mode = HiringMode.HR });
-                DismissModal();
-                RefreshAll();
-            };
-            Action onDismissInterview = () => {
-                var state = BuildSnapshot();
-                if (state != null && interviewVM.IsHireable) {
-                    var hireConfirmVM = new HireConfirmationViewModel(interviewVM.CandidateId);
-                    hireConfirmVM.Refresh(state);
-                    ShowModal(new HireConfirmationView(), hireConfirmVM);
-                } else {
-                    DismissModal();
-                }
-            };
-            interviewVM.OnStartInterview += onStart;
-            interviewVM.OnDismiss += onDismissInterview;
-            _modalCleanup = () => {
-                interviewVM.OnStartInterview -= onStart;
-                interviewVM.OnDismiss -= onDismissInterview;
-            };
-        }
-        else if (modalVM is LoanApplicationViewModel loanVM) {
+        if (modalVM is LoanApplicationViewModel loanVM) {
             Action<int, int> onTakeLoan = (amount, durationMonths) => {
                 QueueCommand(new TakeLoanCommand(CurrentTick, amount, durationMonths));
                 DismissModal();
@@ -348,16 +308,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
                 loanVM.OnDismiss -= DismissModal;
             };
         }
-        else if (modalVM is HRSearchConfiguratorViewModel configuratorVM) {
-            // wired already in OpenHRSearchConfigurator
-            _ = configuratorVM;
-        }
-        else if (modalVM is HRCandidateReviewViewModel reviewVM) {
-            // wired already in OpenHRCandidateReview
-            _ = reviewVM;
-        }
-        bool isLarge = modalVM is CompetitorProfileViewModel
-                    || modalVM is EmployeeProfileViewModel;
+        bool isLarge = modalVM is CompetitorProfileViewModel;
         _modalContent.EnableInClassList("modal-content--large", isLarge);
 
         _modalContent.Clear();
@@ -427,56 +378,6 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
     void IModalPresenter.ShowModal(IGameView view, IViewModel viewModel) => ShowModal(view, viewModel);
     void IModalPresenter.DismissModal() => DismissModal();
 
-    void IModalPresenter.OpenHRSearchConfigurator(TeamId teamId) {
-        var snapshot = BuildSnapshot();
-        var vm = new HRSearchConfiguratorViewModel(teamId);
-        if (snapshot != null) vm.Refresh(snapshot);
-
-        Action<TeamId, StartHRSearchCommand> onLaunch = (tid, cmd) => {
-            cmd.Tick = CurrentTick;
-            QueueCommand(cmd);
-            DismissModal();
-            RefreshAll();
-        };
-        vm.OnLaunchSearch += onLaunch;
-        vm.OnDismiss += DismissModal;
-        _modalCleanup = () => {
-            vm.OnLaunchSearch -= onLaunch;
-            vm.OnDismiss -= DismissModal;
-        };
-
-        ShowModal(new HRSearchConfiguratorView(), vm);
-    }
-
-    void IModalPresenter.OpenHRCandidateReview(System.Collections.Generic.IReadOnlyList<int> candidateIds, string teamName, string criteriaLabel) {
-        var snapshot = BuildSnapshot();
-        var vm = new HRCandidateReviewViewModel(candidateIds, teamName, criteriaLabel);
-        if (snapshot != null) vm.Refresh(snapshot);
-
-        Action<int> onAccept = id => {
-            QueueCommand(new AcceptHRCandidateCommand { Tick = CurrentTick, CandidateId = id });
-            RefreshAll();
-            var updatedSnapshot = BuildSnapshot();
-            if (updatedSnapshot != null) vm.Refresh(updatedSnapshot);
-        };
-        Action<int> onDecline = id => {
-            QueueCommand(new DeclineHRCandidateCommand { Tick = CurrentTick, CandidateId = id });
-            RefreshAll();
-            var updatedSnapshot = BuildSnapshot();
-            if (updatedSnapshot != null) vm.Refresh(updatedSnapshot);
-        };
-        vm.OnAcceptCandidate += onAccept;
-        vm.OnDeclineCandidate += onDecline;
-        vm.OnDismiss += DismissModal;
-        _modalCleanup = () => {
-            vm.OnAcceptCandidate -= onAccept;
-            vm.OnDeclineCandidate -= onDecline;
-            vm.OnDismiss -= DismissModal;
-        };
-
-        ShowModal(new HRCandidateReviewView(), vm);
-    }
-
     void IModalPresenter.OpenCompetitorProfile(CompetitorId competitorId) {
         var snapshot = BuildSnapshot();
         var vm = new CompetitorProfileViewModel();
@@ -492,10 +393,35 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         ShowModal(new ProductDetailView(this, this), vm);
     }
 
+    void IModalPresenter.OpenRenewalModal(EmployeeId? autoExpandId) {
+        var vm = new RenewalViewModel();
+        if (autoExpandId.HasValue) vm.SetAutoExpand(autoExpandId.Value);
+        var snapshot = BuildSnapshot();
+        if (snapshot != null) vm.Refresh(snapshot);
+        ShowModal(new RenewalView(this, this), vm);
+    }
+
+    void IModalPresenter.ShowCandidateDetailModal(int candidateId, bool showCounterOffer) {
+        var vm = new CandidateDetailModalViewModel();
+        vm.SetCandidateId(candidateId);
+        var view = new CandidateDetailModalView(this, this);
+        ShowModal(view, vm);
+        if (showCounterOffer && vm.HasPendingCounter) {
+            view.ShowCounterOfferView();
+        }
+    }
+
     public int CurrentTick => _gameController != null ? _gameController.CurrentTick : 0;
 
     // INavigationService
     void INavigationService.NavigateTo(ScreenId screenId) => NavigateTo(screenId);
+
+    void INavigationService.NavigateTo(ScreenId screenId, int tabHint) {
+        NavigateTo(screenId);
+        if (tabHint >= 0 && _currentView is ITabNavigable tabView) {
+            tabView.SwitchToTab(tabHint);
+        }
+    }
 
     // --- Private helpers ---
 
@@ -651,6 +577,8 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
             _gameController.GenerationSystem
         );
         _cachedSnapshot.SetTaxSystem(_gameController.TaxSystem);
+        _cachedSnapshot.SetTeamChemistrySystem(_gameController.TeamChemistrySystem);
+        _cachedSnapshot.SetFatigueSystem(_gameController.FatigueSystem);
         return _cachedSnapshot;
     }
 
@@ -668,7 +596,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         var map = new Dictionary<Type, HashSet<ScreenId>>();
 
         map[typeof(EmployeeCountChangedEvent)] = new HashSet<ScreenId> {
-            ScreenId.HREmployees, ScreenId.HRTeams, ScreenId.HRCandidates
+            ScreenId.HREmployees, ScreenId.HRPortalLanding
         };
         map[typeof(SkillImprovedEvent)] = new HashSet<ScreenId> {
             ScreenId.HREmployees
@@ -677,7 +605,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
             ScreenId.HREmployees
         };
         map[typeof(EmployeeRetiredEvent)] = new HashSet<ScreenId> {
-            ScreenId.HREmployees, ScreenId.HRTeams
+            ScreenId.HREmployees, ScreenId.HRPortalLanding
         };
         map[typeof(ContractAcceptedEvent)] = new HashSet<ScreenId> {
             ScreenId.ProductionContracts, ScreenId.FinanceOverview, ScreenId.DashboardCalendar
@@ -707,7 +635,10 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
             ScreenId.FinanceOverview, ScreenId.HREmployees
         };
         map[typeof(TeamCreatedEvent)] = new HashSet<ScreenId> {
-            ScreenId.HRTeams
+            ScreenId.HRTeams, ScreenId.HRPortalLanding
+        };
+        map[typeof(TeamDeletedEvent)] = new HashSet<ScreenId> {
+            ScreenId.HRTeams, ScreenId.HRPortalLanding
         };
         map[typeof(CrunchModeChangedEvent)] = new HashSet<ScreenId> {
             ScreenId.HRTeams
@@ -728,22 +659,22 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
             ScreenId.DashboardInbox, ScreenId.ProductionProductsInDev, ScreenId.ProductionProductsLive
         };
         map[typeof(CandidatesGeneratedEvent)] = new HashSet<ScreenId> {
-            ScreenId.HREmployees, ScreenId.HRCandidates
+            ScreenId.HRCandidates, ScreenId.HRPortalLanding
         };
         map[typeof(CandidateDeclinedEvent)] = new HashSet<ScreenId> {
-            ScreenId.HREmployees, ScreenId.HRCandidates
+            ScreenId.HRCandidates, ScreenId.HRPortalLanding
         };
         map[typeof(CandidateWithdrewEvent)] = new HashSet<ScreenId> {
-            ScreenId.HREmployees, ScreenId.HRCandidates
+            ScreenId.HRCandidates, ScreenId.HRPortalLanding
         };
         map[typeof(CandidateHardRejectedEvent)] = new HashSet<ScreenId> {
-            ScreenId.HREmployees, ScreenId.HRCandidates
+            ScreenId.HRCandidates
         };
-        map[typeof(InterviewFinalReportEvent)] = new HashSet<ScreenId> {
-            ScreenId.HREmployees, ScreenId.HRCandidates
+        map[typeof(InterviewThresholdEvent)] = new HashSet<ScreenId> {
+            ScreenId.HRCandidates
         };
         map[typeof(InterviewStartedEvent)] = new HashSet<ScreenId> {
-            ScreenId.HREmployees, ScreenId.HRCandidates
+            ScreenId.HRCandidates
         };
         map[typeof(TeamAssignedToProductEvent)] = new HashSet<ScreenId> {
             ScreenId.ProductionProductsInDev, ScreenId.HRTeams
@@ -826,6 +757,26 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         };
         map[typeof(TaxBankruptcyEvent)] = new HashSet<ScreenId> {
             ScreenId.FinanceOverview, ScreenId.DashboardInbox
+        };
+
+        // Negotiation events
+        map[typeof(CounterOfferReceivedEvent)] = new HashSet<ScreenId> {
+            ScreenId.HRCandidates, ScreenId.DashboardInbox
+        };
+        map[typeof(CandidateLostPatienceEvent)] = new HashSet<ScreenId> {
+            ScreenId.HRCandidates, ScreenId.HRPortalLanding, ScreenId.DashboardInbox
+        };
+        map[typeof(PatienceLowEvent)] = new HashSet<ScreenId> {
+            ScreenId.HRCandidates, ScreenId.HREmployees, ScreenId.DashboardInbox
+        };
+        map[typeof(CounterOfferExpiredEvent)] = new HashSet<ScreenId> {
+            ScreenId.HRCandidates, ScreenId.DashboardInbox
+        };
+        map[typeof(EmployeeFrustratedEvent)] = new HashSet<ScreenId> {
+            ScreenId.HREmployees, ScreenId.DashboardInbox
+        };
+        map[typeof(EmployeeCooldownExpiredEvent)] = new HashSet<ScreenId> {
+            ScreenId.HREmployees, ScreenId.DashboardInbox
         };
 
         return map;
@@ -947,6 +898,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
 
         // Teams
         _eventBus.Subscribe<TeamCreatedEvent>(OnTeamCreated);
+        _eventBus.Subscribe<TeamDeletedEvent>(OnTeamDeleted);
         _eventBus.Subscribe<EmployeeAssignedToTeamEvent>(OnEmployeeAssignedToTeam);
         _eventBus.Subscribe<EmployeeRemovedFromTeamEvent>(OnEmployeeRemovedFromTeam);
         _eventBus.Subscribe<CrunchModeChangedEvent>(OnCrunchModeChanged);
@@ -956,7 +908,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         _eventBus.Subscribe<CandidateDeclinedEvent>(OnCandidateDeclined);
         _eventBus.Subscribe<CandidateWithdrewEvent>(OnCandidateWithdrew);
         _eventBus.Subscribe<CandidateHardRejectedEvent>(OnCandidateHardRejected);
-        _eventBus.Subscribe<InterviewFinalReportEvent>(OnInterviewFinalReport);
+        _eventBus.Subscribe<InterviewThresholdEvent>(OnInterviewThresholdReached);
         _eventBus.Subscribe<InterviewStartedEvent>(OnInterviewStarted);
 
         // Employee aging
@@ -1019,6 +971,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
     private void OnEmployeeCountChanged(EmployeeCountChangedEvent evt)       { MarkViewDirtyFor<EmployeeCountChangedEvent>(); }
     private void OnSkillImproved(SkillImprovedEvent evt)                     { MarkViewDirtyFor<SkillImprovedEvent>(); }
     private void OnTeamCreated(TeamCreatedEvent evt)                         { MarkViewDirtyFor<TeamCreatedEvent>(); }
+    private void OnTeamDeleted(TeamDeletedEvent evt)                         { MarkViewDirtyFor<TeamDeletedEvent>(); }
     private void OnEmployeeAssignedToTeam(EmployeeAssignedToTeamEvent evt)   { MarkViewDirtyFor<EmployeeAssignedToTeamEvent>(); }
     private void OnEmployeeRemovedFromTeam(EmployeeRemovedFromTeamEvent evt) { MarkViewDirtyFor<EmployeeRemovedFromTeamEvent>(); }
     private void OnCrunchModeChanged(CrunchModeChangedEvent evt)             { MarkViewDirtyFor<CrunchModeChangedEvent>(); }
@@ -1026,7 +979,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
     private void OnCandidateDeclined(CandidateDeclinedEvent evt)             { MarkViewDirtyFor<CandidateDeclinedEvent>(); }
     private void OnCandidateWithdrew(CandidateWithdrewEvent evt)             { MarkViewDirtyFor<CandidateWithdrewEvent>(); }
     private void OnCandidateHardRejected(CandidateHardRejectedEvent evt)     { MarkViewDirtyFor<CandidateHardRejectedEvent>(); }
-    private void OnInterviewFinalReport(InterviewFinalReportEvent evt)       { MarkViewDirtyFor<InterviewFinalReportEvent>(); }
+    private void OnInterviewThresholdReached(InterviewThresholdEvent evt)       { MarkViewDirtyFor<InterviewThresholdEvent>(); }
     private void OnInterviewStarted(InterviewStartedEvent evt)               { MarkViewDirtyFor<InterviewStartedEvent>(); }
     private void OnEmployeeDecay(EmployeeDecayEvent evt)                     { MarkViewDirtyFor<EmployeeDecayEvent>(); }
     private void OnEmployeeRetired(EmployeeRetiredEvent evt)                 { MarkViewDirtyFor<EmployeeRetiredEvent>(); }

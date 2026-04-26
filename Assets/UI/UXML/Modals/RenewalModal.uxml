@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="renewal-modal" class="renewal-modal">
+        <ui:VisualElement name="renewal-header" class="renewal-header">
+            <ui:VisualElement class="renewal-header__left">
+                <ui:Label name="renewal-title" text="Contract Renewals" class="renewal-title" />
+                <ui:Label name="renewal-count" text="0 pending" class="renewal-count badge badge--warning" />
+            </ui:VisualElement>
+            <ui:Button name="btn-close" text="✕" class="btn-icon" />
+        </ui:VisualElement>
+        <ui:VisualElement class="divider" />
+        <ui:ScrollView name="renewal-scroll" class="renewal-scroll" vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden">
+            <ui:VisualElement name="renewal-list" class="renewal-list" />
+        </ui:ScrollView>
+        <ui:VisualElement name="renewal-footer" class="renewal-footer">
+            <ui:Button name="btn-done" text="Done" class="btn-secondary" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

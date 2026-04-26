@@ -358,6 +358,9 @@ public class AIDecisionSystem : ISystem
 
         float eraHiringMult = 1f + comp.CompetitorEra * 0.15f;
 
+        CompetitorArchetypeConfig archetypeConfig = GetArchetypeConfig(comp.Archetype);
+        EmploymentType selectedType = RollEmploymentType(comp, archetypeConfig, cashHealth);
+
         for (int i = poolCount - 1; i >= 0 && hired < maxHires; i--)
         {
             CandidateData candidate = _employeeState.availableCandidates[i];
@@ -374,7 +377,9 @@ public class AIDecisionSystem : ISystem
             if (comp.Personality.PricingAggression > 0.7f && candidate.CurrentAbility > 150)
                 salaryMult = System.Math.Max(salaryMult, eraHiringMult * 1.2f);
 
-            int offeredSalary = (int)(expectedSalary * salaryMult);
+            float tierMod = archetypeConfig != null ? archetypeConfig.salaryTierModifier : 1.0f;
+            float ptMod   = selectedType == EmploymentType.PartTime ? 0.60f : 1.0f;
+            int offeredSalary = (int)(expectedSalary * salaryMult * tierMod * ptMod);
             long monthlySalaryCost = offeredSalary * 30L;
 
             if (monthlySalaryCost > budget.hiringBudget) continue;
@@ -393,7 +398,9 @@ public class AIDecisionSystem : ISystem
                 BlindHire        = false,
                 Mode             = HiringMode.Manual,
                 PotentialAbility = candidate.PotentialAbility,
-                CompanyId        = comp.Id.ToCompanyId()
+                CompanyId        = comp.Id.ToCompanyId(),
+                Personality      = candidate.personality,
+                EmploymentType   = selectedType
             };
 
             _employeeSystem.ApplyCommand(hireCmd);
@@ -412,8 +419,33 @@ public class AIDecisionSystem : ISystem
                 CompanyName   = comp.CompanyName
             });
 
-            _logger.Log($"[AIDecisionSystem] {comp.CompanyName} hired {candidate.Name} ({candidate.Role}) at ${offeredSalary}/mo.");
+            _logger.Log($"[AIDecisionSystem] {comp.CompanyName} hired {candidate.Name} ({candidate.Role}, {selectedType}) at ${offeredSalary}/mo.");
         }
+    }
+
+    private EmploymentType RollEmploymentType(Competitor comp, CompetitorArchetypeConfig config, CashHealthTier cashHealth)
+    {
+        float ftProb = config != null ? config.fullTimeRatio : 0.65f;
+
+        switch (comp.Momentum)
+        {
+            case CompetitorMomentum.Declining: ftProb -= 0.15f; break;
+            case CompetitorMomentum.Crisis:    ftProb -= 0.15f; break;
+            case CompetitorMomentum.Rising:    ftProb += 0.10f; break;
+        }
+
+        switch (cashHealth)
+        {
+            case CashHealthTier.Critical: ftProb -= 0.10f; break;
+            case CashHealthTier.Tight:    ftProb -= 0.10f; break;
+            case CashHealthTier.Flush:    ftProb += 0.05f; break;
+        }
+
+        if (ftProb < 0f) ftProb = 0f;
+        if (ftProb > 1f) ftProb = 1f;
+
+        int roll = _rng.Range(0, 100);
+        return roll < (int)(ftProb * 100f) ? EmploymentType.FullTime : EmploymentType.PartTime;
     }
 
     private int ComputeDesiredHeadcount(Competitor comp)
@@ -430,7 +462,7 @@ public class AIDecisionSystem : ISystem
 
         if (cashHealth == CashHealthTier.Critical)
         {
-            int highestSalary = 0;
+            float highestCostPerOutput = -1f;
             EmployeeId targetId = default;
             bool found = false;
 
@@ -441,9 +473,12 @@ public class AIDecisionSystem : ISystem
                 Employee emp = _employeeSystem.GetEmployee(eid);
                 if (emp == null || !emp.isActive) continue;
                 if (emp.isFounder) continue;
-                if (emp.salary > highestSalary)
+
+                float output = emp.EffectiveOutput > 0f ? emp.EffectiveOutput : 1f;
+                float costPerOutput = emp.salary / output;
+                if (costPerOutput > highestCostPerOutput)
                 {
-                    highestSalary = emp.salary;
+                    highestCostPerOutput = costPerOutput;
                     targetId = eid;
                     found = true;
                 }
@@ -453,7 +488,7 @@ public class AIDecisionSystem : ISystem
             {
                 _employeeSystem.FireEmployee(targetId);
                 comp.EmployeeIds.Remove(targetId);
-                _logger.Log($"[AIDecisionSystem] {comp.CompanyName} fired employee {targetId.Value} (survival triage).");
+                _logger.Log($"[AIDecisionSystem] {comp.CompanyName} fired employee {targetId.Value} (survival triage, cost/output).");
             }
             return;
         }
@@ -552,11 +587,9 @@ public class AIDecisionSystem : ISystem
     {
         switch (role)
         {
-            case EmployeeRole.Designer:      return ProductTeamRole.Design;
-            case EmployeeRole.QAEngineer:    return ProductTeamRole.QA;
-            case EmployeeRole.SoundEngineer: return ProductTeamRole.SFX;
-            case EmployeeRole.VFXArtist:     return ProductTeamRole.VFX;
-            default:                         return ProductTeamRole.Programming;
+            case EmployeeRole.Designer:   return ProductTeamRole.Design;
+            case EmployeeRole.QAEngineer: return ProductTeamRole.QA;
+            default:                      return ProductTeamRole.Development;
         }
     }
 

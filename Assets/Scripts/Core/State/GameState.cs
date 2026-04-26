@@ -15,6 +15,7 @@ public class GameState
     public ContractState contractState;
     public ReputationState reputationState;
     public MoraleState moraleState;
+    public FatigueState fatigueState;
     public LoanState loanState;
     public InterviewState interviewState;
     public NegotiationState negotiationState;
@@ -30,6 +31,7 @@ public class GameState
     public PlatformState platformState;
     public GenerationState generationState;
     public DifficultySettings difficultySettings;
+    public ChemistryState chemistryState;
     
     public static GameState CreateNew(int seed, string companyName = "New Company")
     {

@@ -5,251 +5,368 @@ public class EmployeesView : IGameView
 {
     private readonly ICommandDispatcher _dispatcher;
     private readonly IModalPresenter _modal;
-    private readonly ITooltipProvider _tooltipProvider;
+    private readonly INavigationService _nav;
+
     private VisualElement _root;
+    private EmployeesViewModel _vm;
+
+    // Header
+    private Button _backBtn;
+    private Label _titleLabel;
+    private Label _countLabel;
+    private Label _capacityLabel;
+
+    // Sort
+    private Button _sortName;
+    private Button _sortRole;
+    private Button _sortSalary;
+    private Button _sortExpiry;
+    private Button _sortMorale;
+
+    // List
+    private ScrollView _scroll;
     private VisualElement _listContainer;
-    private ElementPool _employeePool;
-    private EmployeesViewModel _viewModel;
-    private readonly List<Button> _headerButtons = new List<Button>();
+    private ElementPool _rowPool;
 
-    // Empty state
-    private VisualElement _emptyState;
+    private EmployeeSortMode _currentSort = EmployeeSortMode.Name;
 
-    // Stagger scratch list — reused, never allocated in Bind
-    private readonly List<VisualElement> _staggerScratch = new List<VisualElement>();
-
-    // Stagger guard
-    private bool _hasAnimatedIn;
-
-    public EmployeesView(ICommandDispatcher dispatcher, IModalPresenter modal, ITooltipProvider tooltipProvider) {
+    public EmployeesView(ICommandDispatcher dispatcher, IModalPresenter modal, INavigationService nav) {
         _dispatcher = dispatcher;
         _modal = modal;
-        _tooltipProvider = tooltipProvider;
+        _nav = nav;
     }
 
     public void Initialize(VisualElement root) {
         _root = root;
+        _root.AddToClassList("employees-screen");
 
-        // Title
-        var title = new Label("Employees");
-        title.AddToClassList("section-header");
-        _root.Add(title);
+        // Header
+        var header = new VisualElement();
+        header.AddToClassList("screen-header");
+
+        _backBtn = new Button(OnBackClicked) { text = "← HR Portal" };
+        _backBtn.AddToClassList("btn-ghost");
+        _backBtn.AddToClassList("btn-sm");
+        header.Add(_backBtn);
+
+        var titleRow = new VisualElement();
+        titleRow.AddToClassList("flex-row");
+        titleRow.AddToClassList("align-center");
+        titleRow.style.flexGrow = 1;
+        titleRow.style.marginLeft = 12;
+
+        _titleLabel = new Label("Employees");
+        _titleLabel.AddToClassList("metric-primary");
+        _titleLabel.AddToClassList("text-accent");
+        titleRow.Add(_titleLabel);
+
+        _countLabel = new Label();
+        _countLabel.AddToClassList("badge");
+        _countLabel.AddToClassList("badge--neutral");
+        _countLabel.style.marginLeft = 8;
+        titleRow.Add(_countLabel);
+
+        var capacityRow = new VisualElement();
+        capacityRow.AddToClassList("flex-row");
+        capacityRow.AddToClassList("align-center");
+        var capacityLbl = new Label("Avg. Capacity:");
+        capacityLbl.AddToClassList("metric-tertiary");
+        capacityLbl.style.marginRight = 4;
+        _capacityLabel = new Label("--");
+        _capacityLabel.AddToClassList("metric-secondary");
+        capacityRow.Add(capacityLbl);
+        capacityRow.Add(_capacityLabel);
+
+        header.Add(titleRow);
+        header.Add(capacityRow);
+        _root.Add(header);
+
+        // Sort bar
+        var sortBar = new VisualElement();
+        sortBar.AddToClassList("employees-sort-bar");
+
+        var sortLabel = new Label("Sort:");
+        sortLabel.AddToClassList("metric-tertiary");
+        sortLabel.style.alignSelf = Align.Center;
+        sortLabel.style.marginRight = 8;
+        sortBar.Add(sortLabel);
+
+        _sortName   = BuildSortBtn(sortBar, "Name",    EmployeeSortMode.Name);
+        _sortRole   = BuildSortBtn(sortBar, "Role",    EmployeeSortMode.Role);
+        _sortSalary = BuildSortBtn(sortBar, "Salary",  EmployeeSortMode.Salary);
+        _sortExpiry = BuildSortBtn(sortBar, "Expiry",  EmployeeSortMode.ContractExpiry);
+        _sortMorale = BuildSortBtn(sortBar, "Morale",  EmployeeSortMode.Morale);
+
+        _root.Add(sortBar);
 
         // Column headers
-        var headerRow = new VisualElement();
-        headerRow.AddToClassList("column-header");
+        var colHeader = new VisualElement();
+        colHeader.AddToClassList("employees-col-header");
+        AddColLabel(colHeader, "Employee",  2, false);
+        AddColLabel(colHeader, "Type",      1);
+        AddColLabel(colHeader, "Team",      1);
+        AddColLabel(colHeader, "Morale",    1);
+        AddColLabel(colHeader, "Energy",    1);
+        AddColLabel(colHeader, "Salary",    1);
+        AddColLabel(colHeader, "Expiry",    1);
+        _root.Add(colHeader);
 
-        var columns = new[] {
-            ("Name",   EmployeeSortColumn.Name,   3, ""),
-            ("Role",   EmployeeSortColumn.Role,   2, ""),
-            ("Age",    EmployeeSortColumn.Role,   1, ""),
-            ("Salary", EmployeeSortColumn.Salary, 1, "Monthly pay. Deducted automatically each in-game month."),
-            ("Morale", EmployeeSortColumn.Morale, 1, "Current wellbeing. Low morale reduces work quality and speed."),
-            ("Ability", EmployeeSortColumn.Ability, 1, "Overall skill star rating from 1 to 5."),
-            ("Team",   EmployeeSortColumn.Team,   2, "")
-        };
+        // Scroll list
+        _scroll = new ScrollView(ScrollViewMode.Vertical);
+        _scroll.AddToClassList("employees-scroll");
+        _listContainer = new VisualElement();
+        _listContainer.AddToClassList("employees-list");
+        _scroll.Add(_listContainer);
+        _root.Add(_scroll);
 
-        for (int i = 0; i < columns.Length; i++) {
-            var (label, sortCol, flex, tip) = columns[i];
-            var btn = new Button { text = label };
-            btn.AddToClassList("column-header__cell");
-            btn.style.flexGrow = flex;
-            btn.style.flexBasis = 0;
-            btn.style.backgroundColor = new StyleColor(UnityEngine.Color.clear);
-            btn.style.borderTopWidth = 0;
-            btn.style.borderBottomWidth = 0;
-            btn.style.borderLeftWidth = 0;
-            btn.style.borderRightWidth = 0;
+        _rowPool = new ElementPool(CreateEmployeeRow, _listContainer);
 
-            if (!string.IsNullOrEmpty(tip))
-                btn.SetSimpleTooltip(tip, _tooltipProvider.TooltipService);
-
-            var capturedCol = sortCol;
-            btn.clicked += () => {
-                _viewModel?.Sort(capturedCol);
-                Bind(_viewModel);
-            };
-
-            headerRow.Add(btn);
-            _headerButtons.Add(btn);
-        }
-        _root.Add(headerRow);
-
-        // Empty state
-        _emptyState = UICardHelper.CreateEmptyState("👤", "No employees hired yet.");
-        _emptyState.AddToClassList("empty-state--hidden");
-        _root.Add(_emptyState);
-
-        // Scrollable list
-        var scrollView = new ScrollView();
-        scrollView.style.flexGrow = 1;
-        _listContainer = scrollView.contentContainer;
-        _employeePool = new ElementPool(CreateEmployeeRow, _listContainer);
-        _root.Add(scrollView);
+        UpdateSortHighlight();
     }
 
     public void Bind(IViewModel viewModel) {
-        _viewModel = viewModel as EmployeesViewModel;
-        if (_viewModel == null) return;
+        _vm = viewModel as EmployeesViewModel;
+        if (_vm == null) return;
 
-        _employeePool.UpdateList(_viewModel.Employees, BindEmployeeRow);
+        if (_countLabel != null) _countLabel.text = _vm.EmployeeCount.ToString();
+        if (_capacityLabel != null) _capacityLabel.text = _vm.EffectiveCapacityText;
 
-        bool hasEmployees = _viewModel.Employees != null && _viewModel.Employees.Count > 0;
-        if (_emptyState != null) {
-            if (hasEmployees) _emptyState.AddToClassList("empty-state--hidden");
-            else _emptyState.RemoveFromClassList("empty-state--hidden");
-        }
-
-        // Stagger on first bind
-        if (!_hasAnimatedIn && hasEmployees) {
-            _hasAnimatedIn = true;
-            _staggerScratch.Clear();
-            int childCount = _listContainer.childCount;
-            for (int i = 0; i < childCount; i++) {
-                var el = _listContainer[i];
-                if (el.style.display != DisplayStyle.None) _staggerScratch.Add(el);
-            }
-            UIAnimator.StaggerIn(_staggerScratch);
-        }
+        _rowPool.UpdateList(_vm.Employees, BindEmployeeRow);
     }
 
     public void Dispose() {
-        var ts = _tooltipProvider.TooltipService;
-        int btnCount = _headerButtons.Count;
-        for (int i = 0; i < btnCount; i++)
-            _headerButtons[i].ClearTooltip(ts);
-        _hasAnimatedIn = false;
-        _staggerScratch.Clear();
-        _viewModel = null;
-        _employeePool = null;
+        if (_backBtn != null)   _backBtn.clicked   -= OnBackClicked;
+        if (_sortName != null)  _sortName.clicked  -= OnSortNameClicked;
+        if (_sortRole != null)  _sortRole.clicked  -= OnSortRoleClicked;
+        if (_sortSalary != null) _sortSalary.clicked -= OnSortSalaryClicked;
+        if (_sortExpiry != null) _sortExpiry.clicked -= OnSortExpiryClicked;
+        if (_sortMorale != null) _sortMorale.clicked -= OnSortMoraleClicked;
+
+        _rowPool = null;
+        _vm = null;
+        _root = null;
+        _listContainer = null;
     }
+
+    // ── Sort handlers ──────────────────────────────────────────────────────────
+
+    private void OnBackClicked()        => _nav.NavigateTo(ScreenId.HRPortalLanding);
+    private void OnSortNameClicked()    => SetSort(EmployeeSortMode.Name);
+    private void OnSortRoleClicked()    => SetSort(EmployeeSortMode.Role);
+    private void OnSortSalaryClicked()  => SetSort(EmployeeSortMode.Salary);
+    private void OnSortExpiryClicked()  => SetSort(EmployeeSortMode.ContractExpiry);
+    private void OnSortMoraleClicked()  => SetSort(EmployeeSortMode.Morale);
+
+    private void SetSort(EmployeeSortMode mode) {
+        _currentSort = mode;
+        if (_vm != null) {
+            _vm.SortMode = mode;
+            _vm.ResortAndNotify();
+        }
+        UpdateSortHighlight();
+        if (_vm != null) {
+            _rowPool.UpdateList(_vm.Employees, BindEmployeeRow);
+        }
+    }
+
+    private void UpdateSortHighlight() {
+        SetSortActive(_sortName,   _currentSort == EmployeeSortMode.Name);
+        SetSortActive(_sortRole,   _currentSort == EmployeeSortMode.Role);
+        SetSortActive(_sortSalary, _currentSort == EmployeeSortMode.Salary);
+        SetSortActive(_sortExpiry, _currentSort == EmployeeSortMode.ContractExpiry);
+        SetSortActive(_sortMorale, _currentSort == EmployeeSortMode.Morale);
+    }
+
+    private static void SetSortActive(Button btn, bool active) {
+        if (btn == null) return;
+        btn.EnableInClassList("tab-bar__item--active", active);
+    }
+
+    // ── Row factory ───────────────────────────────────────────────────────────
 
     private VisualElement CreateEmployeeRow() {
         var row = new VisualElement();
-        row.AddToClassList("list-item");
+        row.AddToClassList("employees-row");
+
+        // Employee col
+        var empCol = new VisualElement();
+        empCol.AddToClassList("employees-row__emp-col");
+        empCol.style.flexGrow = 2;
+
+        var nameRow = new VisualElement();
+        nameRow.AddToClassList("flex-row");
+        nameRow.AddToClassList("align-center");
 
         var nameLabel = new Label();
-        nameLabel.name = "emp-name";
-        nameLabel.style.flexGrow = 3;
-        nameLabel.style.flexBasis = 0;
-        row.Add(nameLabel);
+        nameLabel.name = "row-name";
+        nameLabel.AddToClassList("metric-secondary");
+
+        var founderBadge = new Label("Founder");
+        founderBadge.name = "row-founder";
+        founderBadge.AddToClassList("role-pill");
+        founderBadge.AddToClassList("role-pill--founder");
+        founderBadge.style.marginLeft = 6;
+        founderBadge.style.display = DisplayStyle.None;
+
+        var renewalBadge = new Label("Renewal");
+        renewalBadge.name = "row-renewal";
+        renewalBadge.AddToClassList("badge");
+        renewalBadge.AddToClassList("badge--warning");
+        renewalBadge.style.marginLeft = 6;
+        renewalBadge.style.display = DisplayStyle.None;
+
+        nameRow.Add(nameLabel);
+        nameRow.Add(founderBadge);
+        nameRow.Add(renewalBadge);
 
         var roleLabel = new Label();
-        roleLabel.name = "emp-role";
+        roleLabel.name = "row-role";
         roleLabel.AddToClassList("role-pill");
-        roleLabel.style.flexGrow = 2;
-        roleLabel.style.flexBasis = 0;
-        roleLabel.style.alignSelf = Align.Center;
-        roleLabel.style.overflow = Overflow.Hidden;
-        row.Add(roleLabel);
+        roleLabel.style.marginTop = 2;
 
-        var ageLabel = new Label();
-        ageLabel.name = "emp-age";
-        ageLabel.AddToClassList("metric-tertiary");
-        ageLabel.style.flexGrow = 1;
-        ageLabel.style.flexBasis = 0;
-        ageLabel.style.paddingLeft = 8;
-        row.Add(ageLabel);
+        empCol.Add(nameRow);
+        empCol.Add(roleLabel);
+        row.Add(empCol);
 
-        var salaryLabel = new Label();
-        salaryLabel.name = "emp-salary";
-        salaryLabel.AddToClassList("metric-secondary");
-        salaryLabel.style.flexGrow = 1;
-        salaryLabel.style.flexBasis = 0;
-        row.Add(salaryLabel);
+        // Type col
+        var typeLabel = new Label();
+        typeLabel.name = "row-type";
+        typeLabel.AddToClassList("badge");
+        typeLabel.AddToClassList("employees-row__cell");
+        row.Add(typeLabel);
 
-        var moraleLabel = new Label();
-        moraleLabel.name = "emp-morale-label";
-        moraleLabel.AddToClassList("morale-band-label");
-        moraleLabel.style.flexGrow = 1;
-        moraleLabel.style.flexBasis = 0;
-        row.Add(moraleLabel);
-
-        var starContainer = new VisualElement();
-        starContainer.name = "emp-stars";
-        starContainer.AddToClassList("star-rating");
-        starContainer.style.flexGrow = 1;
-        starContainer.style.flexBasis = 0;
-        for (int s = 0; s < 5; s++) {
-            var star = new VisualElement();
-            star.AddToClassList("star");
-            star.AddToClassList("star-empty");
-            starContainer.Add(star);
-        }
-        row.Add(starContainer);
-
+        // Team col
         var teamLabel = new Label();
-        teamLabel.name = "emp-team";
-        teamLabel.AddToClassList("metric-tertiary");
-        teamLabel.style.flexGrow = 2;
-        teamLabel.style.flexBasis = 0;
+        teamLabel.name = "row-team";
+        teamLabel.AddToClassList("metric-secondary");
+        teamLabel.AddToClassList("employees-row__cell");
         row.Add(teamLabel);
 
-        // Wire click handler once at creation
-        row.RegisterCallback<ClickEvent>(OnEmployeeRowClicked);
+        // Morale col
+        var moraleLabel = new Label();
+        moraleLabel.name = "row-morale";
+        moraleLabel.AddToClassList("metric-secondary");
+        moraleLabel.AddToClassList("employees-row__cell");
+        row.Add(moraleLabel);
+
+        // Energy col
+        var energyLabel = new Label();
+        energyLabel.name = "row-energy";
+        energyLabel.AddToClassList("metric-secondary");
+        energyLabel.AddToClassList("employees-row__cell");
+        row.Add(energyLabel);
+
+        // Salary col
+        var salaryLabel = new Label();
+        salaryLabel.name = "row-salary";
+        salaryLabel.AddToClassList("metric-secondary");
+        salaryLabel.AddToClassList("employees-row__cell");
+        row.Add(salaryLabel);
+
+        // Expiry col
+        var expiryLabel = new Label();
+        expiryLabel.name = "row-expiry";
+        expiryLabel.AddToClassList("metric-secondary");
+        expiryLabel.AddToClassList("employees-row__cell");
+        row.Add(expiryLabel);
+
+        row.RegisterCallback<ClickEvent>(OnRowClicked);
 
         return row;
     }
 
     private void BindEmployeeRow(VisualElement el, EmployeeRowDisplay data) {
-        var nameLabel = el.Q<Label>("emp-name");
-        nameLabel.text = data.Name;
-        if (data.IsFounder) nameLabel.AddToClassList("text-founder");
-        else nameLabel.RemoveFromClassList("text-founder");
-
-        el.Q<Label>("emp-age").text = data.Age > 0 ? data.Age.ToString() : "";
-
-        var roleLabel = el.Q<Label>("emp-role");
-        roleLabel.text = data.Role;
-        UIFormatting.ClearRolePillClasses(roleLabel);
-        roleLabel.AddToClassList(UIFormatting.RolePillClass(data.Role));
-
-        el.Q<Label>("emp-salary").text = data.SalaryDisplay;
-        el.Q<Label>("emp-team").text = data.TeamName;
-
-        // Morale band label
-        var moraleLabel = el.Q<Label>("emp-morale-label");
-        if (moraleLabel != null) {
-            moraleLabel.text = data.MoraleBandLabel;
-            moraleLabel.RemoveFromClassList("morale-band--inspired");
-            moraleLabel.RemoveFromClassList("morale-band--motivated");
-            moraleLabel.RemoveFromClassList("morale-band--stable");
-            moraleLabel.RemoveFromClassList("morale-band--unhappy");
-            moraleLabel.RemoveFromClassList("morale-band--miserable");
-            moraleLabel.RemoveFromClassList("morale-band--critical");
-            moraleLabel.AddToClassList("morale-band--" + data.MoraleBandLabel.ToLowerInvariant());
-        }
-
-        // Star rating (Ability)
-        var starContainer = el.Q<VisualElement>("emp-stars");
-        if (starContainer != null) {
-            int childCount = starContainer.childCount;
-            for (int s = 0; s < childCount && s < 5; s++) {
-                var star = starContainer[s];
-                star.RemoveFromClassList("star-filled");
-                star.RemoveFromClassList("star-empty");
-                star.AddToClassList(s < data.AbilityStars ? "star-filled" : "star-empty");
-            }
-        }
-
-        // Selection state
-        if (_viewModel != null && _viewModel.SelectedEmployeeId.HasValue
-            && _viewModel.SelectedEmployeeId.Value == data.Id) {
-            el.AddToClassList("list-item--selected");
-        } else {
-            el.RemoveFromClassList("list-item--selected");
-        }
-
         el.userData = data.Id;
+
+        var nameLabel    = el.Q<Label>("row-name");
+        var founderBadge = el.Q<Label>("row-founder");
+        var renewalBadge = el.Q<Label>("row-renewal");
+        var roleLabel    = el.Q<Label>("row-role");
+        var typeLabel    = el.Q<Label>("row-type");
+        var teamLabel    = el.Q<Label>("row-team");
+        var moraleLabel  = el.Q<Label>("row-morale");
+        var energyLabel  = el.Q<Label>("row-energy");
+        var salaryLabel  = el.Q<Label>("row-salary");
+        var expiryLabel  = el.Q<Label>("row-expiry");
+
+        if (nameLabel != null)    nameLabel.text = data.Name;
+        if (founderBadge != null) founderBadge.style.display = data.IsFounder ? DisplayStyle.Flex : DisplayStyle.None;
+        if (renewalBadge != null) renewalBadge.style.display = data.ShowRenewalBadge ? DisplayStyle.Flex : DisplayStyle.None;
+
+        if (roleLabel != null) {
+            roleLabel.text = data.RoleName;
+            UIFormatting.ClearRolePillClasses(roleLabel);
+            roleLabel.AddToClassList(data.RolePillClass);
+        }
+
+        if (typeLabel != null) {
+            typeLabel.text = data.TypeBadge;
+            typeLabel.RemoveFromClassList("badge--accent");
+            typeLabel.RemoveFromClassList("badge--info");
+            typeLabel.RemoveFromClassList("badge--special");
+            typeLabel.AddToClassList(data.TypeBadgeClass);
+        }
+
+        if (teamLabel != null) teamLabel.text = data.TeamName;
+
+        if (moraleLabel != null) {
+            moraleLabel.text = data.MoraleText;
+            moraleLabel.RemoveFromClassList("text-success");
+            moraleLabel.RemoveFromClassList("text-warning");
+            moraleLabel.RemoveFromClassList("text-danger");
+            moraleLabel.AddToClassList(data.MoraleClass);
+        }
+
+        if (energyLabel != null) {
+            energyLabel.text = data.EnergyText;
+            energyLabel.RemoveFromClassList("energy-band--fresh");
+            energyLabel.RemoveFromClassList("energy-band--fit");
+            energyLabel.RemoveFromClassList("energy-band--tiring");
+            energyLabel.RemoveFromClassList("energy-band--drained");
+            energyLabel.RemoveFromClassList("energy-band--exhausted");
+            energyLabel.AddToClassList(data.EnergyClass);
+        }
+
+        if (salaryLabel != null) salaryLabel.text = data.SalaryText;
+        if (expiryLabel != null) expiryLabel.text = data.ContractExpiryText;
     }
 
-    private void OnEmployeeRowClicked(ClickEvent evt) {
-        var el = evt.currentTarget as VisualElement;
-        if (el == null || !(el.userData is EmployeeId id)) return;
-        _viewModel?.SelectEmployee(id);
-        var profileVM = new EmployeeProfileViewModel();
-        profileVM.SetEmployee(id);
-        _modal.ShowModal(new EmployeeProfileView(_dispatcher, _modal), profileVM);
-        Bind(_viewModel);
+    // ── Row click ─────────────────────────────────────────────────────────────
+
+    private void OnRowClicked(ClickEvent evt) {
+        var row = evt.currentTarget as VisualElement;
+        if (row == null || !(row.userData is EmployeeId id)) return;
+        OpenDetailModal(id);
+    }
+
+    private void OpenDetailModal(EmployeeId id) {
+        var vm = new EmployeeDetailModalViewModel();
+        vm.SetEmployeeId(id);
+        _modal.ShowModal(new EmployeeDetailModalView(_dispatcher, _modal), vm);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private Button BuildSortBtn(VisualElement parent, string label, EmployeeSortMode mode) {
+        var btn = new Button { text = label };
+        btn.AddToClassList("tab-bar__item");
+        btn.AddToClassList("btn-sm");
+        switch (mode) {
+            case EmployeeSortMode.Name:           btn.clicked += OnSortNameClicked;   break;
+            case EmployeeSortMode.Role:           btn.clicked += OnSortRoleClicked;   break;
+            case EmployeeSortMode.Salary:         btn.clicked += OnSortSalaryClicked; break;
+            case EmployeeSortMode.ContractExpiry: btn.clicked += OnSortExpiryClicked; break;
+            case EmployeeSortMode.Morale:         btn.clicked += OnSortMoraleClicked; break;
+        }
+        parent.Add(btn);
+        return btn;
+    }
+
+    private static void AddColLabel(VisualElement parent, string text, int flex, bool center = true) {
+        var lbl = new Label(text);
+        lbl.AddToClassList("metric-tertiary");
+        lbl.style.flexGrow = flex;
+        if (center) lbl.style.unityTextAlign = UnityEngine.TextAnchor.MiddleCenter;
+        parent.Add(lbl);
     }
 }

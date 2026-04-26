@@ -14,7 +14,7 @@
             <ui:Button name="btn-load-game" text="Load Game" class="btn-secondary menu-btn" />
             <ui:Button name="btn-settings" text="Settings" class="btn-secondary menu-btn" />
             <ui:Button name="btn-exit" text="Exit" class="btn-ghost menu-btn" />
-            <ui:Label name="version-label" text="v0.0.218" class="version-label" />
+            <ui:Label name="version-label" text="v0.0.268" class="version-label" />
         </ui:VisualElement>
     </ui:VisualElement>
     <!-- New Game Screen -->
@@ -80,7 +80,7 @@
                 <ui:Label text="Manual Saves" class="section-header" />
                 <ui:VisualElement name="manual-saves-list" class="saves-list" />
             </ui:VisualElement>
-            <ui:VisualElement name="auto-saves-panel" class="load-saves-panel">
+            <ui:VisualElement name="auto-saves-panel" class="load-saves-panel load-saves-panel--last">
                 <ui:Label text="Auto Saves" class="section-header" />
                 <ui:VisualElement name="auto-saves-list" class="saves-list" />
             </ui:VisualElement>

@@ -6,6 +6,8 @@ public interface IAbilityReadModel
     // HR Skill average of the sourcing team determines Ability/Potential estimate accuracy.
     HiddenAttributes GetEmployeeHiddenAttributes(EmployeeId id);
     CandidatePotentialEstimate GetCandidatePotentialEstimate(int candidateId);
+    // Returns the role-weighted ability score for any role given a raw skill array.
+    int ComputeAbilityForRole(int[] skills, EmployeeRole role);
 }
 
 public struct CandidatePotentialEstimate

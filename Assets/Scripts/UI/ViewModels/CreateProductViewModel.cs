@@ -1295,6 +1295,7 @@ public class CreateProductViewModel : IViewModel
 
     private float[] _marketProfile = new float[3];
     private float[] _productProfile = new float[3];
+    private readonly float[] _maxPossibleWeights = new float[3];
     private string[] _radarAxisLabels = new string[3];
     private Color[] _radarAxisColors = new Color[3];
 
@@ -1384,9 +1385,15 @@ public class CreateProductViewModel : IViewModel
 
     private MarketReadPanelDisplay _marketReadDisplay;
     private MarketReadPanelDisplay _previousMarketRead;
+    [Obsolete("Use PlanReviewDisplay instead. Market Read UI has been replaced by Product Plan Review.")]
     public MarketReadPanelDisplay MarketReadDisplay => _marketReadDisplay;
+    [Obsolete("Use PlanReviewDisplay instead. Market Read UI has been replaced by Product Plan Review.")]
     public bool HasMarketRead => _marketReadDisplay.HasAnyReads;
+    [Obsolete("Delta concept removed. Product Plan Review does not use deltas.")]
     public MarketReadDelta MarketReadDelta { get; private set; }
+
+    private readonly ProductPlanReviewDisplay _planReviewDisplay = new ProductPlanReviewDisplay();
+    public ProductPlanReviewDisplay PlanReviewDisplay => _planReviewDisplay;
 
     public void SetIdentitySystems(GenerationSystem generationSystem, PlatformSystem platformSystem, ProductState productState, TuningConfig tuning) {
         _generationSystem = generationSystem;
@@ -1400,6 +1407,7 @@ public class CreateProductViewModel : IViewModel
             IdentityPreview = default;
             _marketReadDisplay = default;
             MarketReadDelta = default;
+            _planReviewDisplay.Reset();
             return;
         }
         int currentTick = _lastState != null ? _lastState.CurrentDay * TimeState.TicksPerDay : 0;
@@ -1419,6 +1427,8 @@ public class CreateProductViewModel : IViewModel
             MarketReadDelta = MarketReadResolver.ComparePanels(in _previousMarketRead, in _marketReadDisplay);
         else
             MarketReadDelta = default;
+
+        RefreshPlanReview(currentTick, targetReleaseTick);
     }
 
     private MarketReadResolver.MarketReadContext BuildMarketReadContext(int currentTick, int targetReleaseTick) {
@@ -1491,6 +1501,68 @@ public class CreateProductViewModel : IViewModel
         };
     }
 
+    private void RefreshPlanReview(int currentTick, int targetReleaseTick) {
+        float priceNorm = _selectedTemplate?.economyConfig != null && _selectedTemplate.economyConfig.pricePerUnit > 0f
+            ? _selectedTemplate.economyConfig.pricePerUnit : 1f;
+        float priceRatio = priceNorm > 0f ? Price / priceNorm : 1f;
+
+        int selectedCount = 0;
+        int expectedTotal = 0;
+        int selectedExpected = 0;
+        int currentGen = _generationSystem != null ? _generationSystem.GetCurrentGeneration() : 1;
+
+        if (_selectedTemplate?.availableFeatures != null) {
+            int af = _selectedTemplate.availableFeatures.Length;
+            for (int i = 0; i < af; i++) {
+                var feat = _selectedTemplate.availableFeatures[i];
+                if (feat == null) continue;
+                var stage = FeatureDemandHelper.GetDemandStage(currentGen, feat.demandIntroductionGen, feat.demandMaturitySpeed, feat.isFoundational, 0f);
+                bool isExpected = feat.isFoundational || stage == FeatureDemandStage.Standard;
+                if (isExpected) expectedTotal++;
+                int fc = _features.Count;
+                bool isSelected = false;
+                for (int j = 0; j < fc; j++) {
+                    if (_features[j].FeatureId == feat.featureId && _features[j].IsSelected) { isSelected = true; break; }
+                }
+                if (!isSelected) continue;
+                selectedCount++;
+                if (isExpected) selectedExpected++;
+            }
+        }
+
+        int availableFeatureCount = _selectedTemplate?.availableFeatures != null ? _selectedTemplate.availableFeatures.Length : 0;
+        float selectedFeatureRatio = availableFeatureCount > 0 ? (float)selectedCount / availableFeatureCount : 0f;
+        float expectedCoverage = expectedTotal > 0 ? (float)selectedExpected / expectedTotal : 1f;
+
+        float expectedTicks = _tuning != null ? ReviewSystem.ComputeExpectedTicks(_selectedTemplate, _tuning) : 1f;
+        float plannedTicks = targetReleaseTick > currentTick ? (float)(targetReleaseTick - currentTick) : expectedTicks;
+        float scheduleRatio = expectedTicks > 0f ? plannedTicks / expectedTicks : 1f;
+
+        int availPlatforms = _availablePlatforms.Count;
+        float platformReach = availPlatforms > 0 ? (float)_selectedPlatformIds.Count / availPlatforms : 0f;
+
+        bool scheduleConfidenceLow = EstimatedCompletionLabel.StartsWith("Unknown");
+
+        var context = new ProductPlanReviewContext {
+            PriceNorm = priceRatio,
+            SelectedFeatureRatio = selectedFeatureRatio,
+            ExpectedFeatureCoverage = expectedCoverage,
+            ScheduleRatio = scheduleRatio,
+            ScheduleConfidenceLow = scheduleConfidenceLow,
+            PlatformReach = platformReach,
+            PolishForecast = 0f,
+            StabilityForecast = 0f,
+            HasPrice = Price > 0f,
+            HasFeatures = selectedCount > 0,
+            HasPlatforms = _selectedPlatformIds.Count > 0,
+            SelectedFeatureCount = selectedCount,
+            ExpectedFeaturesTotal = expectedTotal,
+            ExpectedFeaturesSelected = selectedExpected
+        };
+
+        ProductPlanReviewDiagnostics.Evaluate(in context, _planReviewDisplay);
+    }
+
     // ── IViewModel ───────────────────────────────────────────────────────────
     public void Refresh(IReadOnlyGameState state)
     {
@@ -1510,7 +1582,7 @@ public class CreateProductViewModel : IViewModel
             bool onContract = state.GetContractForTeam(team.id) != null;
             bool onProduct = state.IsTeamAssignedToProduct(team.id);
             TeamType teamType = state.GetTeamType(team.id);
-            if (teamType == TeamType.HR || teamType == TeamType.Accounting) continue;
+            if (teamType == TeamType.HR) continue;
             var display = new TeamSummaryDisplay {
                 Id = team.id,
                 Name = team.name,
@@ -1987,6 +2059,7 @@ public class CreateProductViewModel : IViewModel
         _templateCategoryCount = 0;
         _marketProfile[0] = 0f; _marketProfile[1] = 0f; _marketProfile[2] = 0f;
         _productProfile[0] = 0f; _productProfile[1] = 0f; _productProfile[2] = 0f;
+        _maxPossibleWeights[0] = 0f; _maxPossibleWeights[1] = 0f; _maxPossibleWeights[2] = 0f;
         _radarAxisLabels[0] = ""; _radarAxisLabels[1] = ""; _radarAxisLabels[2] = "";
         _radarAxisColors[0] = DefaultRadarColors[0];
         _radarAxisColors[1] = DefaultRadarColors[1];
@@ -2026,6 +2099,22 @@ public class CreateProductViewModel : IViewModel
         // Product profile — selected feature devCostMultiplier weight per axis, scaled by demand stage
         float[] rawWeights = new float[3];
         float[] rawWeightsForWaste = new float[3];
+
+        // Max possible weights — all features (not filtered by IsSelected) to compute per-axis denominator
+        int totalFeatureCount = _features.Count;
+        for (int i = 0; i < totalFeatureCount; i++) {
+            var feat = _features[i];
+            FeatureCategory cat = feat.FeatureCategory;
+            float weight = feat.DevCostMultiplier > 0f ? feat.DevCostMultiplier : 1f;
+            weight *= GetDemandStageInterestWeight(feat.DemandStage);
+            for (int axis = 0; axis < _templateCategoryCount; axis++) {
+                if (_templateCategories[axis] == cat) {
+                    _maxPossibleWeights[axis] += weight;
+                    break;
+                }
+            }
+        }
+
         int featureCount = _features.Count;
         for (int i = 0; i < featureCount; i++) {
             var feat = _features[i];
@@ -2043,12 +2132,10 @@ public class CreateProductViewModel : IViewModel
             }
         }
 
-        float maxWeight = 0f;
-        for (int axis = 0; axis < _templateCategoryCount; axis++)
-            if (rawWeights[axis] > maxWeight) maxWeight = rawWeights[axis];
-        if (maxWeight > 0f) {
-            for (int axis = 0; axis < _templateCategoryCount; axis++)
-                _productProfile[axis] = rawWeights[axis] / maxWeight;
+        for (int axis = 0; axis < _templateCategoryCount; axis++) {
+            _productProfile[axis] = _maxPossibleWeights[axis] > 0f
+                ? (float)Math.Min(1f, rawWeights[axis] / _maxPossibleWeights[axis])
+                : 0f;
         }
 
         // Expected interest — dot product of normalized profiles / magnitude, scaled by live demand
@@ -2860,10 +2947,13 @@ public class CreateProductViewModel : IViewModel
                 bool isRoleFit = TeamWorkEngine.IsRoleFitForSkill(emp.role, skillType);
                 TeamWorkEngine.ComputeEffectiveSkills(
                     emp.GetSkill(skillType), ca, emp.morale,
+                    100f,
                     emp.hiddenAttributes.WorkEthic,
                     emp.hiddenAttributes.Creative,
                     emp.hiddenAttributes.Adaptability,
                     isRoleFit,
+                    emp.personality,
+                    50f,
                     out float speedSkill, out _);
                 totalSpeedSkill += speedSkill;
                 activeCount++;
@@ -2948,12 +3038,9 @@ public class CreateProductViewModel : IViewModel
         ProductTeamRole matchingRole;
         switch (requiredSkill)
         {
-            case SkillType.Programming: matchingRole = ProductTeamRole.Programming; break;
-            case SkillType.Design:      matchingRole = ProductTeamRole.Design;      break;
-            case SkillType.QA:          matchingRole = ProductTeamRole.QA;          break;
-            case SkillType.SFX:         matchingRole = ProductTeamRole.SFX;         break;
-            case SkillType.VFX:         matchingRole = ProductTeamRole.VFX;         break;
-            default:                    matchingRole = ProductTeamRole.Programming;  break;
+            case SkillType.Design: matchingRole = ProductTeamRole.Design; break;
+            case SkillType.QA:     matchingRole = ProductTeamRole.QA;     break;
+            default:               matchingRole = ProductTeamRole.Development; break;
         }
 
         if (!_teamAssignments.TryGetValue(matchingRole, out TeamId teamId)) {

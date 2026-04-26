@@ -1,0 +1,104 @@
+.hr-assignments {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+/* ── Assignment Card ─────────────────────────────────────────────────────── */
+
+.assignment-list {
+    flex-direction: column;
+}
+
+.assignment-card {
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+}
+
+.assignment-filter-row {
+    flex-wrap: wrap;
+}
+
+/* ── Progress Bar ─────────────────────────────────────────────────────────── */
+
+.progress-bar {
+    height: 4px;
+    background-color: var(--color-surface-raised);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-bar__fill {
+    height: 100%;
+    background-color: var(--color-accent);
+    border-radius: 2px;
+    transition-property: width;
+    transition-duration: 0.3s;
+}
+
+/* ── Chip ─────────────────────────────────────────────────────────────────── */
+
+.chip {
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+}
+
+.chip--muted {
+    background-color: var(--color-surface-raised);
+    color: var(--color-text-secondary);
+}
+
+/* ── Batch Buttons ────────────────────────────────────────────────────────── */
+
+.assignment-batch-btn {
+    flex-grow: 1;
+    margin-right: 4px;
+    min-width: 32px;
+}
+
+/* ── Sourced List ─────────────────────────────────────────────────────────── */
+
+.sourced-list {
+    flex-direction: column;
+}
+
+.sourced-row {
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border);
+}
+
+.sourced-row:hover {
+    background-color: var(--color-surface-hover);
+    cursor: pointer;
+}
+
+/* ── Empty State ──────────────────────────────────────────────────────────── */
+
+.empty-state {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    padding: var(--spacing-xl);
+}
+
+.empty-state__icon {
+    font-size: 32px;
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.empty-state__title {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.empty-state__subtitle {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    -unity-text-align: middle-center;
+}

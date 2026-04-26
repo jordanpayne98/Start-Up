@@ -1,0 +1,26 @@
+.portal-header {
+    flex-direction: column;
+    margin-bottom: var(--spacing-lg);
+}
+
+.portal-card-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    align-content: flex-start;
+}
+
+.portal-card {
+    flex-basis: 48%;
+    min-height: 280px;
+    margin-bottom: var(--spacing-md);
+    margin-right: var(--spacing-md);
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.portal-card__mini-list {
+    flex-grow: 1;
+    min-height: 72px;
+    margin-bottom: var(--spacing-xs);
+}

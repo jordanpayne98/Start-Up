@@ -41,6 +41,12 @@ public class CompetitorArchetypeConfig : ScriptableObject
     [Header("Capacity")]
     public int maxSimultaneousProducts;
 
+    [Header("Employment Mix")]
+    [Range(0f, 1f)]
+    public float fullTimeRatio = 0.65f;
+    [Range(0.8f, 1.2f)]
+    public float salaryTierModifier = 1.0f;
+
     [Header("Release Date Reactions")]
     [Range(0f, 1f)]
     public float dateShiftReactivity;

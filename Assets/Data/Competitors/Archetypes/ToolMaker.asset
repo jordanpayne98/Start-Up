@@ -48,3 +48,5 @@ MonoBehaviour:
   syntheticAdaptabilityRange: {x: 9, y: 14}
   roleFitRatio: 0.35
   syntheticTeamSizeRange: {x: 5, y: 10}
+  fullTimeRatio: 0.65
+  salaryTierModifier: 1.05

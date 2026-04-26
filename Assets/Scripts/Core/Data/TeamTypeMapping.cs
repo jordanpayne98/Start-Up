@@ -4,13 +4,11 @@ public static class TeamTypeMapping
     {
         switch (role)
         {
-            case ProductTeamRole.Programming: return TeamType.Programming;
+            case ProductTeamRole.Development: return TeamType.Development;
             case ProductTeamRole.Design:      return TeamType.Design;
             case ProductTeamRole.QA:          return TeamType.QA;
-            case ProductTeamRole.SFX:         return TeamType.SFX;
-            case ProductTeamRole.VFX:         return TeamType.VFX;
             case ProductTeamRole.Marketing:   return TeamType.Marketing;
-            default:                          return TeamType.Programming;
+            default:                          return TeamType.Development;
         }
     }
 
@@ -18,11 +16,9 @@ public static class TeamTypeMapping
     {
         switch (type)
         {
-            case TeamType.Programming: return ProductTeamRole.Programming;
+            case TeamType.Development: return ProductTeamRole.Development;
             case TeamType.Design:      return ProductTeamRole.Design;
             case TeamType.QA:          return ProductTeamRole.QA;
-            case TeamType.SFX:         return ProductTeamRole.SFX;
-            case TeamType.VFX:         return ProductTeamRole.VFX;
             case TeamType.Marketing:   return ProductTeamRole.Marketing;
             default:                   return null;
         }

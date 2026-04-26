@@ -312,7 +312,10 @@ public class CompetitorSystem : ISystem
                 minCount = 5; maxCount = 12; break;
         }
         int employeeCount = rng.Range(minCount, maxCount + 1);
-        var hiredIds = _employeeSystem.BulkHireForCompany(comp.Id.ToCompanyId(), comp.Archetype, employeeCount, rng, tick);
+        CompetitorArchetypeConfig archetypeCfg = GetArchetypeConfig(comp.Archetype);
+        float ftRatio = archetypeCfg != null ? archetypeCfg.fullTimeRatio : 0.65f;
+        float salaryMod = archetypeCfg != null ? archetypeCfg.salaryTierModifier : 1.0f;
+        var hiredIds = _employeeSystem.BulkHireForCompany(comp.Id.ToCompanyId(), comp.Archetype, employeeCount, rng, tick, ftRatio, salaryMod);
         for (int i = 0; i < hiredIds.Count; i++)
             comp.EmployeeIds.Add(hiredIds[i]);
     }
@@ -337,7 +340,7 @@ public class CompetitorSystem : ISystem
         var teamIds = new List<TeamId>(devTeamCount);
         for (int t = 0; t < devTeamCount; t++)
         {
-            TeamId teamId = _teamSystem.CreateTeam(TeamType.Programming, tick, companyId);
+            TeamId teamId = _teamSystem.CreateTeam(TeamType.Development, tick, companyId);
             teamIds.Add(teamId);
         }
 

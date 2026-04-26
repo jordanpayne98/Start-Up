@@ -1,4 +1,4 @@
-// TeamWorkEngine Version: Clean v1
+// TeamWorkEngine Version: Clean v2
 using System.Collections.Generic;
 
 // Pure-static utility for all shared work/quality formulas.
@@ -9,6 +9,7 @@ public struct TeamWorkResult
     public float AvgQualitySkill;
     public int Contributors;
     public int ActiveCount;
+    public float EffectiveCapacity;
     public float Overhead;
     public float AvgMorale;
     public float CoverageQualityMod;
@@ -25,35 +26,76 @@ public static class TeamWorkEngine
         float visibleSkill,
         int ca,
         float morale,
+        float energy,
         float workEthic,
         float creative,
         float adaptability,
         bool isRoleFit,
+        Personality personality,
+        float avgTeamMorale,
         out float speedSkill,
         out float qualitySkill)
     {
         float caMod = 0.70f + (ca / 200f) * 0.50f;
         float moraleMod = MoraleSystem.MoraleMultiplier(morale);
+        float energyMod = FatigueSystem.EnergyMultiplier(energy);
         float workEthicMod = 0.90f + (workEthic / 20f) * 0.20f;
         float creativeMod = 0.90f + (creative / 20f) * 0.20f;
         float offRoleSpeedMod = isRoleFit ? 1.0f : 0.25f + (adaptability / 20f) * 0.25f;
         float offRoleQualityMod = isRoleFit ? 1.0f : 0.30f + (adaptability / 20f) * 0.30f;
 
+        float personalitySpeedMod = ComputePersonalitySpeedMod(personality, avgTeamMorale);
+        float personalityQualityMod = ComputePersonalityQualityMod(personality);
+
         // Soft-cap curve: inflection at skill 6 (average new hire baseline).
-        // Below 6 the curve provides a slight boost; above 6 it compresses.
-        // Skill 6→6.0, 10→7.75, 15→9.49, 20→10.95 (1.82x at 20 vs 3.33x linear).
         const float SkillDiminishingReturnsPivot = 6f;
         float scaledSkill = SkillDiminishingReturnsPivot * (float)System.Math.Sqrt(visibleSkill / SkillDiminishingReturnsPivot);
 
-        speedSkill = scaledSkill * caMod * moraleMod * workEthicMod * offRoleSpeedMod;
-        qualitySkill = scaledSkill * caMod * moraleMod * creativeMod * offRoleQualityMod;
+        speedSkill = scaledSkill * caMod * moraleMod * energyMod * workEthicMod * personalitySpeedMod * offRoleSpeedMod;
+        qualitySkill = scaledSkill * caMod * moraleMod * energyMod * creativeMod * personalityQualityMod * offRoleQualityMod;
+    }
+
+    private static float ComputePersonalitySpeedMod(Personality personality, float avgTeamMorale)
+    {
+        switch (personality)
+        {
+            case Personality.Intense:       return 1.05f;
+            case Personality.Abrasive:      return 1.03f;
+            case Personality.Competitive:   return avgTeamMorale >= 65f ? 1.03f : 1.00f;
+            case Personality.Perfectionist: return 0.97f;
+            case Personality.Easygoing:     return 0.98f;
+            default:                        return 1.00f;
+        }
+    }
+
+    private static float ComputePersonalityQualityMod(Personality personality)
+    {
+        switch (personality)
+        {
+            case Personality.Perfectionist: return 1.05f;
+            default:                        return 1.00f;
+        }
     }
 
     // ─── Real Team Aggregation ─────────────────────────────────────────────────
 
+    public static float ComputeEffectiveCapacity(List<EmployeeId> members, EmployeeSystem empSystem)
+    {
+        float total = 0f;
+        int count = members.Count;
+        for (int i = 0; i < count; i++)
+        {
+            Employee emp = empSystem.GetEmployee(members[i]);
+            if (emp == null || !emp.isActive) continue;
+            total += emp.EffectiveOutput;
+        }
+        return total;
+    }
+
     public static TeamWorkResult AggregateTeam(
         List<EmployeeId> members,
         EmployeeSystem empSystem,
+        FatigueSystem fatigueSystem,
         SkillType requiredSkill,
         RoleTierTable roleTierTable,
         float overheadPerMember,
@@ -66,14 +108,28 @@ public static class TeamWorkEngine
         float moraleSum = 0f;
         int contributors = 0;
         int activeCount = 0;
+        float effectiveCapacity = 0f;
 
+        // Pre-scan average morale for Competitive personality threshold check
         int memberCount = members.Count;
+        float preMoraleSum = 0f;
+        int preMoraleCount = 0;
+        for (int i = 0; i < memberCount; i++)
+        {
+            Employee emp = empSystem.GetEmployee(members[i]);
+            if (emp == null || !emp.isActive) continue;
+            preMoraleSum += emp.morale;
+            preMoraleCount++;
+        }
+        float avgTeamMorale = preMoraleCount > 0 ? preMoraleSum / preMoraleCount : 50f;
+
         for (int i = 0; i < memberCount; i++)
         {
             Employee emp = empSystem.GetEmployee(members[i]);
             if (emp == null || !emp.isActive) continue;
 
             activeCount++;
+            effectiveCapacity += emp.EffectiveOutput;
 
             int ca;
             if (roleTierTable != null)
@@ -87,15 +143,19 @@ public static class TeamWorkEngine
             }
 
             bool isRoleFit = IsRoleFitForSkill(emp.role, requiredSkill);
+            float energy = fatigueSystem != null ? fatigueSystem.GetEnergy(emp.id) : 100f;
 
             ComputeEffectiveSkills(
                 emp.GetSkill(requiredSkill),
                 ca,
                 emp.morale,
+                energy,
                 emp.hiddenAttributes.WorkEthic,
                 emp.hiddenAttributes.Creative,
                 emp.hiddenAttributes.Adaptability,
                 isRoleFit,
+                emp.personality,
+                avgTeamMorale,
                 out float speedSkill,
                 out float qualitySkill);
 
@@ -111,10 +171,10 @@ public static class TeamWorkEngine
         }
 
         float avgQualitySkill = qualityWeightSum > 0f ? qualityWeightedSum / qualityWeightSum : 0f;
-        float overhead = activeCount > 0 ? System.Math.Max(0.70f, 1f - overheadPerMember * (activeCount - 1)) : 1f;
+        float overhead = effectiveCapacity > 0f ? System.Math.Max(0.70f, 1f - overheadPerMember * (effectiveCapacity - 1f)) : 1f;
         float avgMorale = activeCount > 0 ? moraleSum / activeCount : 50f;
-        float coverageQualityMod = ComputeCoverageQualityMod(activeCount, optimalTeamSize);
-        float coverageSpeedMod = ComputeCoverageSpeedMod(activeCount, optimalTeamSize);
+        float coverageQualityMod = ComputeCoverageQualityMod(effectiveCapacity, optimalTeamSize);
+        float coverageSpeedMod = ComputeCoverageSpeedMod(effectiveCapacity, optimalTeamSize);
 
         return new TeamWorkResult
         {
@@ -122,6 +182,7 @@ public static class TeamWorkEngine
             AvgQualitySkill = avgQualitySkill,
             Contributors = contributors,
             ActiveCount = activeCount,
+            EffectiveCapacity = effectiveCapacity,
             Overhead = overhead,
             AvgMorale = avgMorale,
             CoverageQualityMod = coverageQualityMod,
@@ -141,14 +202,20 @@ public static class TeamWorkEngine
         float syntheticAdaptability = 10f,
         float roleFitRatio = 0.35f)
     {
+        const float syntheticEnergy = 75f;
+        const Personality syntheticPersonality = Personality.Professional;
+
         ComputeEffectiveSkills(
             syntheticVisibleSkill,
             (int)syntheticCA,
             syntheticMorale,
+            syntheticEnergy,
             syntheticWorkEthic,
             syntheticCreative,
             syntheticAdaptability,
             true,
+            syntheticPersonality,
+            syntheticMorale,
             out float roleFitSpeed,
             out float roleFitQuality);
 
@@ -164,6 +231,7 @@ public static class TeamWorkEngine
             AvgQualitySkill = roleFitQuality * blendedQualityMod,
             Contributors = virtualTeamSize,
             ActiveCount = virtualTeamSize,
+            EffectiveCapacity = virtualTeamSize,
             Overhead = overhead,
             AvgMorale = syntheticMorale,
             CoverageQualityMod = ComputeCoverageQualityMod(virtualTeamSize, 5),
@@ -178,9 +246,11 @@ public static class TeamWorkEngine
         float workRatePerSkillPoint,
         float coverageMod,
         float varianceMod,
-        float extraMult = 1f)
+        float extraMult = 1f,
+        float chemistrySpeedMod = 1f,
+        float conflictSpeedMult = 1f)
     {
-        return team.TotalSpeedSkill * workRatePerSkillPoint * team.Overhead * coverageMod * varianceMod * extraMult;
+        return team.TotalSpeedSkill * workRatePerSkillPoint * team.Overhead * coverageMod * varianceMod * extraMult * chemistrySpeedMod * conflictSpeedMult;
     }
 
     // ─── Quality Curve ─────────────────────────────────────────────────────────
@@ -191,7 +261,9 @@ public static class TeamWorkEngine
         float targetThreshold,
         float excellenceThreshold,
         float coverageQualityMod,
-        float avgMorale = 50f)
+        float avgMorale = 50f,
+        float chemistryQualityMod = 1f,
+        float conflictQualityMult = 1f)
     {
         float s = avgQualitySkill;
         float baseQuality;
@@ -221,10 +293,38 @@ public static class TeamWorkEngine
             baseQuality = 70f + 25f * (1f - (float)System.Math.Exp(-excess * 0.15f));
         }
 
-        float quality = baseQuality * coverageQualityMod;
+        float quality = baseQuality * coverageQualityMod * chemistryQualityMod * conflictQualityMult;
         if (quality < 0f) quality = 0f;
         if (quality > 100f) quality = 100f;
         return quality;
+    }
+
+    // ─── Chemistry Modifiers ───────────────────────────────────────────────────
+
+    public static float GetChemistrySpeedMod(ChemistryBand band)
+    {
+        switch (band)
+        {
+            case ChemistryBand.Excellent: return 1.04f;
+            case ChemistryBand.Good:      return 1.02f;
+            case ChemistryBand.Neutral:   return 1.00f;
+            case ChemistryBand.Poor:      return 0.96f;
+            case ChemistryBand.Toxic:     return 0.92f;
+            default:                      return 1.00f;
+        }
+    }
+
+    public static float GetChemistryQualityMod(ChemistryBand band)
+    {
+        switch (band)
+        {
+            case ChemistryBand.Excellent: return 1.06f;
+            case ChemistryBand.Good:      return 1.03f;
+            case ChemistryBand.Neutral:   return 1.00f;
+            case ChemistryBand.Poor:      return 0.95f;
+            case ChemistryBand.Toxic:     return 0.90f;
+            default:                      return 1.00f;
+        }
     }
 
     // ─── Speed Range Multiplier ────────────────────────────────────────────────
@@ -264,10 +364,10 @@ public static class TeamWorkEngine
 
     // ─── Coverage Quality Modifier ─────────────────────────────────────────────
 
-    public static float ComputeCoverageQualityMod(int activeCount, int optimalTeamSize)
+    public static float ComputeCoverageQualityMod(float effectiveCapacity, int optimalTeamSize)
     {
         if (optimalTeamSize <= 0) optimalTeamSize = 1;
-        float ratio = (float)activeCount / optimalTeamSize;
+        float ratio = effectiveCapacity / optimalTeamSize;
 
         if (ratio <= 0f) return 0.4f;
         if (ratio < 1.0f) return 0.5f + 0.5f * (float)System.Math.Sqrt(ratio);
@@ -278,12 +378,17 @@ public static class TeamWorkEngine
         return result;
     }
 
+    public static float ComputeCoverageQualityMod(int activeCount, int optimalTeamSize)
+    {
+        return ComputeCoverageQualityMod((float)activeCount, optimalTeamSize);
+    }
+
     // ─── Coverage Speed Modifier ───────────────────────────────────────────────
 
-    public static float ComputeCoverageSpeedMod(int activeCount, int optimalTeamSize)
+    public static float ComputeCoverageSpeedMod(float effectiveCapacity, int optimalTeamSize)
     {
         if (optimalTeamSize <= 0) optimalTeamSize = 1;
-        float ratio = (float)activeCount / optimalTeamSize;
+        float ratio = effectiveCapacity / optimalTeamSize;
 
         if (ratio <= 0f) return 0.1f;
         if (ratio < 1.0f) return 0.1f + 0.9f * ratio * ratio;
@@ -292,6 +397,11 @@ public static class TeamWorkEngine
         float result = 1.0f + bonus;
         if (result > 1.20f) result = 1.20f;
         return result;
+    }
+
+    public static float ComputeCoverageSpeedMod(int activeCount, int optimalTeamSize)
+    {
+        return ComputeCoverageSpeedMod((float)activeCount, optimalTeamSize);
     }
 
     // ─── Utility ──────────────────────────────────────────────────────────────
@@ -323,7 +433,6 @@ public static class TeamWorkEngine
     }
 
     // Fallback CA when no RoleTierTable is available: avg(skills) / 20 * 0.5 + 0.7 → CA int equivalent.
-    // Mirrors ContractPredictionHelper.ComputeCA approach.
     private static int ComputeFallbackCA(int[] skills)
     {
         if (skills == null || skills.Length == 0) return 0;

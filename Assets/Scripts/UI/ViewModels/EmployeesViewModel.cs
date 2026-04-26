@@ -1,83 +1,64 @@
 using System.Collections.Generic;
+using UnityEngine;
 
-public enum EmployeeSortColumn
+public enum EmployeeSortMode
 {
     Name,
     Role,
     Salary,
-    Morale,
-    Ability,
-    Team
-}
-
-public enum SortDirection
-{
-    Ascending,
-    Descending
+    ContractExpiry,
+    Morale
 }
 
 public struct EmployeeRowDisplay
 {
     public EmployeeId Id;
     public string Name;
-    public string Role;
-    public string SalaryDisplay;
-    public int SalaryRaw;
-    public int Morale;
-    public string MoraleBandLabel;
-    public int AbilityStars;
-    public int PotentialStars;
+    public string RoleName;
+    public string RolePillClass;
+    public string TypeBadge;
+    public string TypeBadgeClass;
     public string TeamName;
-    public int ProgrammingSkill;
-    public int DesignSkill;
-    public int QASkill;
-    public int Age;
     public bool IsFounder;
+    public string MoraleText;
+    public string MoraleClass;
+    public string EnergyText;
+    public string EnergyClass;
+    public string SalaryText;
+    public string ContractExpiryText;
+    public bool ShowRenewalBadge;
 }
 
 public class EmployeesViewModel : IViewModel
 {
-    private readonly List<EmployeeRowDisplay> _employees = new List<EmployeeRowDisplay>();
+    public int EmployeeCount { get; private set; }
+    public string EffectiveCapacityText { get; private set; }
+
+    private readonly List<EmployeeRowDisplay> _employees = new List<EmployeeRowDisplay>(32);
     public List<EmployeeRowDisplay> Employees => _employees;
 
-    public EmployeeSortColumn CurrentSort { get; private set; }
-    public SortDirection CurrentDirection { get; private set; }
-    public EmployeeId? SelectedEmployeeId { get; private set; }
+    public EmployeeSortMode SortMode { get; set; } = EmployeeSortMode.Name;
 
-    private IReadOnlyGameState _lastState;
-
-    public EmployeesViewModel() {
-        CurrentSort = EmployeeSortColumn.Name;
-        CurrentDirection = SortDirection.Ascending;
-    }
-
-    public void Sort(EmployeeSortColumn column) {
-        if (CurrentSort == column) {
-            CurrentDirection = CurrentDirection == SortDirection.Ascending
-                ? SortDirection.Descending : SortDirection.Ascending;
-        } else {
-            CurrentSort = column;
-            CurrentDirection = SortDirection.Ascending;
-        }
-        ApplySort();
-    }
-
-    public void SelectEmployee(EmployeeId id) {
-        SelectedEmployeeId = id;
+    public void ResortAndNotify() {
+        SortEmployees();
     }
 
     public void Refresh(IReadOnlyGameState state) {
         if (state == null) return;
-        _lastState = state;
 
         _employees.Clear();
+
         var employees = state.ActiveEmployees;
         int count = employees.Count;
+        int currentTick = state.CurrentTick;
+
+        float totalCapacity = 0f;
+
         for (int i = 0; i < count; i++) {
             var emp = employees[i];
-            if (!emp.isActive) continue;
 
-            string teamName = "Unassigned";
+            // Team name
+            string teamName = "--";
             var teamId = state.GetEmployeeTeam(emp.id);
             if (teamId.HasValue) {
                 var teams = state.ActiveTeams;
@@ -90,69 +71,104 @@ public class EmployeesViewModel : IViewModel
                 }
             }
 
-            int ability = state.GetEmployeeAbility(emp.id);
-            int potential = state.GetEmployeePotential(emp.id);
+            // Type badge
+            string typeBadge;
+            string typeBadgeClass;
+            bool isFounder = emp.isFounder;
+            if (isFounder) {
+                typeBadge = "Founder";
+                typeBadgeClass = "badge--special";
+            } else if (emp.Contract.Type == EmploymentType.FullTime) {
+                typeBadge = "Full-Time";
+                typeBadgeClass = "badge--accent";
+            } else {
+                typeBadge = "Part-Time";
+                typeBadgeClass = "badge--info";
+            }
+
+            // Morale
+            int morale = emp.morale;
+            string moraleText = morale + "%";
+            string moraleClass;
+            if (morale >= 70)       moraleClass = "text-success";
+            else if (morale >= 40)  moraleClass = "text-warning";
+            else                    moraleClass = "text-danger";
+
+            // Energy
+            var energyBand = state.GetEmployeeEnergyBand(emp.id);
+            string energyText = UIFormatting.FormatEnergyBand(energyBand);
+            string energyClass = UIFormatting.EnergyBandClass(energyBand);
+
+            // Contract expiry & renewal badge
+            string contractExpiryText;
+            bool showRenewalBadge = false;
+            if (isFounder) {
+                contractExpiryText = "Permanent";
+            } else if (emp.contractExpiryTick <= 0) {
+                contractExpiryText = "--";
+            } else {
+                int daysToExpiry = (emp.contractExpiryTick - currentTick) / TimeState.TicksPerDay;
+                if (daysToExpiry < 0) daysToExpiry = 0;
+                contractExpiryText = daysToExpiry + "d";
+                if (daysToExpiry <= 60) showRenewalBadge = true;
+            }
+
+            totalCapacity += emp.EffectiveOutput;
 
             _employees.Add(new EmployeeRowDisplay {
                 Id = emp.id,
                 Name = emp.name,
-                Role = UIFormatting.FormatRole(emp.role),
-                SalaryDisplay = (emp.isFounder && emp.salary == 0) ? "Founder" : UIFormatting.FormatMoney(emp.salary),
-                SalaryRaw = emp.salary,
-                Morale = emp.morale,
-                MoraleBandLabel = MoraleBandHelper.GetMoraleBandLabel(MoraleBandHelper.GetMoraleBand(emp.morale)),
-                AbilityStars = AbilityCalculator.AbilityToStars(ability),
-                PotentialStars = AbilityCalculator.PotentialToStars(potential),
+                RoleName = UIFormatting.FormatRole(emp.role),
+                RolePillClass = UIFormatting.RolePillClass(emp.role),
+                TypeBadge = typeBadge,
+                TypeBadgeClass = typeBadgeClass,
                 TeamName = teamName,
-                ProgrammingSkill = emp.GetSkill(SkillType.Programming),
-                DesignSkill = emp.GetSkill(SkillType.Design),
-                QASkill = emp.GetSkill(SkillType.QA),
-                Age = emp.age,
-                IsFounder = emp.isFounder
+                IsFounder = isFounder,
+                MoraleText = moraleText,
+                MoraleClass = moraleClass,
+                EnergyText = energyText,
+                EnergyClass = energyClass,
+                SalaryText = UIFormatting.FormatMoney(emp.salary) + "/mo",
+                ContractExpiryText = contractExpiryText,
+                ShowRenewalBadge = showRenewalBadge
             });
         }
 
-        ApplySort();
+        EmployeeCount = count;
+        EffectiveCapacityText = count > 0 ? (totalCapacity / count * 100f).ToString("F0") + "%" : "--";
+
+        SortEmployees();
     }
 
-    private void ApplySort() {
-        int count = _employees.Count;
-        if (count <= 1) return;
-
-        // Simple insertion sort (no LINQ, no allocations beyond struct copies)
-        for (int i = 1; i < count; i++) {
-            var key = _employees[i];
-            int j = i - 1;
-            while (j >= 0 && CompareRows(_employees[j], key) > 0) {
-                _employees[j + 1] = _employees[j];
-                j--;
-            }
-            _employees[j + 1] = key;
-        }
+    private void SortEmployees() {
+        _employees.Sort(CompareRows);
     }
 
     private int CompareRows(EmployeeRowDisplay a, EmployeeRowDisplay b) {
-        int result = 0;
-        switch (CurrentSort) {
-            case EmployeeSortColumn.Name:
-                result = string.Compare(a.Name, b.Name, System.StringComparison.Ordinal);
-                break;
-            case EmployeeSortColumn.Role:
-                result = string.Compare(a.Role, b.Role, System.StringComparison.Ordinal);
-                break;
-            case EmployeeSortColumn.Salary:
-                result = a.SalaryRaw.CompareTo(b.SalaryRaw);
-                break;
-            case EmployeeSortColumn.Morale:
-                result = a.Morale.CompareTo(b.Morale);
-                break;
-            case EmployeeSortColumn.Ability:
-                result = a.AbilityStars.CompareTo(b.AbilityStars);
-                break;
-            case EmployeeSortColumn.Team:
-                result = string.Compare(a.TeamName, b.TeamName, System.StringComparison.Ordinal);
-                break;
+        switch (SortMode) {
+            case EmployeeSortMode.Role:
+                return string.Compare(a.RoleName, b.RoleName, System.StringComparison.Ordinal);
+            case EmployeeSortMode.Salary:
+                return string.Compare(b.SalaryText, a.SalaryText, System.StringComparison.Ordinal);
+            case EmployeeSortMode.ContractExpiry:
+                int aExpiry = a.IsFounder ? int.MaxValue : (a.ContractExpiryText == "--" ? int.MaxValue : ParseDays(a.ContractExpiryText));
+                int bExpiry = b.IsFounder ? int.MaxValue : (b.ContractExpiryText == "--" ? int.MaxValue : ParseDays(b.ContractExpiryText));
+                return aExpiry.CompareTo(bExpiry);
+            case EmployeeSortMode.Morale:
+                return string.Compare(b.MoraleText, a.MoraleText, System.StringComparison.Ordinal);
+            default:
+                return string.Compare(a.Name, b.Name, System.StringComparison.Ordinal);
         }
-        return CurrentDirection == SortDirection.Descending ? -result : result;
+    }
+
+    private static int ParseDays(string text) {
+        if (string.IsNullOrEmpty(text)) return int.MaxValue;
+        int d = 0;
+        for (int i = 0; i < text.Length; i++) {
+            char c = text[i];
+            if (c >= '0' && c <= '9') d = d * 10 + (c - '0');
+            else break;
+        }
+        return d;
     }
 }

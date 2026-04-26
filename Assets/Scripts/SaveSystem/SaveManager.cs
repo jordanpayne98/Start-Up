@@ -33,6 +33,8 @@ public static class SaveManager
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             Formatting = Formatting.Indented
         };
+        settings.Converters.Add(new LegacyTeamTypeConverter());
+        settings.Converters.Add(new LegacyProductTeamRoleConverter());
         settings.Converters.Add(new StringEnumConverter());
         return settings;
     }

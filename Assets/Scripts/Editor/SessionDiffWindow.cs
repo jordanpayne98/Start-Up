@@ -60,7 +60,7 @@ public class SessionDiffWindow : EditorWindow
 
     private void RefreshFileList()
     {
-        string logsDir = Path.Combine(Application.dataPath, "Logs");
+        string logsDir = Path.Combine(Application.dataPath, "..", "Logs");
         if (!Directory.Exists(logsDir))
         {
             _sessionFiles = new string[0];
@@ -98,7 +98,7 @@ public class SessionDiffWindow : EditorWindow
     {
         if (_sessionFiles == null || _sessionFiles.Length == 0)
         {
-            EditorGUILayout.HelpBox("No session log files found in Assets/Logs/", MessageType.Info);
+            EditorGUILayout.HelpBox("No session log files found in Logs/", MessageType.Info);
             if (GUILayout.Button("Refresh"))
                 RefreshFileList();
             return;

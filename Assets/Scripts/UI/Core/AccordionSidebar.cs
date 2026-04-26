@@ -119,7 +119,7 @@ public class AccordionSidebar
         ToggleExpand(topNode);
     }
 
-    public void HandleLeafHotkey(string key) {
+    public bool HandleLeafHotkey(string key) {
         int count = _focusableItems.Count;
         for (int i = 0; i < count; i++) {
             var (node, _) = _focusableItems[i];
@@ -129,8 +129,9 @@ public class AccordionSidebar
             var parent = node.Parent;
             if (parent == null || !parent.IsExpanded) continue;
             OnScreenSelected?.Invoke(node.ScreenId.Value);
-            return;
+            return true;
         }
+        return false;
     }
 
     public void RegisterKeyboardEvents(VisualElement panel) {
@@ -152,8 +153,8 @@ public class AccordionSidebar
             return;
         }
         if (key >= KeyCode.A && key <= KeyCode.Z) {
-            HandleLeafHotkey(key.ToString());
-            evt.StopPropagation();
+            bool consumed = HandleLeafHotkey(key.ToString());
+            if (consumed) evt.StopPropagation();
             return;
         }
         if (key == KeyCode.UpArrow || key == KeyCode.DownArrow ||
@@ -249,6 +250,9 @@ public class AccordionSidebar
         // Arrow
         var arrow = new Label(node.IsExpanded ? "▾" : "▸");
         arrow.AddToClassList("sidebar-group__arrow");
+        if (node.IsLeaf) {
+            arrow.style.visibility = Visibility.Hidden;
+        }
         header.Add(arrow);
 
         group.Add(header);
@@ -338,6 +342,11 @@ public class AccordionSidebar
         if (_collapsed) {
             // In collapsed mode, clicking expands the sidebar
             SetCollapsed(false);
+            return;
+        }
+
+        if (node.IsLeaf && node.ScreenId.HasValue) {
+            OnScreenSelected?.Invoke(node.ScreenId.Value);
             return;
         }
 
