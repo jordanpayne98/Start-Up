@@ -356,11 +356,11 @@ public class SessionLogger : MonoBehaviour
         sb.Append($" | Age: {emp.age}");
         sb.Append($" | Salary: ${emp.salary}");
         sb.Append(" | Skills:");
-        for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++)
+        for (int i = 0; i < SkillIdHelper.SkillCount; i++)
         {
-            int val = emp.skills != null && i < emp.skills.Length ? emp.skills[i] : 0;
+            int val = emp.Stats.Skills != null && i < emp.Stats.Skills.Length ? emp.Stats.Skills[i] : 0;
             if (val > 0)
-                sb.Append($" {SkillTypeHelper.GetName((SkillType)i)}={val}");
+                sb.Append($" {SkillIdHelper.GetName((SkillId)i)}={val}");
         }
         sb.Append($" | Morale: {emp.morale}");
         return sb.ToString();

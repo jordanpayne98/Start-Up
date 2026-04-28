@@ -91,7 +91,7 @@ public class ContractCategoryDefinition : ScriptableObject
 [System.Serializable]
 public struct PhaseSkillProfile
 {
-    public SkillType PrimarySkill;
+    public SkillId PrimarySkill;
     public float WorkFraction;
     public float QualityWeight;
 }

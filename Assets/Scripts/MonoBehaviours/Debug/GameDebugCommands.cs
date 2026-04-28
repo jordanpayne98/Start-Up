@@ -493,11 +493,11 @@ public class GameDebugCommands : MonoBehaviour, IDebugCommandHandler
             var sb = new StringBuilder();
             sb.Append($"  [{emp.id.Value}] {emp.name} | {emp.role} | Salary: ${emp.salary} | Morale: {emp.morale}");
             sb.Append(" | Skills:");
-            for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++)
+            for (int i = 0; i < SkillIdHelper.SkillCount; i++)
             {
-                int val = emp.skills != null && i < emp.skills.Length ? emp.skills[i] : 0;
+                int val = emp.Stats.Skills[i];
                 if (val > 0)
-                    sb.Append($" {SkillTypeHelper.GetName((SkillType)i)}={val}");
+                    sb.Append($" {SkillIdHelper.GetName((SkillId)i)}={val}");
             }
             console.Print(sb.ToString());
         }
@@ -551,11 +551,9 @@ public class GameDebugCommands : MonoBehaviour, IDebugCommandHandler
                 Name = candidate.Name,
                 Gender = candidate.Gender,
                 Age = candidate.Age,
-                Skills = candidate.Skills,
-                HRSkill = candidate.HRSkill,
+                Stats = candidate.Stats,
                 Salary = candidate.Salary,
                 Role = candidate.Role,
-                PotentialAbility = candidate.PotentialAbility,
                 Mode = HiringMode.Manual
             });
             hired++;

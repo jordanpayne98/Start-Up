@@ -16,7 +16,7 @@ public class AddMemberModalView : IGameView
 
     private VisualElement _filterRow;
     private Button[] _filterButtons;
-    private readonly HashSet<EmployeeRole> _activeFilters = new HashSet<EmployeeRole>();
+    private readonly HashSet<RoleId> _activeFilters = new HashSet<RoleId>();
     private readonly HashSet<EmployeeId> _selectedIds = new HashSet<EmployeeId>();
     private readonly List<AvailableEmployeeDisplay> _filteredList = new List<AvailableEmployeeDisplay>(16);
     private Button _addSelectedBtn;
@@ -50,12 +50,12 @@ public class AddMemberModalView : IGameView
         _filterRow.style.marginBottom = 8;
         _root.Add(_filterRow);
 
-        var roleValues = (EmployeeRole[])Enum.GetValues(typeof(EmployeeRole));
+        var roleValues = (RoleId[])Enum.GetValues(typeof(RoleId));
         _filterButtons = new Button[roleValues.Length];
         for (int i = 0; i < roleValues.Length; i++) {
             var role = roleValues[i];
             var btn = new Button();
-            btn.text = UIFormatting.FormatRole(role);
+            btn.text = RoleIdHelper.GetName(role);
             btn.userData = role;
             btn.AddToClassList("filter-pill");
             btn.AddToClassList(UIFormatting.RolePillClass(role));
@@ -155,7 +155,7 @@ public class AddMemberModalView : IGameView
 
     private void OnFilterClicked(ClickEvent evt) {
         var btn = evt.currentTarget as Button;
-        if (btn == null || !(btn.userData is EmployeeRole role)) return;
+        if (btn == null || !(btn.userData is RoleId role)) return;
         if (_activeFilters.Contains(role)) {
             _activeFilters.Remove(role);
             btn.RemoveFromClassList("filter-pill--active");

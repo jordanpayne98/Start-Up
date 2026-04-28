@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f44c05c6d504c143a61de2ae833a1f5, type: 3}
+  m_Name: Expertise_Finance
+  m_EditorClassIdentifier: Assembly-CSharp::FounderExpertiseDefinition
+  ExpertiseId: 6
+  DisplayName: Finance
+  BoostedSkills: 1900000017000000
+  BoostedAttributes: 0600000005000000
+  RelevantRoles:
+  - Accountant
+  - Operations

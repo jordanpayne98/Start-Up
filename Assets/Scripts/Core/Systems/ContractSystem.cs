@@ -7,16 +7,16 @@ public struct SkillContribution
     public float[] Contributions;
     public float TotalWorkThisTick;
 
-    public SkillContribution(SkillType skill, float amount)
+    public SkillContribution(SkillId skill, float amount)
     {
-        Contributions = new float[SkillTypeHelper.SkillTypeCount];
+        Contributions = new float[SkillIdHelper.SkillCount];
         Contributions[(int)skill] = amount;
         TotalWorkThisTick = amount;
     }
 
-    public float ProgrammingContribution => Contributions[(int)SkillType.Programming];
-    public float DesignContribution => Contributions[(int)SkillType.Design];
-    public float QAContribution => Contributions[(int)SkillType.QA];
+    public float ProgrammingContribution => Contributions[(int)SkillId.Programming];
+    public float DesignContribution => Contributions[(int)SkillId.ProductDesign];
+    public float QAContribution => Contributions[(int)SkillId.QaTesting];
 }
 
 public class ContractSystem : ISystem
@@ -78,7 +78,7 @@ public class ContractSystem : ISystem
     private readonly List<ContractId> _scratchIds;
     private readonly List<ContractId> _completedOrFailedIds;
     private readonly int[] _poolSkillCountScratch;
-    private RoleTierTable _roleTierTable;
+    private RoleProfileTable _roleProfileTable;
     private AbilitySystem _abilitySystem;
     private ProductSystem _productSystem;
 
@@ -110,7 +110,7 @@ public class ContractSystem : ISystem
         _pendingEvents = new List<PendingEvent>(16);
         _scratchIds = new List<ContractId>(32);
         _completedOrFailedIds = new List<ContractId>(8);
-        _poolSkillCountScratch = new int[SkillTypeHelper.SkillTypeCount];
+        _poolSkillCountScratch = new int[SkillIdHelper.SkillCount];
 
         _teamSystem.OnTeamDeleted += OnTeamDeleted;
     }
@@ -125,9 +125,9 @@ public class ContractSystem : ISystem
         _reputationSystem = reputationSystem;
     }
 
-    public void SetSkillGrowthDependencies(RoleTierTable roleTierTable, AbilitySystem abilitySystem)
+    public void SetSkillGrowthDependencies(RoleProfileTable roleProfileTable, AbilitySystem abilitySystem)
     {
-        _roleTierTable = roleTierTable;
+        _roleProfileTable = roleProfileTable;
         _abilitySystem = abilitySystem;
     }
 
@@ -341,7 +341,7 @@ public class ContractSystem : ISystem
             _employeeSystem,
             _fatigueSystem,
             contract.RequiredSkill,
-            _roleTierTable,
+            _roleProfileTable,
             _tuning?.TeamOverheadPerMember ?? 0.04f,
             optimalTeamSize: optimalTeamSize);
 
@@ -469,7 +469,7 @@ public class ContractSystem : ISystem
                 var assignedTeam = _teamSystem.GetTeam(contract.AssignedTeamId.Value);
                 if (assignedTeam != null)
                 {
-                    SkillGrowthSystem.AwardSkillXP(contract, assignedTeam, _employeeSystem, _rng, _roleTierTable, _abilitySystem, _tuning);
+                    SkillGrowthSystem.AwardSkillXP(contract, assignedTeam, _employeeSystem, _rng, _roleProfileTable, _abilitySystem, _tuning);
 
                     // Invalidate CA cache for all team members so star ratings update
                     var membersForEvent = new List<EmployeeId>(assignedTeam.members);
@@ -479,6 +479,9 @@ public class ContractSystem : ISystem
                         assignedTeam.isCrunching = false;
                         _fatigueSystem?.ResetCrunchTracking(assignedTeam.members);
                     }
+
+                    // Append work history to each team member
+                    AppendContractWorkHistory(contract, assignedTeam, overallQuality, WorkOutcome.Completed, currentTick);
                 }
 
                 _state.teamAssignments.Remove(contract.AssignedTeamId.Value);
@@ -511,6 +514,10 @@ public class ContractSystem : ISystem
 
             if (contract.AssignedTeamId != null)
             {
+                var failedTeam = _teamSystem.GetTeam(contract.AssignedTeamId.Value);
+                if (failedTeam != null)
+                    AppendContractWorkHistory(contract, failedTeam, overallQuality, WorkOutcome.Cancelled, currentTick);
+
                 _state.teamAssignments.Remove(contract.AssignedTeamId.Value);
                 _teamSystem.NotifyTeamFreed(contract.AssignedTeamId.Value);
                 contract.AssignedTeamId = null;
@@ -608,6 +615,10 @@ public class ContractSystem : ISystem
 
         if (contract.AssignedTeamId != null)
         {
+            var deadlineTeam = _teamSystem.GetTeam(contract.AssignedTeamId.Value);
+            if (deadlineTeam != null)
+                AppendContractWorkHistory(contract, deadlineTeam, 0f, WorkOutcome.Cancelled, currentTick);
+
             _state.teamAssignments.Remove(contract.AssignedTeamId.Value);
             _teamSystem.NotifyTeamFreed(contract.AssignedTeamId.Value);
             contract.AssignedTeamId = null;
@@ -751,7 +762,7 @@ public class ContractSystem : ISystem
         CompleteContract(contractId, tick);
     }
 
-    private float GetPhaseSkillUpgradeMultiplier(SkillType skill)
+    private float GetPhaseSkillUpgradeMultiplier(SkillId skill)
     {
         return 1f;
     }
@@ -761,6 +772,69 @@ public class ContractSystem : ISystem
         if (t < 0f) t = 0f;
         if (t > 1f) t = 1f;
         return a + (b - a) * t;
+    }
+
+    private void AppendContractWorkHistory(Contract contract, Team team, float quality, WorkOutcome outcome, int currentTick)
+    {
+        if (team == null || team.members == null) return;
+
+        int memberCount = team.members.Count;
+        if (memberCount == 0) return;
+
+        // Compute team average skill for contribution label
+        float teamSkillSum = 0f;
+        var employees = _employeeSystem.GetAllActiveEmployees();
+        int empCount = employees.Count;
+
+        int skillIdx = (int)contract.RequiredSkill;
+        for (int m = 0; m < memberCount; m++)
+        {
+            var memberId = team.members[m];
+            for (int e = 0; e < empCount; e++)
+            {
+                if (!employees[e].id.Equals(memberId)) continue;
+                int val = employees[e].Stats.Skills != null && skillIdx < employees[e].Stats.Skills.Length
+                    ? employees[e].Stats.Skills[skillIdx]
+                    : 0;
+                teamSkillSum += val;
+                break;
+            }
+        }
+        float teamAvgSkill = memberCount > 0 ? teamSkillSum / memberCount : 0f;
+
+        for (int m = 0; m < memberCount; m++)
+        {
+            var memberId = team.members[m];
+            Employee emp = null;
+            for (int e = 0; e < empCount; e++)
+            {
+                if (employees[e].id.Equals(memberId)) { emp = employees[e]; break; }
+            }
+            if (emp == null) continue;
+
+            int memberSkill = emp.Stats.Skills != null && skillIdx < emp.Stats.Skills.Length
+                ? emp.Stats.Skills[skillIdx]
+                : 0;
+
+            string contribution;
+            if (teamAvgSkill <= 0f)         contribution = "Medium";
+            else if (memberSkill >= teamAvgSkill * 1.2f) contribution = "High";
+            else if (memberSkill <= teamAvgSkill * 0.8f) contribution = "Low";
+            else                            contribution = "Medium";
+
+            emp.AppendWorkHistory(new WorkHistoryEntry
+            {
+                CompletedTick     = currentTick,
+                EntryType         = WorkEntryType.Contract,
+                WorkName          = contract.Name,
+                TeamName          = team.name,
+                Role              = emp.role,
+                ContributionLabel = contribution,
+                QualityScore      = (int)quality,
+                XpSummary         = "",
+                Outcome           = outcome
+            });
+        }
     }
 
 }

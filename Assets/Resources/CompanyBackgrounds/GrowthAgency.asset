@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e305aa8cfd6f9ba4caf2ccb0fa06a4c0, type: 3}
+  m_Name: GrowthAgency
+  m_EditorClassIdentifier: Assembly-CSharp::CompanyBackgroundDefinition
+  BackgroundId: 6
+  DisplayName: Growth Agency
+  Description: A marketing and growth-focused agency helping companies scale. Data-driven
+    approach to customer acquisition and market expansion.
+  RecommendedFounderRoles: 0c0000000d000000
+  StartingStrengths:
+  - Recurring revenue model
+  - Data-driven decisions
+  - Wide industry applicability
+  StartingRisks:
+  - High client churn
+  - Competitive agency landscape
+  - Metrics pressure
+  SuggestedFirstActions:
+  - Land your first retainer client
+  - Build analytics capabilities
+  - Hire a content specialist
+  DifficultyLabel: Standard
+  CandidatePoolBiasTags:
+  - marketing
+  - sales
+  ContractPoolBiasTags:
+  - marketing
+  - growth

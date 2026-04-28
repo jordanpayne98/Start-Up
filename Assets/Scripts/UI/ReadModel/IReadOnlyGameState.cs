@@ -4,7 +4,7 @@ public struct TeamMemberRoleData
 {
     public EmployeeId EmployeeId;
     public string Name;
-    public EmployeeRole EmployeeRole;
+    public RoleId EmployeeRole;
 }
 
 public interface IReadOnlyGameState : IAbilityReadModel

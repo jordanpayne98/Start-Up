@@ -1,175 +1,295 @@
+/* ══════════════════════════════════════════════════════════════════
+   Employee Detail Modal — full rewrite for UXML-backed layout
+   Design tokens from UI_Architecture_v3 §22
+   BEM-like naming per §37
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════
+   TEXT ROLE CLASSES (§24.3)
+   Use these instead of container opacity or generic color overrides.
+   ══════════════════════════════════════════════════════════════════ */
+.text--primary   { color: var(--text-primary); }
+.text--secondary { color: var(--text-secondary); }
+.text--muted     { color: var(--text-muted); }
+.text--positive  { color: var(--accent-success); }
+.text--warning   { color: var(--accent-warning); }
+.text--danger    { color: var(--accent-danger); }
+.text--info      { color: var(--accent-info); }
+.text--highlight { color: var(--accent-primary); }
+
+/* ── Root Container ─────────────────────────────────────────────── */
 .employee-detail-modal {
     flex-grow: 1;
     flex-direction: column;
     background-color: var(--bg-primary);
-    min-width: 580px;
-    max-width: 660px;
+    overflow: hidden;
 }
 
-/* ── Header ── */
-.employee-detail-modal .modal-header {
+/* ══════════════════════════════════════════════════════════════════
+   HEADER
+   ══════════════════════════════════════════════════════════════════ */
+.edm-header {
     flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
+    align-items: stretch;
     background-color: var(--bg-secondary);
     border-bottom-width: 1px;
     border-bottom-color: var(--border-subtle);
+    padding: 12px 16px;
+    flex-shrink: 0;
 }
 
-.employee-detail-modal .modal-title {
-    font-size: var(--font-xl);
-    -unity-font-style: bold;
-    color: var(--text-light);
-}
-
-/* ── Body ── */
-.employee-detail-modal__body {
-    flex-grow: 1;
-    flex-direction: column;
-}
-
-.employee-detail-modal__content {
-    flex-direction: column;
-    padding: 16px 20px;
-}
-
-/* ── Radar chart ── */
-.employee-detail-modal__radar {
-    width: 100%;
-    height: 220px;
-    margin-top: 8px;
-    margin-bottom: 8px;
-}
-
-/* ── Footer ── */
-.employee-detail-modal .modal-footer {
+/* Header Left — portrait + identity */
+.edm-header__left {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    padding: 12px 20px;
-    border-top-width: 1px;
-    border-top-color: var(--border-subtle);
-    background-color: var(--bg-secondary);
-}
-
-/* ── Detail sections ── */
-.detail-section {
-    flex-direction: column;
-    margin-bottom: 16px;
-}
-
-.detail-section__title {
-    font-size: var(--font-xs);
-    color: var(--text-muted);
-    -unity-font-style: bold;
-    letter-spacing: 0.5px;
-    margin-bottom: 6px;
-}
-
-/* ── Detail grid ── */
-.detail-grid {
-    flex-direction: row;
-    flex-wrap: wrap;
-    margin-top: 8px;
-}
-
-.detail-cell {
-    flex-direction: column;
-    flex: 1;
-    min-width: 100px;
-    max-width: 150px;
-    margin-right: 8px;
-    margin-bottom: 8px;
-    overflow: hidden;
-}
-
-.detail-cell__label {
-    font-size: var(--font-xs);
-    color: var(--text-muted);
-    margin-bottom: 2px;
-}
-
-.detail-cell__value {
-    font-size: var(--font-sm);
-    color: var(--text-light);
-    -unity-font-style: bold;
-}
-
-/* ── Departure risk card ── */
-.card--warning-left {
-    flex-direction: column;
-    background-color: var(--bg-tertiary);
-    border-radius: var(--radius-md);
-    padding: 8px 12px;
-    margin-bottom: 10px;
-    border-left-width: 3px;
-    border-left-color: var(--accent-warning);
-    border-top-color: transparent;
-    border-right-color: transparent;
-    border-bottom-color: transparent;
-}
-
-/* ── Accent left card ── */
-.card--accent-left {
-    flex-direction: column;
-    background-color: var(--bg-tertiary);
-    border-radius: var(--radius-md);
-    padding: 10px 14px;
-    margin-bottom: 10px;
-    border-left-width: 3px;
-    border-left-color: var(--accent-primary);
-    border-top-color: transparent;
-    border-right-color: transparent;
-    border-bottom-color: transparent;
-}
-
-/* ── Info left card ── */
-.card--info-left {
-    flex-direction: column;
-    background-color: var(--bg-tertiary);
-    border-radius: var(--radius-md);
-    padding: 10px 14px;
-    margin-bottom: 10px;
-    border-left-width: 3px;
-    border-left-color: var(--accent-info);
-    border-top-color: transparent;
-    border-right-color: transparent;
-    border-bottom-color: transparent;
-}
-
-/* ── Two-column body ── */
-.modal-body--two-col {
-    flex-direction: row;
-    flex-grow: 1;
-    overflow: hidden;
-}
-
-.modal-col--left {
-    flex-basis: 40%;
+    flex-basis: 35%;
     flex-shrink: 0;
+}
+
+.edm-portrait {
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+    background-color: var(--bg-elevated);
+    border-width: 2px;
+    border-color: var(--border-subtle);
+    flex-shrink: 0;
+    margin-right: 12px;
+}
+
+.edm-header__identity {
     flex-direction: column;
-    padding: 12px 10px 12px 16px;
-    overflow: hidden;
+    flex-grow: 1;
+}
+
+.edm-header__name-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.edm-name {
+    font-size: var(--font-xl);
+    -unity-font-style: bold;
+    color: var(--text-primary);
+    margin-right: 8px;
+}
+
+.edm-founder-badge {
+    font-size: var(--font-xs);
+    padding: 1px 6px;
+}
+
+.edm-header__sub-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.edm-seniority {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+    margin-right: 6px;
+}
+
+.edm-role-family {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    margin-right: 6px;
+    margin-left: 4px;
+}
+
+.edm-age {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+}
+
+/* Header Center — contract & financial stats */
+.edm-header__center {
+    flex-direction: column;
+    justify-content: center;
+    flex-basis: 35%;
+    flex-shrink: 0;
+    padding: 0 16px;
+    border-left-width: 1px;
+    border-left-color: var(--border-subtle);
     border-right-width: 1px;
     border-right-color: var(--border-subtle);
 }
 
-.modal-col--right {
-    flex-basis: 60%;
-    flex-grow: 1;
+.edm-header__stat-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3px;
+}
+
+.edm-stat-label {
+    font-size: var(--font-xs);
+    color: var(--text-secondary);
+    -unity-font-style: bold;
+    letter-spacing: 0.3px;
+}
+
+.edm-stat-value {
+    font-size: var(--font-sm);
+    color: var(--text-primary);
+    -unity-font-style: bold;
+}
+
+/* Header Right — CA/PA stars, morale, badges, close */
+.edm-header__right {
     flex-direction: column;
-    padding: 12px 16px 12px 10px;
+    justify-content: center;
+    flex-grow: 1;
+    padding-left: 16px;
+}
+
+.edm-stars-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3px;
+}
+
+.edm-stars {
+    font-size: var(--font-sm);
+    color: var(--accent-primary);
+    -unity-font-style: bold;
+}
+
+.edm-badges-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.edm-close-btn {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    width: 28px;
+    height: 28px;
+    font-size: var(--font-sm);
+    background-color: transparent;
+    border-width: 1px;
+    border-color: var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+}
+
+.edm-close-btn:hover {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TAB BAR
+   ══════════════════════════════════════════════════════════════════ */
+.edm-tab-bar {
+    flex-direction: row;
+    align-items: flex-end;
+    background-color: var(--bg-secondary);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+    padding: 0 16px;
+    flex-shrink: 0;
+}
+
+.edm-tab {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    background-color: transparent;
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-bottom-color: transparent;
+    border-radius: 0;
+    padding: 8px 14px;
+    margin-right: 2px;
+    -unity-font-style: normal;
+    cursor: link;
+}
+
+.edm-tab:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-elevated);
+}
+
+.edm-tab.tab--active {
+    color: var(--accent-primary);
+    border-bottom-color: var(--accent-primary);
+    -unity-font-style: bold;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TAB CONTENT AREA
+   ══════════════════════════════════════════════════════════════════ */
+.edm-tab-content-area {
+    flex-grow: 1;
+    flex-shrink: 1;
     overflow: hidden;
 }
 
-.modal-col--scroll {
-    flex-grow: 1;
+.edm-tab-content {
     flex-direction: column;
-    overflow: scroll;
+    flex-grow: 1;
 }
 
-/* ── Card section inside columns ── */
+.edm-tab-content--hidden {
+    display: none;
+}
+
+/* ── Stub labels for unimplemented tabs ─────────────────────────── */
+.edm-stub-label {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    -unity-font-style: italic;
+    padding: 24px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   OVERVIEW TAB — 3-COLUMN LAYOUT
+   ══════════════════════════════════════════════════════════════════ */
+.edm-overview-content {
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 12px;
+}
+
+/* Inner row wrapper for the 3 columns */
+.edm-overview-columns {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.edm-col {
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.edm-col--left {
+    flex-basis: 25%;
+    flex-shrink: 0;
+    padding-right: 8px;
+    border-right-width: 1px;
+    border-right-color: var(--border-subtle);
+}
+
+.edm-col--center {
+    flex-basis: 50%;
+    flex-grow: 1;
+    padding: 0 8px;
+    border-right-width: 1px;
+    border-right-color: var(--border-subtle);
+}
+
+.edm-col--right {
+    flex-basis: 25%;
+    flex-shrink: 0;
+    padding-left: 8px;
+}
+
+/* ── Col Cards ──────────────────────────────────────────────────── */
 .col-card {
     flex-direction: column;
     background-color: var(--bg-secondary);
@@ -188,7 +308,11 @@
     margin-bottom: 6px;
 }
 
-/* ── Role suitability row ── */
+/* ── Role Fit Rows ──────────────────────────────────────────────── */
+.edm-role-fit-rows {
+    flex-direction: column;
+}
+
 .role-suit-row {
     flex-direction: row;
     align-items: center;
@@ -212,71 +336,971 @@
 }
 
 .role-suit-dot--natural      { background-color: #4ADE80; }
-.role-suit-dot--accomplished  { background-color: #A3E635; }
-.role-suit-dot--competent     { background-color: #FACC15; }
-.role-suit-dot--awkward       { background-color: #FB923C; }
-.role-suit-dot--unsuitable    { background-color: #6B7280; }
+.role-suit-dot--accomplished { background-color: #A3E635; }
+.role-suit-dot--competent    { background-color: #FACC15; }
+.role-suit-dot--awkward      { background-color: #FB923C; }
+.role-suit-dot--unsuitable   { background-color: #6B7280; }
 
-/* ── Skill table row ── */
-.skill-table-row {
+/* ── Team Fit ───────────────────────────────────────────────────── */
+.edm-team-fit-label {
+    font-size: var(--font-sm);
+    color: var(--text-primary);
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.edm-team-fit-detail {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    white-space: normal;
+}
+
+/* ── Stat Rows (skills & attributes) ───────────────────────────── */
+.edm-stat-rows {
+    flex-direction: column;
+}
+
+.edm-stat-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 3px 0;
+    margin-bottom: 2px;
+    justify-content: space-between;
+}
+
+.edm-stat-row__name {
+    font-size: var(--font-sm);
+    color: var(--text-primary);
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.edm-stat-row__value {
+    font-size: var(--font-sm);
+    color: var(--text-primary);
+    -unity-font-style: bold;
+    min-width: 24px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+    margin-left: 6px;
+    margin-right: 4px;
+}
+
+.edm-stat-row__bar-bg {
+    width: 60px;
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--bg-elevated);
+    flex-shrink: 0;
+}
+
+.edm-stat-row__bar-fill {
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--accent-primary);
+}
+
+.edm-stat-row__arrow {
+    font-size: var(--font-xs);
+    min-width: 12px;
+    flex-shrink: 0;
+    margin-left: 2px;
+}
+
+.skill-row__value--up   { color: #4ADE80; }
+.skill-row__value--down { color: #F87171; }
+
+/* ── Report / Personality Panel ─────────────────────────────────── */
+.edm-personality-badge {
+    margin-bottom: 8px;
+    align-self: flex-start;
+}
+
+.edm-report-text {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    white-space: normal;
+}
+
+/* ── Role Summary Row ──────────────────────────────────────────── */
+.edm-role-summary-row {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 2px 4px;
+    margin-bottom: 3px;
+}
+
+.edm-suggestion-text {
+    font-size: var(--font-xs);
+    color: var(--accent-warning);
+    -unity-font-style: italic;
+    white-space: normal;
+    margin-top: 4px;
+}
+
+/* ── Team Fit Notes ────────────────────────────────────────────── */
+.edm-team-fit-notes {
+    flex-direction: column;
+    margin-top: 4px;
+}
+
+.edm-team-fit-note {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    white-space: normal;
     margin-bottom: 2px;
 }
 
-.skill-table-row__name {
+/* ── Skill Bar (color variants by value range) ─────────────────── */
+.edm-stat-row__bar-fill--low {
+    background-color: #F87171;
+}
+
+.edm-stat-row__bar-fill--mid {
+    background-color: #FACC15;
+}
+
+.edm-stat-row__bar-fill--high {
+    background-color: #4ADE80;
+}
+
+/* ── View All Skills Link Button ───────────────────────────────── */
+.edm-link-btn {
     font-size: var(--font-sm);
-    -unity-font-style: bold;
-    flex-grow: 1;
+    color: var(--accent-primary);
+    background-color: transparent;
+    border-width: 0;
+    padding: 4px 0;
+    margin-bottom: 8px;
+    -unity-text-align: middle-left;
+    cursor: link;
+    align-self: flex-start;
 }
 
-.skill-table-row__value {
-    font-size: var(--font-sm);
-    color: var(--text-light);
-    min-width: 40px;
-    -unity-text-align: middle-right;
+.edm-link-btn:hover {
+    color: var(--text-primary);
 }
 
-.skill-row__value--up {
-    color: #4ADE80;
+/* ── Hidden Signal Rows ────────────────────────────────────────── */
+.edm-hidden-signals {
+    flex-direction: column;
+    margin-top: 8px;
 }
 
-.skill-row__value--down {
-    color: #F87171;
+.edm-subsection-title {
+    margin-top: 4px;
 }
 
-/* ── Status bar ── */
-.employee-status-bar {
+.edm-signal-rows {
+    flex-direction: column;
+}
+
+.edm-signal-row {
     flex-direction: row;
     align-items: center;
-    padding: 8px 16px;
+    justify-content: space-between;
+    padding: 2px 0;
+    margin-bottom: 2px;
+}
+
+.edm-signal-row__name {
+    font-size: var(--font-sm);
+    color: var(--text-primary);
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.edm-signal-row__label {
+    font-size: var(--font-xs);
+    -unity-font-style: bold;
+    min-width: 60px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+    margin-left: 6px;
+}
+
+.edm-signal-row__confidence {
+    font-size: 9px;
+    color: var(--text-muted);
+    min-width: 50px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+
+/* Signal label color by tier */
+.signal--exceptional { color: #4ADE80; }
+.signal--high        { color: #A3E635; }
+.signal--average     { color: var(--text-muted); }
+.signal--low         { color: #FB923C; }
+.signal--very-low    { color: #F87171; }
+
+/* ── Notes Card ────────────────────────────────────────────────── */
+.edm-note-text {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    white-space: normal;
+    margin-bottom: 4px;
+}
+
+.edm-recommendation-text {
+    font-size: var(--font-sm);
+    color: var(--accent-primary);
+    white-space: normal;
+    -unity-font-style: italic;
+    margin-top: 4px;
+}
+
+/* ── Team Impact Section ───────────────────────────────────────── */
+.edm-team-impact-section {
+    flex-direction: column;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin-top: 8px;
+    border-width: 1px;
+    border-color: var(--border-subtle);
+    flex-shrink: 0;
+}
+
+.edm-team-impact-rows {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.edm-team-impact-row {
+    flex-direction: row;
+    align-items: center;
+    margin-right: 16px;
+    margin-bottom: 4px;
+}
+
+.edm-team-impact-row__name {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin-right: 6px;
+}
+
+.edm-team-impact-row__delta {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+}
+
+.edm-team-impact-row__delta--positive { color: #4ADE80; }
+.edm-team-impact-row__delta--negative { color: #F87171; }
+.edm-team-impact-row__delta--neutral  { color: var(--text-muted); }
+
+/* ── Contract Detail Rows ───────────────────────────────────────── */
+.edm-contract-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.edm-contract-row__label {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+}
+
+.edm-contract-row__value {
+    font-size: var(--font-sm);
+    color: var(--text-primary);
+    -unity-font-style: bold;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BOTTOM STATUS STRIP
+   ══════════════════════════════════════════════════════════════════ */
+.edm-status-strip {
+    flex-direction: row;
+    align-items: stretch;
+    background-color: var(--bg-floor);
+    border-top-width: 1px;
+    border-top-color: var(--border-subtle);
+    flex-shrink: 0;
+    min-height: 52px;
+}
+
+.edm-status-card {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    padding: 6px 8px;
+    border-right-width: 1px;
+    border-right-color: var(--border-subtle);
+}
+
+.edm-status-card:last-child {
+    border-right-width: 0;
+}
+
+.edm-status-card__label {
+    font-size: 9px;
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    letter-spacing: 0.4px;
+    margin-bottom: 2px;
+    -unity-text-align: middle-center;
+}
+
+.edm-status-card__value {
+    font-size: var(--font-sm);
+    color: var(--text-primary);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* Status card state modifiers */
+.edm-status-card--warning {
+    background-color: rgba(251, 191, 36, 0.08);
+    border-bottom-width: 2px;
+    border-bottom-color: var(--accent-warning);
+}
+
+.edm-status-card--danger {
+    background-color: rgba(248, 113, 113, 0.08);
+    border-bottom-width: 2px;
+    border-bottom-color: var(--accent-danger);
+}
+
+.edm-status-card--success {
+    background-color: rgba(74, 222, 128, 0.06);
+    border-bottom-width: 2px;
+    border-bottom-color: var(--accent-success);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   FOOTER ACTIONS
+   ══════════════════════════════════════════════════════════════════ */
+.edm-footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
     background-color: var(--bg-secondary);
     border-top-width: 1px;
     border-top-color: var(--border-subtle);
     flex-shrink: 0;
 }
 
-.status-bar__item {
+.edm-footer__right {
     flex-direction: row;
     align-items: center;
-    margin-right: 16px;
 }
 
-.status-bar__label {
+.edm-action-btn {
+    margin-left: 8px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BADGES
+   ══════════════════════════════════════════════════════════════════ */
+.badge--founder {
+    background-color: rgba(139, 92, 246, 0.2);
+    color: #a78bfa;
+    border-color: rgba(139, 92, 246, 0.4);
+}
+
+.edm-badge-chip {
+    font-size: var(--font-xs);
+    padding: 1px 6px;
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    margin-right: 4px;
+    margin-bottom: 2px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PERSONAL / PERFORMANCE / GROWTH TABS — shared layout
+   ══════════════════════════════════════════════════════════════════ */
+.edm-personal-content,
+.edm-performance-content,
+.edm-growth-content {
+    flex-direction: column;
+    padding: 12px;
+}
+
+.edm-tab-section {
+    margin-bottom: 8px;
+}
+
+/* ── Wellbeing / stat pair row ───────────────────────────────────── */
+.edm-wellbeing-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3px;
+}
+
+/* ── Personality description ─────────────────────────────────────── */
+.edm-personality-description {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    white-space: normal;
+    margin-top: 4px;
+}
+
+/* ── Retention risk label tiers ──────────────────────────────────── */
+.edm-retention-risk-label {
+    font-size: var(--font-md);
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.edm-retention-risk--low    { color: #4ADE80; }
+.edm-retention-risk--medium { color: #FACC15; }
+.edm-retention-risk--high   { color: #FB923C; }
+.edm-retention-risk--severe { color: #F87171; }
+
+.edm-retention-reasons {
+    flex-direction: column;
+}
+
+.edm-retention-reason {
     font-size: var(--font-xs);
     color: var(--text-muted);
+    white-space: normal;
+    margin-bottom: 2px;
+    padding-left: 8px;
+}
+
+/* ── Burnout warning label ───────────────────────────────────────── */
+.edm-burnout-warning {
+    font-size: var(--font-sm);
+    color: #F87171;
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-top: 4px;
+}
+
+/* ── Founder traits section ──────────────────────────────────────── */
+.edm-founder-traits {
+    border-left-width: 3px;
+    border-left-color: rgba(139, 92, 246, 0.6);
+    border-top-color: var(--border-subtle);
+    border-right-color: var(--border-subtle);
+    border-bottom-color: var(--border-subtle);
+}
+
+.edm-founder-trait-value {
+    color: #a78bfa;
+}
+
+.edm-founder-weakness-value {
+    color: #FB923C;
+}
+
+/* ── Performance tab: form score ─────────────────────────────────── */
+.edm-form-score {
+    font-size: var(--font-xl);
+    -unity-font-style: bold;
+    color: var(--text-primary);
+    -unity-text-align: middle-center;
+    padding: 4px 0;
+}
+
+.edm-form-score--strong    { color: #4ADE80; }
+.edm-form-score--good      { color: #A3E635; }
+.edm-form-score--average   { color: var(--text-primary); }
+.edm-form-score--poor      { color: #FB923C; }
+.edm-form-score--declining { color: #F87171; }
+
+/* ── Work history list ───────────────────────────────────────────── */
+.edm-work-history-list {
+    flex-direction: column;
+}
+
+.edm-work-history-row {
+    flex-direction: column;
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-elevated);
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    border-width: 1px;
+    border-color: var(--border-subtle);
+}
+
+.edm-work-history-row__header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 3px;
+}
+
+.edm-work-history-row__date {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.edm-work-history-row__type-pill {
+    font-size: 9px;
+    -unity-font-style: bold;
+    padding: 1px 5px;
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.edm-work-type--contract {
+    background-color: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.4);
+    color: #93C5FD;
+}
+
+.edm-work-type--product {
+    background-color: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.4);
+    color: #C4B5FD;
+}
+
+.edm-work-history-row__name {
+    font-size: var(--font-sm);
+    color: var(--text-primary);
+    -unity-font-style: bold;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.edm-work-history-row__detail {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.edm-work-history-row__contribution {
+    font-size: var(--font-xs);
+    -unity-font-style: bold;
+    padding: 1px 5px;
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    margin-right: 6px;
+}
+
+.contribution--high   { background-color: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.35); color: #4ADE80; }
+.contribution--medium { background-color: rgba(250,204,21,0.10); border-color: rgba(250,204,21,0.35); color: #FACC15; }
+.contribution--low    { background-color: rgba(248,113,113,0.10); border-color: rgba(248,113,113,0.35); color: #F87171; }
+
+.edm-work-history-row__outcome {
+    font-size: var(--font-xs);
+    -unity-font-style: bold;
+    padding: 1px 5px;
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    margin-right: 6px;
+}
+
+.outcome--completed { background-color: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.25); color: #4ADE80; }
+.outcome--cancelled { background-color: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.25); color: #F87171; }
+
+.edm-work-history-row__quality {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    margin-right: 6px;
+}
+
+.edm-work-history-row__xp {
+    font-size: var(--font-xs);
+    color: var(--accent-primary);
+    -unity-font-style: italic;
+}
+
+.edm-empty-state-label {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    -unity-font-style: italic;
+    padding: 12px 0;
+    -unity-text-align: middle-center;
+}
+
+/* ── Growth tab: growth outlook badge ────────────────────────────── */
+.edm-growth-outlook-badge {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    align-self: flex-start;
+    margin-top: 6px;
+}
+
+.growth-outlook--strong     { background-color: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.35); color: #4ADE80; }
+.growth-outlook--good       { background-color: rgba(163,230,53,0.10); border-color: rgba(163,230,53,0.30); color: #A3E635; }
+.growth-outlook--plateauing { background-color: rgba(250,204,21,0.10); border-color: rgba(250,204,21,0.30); color: #FACC15; }
+.growth-outlook--declining  { background-color: rgba(248,113,113,0.10); border-color: rgba(248,113,113,0.30); color: #F87171; }
+
+/* ── Plateau warning label ───────────────────────────────────────── */
+.edm-plateau-warning {
+    font-size: var(--font-xs);
+    color: #FACC15;
+    -unity-font-style: italic;
+    white-space: normal;
+    margin-top: 4px;
+}
+
+/* ── Growth tab: skill list with XP bars ─────────────────────────── */
+.edm-skill-growth-list {
+    flex-direction: column;
+}
+
+.edm-skill-category-header {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    letter-spacing: 0.4px;
+    margin-top: 6px;
+    margin-bottom: 3px;
+    padding-bottom: 2px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+}
+
+.edm-skill-growth-row {
+    flex-direction: column;
+    padding: 3px 0;
+    margin-bottom: 4px;
+}
+
+.edm-skill-growth-row__top {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2px;
+}
+
+.edm-skill-growth-row__name {
+    font-size: var(--font-sm);
+    color: var(--text-primary);
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.edm-skill-growth-row__value {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    color: var(--text-primary);
+    min-width: 20px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+    margin-left: 6px;
     margin-right: 4px;
 }
 
-.status-bar__value {
+.edm-skill-growth-row__arrow {
+    font-size: var(--font-xs);
+    min-width: 12px;
+    flex-shrink: 0;
+}
+
+.edm-skill-growth-row__xp-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.edm-xp-bar-bg {
+    flex-grow: 1;
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--bg-elevated);
+    flex-shrink: 1;
+}
+
+.edm-xp-bar-fill {
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--accent-primary);
+}
+
+.edm-xp-pct-label {
+    font-size: 9px;
+    color: var(--text-muted);
+    min-width: 40px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+    margin-left: 6px;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   CAREER TAB
+   ══════════════════════════════════════════════════════════════════ */
+.edm-career-content {
+    flex-direction: column;
+    padding: 12px;
+}
+
+/* ── Career stats grid — 3-column grid ───────────────────────────── */
+.edm-career-stats-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.edm-career-stat-card {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-basis: 33%;
+    padding: 8px 4px;
+    margin-bottom: 4px;
+}
+
+.edm-career-stat-card__label {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    -unity-text-align: middle-center;
+    margin-bottom: 2px;
+}
+
+.edm-career-stat-card__value {
+    font-size: var(--font-lg);
+    -unity-font-style: bold;
+    color: var(--text-primary);
+    -unity-text-align: middle-center;
+}
+
+/* ── Career timeline ──────────────────────────────────────────────── */
+.edm-career-timeline {
+    flex-direction: column;
+}
+
+.edm-timeline-entry {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+    margin-bottom: 2px;
+}
+
+.edm-timeline-entry:last-child {
+    border-bottom-width: 0;
+}
+
+.edm-timeline-entry__date {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    min-width: 56px;
+    flex-shrink: 0;
+    margin-right: 8px;
+}
+
+.edm-timeline-entry__type-pill {
+    font-size: 9px;
+    -unity-font-style: bold;
+    padding: 1px 5px;
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+.timeline-type--hired      { background-color: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.35); color: #4ADE80; }
+.timeline-type--shipped    { background-color: rgba(139,92,246,0.12); border-color: rgba(139,92,246,0.35); color: #C4B5FD; }
+.timeline-type--contract   { background-color: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.35); color: #93C5FD; }
+.timeline-type--team       { background-color: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.35); color: #FDE68A; }
+.timeline-type--salary     { background-color: rgba(249,115,22,0.12); border-color: rgba(249,115,22,0.35); color: #FDBA74; }
+
+.edm-timeline-entry__details {
+    flex-direction: column;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.edm-timeline-entry__title {
     font-size: var(--font-sm);
-    color: var(--text-light);
+    color: var(--text-primary);
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: 2px;
+}
+
+.edm-timeline-entry__subtitle {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    white-space: normal;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   COMPARISON TAB
+   ══════════════════════════════════════════════════════════════════ */
+.edm-comparison-content {
+    flex-direction: column;
+    padding: 12px;
+}
+
+/* ── Comparison target selector ───────────────────────────────────── */
+.edm-comparison-target-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.edm-comparison-target-btn {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+    background-color: var(--bg-elevated);
+    border-width: 1px;
+    border-color: var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 5px 12px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    cursor: link;
+}
+
+.edm-comparison-target-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-primary);
+}
+
+.edm-comparison-target-btn--active {
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background-color: rgba(99,102,241,0.12);
     -unity-font-style: bold;
 }
 
-/* ── Renewal negotiation card ── */
+/* ── Comparison columns header ────────────────────────────────────── */
+.edm-comparison-columns-header {
+    flex-direction: row;
+    align-items: center;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+}
+
+.edm-comparison-col-label {
+    font-size: var(--font-xs);
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    letter-spacing: 0.3px;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.edm-comparison-col-label--right {
+    flex-grow: 0;
+    flex-shrink: 0;
+    min-width: 72px;
+    -unity-text-align: middle-right;
+}
+
+/* ── Comparison metrics list ──────────────────────────────────────── */
+.edm-comparison-metrics-list {
+    flex-direction: column;
+}
+
+.edm-comparison-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+    margin-bottom: 1px;
+}
+
+.edm-comparison-row:last-child {
+    border-bottom-width: 0;
+}
+
+.edm-comparison-row__name {
+    font-size: var(--font-sm);
+    color: var(--text-primary);
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.edm-comparison-row__employee {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    color: var(--text-primary);
+    min-width: 72px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+}
+
+.edm-comparison-row__benchmark {
+    font-size: var(--font-sm);
+    color: var(--text-muted);
+    min-width: 72px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+}
+
+.edm-comparison-row__diff {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    min-width: 56px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+}
+
+/* Difference indicator classes */
+.diff--positive { color: #4ADE80; }
+.diff--negative { color: #F87171; }
+.diff--neutral  { color: var(--text-muted); }
+
+.edm-attr-trend-label {
+    font-size: var(--font-xs);
+    min-width: 72px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+    margin-left: 6px;
+    -unity-font-style: bold;
+}
+
+.attr-trend--improving  { color: #4ADE80; }
+.attr-trend--unchanged  { color: var(--text-muted); }
+.attr-trend--uncertain  { color: #FACC15; }
+.attr-trend--declining  { color: #F87171; }
+
+
+.card--warning-left {
+    flex-direction: column;
+    background-color: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-left-width: 3px;
+    border-left-color: var(--accent-warning);
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+.card--accent-left {
+    flex-direction: column;
+    background-color: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    border-left-width: 3px;
+    border-left-color: var(--accent-primary);
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+.card--info-left {
+    flex-direction: column;
+    background-color: var(--bg-elevated);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    border-left-width: 3px;
+    border-left-color: var(--accent-info);
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   RENEWAL & PATIENCE DOTS (preserved for ContractRenewalModalView)
+   ══════════════════════════════════════════════════════════════════ */
 .renewal-card {
     flex-direction: column;
     background-color: rgba(251, 191, 36, 0.06);
@@ -315,7 +1339,6 @@
     border-bottom-color: transparent;
 }
 
-/* ── Renewal patience dots ── */
 .renewal-patience-dot {
     width: 10px;
     height: 10px;

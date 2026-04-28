@@ -7,9 +7,8 @@ public class CandidateData
     public string Name;
     public Gender Gender;
     public int Age;
-    public int[] Skills;
     public int Salary;
-    public EmployeeRole Role;
+    public RoleId Role;
 
     // Hiring pipeline fields (set post-generation)
     public int InterviewStage;
@@ -20,7 +19,7 @@ public class CandidateData
     public TeamId SourcingTeamId;   // set by HRSystem on candidate delivery; default = 0 (not HR-sourced)
     public bool IsPendingReview; // true = HR-delivered, awaiting player accept/decline before entering pool
     public int SourceTier;      // 0 = Basic, 1 = Standard, 2 = Executive
-    public int HRSkill;         // only populated for Role == HR
+    public int HRSkill;         // only populated for Role == HrSpecialist
 
     // Follow-up / patience state
     public bool HasSentFollowUp;        // true once the follow-up inbox message is sent
@@ -28,15 +27,8 @@ public class CandidateData
     public int WithdrawalDeadlineTick;  // set when follow-up sends; candidate withdraws at this tick
     public int LastOfferTick;           // tick when the last offer was made; 0 = no offer sent
 
-    // Backward-compat properties
-    public int ProgrammingSkill { get => Skills[(int)SkillType.Programming]; set => Skills[(int)SkillType.Programming] = value; }
-    public int DesignSkill { get => Skills[(int)SkillType.Design]; set => Skills[(int)SkillType.Design] = value; }
-    public int QASkill { get => Skills[(int)SkillType.QA]; set => Skills[(int)SkillType.QA] = value; }
-
-    // CA/PA fields — CurrentAbility set during GenerateCandidate; PotentialAbility also set during GenerateCandidate
+    // CA/PA fields
     public int CurrentAbility;             // set to ca at generation; 0 = lazy-compute fallback on old saves
-    public int PotentialAbility;           // 0-200; 0 = not yet generated
-    public HiddenAttributes HiddenAttributes;
     public Personality personality;
 
     // Employment preference fields — generated in GenerateCandidate, revealed via interview/HR
@@ -44,17 +36,15 @@ public class CandidateData
     public bool PreferencesRevealed;   // true = player has seen exact FT/PT + length preference
     public bool PreferencesHinted;     // true = player has seen a vague hint about preferences
 
-    public int GetSkill(SkillType type) => Skills[(int)type];
+    // Stat model
+    public EmployeeStatBlock Stats;
+    public ConfidenceLevel[] SkillConfidence;           // length 26, per-skill confidence
+    public ConfidenceLevel[] VisibleAttributeConfidence; // length 8
+    public ConfidenceLevel[] HiddenAttributeConfidence;  // length 7
 
-    // Returns the indexed tier array for this candidate's role — used by SalaryDemandCalculator.
-    public int[] GetRoleTiersForSalary()
-    {
-        GetRoleTiers(Role, out int[] tiers, out _, out _);
-        return tiers;
-    }
+    public int GetSkill(SkillId id) => Stats.GetSkill(id);
 
     // Compute salary that this candidate demands.
-    // Delegates to SalaryDemandCalculator unified formula.
     public int ComputeSalary()
     {
         return SalaryDemandCalculator.ComputeDemand(this);
@@ -63,37 +53,50 @@ public class CandidateData
     // 0–100, pure computed — no RNG, no alloc
     public int RoleFitScore => RoleRelevantAverage;
 
+    // Returns the top-3 skill average using the role's primary+secondary skill bands.
+    // Requires a RoleProfileTable to be provided; falls back to zero if unavailable.
+    public int ComputeRoleRelevantAverage(RoleProfileTable roleProfileTable)
+    {
+        if (roleProfileTable == null) return 0;
+        var profile = roleProfileTable.Get(Role);
+        if (profile == null) return 0;
+
+        int primary = 0;
+        int secondary = 0;
+        int third = 0;
+        int skillCount = SkillIdHelper.SkillCount;
+        for (int i = 0; i < skillCount; i++)
+        {
+            var band = profile.SkillBands[i];
+            if (band != RoleWeightBand.Primary && band != RoleWeightBand.Secondary) continue;
+            int val = Stats.GetSkill((SkillId)i);
+            if (val > primary) { third = secondary; secondary = primary; primary = val; }
+            else if (val > secondary) { third = secondary; secondary = val; }
+            else if (val > third) { third = val; }
+        }
+        return (primary + secondary + third) / 3;
+    }
+
     public int RoleRelevantAverage
     {
         get
         {
-            // Use top 2-3 role-relevant skills for seniority/salary instead of all-skill average
-            int primary = 0;
-            int secondary = 0;
-            int third = 0;
-            GetRoleTiers(Role, out _, out int[] primaryIndices, out int[] secondaryIndices);
-            int pLen = primaryIndices.Length;
-            for (int i = 0; i < pLen; i++)
+            // Fallback: use highest 3 skills when no profile table available
+            int s0 = 0, s1 = 0, s2 = 0;
+            int count = SkillIdHelper.SkillCount;
+            for (int i = 0; i < count; i++)
             {
-                int val = Skills[primaryIndices[i]];
-                if (val > primary) { third = secondary; secondary = primary; primary = val; }
-                else if (val > secondary) { third = secondary; secondary = val; }
-                else if (val > third) { third = val; }
+                int val = Stats.Skills[i];
+                if (val > s0) { s2 = s1; s1 = s0; s0 = val; }
+                else if (val > s1) { s2 = s1; s1 = val; }
+                else if (val > s2) { s2 = val; }
             }
-            int sLen = secondaryIndices.Length;
-            for (int i = 0; i < sLen; i++)
-            {
-                int val = Skills[secondaryIndices[i]];
-                if (val > primary) { third = secondary; secondary = primary; primary = val; }
-                else if (val > secondary) { third = secondary; secondary = val; }
-                else if (val > third) { third = val; }
-            }
-            return (primary + secondary + third) / 3;
+            return (s0 + s1 + s2) / 3;
         }
     }
 
     public int AverageSkill => RoleRelevantAverage;
-    
+
     public SkillTier SuggestedSkillTier
     {
         get
@@ -120,73 +123,27 @@ public class CandidateData
         }
     }
 
-    // Role-skill tier mapping derived from RoleTierProfile canonical values.
-    // Tier values: 2 = Primary (1.0x cost), 3 = Secondary (1.5x), 4 = Tertiary (2.0x).
-    // SkillType indices: 0=Prog, 1=Design, 2=QA, 3=VFX, 4=SFX, 5=HR, 6=Neg, 7=Acct, 8=Mktg
-    private static void GetRoleTiers(EmployeeRole role, out int[] tiers, out int[] primaryIndices, out int[] secondaryIndices)
-    {
-        tiers = s_RoleTierTable.GetTiers(role);
-        DeriveTierIndices(tiers, out primaryIndices, out secondaryIndices);
-    }
-
-    private static readonly RoleTierTable s_RoleTierTable = BuildDefaultTierTable();
-
-    private static RoleTierTable BuildDefaultTierTable()
-    {
-        var table = new RoleTierTable();
-        var profiles = UnityEngine.Resources.LoadAll<RoleTierProfile>("RoleTiers");
-        for (int i = 0; i < profiles.Length; i++)
-            table.Register(profiles[i]);
-        return table;
-    }
-
-    private static void DeriveTierIndices(int[] tiers, out int[] primaryIndices, out int[] secondaryIndices)
-    {
-        int pCount = 0;
-        int sCount = 0;
-        for (int i = 0; i < tiers.Length; i++) {
-            if (tiers[i] == 2) pCount++;
-            else if (tiers[i] == 3) sCount++;
-        }
-        primaryIndices = new int[pCount];
-        secondaryIndices = new int[sCount];
-        int pi = 0;
-        int si = 0;
-        for (int i = 0; i < tiers.Length; i++) {
-            if (tiers[i] == 2) primaryIndices[pi++] = i;
-            else if (tiers[i] == 3) secondaryIndices[si++] = i;
-        }
-    }
-    
-    public static CandidateData GenerateCandidate(IRng rng, float qualityMultiplier = 1.0f, EmployeeRole? forceRole = null)
+    // Candidate generation using new RoleId-based system.
+    public static CandidateData GenerateCandidate(IRng rng, RoleProfileTable roleProfileTable, float qualityMultiplier = 1.0f, RoleId? forceRole = null)
     {
         int genderIndex = rng.Range(0, 2);
         Gender gender = (Gender)genderIndex;
         string name = NameGenerator.GenerateRandomName(rng, gender);
 
-        EmployeeRole role;
+        RoleId role;
         if (forceRole.HasValue)
         {
             role = forceRole.Value;
         }
         else
         {
-            // Free candidate pool: Developer, Designer, QAEngineer, HR, SoundEngineer, VFXArtist, Marketer.
-            // Pool index → role mapping (enum gap at 3 since Researcher was removed):
-            //   0→Dev(0), 1→Des(1), 2→QA(2), 3→HR(4), 4→SoundEngineer(5), 5→VFXArtist(6), 6→Marketer(8)
-            int poolIndex = rng.Range(0, 7);
-            if (poolIndex < 3)
-                role = (EmployeeRole)poolIndex;           // 0→Dev, 1→Des, 2→QA
-            else if (poolIndex < 6)
-                role = (EmployeeRole)(poolIndex + 1);     // 3→HR(4), 4→Sound(5), 5→VFX(6)
-            else
-                role = EmployeeRole.Marketer;             // 6→Marketer(8)
+            // Free candidate pool: common roles weighted by CandidatePoolWeight from profile table
+            // Fallback: equal distribution across all 16 roles
+            int poolIndex = rng.Range(0, RoleIdHelper.RoleCount);
+            role = (RoleId)poolIndex;
         }
 
         // ── Phase 1: Roll CA from weighted distribution ─────────────────────────
-        // Four buckets matching star thresholds. qualityMultiplier (HR searches)
-        // shifts probability mass from lower buckets toward higher ones.
-        // Default weights (q=0): Low 45% | Average 40% | High 10% | Exceptional 2%
         float q = qualityMultiplier - 1.0f;
         int wLow  = Clamp((int)(45 - q * 50),  5, 45);
         int wAvg  = Clamp((int)(40 - q * 15), 15, 40);
@@ -204,8 +161,6 @@ public class CandidateData
         int ca = rng.Range(caMin, caMax + 1);
 
         // ── Phase 2: Roll age independently, soft-nudge toward CA-plausible range
-        // Age has no mechanical effect on CA. High CA nudges displayed age older,
-        // low CA nudges younger. Bias is 40% blend — never a hard clamp.
         int rawAge = rng.Range(18, 46);
         int ageBias;
         if      (ca >= 170) ageBias = 38;
@@ -214,8 +169,7 @@ public class CandidateData
         else                ageBias = 20;
         int age = Clamp((int)(rawAge * 0.6f + ageBias * 0.4f), 20, 55);
 
-        // ── Phase 3: Derive PA — soft age bias preserved for growth ceiling ──────
-        // PA >= CA always by construction. Younger age = more uplift headroom.
+        // ── Phase 3: Derive PA
         int maxUplift;
         if      (age <= 22) maxUplift = 110;
         else if (age <= 26) maxUplift = 85;
@@ -226,31 +180,54 @@ public class CandidateData
         int pa = ca + rng.Range(8, maxUplift + 1);
         if (pa > 200) pa = 200;
 
-        // ── Phase 3: Distribute CA as skill budget using reverse-solve ──────────
-        // Greedy allocation: primary first (cheapest per CA), then secondary, then
-        // tertiary. Final CA is computed and validated against the rolled target.
-        int[] skills = new int[SkillTypeHelper.SkillTypeCount];
+        // ── Phase 4: Distribute CA as skill budget across new 26-skill model ────
+        var stats = EmployeeStatBlock.Create();
+        stats.PotentialAbility = pa;
 
-        GetRoleTiers(role, out int[] tiers, out int[] primaryIndices, out int[] secondaryIndices);
+        RoleProfileDefinition profile = roleProfileTable?.Get(role);
+        int totalSkills = SkillIdHelper.SkillCount;
 
-        // Build tertiary index list (all skills not in primary or secondary)
-        int totalSkills = SkillTypeHelper.SkillTypeCount;
-        int[] tertiaryIndices = new int[totalSkills - primaryIndices.Length - secondaryIndices.Length];
-        int tertiaryCount = 0;
-        for (int i = 0; i < totalSkills; i++)
+        // Build tier int array from profile bands (Primary=2, Secondary=3, Tertiary=4, None=4)
+        int[] tiers = new int[totalSkills];
+        int[] primaryIndices;
+        int[] secondaryIndices;
+        int[] tertiaryIndices;
+
+        if (profile != null)
         {
-            bool isPrimary = false;
-            for (int p = 0; p < primaryIndices.Length; p++) if (primaryIndices[p] == i) { isPrimary = true; break; }
-            if (isPrimary) continue;
-            bool isSecondary = false;
-            for (int s = 0; s < secondaryIndices.Length; s++) if (secondaryIndices[s] == i) { isSecondary = true; break; }
-            if (!isSecondary) tertiaryIndices[tertiaryCount++] = i;
+            int pCount = 0, sCount = 0, tCount = 0;
+            for (int i = 0; i < totalSkills; i++)
+            {
+                switch (profile.SkillBands[i])
+                {
+                    case RoleWeightBand.Primary:   tiers[i] = 2; pCount++; break;
+                    case RoleWeightBand.Secondary: tiers[i] = 3; sCount++; break;
+                    default:                       tiers[i] = 4; tCount++; break;
+                }
+            }
+            primaryIndices = new int[pCount];
+            secondaryIndices = new int[sCount];
+            tertiaryIndices = new int[tCount];
+            int pi = 0, si = 0, ti = 0;
+            for (int i = 0; i < totalSkills; i++)
+            {
+                if (tiers[i] == 2) primaryIndices[pi++] = i;
+                else if (tiers[i] == 3) secondaryIndices[si++] = i;
+                else tertiaryIndices[ti++] = i;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < totalSkills; i++) tiers[i] = 3;
+            primaryIndices = new int[0];
+            secondaryIndices = new int[totalSkills];
+            tertiaryIndices = new int[0];
+            for (int i = 0; i < totalSkills; i++) secondaryIndices[i] = i;
         }
 
         int remaining = ca;
 
-        // Primary allocation: greedily add points while marginal cost fits in budget
-        // Target ~30% of total CA for primaries combined
+        // Primary allocation: ~30% of CA budget
         int primaryTarget = (ca * 30) / 100;
         int primarySpent = 0;
         bool primaryActive = true;
@@ -260,11 +237,11 @@ public class CandidateData
             for (int p = 0; p < primaryIndices.Length; p++)
             {
                 int idx = primaryIndices[p];
-                if (skills[idx] >= 20) continue;
-                int marginal = AbilityCalculator.GetMarginalCost(skills[idx], tiers[idx]);
+                if (stats.Skills[idx] >= 20) continue;
+                int marginal = AbilityCalculator.GetMarginalCost(stats.Skills[idx], tiers[idx]);
                 if (marginal > 0 && marginal <= remaining && primarySpent + marginal <= primaryTarget + 5)
                 {
-                    skills[idx]++;
+                    stats.Skills[idx]++;
                     remaining -= marginal;
                     primarySpent += marginal;
                     primaryActive = true;
@@ -272,7 +249,7 @@ public class CandidateData
             }
         }
 
-        // Secondary allocation: greedily add points, target ~32% of total CA
+        // Secondary allocation: ~32% of CA budget
         int secondaryTarget = (ca * 32) / 100;
         int secondarySpent = 0;
         bool secondaryActive = true;
@@ -282,11 +259,11 @@ public class CandidateData
             for (int s = 0; s < secondaryIndices.Length; s++)
             {
                 int idx = secondaryIndices[s];
-                if (skills[idx] >= 20) continue;
-                int marginal = AbilityCalculator.GetMarginalCost(skills[idx], tiers[idx]);
+                if (stats.Skills[idx] >= 20) continue;
+                int marginal = AbilityCalculator.GetMarginalCost(stats.Skills[idx], tiers[idx]);
                 if (marginal > 0 && marginal <= remaining && secondarySpent + marginal <= secondaryTarget + 5)
                 {
-                    skills[idx]++;
+                    stats.Skills[idx]++;
                     remaining -= marginal;
                     secondarySpent += marginal;
                     secondaryActive = true;
@@ -294,19 +271,19 @@ public class CandidateData
             }
         }
 
-        // Tertiary allocation: distribute remaining budget across tertiary skills
+        // Tertiary allocation: distribute remaining budget
         bool tertiaryActive = true;
         while (tertiaryActive && remaining > 0)
         {
             tertiaryActive = false;
-            for (int t = 0; t < tertiaryCount; t++)
+            for (int t = 0; t < tertiaryIndices.Length; t++)
             {
                 int idx = tertiaryIndices[t];
-                if (skills[idx] >= 20) continue;
-                int marginal = AbilityCalculator.GetMarginalCost(skills[idx], tiers[idx]);
+                if (stats.Skills[idx] >= 20) continue;
+                int marginal = AbilityCalculator.GetMarginalCost(stats.Skills[idx], tiers[idx]);
                 if (marginal > 0 && marginal <= remaining)
                 {
-                    skills[idx]++;
+                    stats.Skills[idx]++;
                     remaining -= marginal;
                     tertiaryActive = true;
                 }
@@ -318,46 +295,44 @@ public class CandidateData
         {
             int idx = primaryIndices[p];
             int variance = rng.Range(-2, 3);
-            skills[idx] = Clamp(skills[idx] + variance, 0, 20);
+            stats.Skills[idx] = Clamp(stats.Skills[idx] + variance, 0, 20);
         }
         for (int s = 0; s < secondaryIndices.Length; s++)
         {
             int idx = secondaryIndices[s];
             int variance = rng.Range(-1, 2);
-            skills[idx] = Clamp(skills[idx] + variance, 0, 20);
+            stats.Skills[idx] = Clamp(stats.Skills[idx] + variance, 0, 20);
         }
 
-        // Validation: compute actual Ability and trim/bump to stay within [ca-5, ca+5]
-        int actualCA = AbilityCalculator.ComputeAbility(skills, tiers);
+        // Compute actual CA and trim/bump to stay within [ca-5, ca+5]
+        int actualCA = AbilityCalculator.ComputeAbility(stats.Skills, tiers);
         int delta = actualCA - ca;
 
-        // Overshoot: trim highest tertiary skills
         if (delta > 5)
         {
-            for (int t = tertiaryCount - 1; t >= 0 && delta > 5; t--)
+            for (int t = tertiaryIndices.Length - 1; t >= 0 && delta > 5; t--)
             {
                 int idx = tertiaryIndices[t];
-                while (skills[idx] > 0 && delta > 5)
+                while (stats.Skills[idx] > 0 && delta > 5)
                 {
-                    int marginal = AbilityCalculator.GetMarginalCost(skills[idx] - 1, tiers[idx]);
-                    skills[idx]--;
+                    int marginal = AbilityCalculator.GetMarginalCost(stats.Skills[idx] - 1, tiers[idx]);
+                    stats.Skills[idx]--;
                     delta -= marginal;
                 }
             }
         }
-        // Undershoot: bump a secondary skill
-        else if (delta < -5)
+        else if (delta < -5 && secondaryIndices.Length > 0)
         {
             int sIdx = secondaryIndices[0];
-            while (skills[sIdx] < 20 && delta < -5)
+            while (stats.Skills[sIdx] < 20 && delta < -5)
             {
-                int marginal = AbilityCalculator.GetMarginalCost(skills[sIdx], tiers[sIdx]);
-                skills[sIdx]++;
+                int marginal = AbilityCalculator.GetMarginalCost(stats.Skills[sIdx], tiers[sIdx]);
+                stats.Skills[sIdx]++;
                 delta += marginal;
             }
         }
 
-        // 5% chance cross-skill spike: one off-role skill gets a minor bump
+        // 5% chance cross-skill spike
         if (rng.Range(0, 100) < 5)
         {
             int crossIdx = rng.Range(0, totalSkills);
@@ -365,65 +340,60 @@ public class CandidateData
             for (int p = 0; p < primaryIndices.Length; p++) if (primaryIndices[p] == crossIdx) { isRoleSkill = true; break; }
             if (!isRoleSkill)
                 for (int s = 0; s < secondaryIndices.Length; s++) if (secondaryIndices[s] == crossIdx) { isRoleSkill = true; break; }
-            if (!isRoleSkill && skills[crossIdx] < 20)
+            if (!isRoleSkill && stats.Skills[crossIdx] < 20)
             {
-                // Only spike if it doesn't overshoot CA budget
                 int spikeAmt = rng.Range(2, 4);
                 int spikeCost = 0;
-                for (int bump = 0; bump < spikeAmt && skills[crossIdx] + bump < 20; bump++)
-                    spikeCost += AbilityCalculator.GetMarginalCost(skills[crossIdx] + bump, tiers[crossIdx]);
-                if (AbilityCalculator.ComputeAbility(skills, tiers) + spikeCost <= ca + 10)
-                    skills[crossIdx] = Clamp(skills[crossIdx] + spikeAmt, 0, 20);
+                for (int bump = 0; bump < spikeAmt && stats.Skills[crossIdx] + bump < 20; bump++)
+                    spikeCost += AbilityCalculator.GetMarginalCost(stats.Skills[crossIdx] + bump, tiers[crossIdx]);
+                if (AbilityCalculator.ComputeAbility(stats.Skills, tiers) + spikeCost <= ca + 10)
+                    stats.Skills[crossIdx] = Clamp(stats.Skills[crossIdx] + spikeAmt, 0, 20);
             }
         }
 
-        // Ability is the actual computed value from the generated skills
-        int computedCA = AbilityCalculator.ComputeAbility(skills, tiers);
+        int computedCA = AbilityCalculator.ComputeAbility(stats.Skills, tiers);
 
-        // Salary based on role-relevant skill average (top 2-3 skills)
-        var candidateData = new CandidateData
-        {
-            Name = name,
-            Gender = gender,
-            Age = age,
-            Skills = skills,
-            Role = role,
-            CurrentAbility = computedCA,
-            PotentialAbility = pa
-        };
-
-        // Generate HiddenAttributes from PA immediately (same formula as AbilitySystem)
+        // Generate hidden attributes from PA
         {
             int floor = pa / 20;
             if (floor < 1) floor = 1;
             if (floor > 10) floor = 10;
             int spread = (20 - floor) / 2 + 1;
             int Attr() => Clamp(rng.Range(floor, floor + spread + 1) + rng.Range(-1, 2), 1, 20);
-            candidateData.HiddenAttributes = new HiddenAttributes
-            {
-                LearningRate = Attr(),
-                Creative     = Attr(),
-                WorkEthic    = Attr(),
-                Adaptability = Attr(),
-                Ambition     = Attr()
-            };
+            stats.HiddenAttributes[(int)HiddenAttributeId.LearningRate] = Attr();
+            stats.HiddenAttributes[(int)HiddenAttributeId.Ambition]     = Attr();
+            stats.HiddenAttributes[(int)HiddenAttributeId.Loyalty]      = Attr();
+            stats.HiddenAttributes[(int)HiddenAttributeId.PressureTolerance] = Attr();
+            stats.HiddenAttributes[(int)HiddenAttributeId.Ego]          = Attr();
+            stats.HiddenAttributes[(int)HiddenAttributeId.Consistency]  = Attr();
+            stats.HiddenAttributes[(int)HiddenAttributeId.Mentoring]    = Attr();
+            stats.VisibleAttributes[(int)VisibleAttributeId.WorkEthic]  = Attr();
+            stats.VisibleAttributes[(int)VisibleAttributeId.Creativity] = Attr();
+            stats.VisibleAttributes[(int)VisibleAttributeId.Adaptability] = Attr();
+            // remaining visible attributes: default 10 from Create()
         }
+
+        var candidateData = new CandidateData
+        {
+            Name = name,
+            Gender = gender,
+            Age = age,
+            Role = role,
+            CurrentAbility = computedCA,
+            Stats = stats,
+        };
 
         // Salary derived from CA, role base band, and Ambition
         candidateData.Salary = candidateData.ComputeSalary();
         candidateData.personality = PersonalitySystem.GeneratePersonality(rng);
 
-        // ── Preference generation (Section 10.3) ─────────────────────────────
-        // Core roles: 65% FT / 20% Flex / 15% PT
-        // Support roles: 40% FT / 35% Flex / 25% PT
-        // Age influence: older (>40) shifts 8% toward FT; younger (<28) shifts 7% toward PT
-        bool isCoreRole = role == EmployeeRole.Developer || role == EmployeeRole.Designer || role == EmployeeRole.QAEngineer;
+        // ── Preference generation ─────────────────────────────────────────────
+        bool isCoreRole = role == RoleId.SoftwareEngineer || role == RoleId.ProductDesigner || role == RoleId.QaEngineer;
 
         int wFT  = isCoreRole ? 65 : 40;
         int wFlex = isCoreRole ? 20 : 35;
         int wPT  = isCoreRole ? 15 : 25;
 
-        // Age influence on FT/PT: older → more FT, younger → more PT
         if (age > 40)
         {
             int shift = 8;
@@ -447,8 +417,6 @@ public class CandidateData
         else
             ftPtPref = FtPtPreference.PrefersPartTime;
 
-        // Length preference: 40% Security / 35% NoPreference / 25% Flexibility
-        // Age influence: older (>40) shifts 5% toward Security; younger (<28) shifts 5% toward Flexibility
         int wSec = 40;
         int wNone = 35;
         int wFlex2 = 25;
@@ -485,18 +453,23 @@ public class CandidateData
         return candidateData;
     }
 
+    public static CandidateData GenerateCandidate(IRng rng, float qualityMultiplier = 1.0f, RoleId? forceRole = null)
+    {
+        return GenerateCandidate(rng, null, qualityMultiplier, forceRole);
+    }
+
     private static int Clamp(int value, int min, int max)
     {
         if (value < min) return min;
         if (value > max) return max;
         return value;
     }
-    
+
     private static int RoundToInt(float value)
     {
         return (int)Math.Round(value);
     }
-    
+
     private static int Max(int a, int b)
     {
         return a > b ? a : b;

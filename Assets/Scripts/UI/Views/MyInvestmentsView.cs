@@ -103,7 +103,7 @@ public class MyInvestmentsView : IGameView
         card.style.marginRight = 8;
 
         var lbl = new Label(labelText);
-        lbl.AddToClassList("text-muted");
+        lbl.AddToClassList("text-secondary");
         lbl.AddToClassList("text-sm");
         card.Add(lbl);
 

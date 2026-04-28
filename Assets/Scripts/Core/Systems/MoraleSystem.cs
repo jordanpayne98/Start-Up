@@ -393,7 +393,7 @@ public class MoraleSystem : ISystem
                             // 8. Product wrong-function penalty
                             bool employeeHasMatchingPhase = false;
                             for (int p = 0; p < phaseCount; p++) {
-                                SkillType phaseSkill = TeamWorkEngine.MapPhaseToSkill(product.Phases[p].phaseType);
+                                SkillId phaseSkill = TeamWorkEngine.MapPhaseToSkill(product.Phases[p].phaseType);
                                 if (TeamWorkEngine.IsRoleFitForSkill(employee.role, phaseSkill)) {
                                     employeeHasMatchingPhase = true;
                                     break;
@@ -495,7 +495,7 @@ public class MoraleSystem : ISystem
             employee.morale = (int)newMorale;
 
             if (data.currentMorale < quitThreshold) {
-                float quitChance = quitChanceBase + (employee.hiddenAttributes.Ambition / 20f) * quitAmbitionScale;
+                float quitChance = quitChanceBase + (employee.Stats.GetHiddenAttribute(HiddenAttributeId.Ambition) / 20f) * quitAmbitionScale;
                 if (rng.Chance(quitChance)) {
                     _mayQuitBuffer.Add(empId);
                     _logger.Log($"[MoraleSystem] Employee {empId.Value} morale critically low ({data.currentMorale:F1}), may quit");

@@ -191,7 +191,7 @@ public class HRSystem : ISystem
             var empId = team.members[i];
             var emp = _employeeState.employees.TryGetValue(empId, out var e) ? e : null;
             if (emp == null || !emp.isActive) continue;
-            if (emp.role != EmployeeRole.HR) continue;
+            if (emp.role != RoleId.HrSpecialist) continue;
             capacity += emp.EffectiveOutput;
         }
         return capacity;
@@ -235,8 +235,8 @@ public class HRSystem : ISystem
             var empId = team.members[i];
             var emp = _employeeState.employees.TryGetValue(empId, out var e) ? e : null;
             if (emp == null || !emp.isActive) continue;
-            if (emp.role != EmployeeRole.HR) continue;
-            total += emp.hrSkill;
+            if (emp.role != RoleId.HrSpecialist) continue;
+            total += emp.Stats.GetSkill(SkillId.HrRecruitment);
             count++;
         }
         return count > 0 ? total / count : 0;
@@ -254,8 +254,8 @@ public class HRSystem : ISystem
             var empId = team.members[i];
             var emp = _employeeState.employees.TryGetValue(empId, out var e) ? e : null;
             if (emp == null || !emp.isActive) continue;
-            if (emp.role != EmployeeRole.HR) continue;
-            total += emp.GetSkill(SkillType.Negotiation);
+            if (emp.role != RoleId.HrSpecialist) continue;
+            total += emp.Stats.GetSkill(SkillId.Negotiation);
             count++;
         }
         return count > 0 ? total / count : 0;
@@ -272,12 +272,12 @@ public class HRSystem : ISystem
             var empId = team.members[i];
             var emp = _employeeState.employees.TryGetValue(empId, out var e) ? e : null;
             if (emp == null || !emp.isActive) continue;
-            if (emp.role == EmployeeRole.HR) count++;
+            if (emp.role == RoleId.HrSpecialist) count++;
         }
         return count;
     }
 
-    /// <summary>Returns the highest hrSkill value among active HR employees on the given team. Returns 0 if none.</summary>
+    /// <summary>Returns the highest HrRecruitment skill value among active HR employees on the given team. Returns 0 if none.</summary>
     public int GetHighestHRSkill(TeamId teamId)
     {
         var team = _teamSystem?.GetTeam(teamId);
@@ -289,13 +289,14 @@ public class HRSystem : ISystem
             var empId = team.members[i];
             var emp = _employeeState.employees.TryGetValue(empId, out var e) ? e : null;
             if (emp == null || !emp.isActive) continue;
-            if (emp.role != EmployeeRole.HR) continue;
-            if (emp.hrSkill > highest) highest = emp.hrSkill;
+            if (emp.role != RoleId.HrSpecialist) continue;
+            int hrSkill = emp.Stats.GetSkill(SkillId.HrRecruitment);
+            if (hrSkill > highest) highest = hrSkill;
         }
         return highest;
     }
 
-    /// <summary>Returns average HRSkill across all active HR employees company-wide.
+    /// <summary>Returns average HrRecruitment skill across all active HR employees company-wide.
     /// Returns -1 if no HR employees exist (sentinel for ShowAsUnknown).</summary>
     public int GetAllHREmployeesSkillAverage()
     {
@@ -310,8 +311,8 @@ public class HRSystem : ISystem
         {
             if (!_employeeState.employees.TryGetValue(_employeeIdScratch[e], out var emp)) continue;
             if (!emp.isActive) continue;
-            if (emp.role != EmployeeRole.HR) continue;
-            total += emp.hrSkill;
+            if (emp.role != RoleId.HrSpecialist) continue;
+            total += emp.Stats.GetSkill(SkillId.HrRecruitment);
             count++;
         }
         return count > 0 ? total / count : -1;
@@ -600,7 +601,7 @@ public class HRSystem : ISystem
             var candidate = CandidateData.GenerateCandidate(_rng, qualityMultiplier, search.targetRole);
 
             int candidateCA      = _abilitySystem != null ? _abilitySystem.ComputeCandidateCA(candidate) : 0;
-            int candidatePAStars = AbilityCalculator.PotentialToStars(candidate.PotentialAbility);
+            int candidatePAStars = AbilityCalculator.PotentialToStars(candidate.Stats.PotentialAbility);
 
             bool passesCA = !hasCAFilter || (candidateCA >= effectiveMinCA && candidateCA <= effectiveMaxCA);
             bool passesPA = !hasPAFilter || (candidatePAStars >= paStarMin && candidatePAStars <= paStarMax);
@@ -622,17 +623,8 @@ public class HRSystem : ISystem
 
         _abilitySystem?.GenerateCandidateAbility(bestCandidate);
 
-        if (search.targetRole == EmployeeRole.HR && bestCandidate.Skills != null)
-        {
-            // Sync HRSkill display field from the already-correctly-generated Skills[HR] index.
-            // forceRole guarantees Skills[(int)SkillType.HR] was boosted as primary skill.
-            bestCandidate.HRSkill = bestCandidate.Skills.Length > (int)SkillType.HR
-                ? bestCandidate.Skills[(int)SkillType.HR]
-                : 5;
-        }
-
         int finalCA     = _abilitySystem != null ? _abilitySystem.ComputeCandidateCA(bestCandidate) : 0;
-        int finalPAStars = AbilityCalculator.PotentialToStars(bestCandidate.PotentialAbility);
+        int finalPAStars = AbilityCalculator.PotentialToStars(bestCandidate.Stats.PotentialAbility);
         _logger.Log($"[HRSystem] Delivered {bestCandidate.Name} — Ability:{finalCA} Potential:★{finalPAStars} (filter Ability:{effectiveMinCA}–{effectiveMaxCA} Potential:★{paStarMin}–★{paStarMax})");
 
         return bestCandidate;

@@ -125,7 +125,7 @@ public class IndustryOverviewView : IGameView
 
         var lbl = new Label(labelText);
         lbl.AddToClassList("text-sm");
-        lbl.AddToClassList("text-muted");
+        lbl.AddToClassList("text-secondary");
         cell.Add(lbl);
 
         var val = new Label("--");
@@ -253,7 +253,7 @@ public class IndustryOverviewView : IGameView
         var descLabel = new Label();
         descLabel.name = "dis-desc";
         descLabel.AddToClassList("text-sm");
-        descLabel.AddToClassList("text-muted");
+        descLabel.AddToClassList("text-secondary");
         descLabel.style.flexGrow = 3;
         descLabel.style.flexBasis = 0;
         row.Add(descLabel);

@@ -1,0 +1,499 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="product-creation-wizard" class="pcw">
+        <!-- Header -->
+        <ui:VisualElement name="wizard-header" class="pcw__header">
+            <ui:VisualElement class="pcw__header-left">
+                <ui:Label name="wizard-title" text="New Product" class="pcw__title" />
+                <ui:TextField name="product-name-field" value="" class="pcw__name-field" />
+            </ui:VisualElement>
+            <ui:VisualElement class="pcw__header-right">
+                <ui:Label name="step-label" text="Step 1 of 10" class="pcw__step-label" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Progress Stepper -->
+        <ui:VisualElement name="progress-stepper" class="pcw__stepper" />
+
+        <!-- Body: Main Panel + Forecast Panel -->
+        <ui:VisualElement name="wizard-body" class="pcw__body">
+            <!-- Left: Main Planning Panel -->
+            <ui:VisualElement name="main-planning-panel" class="pcw__main-panel">
+
+                <!-- Step 0: Product Type -->
+                <ui:VisualElement name="step-product-type" class="pcw__step">
+                    <ui:Label text="Choose Product Type" class="pcw__step-title" />
+                    <ui:Label text="Select what kind of product you want to build." class="pcw__step-desc" />
+                    <ui:VisualElement name="type-cards-container" class="pcw__cards-grid" />
+                </ui:VisualElement>
+
+                <!-- Step 1: Category / Template -->
+                <ui:VisualElement name="step-category" class="pcw__step">
+                    <ui:Label text="Choose Category" class="pcw__step-title" />
+                    <ui:Label name="category-step-desc" text="Select a product category to build." class="pcw__step-desc" />
+                    <ui:VisualElement name="category-cards-container" class="pcw__cards-grid" />
+                </ui:VisualElement>
+
+                <!-- Step 2: Market / Niche -->
+                <ui:VisualElement name="step-market" class="pcw__step">
+                    <ui:Label text="Target Market" class="pcw__step-title" />
+                    <ui:Label text="Choose a market niche to target. Demand and competition affect your success." class="pcw__step-desc" />
+                    <ui:VisualElement name="niche-cards-container" class="pcw__cards-grid" />
+                </ui:VisualElement>
+
+                <!-- Step 3: Genre (games only) -->
+                <ui:VisualElement name="step-genre" class="pcw__step">
+                    <ui:Label text="Select Genre" class="pcw__step-title" />
+                    <ui:Label text="Choose a genre for your game. This affects expected features and audience." class="pcw__step-desc" />
+                    <ui:VisualElement name="genre-cards-container" class="pcw__cards-grid" />
+                    <ui:VisualElement name="format-section" class="pcw__format-section">
+                        <ui:Label text="Game Format" class="pcw__step-subtitle" />
+                        <ui:Label text="Choose the visual format. This impacts scope, skills needed, and hardware requirements." class="pcw__step-desc" />
+                        <ui:VisualElement name="format-cards-container" class="pcw__cards-row" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Step 4: Target Platform -->
+                <ui:VisualElement name="step-platform" class="pcw__step">
+                    <ui:Label text="Target Platforms" class="pcw__step-title" />
+                    <ui:Label text="Select one or more platforms to release on. Multi-platform increases scope." class="pcw__step-desc" />
+                    <ui:VisualElement name="platform-cards-container" class="pcw__cards-grid" />
+                    <ui:Label name="multi-platform-warning" text="" class="pcw__warning-label" />
+                </ui:VisualElement>
+
+                <!-- Step 5: Features -->
+                <ui:VisualElement name="step-features" class="pcw__step">
+                    <ui:Label text="Select Features" class="pcw__step-title" />
+                    <ui:Label text="Choose features for your product. Expected features are required for competitive reviews." class="pcw__step-desc" />
+
+                    <!-- Category Tabs -->
+                    <ui:VisualElement name="feature-category-tabs" class="pcw__feat-tabs" />
+
+                    <!-- Feature List -->
+                    <ui:ScrollView name="feature-list-scroll" class="pcw__feat-scroll">
+                        <ui:VisualElement name="feature-list-container" class="pcw__feat-list" />
+                    </ui:ScrollView>
+
+                    <!-- Summary Panel -->
+                    <ui:VisualElement name="feature-summary-panel" class="pcw__feat-summary">
+                        <ui:VisualElement class="pcw__feat-summary-row">
+                            <ui:Label text="Selected" class="pcw__feat-summary-key" />
+                            <ui:Label name="feat-selected-count" text="0" class="pcw__feat-summary-val" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pcw__feat-summary-row">
+                            <ui:Label text="Scope Cost" class="pcw__feat-summary-key" />
+                            <ui:Label name="feat-scope-total" text="$0" class="pcw__feat-summary-val" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pcw__feat-summary-row">
+                            <ui:Label text="Synergy" class="pcw__feat-summary-key" />
+                            <ui:Label name="feat-synergy-score" text="--" class="pcw__feat-summary-val" />
+                        </ui:VisualElement>
+                        <ui:Label name="feat-missing-warning" text="" class="pcw__feat-missing-warning" />
+                        <ui:Label name="feat-conflict-warning" text="" class="pcw__feat-conflict-warning" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Step 6: Hardware Config (conditional, console/hardware products) -->
+                <ui:VisualElement name="step-hardware" class="pcw__step">
+                    <ui:Label text="Hardware Configuration" class="pcw__step-title" />
+                    <ui:Label text="Configure the hardware specifications for your product. Higher tiers cost more but enable more features." class="pcw__step-desc" />
+
+                    <ui:VisualElement class="pcw__hw-layout">
+                        <!-- Config Section -->
+                        <ui:VisualElement name="hardware-config-section" class="pcw__hw-config">
+                            <ui:Label text="Components" class="pcw__step-subtitle" />
+
+                            <ui:VisualElement class="pcw__hw-slider-row">
+                                <ui:Label text="Processing" class="pcw__hw-slider-label" />
+                                <ui:DropdownField name="hw-processing-dropdown" class="pcw__hw-dropdown" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="pcw__hw-slider-row">
+                                <ui:Label text="Graphics" class="pcw__hw-slider-label" />
+                                <ui:DropdownField name="hw-graphics-dropdown" class="pcw__hw-dropdown" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="pcw__hw-slider-row">
+                                <ui:Label text="Memory" class="pcw__hw-slider-label" />
+                                <ui:DropdownField name="hw-memory-dropdown" class="pcw__hw-dropdown" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="pcw__hw-slider-row">
+                                <ui:Label text="Storage" class="pcw__hw-slider-label" />
+                                <ui:DropdownField name="hw-storage-dropdown" class="pcw__hw-dropdown" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="pcw__hw-slider-row">
+                                <ui:Label text="Form Factor" class="pcw__hw-slider-label" />
+                                <ui:DropdownField name="hw-formfactor-dropdown" class="pcw__hw-dropdown" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Preview Section -->
+                        <ui:VisualElement name="hardware-preview-section" class="pcw__hw-preview">
+                            <ui:Label text="Preview" class="pcw__step-subtitle" />
+
+                            <ui:VisualElement class="pcw__hw-metric-row">
+                                <ui:Label text="Performance Score" class="pcw__hw-metric-label" />
+                                <ui:Label name="hw-performance-score" text="--" class="pcw__hw-metric-val" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="pcw__hw-metric-row">
+                                <ui:Label text="Manufacture Cost" class="pcw__hw-metric-label" />
+                                <ui:Label name="hw-manufacture-cost" text="--" class="pcw__hw-metric-val" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="pcw__hw-metric-row">
+                                <ui:Label text="Dev Cost Adder" class="pcw__hw-metric-label" />
+                                <ui:Label name="hw-dev-cost" text="--" class="pcw__hw-metric-val" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="pcw__hw-metric-row">
+                                <ui:Label text="Thermal Risk" class="pcw__hw-metric-label" />
+                                <ui:Label name="hw-thermal-risk" text="--" class="pcw__hw-metric-val" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="pcw__hw-metric-row">
+                                <ui:Label text="Defect Risk" class="pcw__hw-metric-label" />
+                                <ui:Label name="hw-defect-risk" text="--" class="pcw__hw-metric-val" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="pcw__hw-metric-row">
+                                <ui:Label text="Reliability" class="pcw__hw-metric-label" />
+                                <ui:Label name="hw-reliability" text="--" class="pcw__hw-metric-val" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="pcw__hw-metric-row">
+                                <ui:Label text="Dev Friendliness" class="pcw__hw-metric-label" />
+                                <ui:Label name="hw-dev-friendliness" text="--" class="pcw__hw-metric-val" />
+                            </ui:VisualElement>
+
+                            <!-- Warnings -->
+                            <ui:VisualElement name="hardware-warnings" class="pcw__hw-warnings" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Step 7: Teams -->
+                <ui:VisualElement name="step-teams" class="pcw__step">
+                    <ui:Label text="Assign Teams" class="pcw__step-title" />
+                    <ui:Label text="Assign teams to each product slot. Skill match and team meters affect quality, speed, and bug risk." class="pcw__step-desc" />
+
+                    <!-- Team Slots -->
+                    <ui:VisualElement name="team-slots-container" class="pcw__team-slots" />
+
+                    <!-- Team Overview -->
+                    <ui:VisualElement name="team-overview-section" class="pcw__team-overview">
+                        <ui:VisualElement class="pcw__team-overview-row">
+                            <ui:Label text="Readiness" class="pcw__team-overview-key" />
+                            <ui:Label name="team-overall-readiness" text="--" class="pcw__team-overview-val" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pcw__team-overview-row">
+                            <ui:Label text="Total Salary" class="pcw__team-overview-key" />
+                            <ui:Label name="team-total-salary" text="--" class="pcw__team-overview-val" />
+                        </ui:VisualElement>
+                        <ui:Label name="team-missing-coverage" text="" class="pcw__team-missing-coverage" />
+                    </ui:VisualElement>
+
+                    <!-- Team Suggestions -->
+                    <ui:VisualElement name="team-suggestion-cards" class="pcw__team-suggestions" />
+                </ui:VisualElement>
+
+                <!-- Step 8: Budget & Pricing -->
+                <ui:VisualElement name="step-budget" class="pcw__step">
+                    <ui:Label text="Budget &amp; Pricing" class="pcw__step-title" />
+                    <ui:Label text="Set your product name, price, distribution model, and marketing investment." class="pcw__step-desc" />
+
+                    <!-- Two-column layout -->
+                    <ui:VisualElement class="pcw__budget-layout">
+                        <!-- Left: Inputs -->
+                        <ui:VisualElement class="pcw__budget-inputs">
+                            <ui:Label text="Product Name" class="pcw__step-subtitle" />
+                            <ui:TextField name="budget-name-input" class="pcw__budget-name-field" />
+                            <ui:Label name="budget-name-error" text="" class="pcw__budget-name-error" />
+
+                            <ui:Label text="Target Price" class="pcw__step-subtitle" />
+                            <ui:SliderInt name="price-slider" low-value="5" high-value="200" value="30" show-input-field="true" class="pcw__budget-slider" />
+
+                            <ui:Label text="Distribution Model" class="pcw__step-subtitle" />
+                            <ui:DropdownField name="distribution-dropdown" class="pcw__budget-dropdown" />
+
+                            <ui:Label text="Marketing Investment" class="pcw__step-subtitle" />
+                            <ui:VisualElement class="pcw__budget-marketing-row">
+                                <ui:Button name="marketing-low-btn" text="Low" class="pcw__budget-mkt-btn" />
+                                <ui:Button name="marketing-medium-btn" text="Medium" class="pcw__budget-mkt-btn" />
+                                <ui:Button name="marketing-high-btn" text="High" class="pcw__budget-mkt-btn" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Right: Preview Cards -->
+                        <ui:VisualElement class="pcw__budget-preview-col">
+                            <!-- Budget Preview Card -->
+                            <ui:VisualElement class="pcw__budget-card">
+                                <ui:Label text="Cost Estimate" class="pcw__budget-card-title" />
+                                <ui:VisualElement class="pcw__budget-metric-row">
+                                    <ui:Label text="Upfront Cost" class="pcw__budget-metric-key" />
+                                    <ui:Label name="preview-upfront-cost" text="--" class="pcw__budget-metric-val" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="pcw__budget-metric-row">
+                                    <ui:Label text="Monthly Burn" class="pcw__budget-metric-key" />
+                                    <ui:Label name="preview-monthly-burn" text="--" class="pcw__budget-metric-val" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="pcw__budget-metric-row">
+                                    <ui:Label text="Total Estimated" class="pcw__budget-metric-key" />
+                                    <ui:Label name="preview-total-cost" text="--" class="pcw__budget-metric-val" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="pcw__budget-metric-row">
+                                    <ui:Label text="Runway After Start" class="pcw__budget-metric-key" />
+                                    <ui:Label name="preview-runway" text="--" class="pcw__budget-metric-val" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="pcw__budget-metric-row">
+                                    <ui:Label text="Break-Even (Est.)" class="pcw__budget-metric-key" />
+                                    <ui:Label name="preview-break-even" text="--" class="pcw__budget-metric-val pcw__budget-metric-val--muted" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+
+                            <!-- Pricing Preview Card -->
+                            <ui:VisualElement class="pcw__budget-card">
+                                <ui:Label text="Pricing Analysis" class="pcw__budget-card-title" />
+                                <ui:VisualElement class="pcw__budget-metric-row">
+                                    <ui:Label text="Your Price" class="pcw__budget-metric-key" />
+                                    <ui:Label name="pricing-your-price" text="--" class="pcw__budget-metric-val" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="pcw__budget-metric-row">
+                                    <ui:Label text="Market Expectation" class="pcw__budget-metric-key" />
+                                    <ui:Label name="pricing-market-expect" text="--" class="pcw__budget-metric-val" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="pcw__budget-metric-row">
+                                    <ui:Label text="Value Risk" class="pcw__budget-metric-key" />
+                                    <ui:Label name="pricing-value-risk" text="--" class="pcw__budget-metric-val" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="pcw__budget-metric-row">
+                                    <ui:Label text="Competitor Price" class="pcw__budget-metric-key" />
+                                    <ui:Label name="pricing-competitor" text="--" class="pcw__budget-metric-val" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Step 9: Final Review & Confirm -->
+                <ui:VisualElement name="step-review" class="pcw__step">
+                    <ui:Label text="Review &amp; Confirm" class="pcw__step-title" />
+                    <ui:Label text="Review your product plan before starting development." class="pcw__step-desc" />
+
+                    <ui:ScrollView class="pcw__review-scroll">
+                        <ui:VisualElement class="pcw__review-layout">
+                            <!-- Left column -->
+                            <ui:VisualElement class="pcw__review-col">
+                                <!-- Product Summary -->
+                                <ui:VisualElement name="review-product-summary" class="pcw__review-section">
+                                    <ui:Label text="Product Summary" class="pcw__review-section-title" />
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Name" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-product-name" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Category" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-category" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Niche" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-niche" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Genre" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-genre" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Platforms" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-platforms" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Features" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-features-count" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+
+                                <!-- Market Summary -->
+                                <ui:VisualElement name="review-market-summary" class="pcw__review-section">
+                                    <ui:Label text="Market" class="pcw__review-section-title" />
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Demand" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-market-demand" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Competition" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-market-competition" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Market Fit" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-market-fit" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Trend" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-market-trend" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+
+                                <!-- Cost & Duration -->
+                                <ui:VisualElement name="review-cost-duration" class="pcw__review-section">
+                                    <ui:Label text="Cost &amp; Duration" class="pcw__review-section-title" />
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Estimated Cost" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-cost-range" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Duration" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-duration-range" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Monthly Burn" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-monthly-burn" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+
+                            <!-- Right column -->
+                            <ui:VisualElement class="pcw__review-col">
+                                <!-- Team Readiness -->
+                                <ui:VisualElement name="review-team-readiness" class="pcw__review-section">
+                                    <ui:Label text="Team Readiness" class="pcw__review-section-title" />
+                                    <ui:VisualElement name="review-team-slots-container" class="pcw__review-team-slots" />
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Overall Readiness" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-team-readiness" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+
+                                <!-- Quality Forecast -->
+                                <ui:VisualElement name="review-quality-forecast" class="pcw__review-section">
+                                    <ui:Label text="Quality Forecast" class="pcw__review-section-title" />
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Quality" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-quality-range" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Innovation" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-innovation-range" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Bug Risk" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-bug-risk" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Scope Risk" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-scope-risk" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="pcw__review-metric-row">
+                                        <ui:Label text="Confidence" class="pcw__review-metric-key" />
+                                        <ui:Label name="rev-confidence" text="--" class="pcw__review-metric-val" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+
+                                <!-- Missing Requirements & Validation -->
+                                <ui:VisualElement name="review-validation" class="pcw__review-section">
+                                    <ui:Label text="Validation" class="pcw__review-section-title" />
+                                    <ui:VisualElement name="review-errors-container" class="pcw__review-errors" />
+                                    <ui:VisualElement name="review-warnings-container" class="pcw__review-warnings" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:ScrollView>
+
+                    <!-- Start Development Button -->
+                    <ui:VisualElement class="pcw__review-confirm-bar">
+                        <ui:Button name="btn-start-development" text="Start Development" class="pcw__btn pcw__btn--start-dev" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Right: Forecast Panel -->
+            <ui:VisualElement name="forecast-panel" class="pcw__forecast">
+                <ui:Label text="Forecast" class="pcw__forecast-title" />
+
+                <ui:VisualElement class="pcw__forecast-stats">
+                    <ui:VisualElement class="pcw__forecast-row">
+                        <ui:Label text="Quality" class="pcw__forecast-label" />
+                        <ui:Label name="forecast-quality" text="--" class="pcw__forecast-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pcw__forecast-row">
+                        <ui:Label text="Innovation" class="pcw__forecast-label" />
+                        <ui:Label name="forecast-innovation" text="--" class="pcw__forecast-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pcw__forecast-row">
+                        <ui:Label text="Market Fit" class="pcw__forecast-label" />
+                        <ui:Label name="forecast-market-fit" text="--" class="pcw__forecast-value" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="pcw__forecast-divider" />
+
+                    <ui:VisualElement class="pcw__forecast-row">
+                        <ui:Label text="Scope Risk" class="pcw__forecast-label" />
+                        <ui:Label name="forecast-scope-risk" text="--" class="pcw__forecast-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pcw__forecast-row">
+                        <ui:Label text="Bug Risk" class="pcw__forecast-label" />
+                        <ui:Label name="forecast-bug-risk" text="--" class="pcw__forecast-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pcw__forecast-row">
+                        <ui:Label text="Technical Risk" class="pcw__forecast-label" />
+                        <ui:Label name="forecast-technical-risk" text="--" class="pcw__forecast-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pcw__forecast-row">
+                        <ui:Label text="Commercial Risk" class="pcw__forecast-label" />
+                        <ui:Label name="forecast-commercial-risk" text="--" class="pcw__forecast-value" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="pcw__forecast-divider" />
+
+                    <ui:VisualElement class="pcw__forecast-row">
+                        <ui:Label text="Duration" class="pcw__forecast-label" />
+                        <ui:Label name="forecast-duration" text="--" class="pcw__forecast-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pcw__forecast-row">
+                        <ui:Label text="Est. Cost" class="pcw__forecast-label" />
+                        <ui:Label name="forecast-cost" text="--" class="pcw__forecast-value" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="pcw__forecast-divider" />
+
+                    <ui:VisualElement class="pcw__forecast-row">
+                        <ui:Label text="Confidence" class="pcw__forecast-label" />
+                        <ui:Label name="forecast-confidence" text="Low" class="pcw__forecast-value pcw__forecast-value--low" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Diagnostic Cards -->
+                <ui:VisualElement name="diagnostic-cards-container" class="pcw__diagnostics" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Bottom Risk Bar -->
+        <ui:VisualElement name="bottom-risk-bar" class="pcw__risk-bar">
+            <ui:VisualElement class="pcw__risk-item">
+                <ui:Label text="Scope" class="pcw__risk-label" />
+                <ui:Label name="risk-scope" text="--" class="pcw__risk-value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="pcw__risk-item">
+                <ui:Label text="Cost" class="pcw__risk-label" />
+                <ui:Label name="risk-cost" text="--" class="pcw__risk-value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="pcw__risk-item">
+                <ui:Label text="Duration" class="pcw__risk-label" />
+                <ui:Label name="risk-duration" text="--" class="pcw__risk-value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="pcw__risk-item">
+                <ui:Label text="Bug Risk" class="pcw__risk-label" />
+                <ui:Label name="risk-bug" text="--" class="pcw__risk-value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="pcw__risk-item">
+                <ui:Label text="Market Fit" class="pcw__risk-label" />
+                <ui:Label name="risk-market-fit" text="--" class="pcw__risk-value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="pcw__risk-item">
+                <ui:Label text="Coverage" class="pcw__risk-label" />
+                <ui:Label name="risk-coverage" text="--" class="pcw__risk-value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Footer -->
+        <ui:VisualElement name="wizard-footer" class="pcw__footer">
+            <ui:Button name="btn-cancel" text="Cancel" class="pcw__btn pcw__btn--cancel" />
+            <ui:VisualElement class="pcw__footer-spacer" />
+            <ui:Button name="btn-back" text="Back" class="pcw__btn pcw__btn--secondary" />
+            <ui:Button name="btn-save-draft" text="Save Draft" class="pcw__btn pcw__btn--secondary" />
+            <ui:Button name="btn-continue" text="Continue" class="pcw__btn pcw__btn--primary" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

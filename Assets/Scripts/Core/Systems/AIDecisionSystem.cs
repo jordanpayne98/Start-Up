@@ -23,7 +23,7 @@ public class AIDecisionSystem : ISystem
         public CompetitorId CompId;
         public ProductId ProductId;
         public string CandidateName;
-        public EmployeeRole Role;
+        public RoleId Role;
         public string CompanyName;
     }
 
@@ -391,13 +391,13 @@ public class AIDecisionSystem : ISystem
                 Name             = candidate.Name,
                 Gender           = candidate.Gender,
                 Age              = candidate.Age,
-                Skills           = candidate.Skills,
+                Stats            = candidate.Stats,
                 HRSkill          = candidate.HRSkill,
                 Salary           = offeredSalary,
                 Role             = candidate.Role,
                 BlindHire        = false,
                 Mode             = HiringMode.Manual,
-                PotentialAbility = candidate.PotentialAbility,
+                PotentialAbility = candidate.Stats.PotentialAbility,
                 CompanyId        = comp.Id.ToCompanyId(),
                 Personality      = candidate.personality,
                 EmploymentType   = selectedType
@@ -527,7 +527,7 @@ public class AIDecisionSystem : ISystem
             EmployeeId eid = comp.EmployeeIds[i];
             Employee emp = _employeeSystem.GetEmployee(eid);
             if (emp == null || !emp.isActive || !emp.contractRenewalPending) continue;
-            int ca = emp.potentialAbility;
+            int ca = emp.Stats.PotentialAbility;
             if (ca > topCA) { topCA = ca; topId = eid; }
         }
 
@@ -547,7 +547,7 @@ public class AIDecisionSystem : ISystem
                 continue;
             }
 
-            if (isTopEmployee || emp.potentialAbility >= 120)
+            if (isTopEmployee || emp.Stats.PotentialAbility >= 120)
             {
                 _employeeSystem.ApplyCommand(new RenewContractCommand { Tick = tick, EmployeeId = eid });
                 _logger.Log($"[AIDecisionSystem] {comp.CompanyName} renewed contract for {emp.name}.");
@@ -583,13 +583,13 @@ public class AIDecisionSystem : ISystem
         }
     }
 
-    private static ProductTeamRole RoleToProductTeamRole(EmployeeRole role)
+    private static ProductTeamRole RoleToProductTeamRole(RoleId role)
     {
         switch (role)
         {
-            case EmployeeRole.Designer:   return ProductTeamRole.Design;
-            case EmployeeRole.QAEngineer: return ProductTeamRole.QA;
-            default:                      return ProductTeamRole.Development;
+            case RoleId.ProductDesigner: return ProductTeamRole.Design;
+            case RoleId.QaEngineer:      return ProductTeamRole.QA;
+            default:                     return ProductTeamRole.Development;
         }
     }
 

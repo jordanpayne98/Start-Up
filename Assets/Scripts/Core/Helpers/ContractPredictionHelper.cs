@@ -52,9 +52,9 @@ public static class ContractPredictionHelper
             TeamWorkEngine.ComputeEffectiveSkills(
                 visibleSkill, ca, emp.morale,
                 100f,
-                emp.hiddenAttributes.WorkEthic,
-                emp.hiddenAttributes.Creative,
-                emp.hiddenAttributes.Adaptability,
+                emp.Stats.GetVisibleAttribute(VisibleAttributeId.WorkEthic),
+                emp.Stats.GetVisibleAttribute(VisibleAttributeId.Creativity),
+                emp.Stats.GetVisibleAttribute(VisibleAttributeId.Adaptability),
                 isRoleFit,
                 emp.personality,
                 50f,
@@ -169,8 +169,8 @@ public static class ContractPredictionHelper
     private static int ComputeSimpleCA(Employee emp)
     {
         int sum = 0;
-        int count = emp.skills != null ? emp.skills.Length : 0;
-        for (int i = 0; i < count; i++) sum += emp.skills[i];
+        int count = SkillIdHelper.SkillCount;
+        for (int i = 0; i < count; i++) sum += emp.Stats.Skills[i];
         float avg = count > 0 ? (float)sum / count : 5f;
         return (int)(System.Math.Min(avg / 20f, 1f) * 200f);
     }

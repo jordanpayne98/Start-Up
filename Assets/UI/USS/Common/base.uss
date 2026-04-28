@@ -164,6 +164,14 @@ Toggle > .unity-toggle__text {
     color: var(--text-muted);
 }
 
+.text-primary {
+    color: var(--text-primary);
+}
+
+.text-secondary {
+    color: var(--text-secondary);
+}
+
 .text-light {
     color: var(--text-light);
 }

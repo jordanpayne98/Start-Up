@@ -167,7 +167,7 @@
 
 .card__subtitle {
     font-size: var(--font-sm);
-    color: var(--text-muted);
+    color: var(--text-secondary);
     margin-bottom: var(--spacing-md);
 }
 
@@ -249,7 +249,7 @@
 .stat-bar__label {
     width: 100px;
     font-size: var(--font-sm);
-    color: var(--text-muted);
+    color: var(--text-secondary);
 }
 
 .stat-bar__track {
@@ -351,7 +351,7 @@
 
 .column-header__cell {
     font-size: var(--font-sm);
-    color: var(--text-muted);
+    color: var(--text-secondary);
     -unity-font-style: bold;
     cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
     padding: 0;
@@ -470,7 +470,7 @@
 
 .tooltip__stat-label {
     font-size: var(--font-xs);
-    color: var(--text-muted);
+    color: var(--text-secondary);
 }
 
 .tooltip__stat-value {
@@ -557,7 +557,7 @@
 /* ── 3-level type hierarchy ── */
 .metric-primary   { font-size: var(--font-xl); -unity-font-style: bold; -unity-font: var(--font-display); color: var(--text-light); }
 .metric-secondary { font-size: var(--font-md); color: var(--text-light); }
-.metric-tertiary  { font-size: var(--font-sm); color: var(--text-muted); }
+.metric-tertiary  { font-size: var(--font-sm); color: var(--text-secondary); }
 
 /* ── Scope efficiency feedback in Create Product wizard ── */
 .scope-good     { color: #4ecdc4; }
@@ -608,7 +608,6 @@
 .text-success { color: var(--accent-success); }
 .text-warning { color: var(--accent-warning); }
 .text-danger  { color: var(--accent-danger); }
-.text-muted   { color: var(--text-muted); }
 .text-light   { color: var(--text-light); }
 
 /* ── Tab Bar (pill segment control) ── */
@@ -703,7 +702,7 @@
 
 .stat-callout__label {
     font-size: var(--font-sm);
-    color: var(--text-muted);
+    color: var(--text-secondary);
 }
 
 /* ── Card accent left-border variants ── */

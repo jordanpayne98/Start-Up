@@ -356,7 +356,7 @@ public class CompetitorProfileView : IGameView
         var keyLabel = new Label();
         keyLabel.name = "niche-key";
         keyLabel.AddToClassList("text-sm");
-        keyLabel.AddToClassList("text-muted");
+        keyLabel.AddToClassList("text-secondary");
         var valLabel = new Label();
         valLabel.name = "niche-val";
         valLabel.AddToClassList("text-sm");
@@ -386,7 +386,7 @@ public class CompetitorProfileView : IGameView
         var catLabel = new Label();
         catLabel.name = "prod-cat";
         catLabel.AddToClassList("text-sm");
-        catLabel.AddToClassList("text-muted");
+        catLabel.AddToClassList("text-secondary");
         left.Add(nameLabel);
         left.Add(catLabel);
         var right = new VisualElement();
@@ -400,7 +400,7 @@ public class CompetitorProfileView : IGameView
         var lifecycleLabel = new Label();
         lifecycleLabel.name = "prod-lifecycle";
         lifecycleLabel.AddToClassList("text-sm");
-        lifecycleLabel.AddToClassList("text-muted");
+        lifecycleLabel.AddToClassList("text-secondary");
         right.Add(qualLabel);
         right.Add(revLabel);
         right.Add(lifecycleLabel);
@@ -431,7 +431,7 @@ public class CompetitorProfileView : IGameView
         var catLabel = new Label();
         catLabel.name = "dev-cat";
         catLabel.AddToClassList("text-sm");
-        catLabel.AddToClassList("text-muted");
+        catLabel.AddToClassList("text-secondary");
         left.Add(nameLabel);
         left.Add(catLabel);
         var right = new VisualElement();
@@ -465,7 +465,7 @@ public class CompetitorProfileView : IGameView
         var roleLabel = new Label();
         roleLabel.name = "emp-role";
         roleLabel.AddToClassList("text-sm");
-        roleLabel.AddToClassList("text-muted");
+        roleLabel.AddToClassList("text-secondary");
         roleLabel.style.flexGrow = 2;
         roleLabel.style.flexBasis = 0;
         var skillLabel = new Label();
@@ -508,7 +508,7 @@ public class CompetitorProfileView : IGameView
         var name = new Label();
         name.name = "rev-name";
         name.AddToClassList("text-sm");
-        name.AddToClassList("text-muted");
+        name.AddToClassList("text-secondary");
         var amt = new Label();
         amt.name = "rev-amount";
         amt.AddToClassList("text-sm");
@@ -530,7 +530,7 @@ public class CompetitorProfileView : IGameView
         var cat = new Label();
         cat.name = "exp-cat";
         cat.AddToClassList("text-sm");
-        cat.AddToClassList("text-muted");
+        cat.AddToClassList("text-secondary");
         var amt = new Label();
         amt.name = "exp-amount";
         amt.AddToClassList("text-sm");
@@ -582,7 +582,7 @@ public class CompetitorProfileView : IGameView
         row.AddToClassList("info-row");
         var key = new Label(labelText);
         key.AddToClassList("text-sm");
-        key.AddToClassList("text-muted");
+        key.AddToClassList("text-secondary");
         var val = new Label("--");
         val.name = valueName;
         val.AddToClassList("text-sm");
@@ -605,7 +605,7 @@ public class CompetitorProfileView : IGameView
         val.AddToClassList("text-bold");
         var key = new Label(labelText);
         key.AddToClassList("text-sm");
-        key.AddToClassList("text-muted");
+        key.AddToClassList("text-secondary");
         box.Add(val);
         box.Add(key);
         parent.Add(box);

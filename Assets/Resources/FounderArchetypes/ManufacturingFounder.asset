@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 276d49dd6012ea740947a09a115572f5, type: 3}
+  m_Name: ManufacturingFounder
+  m_EditorClassIdentifier: Assembly-CSharp::FounderArchetypeDefinition
+  ArchetypeId: 21
+  DisplayName: Manufacturing Founder
+  Description: Hardware manufacturing and production expertise. Only viable on the
+    hardware path.
+  Role: 5
+  TopSkills: 070000000600000002000000
+  BestEarlyUse: Hardware manufacturing, device production, physical product lines
+  Strengths:
+  - Strong hardware production capability
+  - Supply chain knowledge
+  Risks:
+  - Only relevant on hardware path
+  - Very high initial capital needs
+  RecommendedPairing: Hardware Founder or Operations Founder
+  CAMin: 65
+  CAMax: 90
+  PAMin: 105
+  PAMax: 140
+  SkillBiasProfile: 070000000600000004000000
+  AttributeBias: 020000000500000006000000
+  IsGatedArchetype: 1
+  GateCondition: Manufacturing Founder requires Hardware Startup background.
+  SortOrder: 21

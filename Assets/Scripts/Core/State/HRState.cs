@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class ActiveHRSearch
 {
     public HRSearchId searchId;
-    public EmployeeRole targetRole;
+    public RoleId targetRole;
     public int startTick;
     public int completionTick;
     public int cost;
@@ -18,7 +18,7 @@ public class ActiveHRSearch
     public int maxCA;
     public int minPAStars;
     public int maxPAStars;
-    public bool[] desiredSkills;             // length = SkillTypeHelper.SkillTypeCount; null = no preference
+    public bool[] desiredSkills;             // length = SkillIdHelper.SkillCount; null = no preference
 }
 
 [Serializable]

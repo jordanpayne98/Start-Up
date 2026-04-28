@@ -36,7 +36,7 @@ public struct CompanyBenchmark
 
 public static class CompetitorBenchmarkCalculator
 {
-    public static RoleBenchmark ComputeRoleBenchmark(EmployeeRole role, IReadOnlyList<Competitor> competitors, EmployeeState employeeState)
+    public static RoleBenchmark ComputeRoleBenchmark(RoleId role, IReadOnlyList<Competitor> competitors, EmployeeState employeeState)
     {
         if (competitors == null || competitors.Count == 0 || employeeState == null)
             return FallbackRoleBenchmark(role);
@@ -165,7 +165,7 @@ public static class CompetitorBenchmarkCalculator
         return BenchmarkVisibility.Basic;
     }
 
-    private static RoleBenchmark FallbackRoleBenchmark(EmployeeRole role)
+    private static RoleBenchmark FallbackRoleBenchmark(RoleId role)
     {
         return new RoleBenchmark
         {

@@ -61,7 +61,7 @@ public class InboxView : IGameView
         headerRight.AddToClassList("align-center");
 
         _countLabel = new Label("0 messages");
-        _countLabel.AddToClassList("text-muted");
+        _countLabel.AddToClassList("text-secondary");
         _countLabel.style.marginRight = 12;
         headerRight.Add(_countLabel);
 
@@ -192,7 +192,7 @@ public class InboxView : IGameView
         var msgTime = new Label();
         msgTime.name = "msg-time";
         msgTime.AddToClassList("text-sm");
-        msgTime.AddToClassList("text-muted");
+        msgTime.AddToClassList("text-secondary");
         msgTime.style.minWidth = 60;
         msgTime.style.marginLeft = 8;
         headerRow.Add(msgTime);
@@ -216,7 +216,7 @@ public class InboxView : IGameView
         var msgBody = new Label();
         msgBody.name = "msg-body";
         msgBody.AddToClassList("text-sm");
-        msgBody.AddToClassList("text-muted");
+        msgBody.AddToClassList("text-secondary");
         detail.Add(msgBody);
 
         var actionBar = new VisualElement();

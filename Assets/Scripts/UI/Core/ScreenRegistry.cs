@@ -165,6 +165,16 @@ public class ScreenRegistry
             ViewModelFactory = () => new TeamAssignmentViewModel()
         });
 
+        // --- Product Creation ---
+        RegisterScreen(new ScreenConfig {
+            ScreenId = ScreenId.ProductCreationPlanning,
+            Category = NavCategory.Production,
+            DisplayName = "New Product",
+            UxmlPath = "Assets/UI/UXML/Screens/ProductCreationPlanning.uxml",
+            ViewFactory = () => new ProductCreationPlanningView(dispatcher, modal),
+            ViewModelFactory = () => new ProductCreationPlanningViewModel()
+        });
+
         BuildNavigationTree();
     }
 

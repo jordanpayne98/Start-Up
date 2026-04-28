@@ -69,7 +69,7 @@ public static class ProductIdentityHelper
     }
 
     public static ProductIdentityPreview ComputePreview(
-        CreateProductViewModel draft,
+        ProductCreationPlanningViewModel draft,
         ProductTemplateDefinition template,
         GenerationSystem generationSystem,
         PlatformSystem platformSystem,
@@ -172,7 +172,7 @@ public static class ProductIdentityHelper
     }
 
     private static ProductIdentityInputs BuildInputsFromDraft(
-        CreateProductViewModel draft,
+        ProductCreationPlanningViewModel draft,
         ProductTemplateDefinition template,
         GenerationSystem generationSystem,
         PlatformSystem platformSystem,
@@ -181,16 +181,32 @@ public static class ProductIdentityHelper
         int currentTick,
         int targetReleaseTick)
     {
-        string[] selectedFeatureIds = draft.GetSelectedFeatureIds();
-        ProductId[] selectedToolIds = draft.GetSelectedToolIds();
-        List<ProductId> selectedPlatformIds = draft.SelectedPlatformIds;
+        var allFeatures = draft.AllFeatures;
+        var selectedIndices = draft.Draft.SelectedFeatureIds;
+        string[] selectedFeatureIds = new string[selectedIndices.Count];
+        for (int i = 0; i < selectedIndices.Count; i++)
+        {
+            int idx = selectedIndices[i];
+            if (idx >= 0 && idx < allFeatures.Count)
+                selectedFeatureIds[i] = allFeatures[idx].FeatureId;
+        }
+
+        var platIndices = draft.SelectedPlatformIndices;
+        var platOptions = draft.PlatformOptions;
+        List<ProductId> selectedPlatformIds = new List<ProductId>();
+        for (int i = 0; i < platIndices.Count; i++)
+        {
+            int idx = platIndices[i];
+            if (idx >= 0 && idx < platOptions.Count)
+                selectedPlatformIds.Add(new ProductId(platOptions[idx].PlatformIdValue));
+        }
 
         int selectedCount = selectedFeatureIds != null ? selectedFeatureIds.Length : 0;
         int availableCount = template.availableFeatures != null ? template.availableFeatures.Length : 0;
 
         float priceCenter = template.economyConfig != null && template.economyConfig.pricePerUnit > 0f
             ? template.economyConfig.pricePerUnit : 1f;
-        float price = draft.Price > 0f ? draft.Price : priceCenter;
+        float price = draft.TargetPrice > 0 ? draft.TargetPrice : priceCenter;
 
         int currentGen = generationSystem != null ? generationSystem.GetCurrentGeneration() : 1;
 
@@ -209,7 +225,7 @@ public static class ProductIdentityHelper
         }
 
         float avgPlatformCeiling = ComputeAvgPlatformCeilingFromIds(platformIdArr, platformSystem, isPlayerOwned: true);
-        float avgToolCeiling = ComputeAvgToolCeiling(selectedToolIds, productState);
+        float avgToolCeiling = ComputeAvgToolCeiling(new ProductId[0], productState);
 
         float expectedTicks = ReviewSystem.ComputeExpectedTicks(template, tuning);
         float plannedTicks = targetReleaseTick > currentTick

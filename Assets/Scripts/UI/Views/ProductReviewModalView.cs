@@ -69,7 +69,7 @@ public class ProductReviewModalView : IGameView
 
         _aggregateRatingLabel = new Label();
         _aggregateRatingLabel.AddToClassList("text-sm");
-        _aggregateRatingLabel.AddToClassList("text-muted");
+        _aggregateRatingLabel.AddToClassList("text-secondary");
         _aggregateRatingLabel.style.marginLeft = 6;
         scoreBadge.Add(_aggregateRatingLabel);
 

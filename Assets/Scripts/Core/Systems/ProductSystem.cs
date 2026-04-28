@@ -154,7 +154,7 @@ public class ProductSystem : ISystem
     private ReputationSystem _reputationSystem;
     private ReviewSystem _reviewSystem;
     private InboxSystem _inboxSystem;
-    private RoleTierTable _roleTierTable;
+    private RoleProfileTable _roleProfileTable;
     private AbilitySystem _abilitySystem;
     private ContractState _contractState;
     private TimeSystem _timeSystem;
@@ -253,9 +253,9 @@ public class ProductSystem : ISystem
         _inboxSystem = inboxSystem;
     }
 
-    public void SetSkillGrowthDependencies(RoleTierTable roleTierTable, AbilitySystem abilitySystem)
+    public void SetSkillGrowthDependencies(RoleProfileTable roleProfileTable, AbilitySystem abilitySystem)
     {
-        _roleTierTable = roleTierTable;
+        _roleProfileTable = roleProfileTable;
         _abilitySystem = abilitySystem;
     }
 
@@ -792,8 +792,8 @@ public class ProductSystem : ISystem
                 qaTeam.members,
                 _employeeSystem,
                 _fatigueSystem,
-                SkillType.QA,
-                _roleTierTable,
+                SkillId.QaTesting,
+                _roleProfileTable,
                 _tuning?.TeamOverheadPerMember ?? 0.04f,
                 optimalTeamSize: optimalSize);
 
@@ -1999,8 +1999,8 @@ public class ProductSystem : ISystem
                     {
                         int optimalQASize = ComputeMaintenanceOptimalTeamSize(product);
                         var result = TeamWorkEngine.AggregateTeam(
-                            qaTeam.members, _employeeSystem, _fatigueSystem, SkillType.QA,
-                            _roleTierTable, _tuning?.TeamOverheadPerMember ?? 0.04f,
+                            qaTeam.members, _employeeSystem, _fatigueSystem, SkillId.QaTesting,
+                            _roleProfileTable, _tuning?.TeamOverheadPerMember ?? 0.04f,
                             optimalTeamSize: optimalQASize);
                         float variance = 0.95f + _rng.NextFloat01() * 0.10f;
                         ChemistryBand bugFixChemBand = _chemistrySystem != null
@@ -2023,13 +2023,13 @@ public class ProductSystem : ISystem
                 foreach (var kvp in product.TeamAssignments)
                 {
                     ProductPhaseType phaseType = MapRoleToPhase(kvp.Key);
-                    SkillType skillType = TeamWorkEngine.MapPhaseToSkill(phaseType);
+                    SkillId skillType = TeamWorkEngine.MapPhaseToSkill(phaseType);
                     var assignedTeam = _teamSystem.GetTeam(kvp.Value);
                     if (assignedTeam != null)
                     {
                         var result = TeamWorkEngine.AggregateTeam(
                             assignedTeam.members, _employeeSystem, _fatigueSystem, skillType,
-                            _roleTierTable, _tuning?.TeamOverheadPerMember ?? 0.04f,
+                            _roleProfileTable, _tuning?.TeamOverheadPerMember ?? 0.04f,
                             optimalTeamSize: updateOptimalSize);
                         float variance = 0.95f + _rng.NextFloat01() * 0.10f;
                         ChemistryBand updChemBand = _chemistrySystem != null
@@ -2936,6 +2936,9 @@ public class ProductSystem : ISystem
         // Award skill XP to all contributing employees
         AwardShipXP(product, employeeIds);
 
+        // Append work history to all contributing employees
+        AppendProductWorkHistory(product, overallQuality, WorkOutcome.Completed);
+
         // Quality release uplift: high-quality releases boost market demand via niche
         if (_marketSystem != null && overallQuality >= 75f)
         {
@@ -3290,10 +3293,10 @@ public class ProductSystem : ISystem
 
     private void AwardMarketingXPForProduct(ProductId productId, TeamId marketingTeamId, float xpAmount)
     {
-        if (_teamSystem == null || _employeeSystem == null || _roleTierTable == null) return;
+        if (_teamSystem == null || _employeeSystem == null || _roleProfileTable == null) return;
         var team = _teamSystem.GetTeam(marketingTeamId);
         if (team == null) return;
-        SkillGrowthSystem.AwardMarketingXP(team, _employeeSystem, xpAmount, _rng, _roleTierTable, _abilitySystem, _tuning);
+        SkillGrowthSystem.AwardMarketingXP(team, _employeeSystem, xpAmount, _rng, _roleProfileTable, _abilitySystem, _tuning);
     }
 
     private void ProcessHypeEventRoll(Product product, bool isPreLaunch)
@@ -3356,7 +3359,7 @@ public class ProductSystem : ISystem
         {
             var emp = _employeeSystem?.GetEmployee(team.members[i]);
             if (emp == null) continue;
-            totalMarketingSkill += emp.GetSkill(SkillType.Marketing);
+            totalMarketingSkill += emp.GetSkill(SkillId.Marketing);
         }
 
         float effectivePower = (float)totalMarketingSkill / Math.Max(1, assignedProductCount);
@@ -3837,6 +3840,7 @@ public class ProductSystem : ISystem
 
         if (!product.IsCompetitorProduct) SetupSuccessorMigration(product);
         if (!product.IsCompetitorProduct) AwardShipXP(product, employeeIds);
+        if (!product.IsCompetitorProduct) AppendProductWorkHistory(product, overallQuality, WorkOutcome.Completed);
 
         if (_marketSystem != null && overallQuality >= 75f)
         {
@@ -4412,14 +4416,14 @@ public class ProductSystem : ISystem
         var primaryTeam = _teamSystem.GetTeam(primaryTeamId);
         if (primaryTeam == null) return;
 
-        SkillType skill = TeamWorkEngine.MapPhaseToSkill(phase.phaseType);
+        SkillId skill = TeamWorkEngine.MapPhaseToSkill(phase.phaseType);
         int optimalSize = GetPhaseOptimalTeamSize(phase.phaseType, product);
         var primaryResult = TeamWorkEngine.AggregateTeam(
             primaryTeam.members,
             _employeeSystem,
             _fatigueSystem,
             skill,
-            _roleTierTable,
+            _roleProfileTable,
             _tuning?.TeamOverheadPerMember ?? 0.04f,
             optimalTeamSize: optimalSize);
 
@@ -4449,7 +4453,7 @@ public class ProductSystem : ISystem
         {
             SkillGrowthSystem.AwardProductPhaseXP(
                 primaryTeam, skill, _employeeSystem,
-                _roleTierTable, _abilitySystem, _tuning);
+                _roleProfileTable, _abilitySystem, _tuning);
         }
 
         // Initial-phase bug accumulation during active development
@@ -4651,14 +4655,14 @@ public class ProductSystem : ISystem
         var primaryTeam = _teamSystem.GetTeam(primaryTeamId);
         if (primaryTeam == null) return 0f;
 
-        SkillType skill = TeamWorkEngine.MapPhaseToSkill(phase.phaseType);
+        SkillId skill = TeamWorkEngine.MapPhaseToSkill(phase.phaseType);
         int optimalSize = GetPhaseOptimalTeamSize(phase.phaseType, product);
         var primaryResult = TeamWorkEngine.AggregateTeam(
             primaryTeam.members,
             _employeeSystem,
             _fatigueSystem,
             skill,
-            _roleTierTable,
+            _roleProfileTable,
             _tuning?.TeamOverheadPerMember ?? 0.04f,
             optimalTeamSize: optimalSize);
 
@@ -4693,14 +4697,14 @@ public class ProductSystem : ISystem
         var primaryTeam = _teamSystem.GetTeam(primaryTeamId);
         if (primaryTeam == null) return 40f;
 
-        SkillType skill = TeamWorkEngine.MapPhaseToSkill(phase.phaseType);
+        SkillId skill = TeamWorkEngine.MapPhaseToSkill(phase.phaseType);
         int optimalSize = GetPhaseOptimalTeamSize(phase.phaseType, product);
         var teamResult = TeamWorkEngine.AggregateTeam(
             primaryTeam.members,
             _employeeSystem,
             _fatigueSystem,
             skill,
-            _roleTierTable,
+            _roleProfileTable,
             _tuning?.TeamOverheadPerMember ?? 0.04f,
             optimalTeamSize: optimalSize);
 
@@ -4886,11 +4890,10 @@ public class ProductSystem : ISystem
 
     private void AwardShipXP(Product product, List<EmployeeId> employeeIds)
     {
-        if (_employeeSystem == null || _roleTierTable == null || employeeIds.Count == 0) return;
+        if (_employeeSystem == null || _roleProfileTable == null || employeeIds.Count == 0) return;
 
         float qualityFactor = product.OverallQuality / 100f;
 
-        // Complexity factor: selected features vs total available features
         float complexityFactor = 1f;
         if (_templateLookup.TryGetValue(product.TemplateId, out var tmpl) && tmpl.availableFeatures != null && tmpl.availableFeatures.Length > 0)
         {
@@ -4900,7 +4903,6 @@ public class ProductSystem : ISystem
             if (complexityFactor > 2f) complexityFactor = 2f;
         }
 
-        // Duration factor: longer dev = more XP, capped at configured days
         int durationCapDays = _tuning?.ProductXPDurationCapDays ?? 180;
         int devTicks = _currentTick - product.CreationTick;
         float devDays = devTicks / (float)TimeState.TicksPerDay;
@@ -4917,59 +4919,105 @@ public class ProductSystem : ISystem
             var employee = _employeeSystem.GetEmployee(employeeIds[i]);
             if (employee == null || !employee.isActive) continue;
 
-            int[] tiers = _roleTierTable.GetTiers(employee.role);
-            int currentCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
-            if (currentCA >= employee.potentialAbility) continue;
+            var profile = _roleProfileTable.Get(employee.role);
+            int[] tiers = profile != null ? RoleSuitabilityCalculator.BuildTierArray(profile) : null;
+            int currentCA = tiers != null ? AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers) : 0;
+            if (currentCA >= employee.Stats.PotentialAbility) continue;
 
-            float learningRate = employee.hiddenAttributes.LearningRate;
+            float learningRate = employee.Stats.GetHiddenAttribute(HiddenAttributeId.LearningRate);
             float learningMult = 0.7f + (learningRate / 20f) * 0.6f;
             float xpAmount = baseXP * learningMult * (0.8f + _rng.NextFloat01() * 0.4f);
             if (employee.isFounder) xpAmount *= 1.5f;
             if (xpAmount <= 0f) continue;
 
-            SkillType primarySkill = GetHighestSkillForEmployee(employee);
+            SkillId primarySkill = GetHighestSkillForEmployee(employee);
             int skillIdx = (int)primarySkill;
 
-            if (employee.skillXp == null)
-                employee.skillXp = new float[SkillTypeHelper.SkillTypeCount];
-            if (employee.skillDeltaDirection == null)
-                employee.skillDeltaDirection = new sbyte[SkillTypeHelper.SkillTypeCount];
-
-            int oldSkillLevel = employee.skills[skillIdx];
-            employee.skillXp[skillIdx] += xpAmount;
-            while (employee.skillXp[skillIdx] >= 1.0f && employee.skills[skillIdx] < 20)
+            int oldSkillLevel = employee.Stats.Skills[skillIdx];
+            employee.Stats.SkillXp[skillIdx] += xpAmount;
+            while (employee.Stats.SkillXp[skillIdx] >= 1.0f && employee.Stats.Skills[skillIdx] < 20)
             {
-                employee.skills[skillIdx]++;
-                int newCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
-                if (newCA > employee.potentialAbility)
+                employee.Stats.Skills[skillIdx]++;
+                int newCA = tiers != null ? AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers) : 0;
+                if (newCA > employee.Stats.PotentialAbility)
                 {
-                    employee.skills[skillIdx]--;
-                    employee.skillXp[skillIdx] = 0f;
+                    employee.Stats.Skills[skillIdx]--;
+                    employee.Stats.SkillXp[skillIdx] = 0f;
                     break;
                 }
-                employee.skillXp[skillIdx] -= 1.0f;
+                employee.Stats.SkillXp[skillIdx] -= 1.0f;
             }
-            if (employee.skills[skillIdx] >= 20)
-                employee.skillXp[skillIdx] = 0f;
-            employee.skillDeltaDirection[skillIdx] = (sbyte)(employee.skills[skillIdx] > oldSkillLevel ? 1 : 0);
+            if (employee.Stats.Skills[skillIdx] >= 20)
+                employee.Stats.SkillXp[skillIdx] = 0f;
+            employee.Stats.SkillDeltaDirection[skillIdx] = (sbyte)(employee.Stats.Skills[skillIdx] > oldSkillLevel ? 1 : 0);
 
             _abilitySystem?.InvalidateCA(employeeIds[i]);
         }
     }
 
-    private static SkillType GetHighestSkillForEmployee(Employee employee)
+    private static SkillId GetHighestSkillForEmployee(Employee employee)
     {
         int bestIdx = 0;
-        int bestVal = employee.skills[0];
-        for (int i = 1; i < SkillTypeHelper.SkillTypeCount; i++)
+        int bestVal = employee.Stats.Skills.Length > 0 ? employee.Stats.Skills[0] : 0;
+        for (int i = 1; i < SkillIdHelper.SkillCount; i++)
         {
-            if (employee.skills[i] > bestVal)
+            if (i < employee.Stats.Skills.Length && employee.Stats.Skills[i] > bestVal)
             {
-                bestVal = employee.skills[i];
+                bestVal = employee.Stats.Skills[i];
                 bestIdx = i;
             }
         }
-        return (SkillType)bestIdx;
+        return (SkillId)bestIdx;
+    }
+
+    private void AppendProductWorkHistory(Product product, float overallQuality, WorkOutcome outcome)
+    {
+        if (_employeeSystem == null || _teamSystem == null) return;
+
+        foreach (var kvp in product.TeamAssignments)
+        {
+            var team = _teamSystem.GetTeam(kvp.Value);
+            if (team == null) continue;
+
+            int memberCount = team.members.Count;
+            if (memberCount == 0) continue;
+
+            // Compute team average skill for contribution label
+            float teamSkillSum = 0f;
+            for (int m = 0; m < memberCount; m++)
+            {
+                var emp = _employeeSystem.GetEmployee(team.members[m]);
+                if (emp == null) continue;
+                teamSkillSum += (int)GetHighestSkillForEmployee(emp);
+            }
+            float teamAvgSkill = memberCount > 0 ? teamSkillSum / memberCount : 0f;
+
+            for (int m = 0; m < memberCount; m++)
+            {
+                var emp = _employeeSystem.GetEmployee(team.members[m]);
+                if (emp == null || !emp.isActive) continue;
+
+                float memberSkill = (int)GetHighestSkillForEmployee(emp);
+                string contribution;
+                if (teamAvgSkill <= 0f)                          contribution = "Medium";
+                else if (memberSkill >= teamAvgSkill * 1.2f)     contribution = "High";
+                else if (memberSkill <= teamAvgSkill * 0.8f)     contribution = "Low";
+                else                                              contribution = "Medium";
+
+                emp.AppendWorkHistory(new WorkHistoryEntry
+                {
+                    CompletedTick     = _currentTick,
+                    EntryType         = WorkEntryType.Product,
+                    WorkName          = product.ProductName,
+                    TeamName          = team.name,
+                    Role              = emp.role,
+                    ContributionLabel = contribution,
+                    QualityScore      = (int)overallQuality,
+                    XpSummary         = "",
+                    Outcome           = outcome
+                });
+            }
+        }
     }
 
     private float ComputeFeatureRelevanceAtShip(Product product)

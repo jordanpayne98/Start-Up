@@ -1,0 +1,328 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="project://database/Assets/UI/USS/Modals/candidate-detail-modal.uss" />
+    <ui:VisualElement name="candidate-detail-modal" class="cdm">
+
+        <!-- ── Modal Header ── -->
+        <ui:VisualElement name="modal-header" class="cdm-header">
+            <!-- Left: portrait, name, age, role pill, source badge -->
+            <ui:VisualElement name="header-left" class="cdm-header__left">
+                <ui:VisualElement name="portrait-placeholder" class="cdm-portrait" />
+                <ui:VisualElement class="cdm-header__identity">
+                    <ui:VisualElement class="cdm-header__name-row">
+                        <ui:Label name="name-label" text="Candidate Name" class="cdm-name" />
+                        <ui:Label name="source-badge" text="Market" class="badge cdm-source-badge" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cdm-header__sub-row">
+                        <ui:Label name="role-pill" text="Role" class="role-pill" />
+                        <ui:Label name="age-label" text="0y" class="cdm-age" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Center: pipeline state, salary estimate, CA/PA estimates, overall confidence -->
+            <ui:VisualElement name="header-center" class="cdm-header__center">
+                <ui:VisualElement class="cdm-header__stat-row">
+                    <ui:Label class="cdm-stat-label" text="Pipeline" />
+                    <ui:Label name="pipeline-state-label" text="—" class="cdm-stat-value badge" />
+                </ui:VisualElement>
+                <ui:VisualElement class="cdm-header__stat-row">
+                    <ui:Label class="cdm-stat-label" text="Salary Est." />
+                    <ui:Label name="salary-estimate-label" text="—" class="cdm-stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="cdm-header__stat-row">
+                    <ui:Label class="cdm-stat-label" text="Confidence" />
+                    <ui:Label name="salary-confidence-label" text="—" class="cdm-stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="cdm-header__stat-row">
+                    <ui:Label class="cdm-stat-label" text="CA Est." />
+                    <ui:Label name="ca-estimate-label" text="—" class="cdm-stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="cdm-header__stat-row">
+                    <ui:Label class="cdm-stat-label" text="PA Est." />
+                    <ui:Label name="pa-estimate-label" text="—" class="cdm-stat-value" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Right: expiry, overall confidence, badges, close -->
+            <ui:VisualElement name="header-right" class="cdm-header__right">
+                <ui:VisualElement class="cdm-header__stat-row">
+                    <ui:Label class="cdm-stat-label" text="Overall" />
+                    <ui:Label name="overall-confidence-label" text="—" class="cdm-stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="cdm-header__stat-row">
+                    <ui:Label class="cdm-stat-label" text="Expires" />
+                    <ui:Label name="expiry-label" text="—" class="cdm-stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement name="badges-container" class="cdm-badges-container">
+                    <!-- badges injected at runtime -->
+                </ui:VisualElement>
+                <ui:Button name="btn-close" text="✕" class="btn-icon cdm-close-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ── Tab Bar ── -->
+        <ui:VisualElement name="tab-bar" class="cdm-tab-bar">
+            <ui:Button name="tab-overview"    text="Overview"    class="cdm-tab tab--active" />
+            <ui:Button name="tab-interview"   text="Interview"   class="cdm-tab" />
+            <ui:Button name="tab-personality"  text="Personality" class="cdm-tab" />
+            <ui:Button name="tab-comparison"   text="Comparison"  class="cdm-tab" />
+            <ui:Button name="tab-offer"        text="Offer"       class="cdm-tab" />
+        </ui:VisualElement>
+
+        <!-- ── Tab Content Area ── -->
+        <ui:ScrollView name="tab-content-area" class="cdm-tab-content-area"
+                       vertical-scroller-visibility="Auto"
+                       horizontal-scroller-visibility="Hidden">
+
+            <!-- Overview: 3-column layout -->
+            <ui:VisualElement name="overview-content" class="cdm-tab-content cdm-overview-content">
+                <!-- Left panel: projected role fits, team projection -->
+                <ui:VisualElement name="left-panel" class="cdm-col cdm-col--left">
+                    <ui:VisualElement name="role-fit-card" class="col-card">
+                        <ui:Label text="PROJECTED ROLE FIT" class="col-card__title" />
+                        <ui:VisualElement name="role-fit-rows" class="cdm-role-fit-rows" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="team-projection-card" class="col-card">
+                        <ui:Label text="TEAM PROJECTION" class="col-card__title" />
+                        <ui:VisualElement name="team-selector" class="cdm-team-selector">
+                            <!-- team dropdown populated at runtime -->
+                        </ui:VisualElement>
+                        <ui:Label name="team-projection-fit" text="—" class="cdm-team-fit-label" />
+                        <ui:Label name="team-projection-detail" text="" class="cdm-team-fit-detail" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Center panel: estimated skills, estimated attributes -->
+                <ui:VisualElement name="center-panel" class="cdm-col cdm-col--center">
+                    <ui:VisualElement name="core-skills-card" class="col-card">
+                        <ui:Label text="ESTIMATED CORE SKILLS" class="col-card__title" />
+                        <ui:VisualElement name="core-skills-rows" class="cdm-stat-rows" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="supporting-skills-card" class="col-card">
+                        <ui:Label text="ESTIMATED SUPPORTING SKILLS" class="col-card__title" />
+                        <ui:VisualElement name="supporting-skills-rows" class="cdm-stat-rows" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="attributes-card" class="col-card">
+                        <ui:Label text="ESTIMATED ATTRIBUTES" class="col-card__title" />
+                        <ui:VisualElement name="attributes-rows" class="cdm-stat-rows" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Right panel: report, hidden signals, recommendation -->
+                <ui:VisualElement name="right-panel" class="cdm-col cdm-col--right">
+                    <ui:VisualElement name="report-card" class="col-card">
+                        <ui:Label text="CANDIDATE REPORT" class="col-card__title" />
+                        <ui:Label name="report-summary-label" text="—" class="cdm-report-summary" />
+                        <ui:VisualElement name="report-strengths" class="cdm-report-list" />
+                        <ui:VisualElement name="report-concerns" class="cdm-report-list" />
+                        <ui:Label name="report-confidence-label" text="" class="cdm-report-confidence" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="recommendation-card" class="col-card">
+                        <ui:Label text="RECOMMENDATION" class="col-card__title" />
+                        <ui:Label name="recommendation-label" text="—" class="cdm-recommendation" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Interview tab content -->
+            <ui:VisualElement name="interview-content" class="cdm-tab-content cdm-tab-content--hidden">
+                <ui:VisualElement name="interview-stage-card" class="col-card">
+                    <ui:Label text="INTERVIEW STATUS" class="col-card__title" />
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="Stage" />
+                        <ui:Label name="interview-stage-label" text="—" class="cdm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="HR Team" />
+                        <ui:Label name="interview-hr-team-label" text="—" class="cdm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="Time Remaining" />
+                        <ui:Label name="interview-time-label" text="—" class="cdm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="Knowledge" />
+                        <ui:Label name="interview-knowledge-label" text="—" class="cdm-stat-value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="interview-reports-card" class="col-card">
+                    <ui:Label text="INTERVIEW REPORTS" class="col-card__title" />
+                    <ui:Label name="first-report-label" text="First report not yet available" class="cdm-report-text" />
+                    <ui:Label name="final-report-label" text="Final report not yet available" class="cdm-report-text" />
+                </ui:VisualElement>
+                <ui:VisualElement name="interview-reveals-card" class="col-card">
+                    <ui:Label text="REVEALED INFORMATION" class="col-card__title" />
+                    <ui:VisualElement name="revealed-strengths" class="cdm-report-list" />
+                    <ui:VisualElement name="revealed-concerns" class="cdm-report-list" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Personality tab content -->
+            <ui:VisualElement name="personality-content" class="cdm-tab-content cdm-tab-content--hidden">
+                <ui:VisualElement name="personality-estimate-card" class="col-card">
+                    <ui:Label text="PERSONALITY ESTIMATE" class="col-card__title" />
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="Type" />
+                        <ui:Label name="personality-type-label" text="—" class="cdm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="Confidence" />
+                        <ui:Label name="personality-confidence-label" text="—" class="cdm-stat-value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="signals-card" class="col-card">
+                    <ui:Label text="SIGNALS" class="col-card__title" />
+                    <ui:VisualElement name="signal-rows" class="cdm-stat-rows" />
+                </ui:VisualElement>
+                <ui:VisualElement name="risk-card" class="col-card">
+                    <ui:Label text="RISK ASSESSMENT" class="col-card__title" />
+                    <ui:VisualElement name="risk-flag-rows" class="cdm-report-list" />
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="Retention Risk" />
+                        <ui:Label name="retention-risk-label" text="—" class="cdm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="Salary Pressure" />
+                        <ui:Label name="salary-pressure-label" text="—" class="cdm-stat-value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Comparison tab content -->
+            <ui:VisualElement name="comparison-content" class="cdm-tab-content cdm-tab-content--hidden cdm-comparison-content">
+                <!-- Selector row -->
+                <ui:VisualElement name="comparison-header-row" class="cdm-comparison-header-row">
+                    <ui:Label text="COMPARE AGAINST" class="cdm-comparison-header-label" />
+                    <ui:VisualElement name="comparison-target-selector" class="cdm-comparison-target-selector" />
+                </ui:VisualElement>
+                <!-- Two-column comparison table -->
+                <ui:VisualElement name="comparison-columns" class="cdm-comparison-columns">
+                    <!-- Candidate column -->
+                    <ui:VisualElement name="comparison-candidate-col" class="cdm-comparison-col cdm-comparison-col--candidate">
+                        <ui:Label text="THIS CANDIDATE" class="cdm-comparison-col__header" />
+                        <ui:VisualElement name="comparison-candidate-metrics" class="cdm-comparison-metrics" />
+                    </ui:VisualElement>
+                    <!-- Metric labels column -->
+                    <ui:VisualElement name="comparison-label-col" class="cdm-comparison-col cdm-comparison-col--labels">
+                        <ui:Label text="METRIC" class="cdm-comparison-col__header" />
+                        <ui:VisualElement name="comparison-metric-labels" class="cdm-comparison-metrics" />
+                    </ui:VisualElement>
+                    <!-- Target column -->
+                    <ui:VisualElement name="comparison-target-col" class="cdm-comparison-col cdm-comparison-col--target">
+                        <ui:Label name="comparison-target-col-header" text="COMPARISON TARGET" class="cdm-comparison-col__header" />
+                        <ui:VisualElement name="comparison-target-metrics" class="cdm-comparison-metrics" />
+                    </ui:VisualElement>
+                    <!-- Delta column -->
+                    <ui:VisualElement name="comparison-delta-col" class="cdm-comparison-col cdm-comparison-col--delta">
+                        <ui:Label text="DIFF" class="cdm-comparison-col__header" />
+                        <ui:VisualElement name="comparison-delta-metrics" class="cdm-comparison-metrics" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <!-- Recommendation -->
+                <ui:VisualElement name="comparison-recommendation-card" class="col-card cdm-comparison-recommendation-card">
+                    <ui:Label text="RECOMMENDATION" class="col-card__title" />
+                    <ui:Label name="comparison-recommendation-text" text="—" class="cdm-comparison-recommendation-text" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Offer tab content -->
+            <ui:VisualElement name="offer-content" class="cdm-tab-content cdm-tab-content--hidden cdm-offer-content">
+                <!-- Salary demand state -->
+                <ui:VisualElement name="salary-state-section" class="col-card">
+                    <ui:Label text="SALARY DEMAND" class="col-card__title" />
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="Demand State" />
+                        <ui:Label name="salary-demand-state-label" text="—" class="cdm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="Estimate" />
+                        <ui:Label name="salary-estimate-display" text="—" class="cdm-stat-value cdm-offer__salary-estimate" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="Monthly Cost" />
+                        <ui:Label name="monthly-cost-label" text="—" class="cdm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="Runway Impact" />
+                        <ui:Label name="runway-impact-label" text="—" class="cdm-stat-value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <!-- Acceptance preview -->
+                <ui:VisualElement name="acceptance-preview" class="col-card">
+                    <ui:Label text="ACCEPTANCE OUTLOOK" class="col-card__title" />
+                    <ui:VisualElement class="cdm-header__stat-row">
+                        <ui:Label class="cdm-stat-label" text="Likelihood" />
+                        <ui:Label name="acceptance-chance-label" text="—" class="cdm-stat-value cdm-offer__acceptance-badge" />
+                    </ui:VisualElement>
+                    <ui:Label text="FACTORS" class="cdm-offer__factors-title" />
+                    <ui:VisualElement name="acceptance-factors-list" class="cdm-offer__factors-list" />
+                </ui:VisualElement>
+                <!-- Status / unavailable notice -->
+                <ui:VisualElement name="offer-status-section" class="col-card cdm-offer__status-section">
+                    <ui:Label name="offer-status-label" text="" class="cdm-offer__status-label" />
+                </ui:VisualElement>
+                <!-- Offer actions -->
+                <ui:VisualElement name="offer-actions-section" class="cdm-offer-actions-section">
+                    <ui:Button name="btn-make-offer"     text="Make Offer"     class="btn-primary  cdm-offer-action-btn" />
+                    <ui:Button name="btn-hire"           text="Hire Now"       class="btn-primary  cdm-offer-action-btn" />
+                    <ui:Button name="btn-withdraw-offer" text="Withdraw Offer" class="btn-danger   cdm-offer-action-btn" />
+                    <ui:Button name="btn-accept-counter" text="Accept Counter" class="btn-secondary cdm-offer-action-btn" />
+                    <ui:Button name="btn-reject-counter" text="Reject Counter" class="btn-danger   cdm-offer-action-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+        </ui:ScrollView>
+
+        <!-- ── Bottom Status Strip ── -->
+        <ui:VisualElement name="bottom-status-strip" class="cdm-status-strip">
+            <ui:VisualElement name="status-card-interest" class="cdm-status-card">
+                <ui:Label text="INTEREST" class="cdm-status-card__label" />
+                <ui:Label name="status-interest-value" text="—" class="cdm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-salary" class="cdm-status-card">
+                <ui:Label text="SALARY" class="cdm-status-card__label" />
+                <ui:Label name="status-salary-value" text="—" class="cdm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-potential" class="cdm-status-card">
+                <ui:Label text="POTENTIAL" class="cdm-status-card__label" />
+                <ui:Label name="status-potential-value" text="—" class="cdm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-risk" class="cdm-status-card">
+                <ui:Label text="RISK" class="cdm-status-card__label" />
+                <ui:Label name="status-risk-value" text="—" class="cdm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-availability" class="cdm-status-card">
+                <ui:Label text="AVAILABILITY" class="cdm-status-card__label" />
+                <ui:Label name="status-availability-value" text="—" class="cdm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-interview" class="cdm-status-card">
+                <ui:Label text="INTERVIEW" class="cdm-status-card__label" />
+                <ui:Label name="status-interview-value" text="—" class="cdm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-team-impact" class="cdm-status-card">
+                <ui:Label text="TEAM IMPACT" class="cdm-status-card__label" />
+                <ui:Label name="status-team-impact-value" text="—" class="cdm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-comparison" class="cdm-status-card">
+                <ui:Label text="COMPARISON" class="cdm-status-card__label" />
+                <ui:Label name="status-comparison-value" text="—" class="cdm-status-card__value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ── Footer Actions ── -->
+        <ui:VisualElement name="footer-actions" class="cdm-footer modal-footer">
+            <ui:Button name="btn-close-footer" text="Close" class="btn-ghost" />
+            <ui:VisualElement class="cdm-footer__right">
+                <ui:Button name="btn-interview"      text="Start Interview" class="btn-secondary cdm-action-btn" />
+                <ui:Button name="btn-shortlist"       text="Shortlist"       class="btn-secondary cdm-action-btn" />
+                <ui:Button name="btn-offer"           text="Make Offer"      class="btn-primary   cdm-action-btn" />
+                <ui:Button name="btn-reject"          text="Reject"          class="btn-danger    cdm-action-btn" />
+                <ui:Button name="btn-hire-footer"     text="Hire Now"        class="btn-primary   cdm-action-btn" />
+                <ui:Button name="btn-withdraw-footer" text="Withdraw Offer"  class="btn-danger    cdm-action-btn" />
+                <ui:Button name="btn-accept-hr"       text="Accept"          class="btn-primary   cdm-action-btn" />
+                <ui:Button name="btn-decline-hr"      text="Decline"         class="btn-danger    cdm-action-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

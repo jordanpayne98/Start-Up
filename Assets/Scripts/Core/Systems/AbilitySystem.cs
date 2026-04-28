@@ -1,4 +1,4 @@
-// AbilitySystem Version: Clean v1
+// AbilitySystem Version: Clean v2
 using System;
 using System.Collections.Generic;
 
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public class AbilitySystem : ISystem
 {
     private readonly EmployeeState _employeeState;
-    private readonly RoleTierTable _tierTable;
+    private readonly RoleProfileTable _profileTable;
     private readonly IRng _rng;
     private readonly ILogger _logger;
     private TuningConfig _tuning;
@@ -16,16 +16,16 @@ public class AbilitySystem : ISystem
     // Ability cache — invalidated on skill change
     private readonly Dictionary<EmployeeId, int> _caCache = new Dictionary<EmployeeId, int>();
 
-    public AbilitySystem(EmployeeState employeeState, RoleTierTable tierTable, IRng rng, ILogger logger)
+    public AbilitySystem(EmployeeState employeeState, RoleProfileTable profileTable, IRng rng, ILogger logger)
     {
         _employeeState = employeeState ?? throw new ArgumentNullException(nameof(employeeState));
-        _tierTable     = tierTable     ?? throw new ArgumentNullException(nameof(tierTable));
+        _profileTable  = profileTable  ?? throw new ArgumentNullException(nameof(profileTable));
         _rng           = rng           ?? throw new ArgumentNullException(nameof(rng));
         _logger        = logger        ?? new NullLogger();
     }
 
-    // Exposes the RoleTierTable so the read model can compute cross-role ability queries.
-    public RoleTierTable TierTable => _tierTable;
+    // Exposes the RoleProfileTable so the read model can compute cross-role ability queries.
+    public RoleProfileTable ProfileTable => _profileTable;
 
     // Called to invalidate the Ability cache for an employee after a skill change.
     public void InvalidateCA(EmployeeId id)
@@ -38,61 +38,50 @@ public class AbilitySystem : ISystem
         _tuning = tuning;
     }
 
-    // Called by EmployeeSystem.HireEmployee after hire — assigns HiddenAttributes to the hired employee.
-    // PA transfers from CandidateData.PotentialAbility → employee.potentialAbility before this is called.
+    // Called by EmployeeSystem.HireEmployee after hire.
     public void OnEmployeeHired(EmployeeId id, Employee employee)
     {
         if (employee == null) return;
 
-        if (employee.potentialAbility <= 0)
+        if (employee.Stats.PotentialAbility <= 0)
         {
             int paMin = _tuning != null ? _tuning.AbilityFallbackPAMin : 60;
             int paMax = _tuning != null ? _tuning.AbilityFallbackPAMax : 151;
-            employee.potentialAbility = _rng.Range(paMin, paMax);
-            _logger.LogWarning($"[AbilitySystem] Employee {id.Value} had no PA set — fallback PA:{employee.potentialAbility}");
+            employee.Stats.PotentialAbility = _rng.Range(paMin, paMax);
+            _logger.LogWarning($"[AbilitySystem] Employee {id.Value} had no PA set — fallback PA:{employee.Stats.PotentialAbility}");
         }
 
-        bool hasPresetAttrs = employee.hiddenAttributes.LearningRate > 0
-            && employee.hiddenAttributes.Creative > 0
-            && employee.hiddenAttributes.WorkEthic > 0
-            && employee.hiddenAttributes.Adaptability > 0
-            && employee.hiddenAttributes.Ambition > 0;
-
-        if (!hasPresetAttrs) {
-            employee.hiddenAttributes = GenerateHiddenAttributesForPA(employee.potentialAbility);
-        }
         _caCache.Remove(id);
 
-        int[] tiers = _tierTable.GetTiers(employee.role);
-        int ca = AbilityCalculator.ComputeAbility(employee.skills, tiers);
-        if (ca > employee.potentialAbility) ca = employee.potentialAbility;
+        int[] tiers = GetTiersForRole(employee.role);
+        int ca = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
+        if (ca > employee.Stats.PotentialAbility) ca = employee.Stats.PotentialAbility;
         _caCache[id] = ca;
 
-        _logger.Log($"[Hired] {employee.name} ({employee.role}) | Ability:{ca} PA:{employee.potentialAbility} | LR:{employee.hiddenAttributes.LearningRate} Cr:{employee.hiddenAttributes.Creative} WE:{employee.hiddenAttributes.WorkEthic} A:{employee.hiddenAttributes.Adaptability} Amb:{employee.hiddenAttributes.Ambition}");
+        _logger.Log($"[Hired] {employee.name} ({employee.role}) | Ability:{ca} PA:{employee.Stats.PotentialAbility}");
     }
 
-    // Called by HRSystem.GenerateTargetedCandidate — bakes HiddenAttributes into CandidateData.
-    // PA must already be set on candidate (from GenerateCandidate) before calling this.
+    // Called by HRSystem — ensures candidate has generated hidden attributes if not already set.
     public void GenerateCandidateAbility(CandidateData candidate)
     {
         if (candidate == null) return;
-        if (candidate.PotentialAbility == 0)
+        if (candidate.Stats.PotentialAbility == 0)
             _logger.LogWarning($"[AbilitySystem] GenerateCandidateAbility called with PA=0 on candidate {candidate.CandidateId}");
-        candidate.HiddenAttributes = GenerateHiddenAttributesForPA(candidate.PotentialAbility);
+        // Hidden attributes are generated inside CandidateData.GenerateCandidate; nothing to do here.
     }
 
     // Returns the role-weighted Ability for a candidate (uses their current role's tier profile).
     public int ComputeCandidateCA(CandidateData candidate)
     {
         if (candidate == null) return 0;
-        int[] tiers = _tierTable.GetTiers(candidate.Role);
-        int ca = AbilityCalculator.ComputeAbility(candidate.Skills, tiers);
-        if (ca > candidate.PotentialAbility) ca = candidate.PotentialAbility;
+        int[] tiers = GetTiersForRole(candidate.Role);
+        int ca = AbilityCalculator.ComputeAbility(candidate.Stats.Skills, tiers);
+        if (ca > candidate.Stats.PotentialAbility) ca = candidate.Stats.PotentialAbility;
         return ca;
     }
 
     // Pure read — returns cached or recomputed Ability. No allocation.
-    public int GetCA(EmployeeId id, EmployeeRole role)
+    public int GetCA(EmployeeId id, RoleId role)
     {
         if (_caCache.TryGetValue(id, out int cached))
             return cached;
@@ -100,24 +89,22 @@ public class AbilitySystem : ISystem
         if (!_employeeState.employees.TryGetValue(id, out var employee) || !employee.isActive)
             return 0;
 
-        int[] tiers = _tierTable.GetTiers(role);
-        int ca = AbilityCalculator.ComputeAbility(employee.skills, tiers);
-        if (ca > employee.potentialAbility) ca = employee.potentialAbility;
+        int[] tiers = GetTiersForRole(role);
+        int ca = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
+        if (ca > employee.Stats.PotentialAbility) ca = employee.Stats.PotentialAbility;
         _caCache[id] = ca;
         return ca;
     }
 
     // Returns ability/potential estimate for a candidate.
-    // If interview is active or complete: delegates to InterviewSystem for noise-based estimates.
-    // If no interview: returns ShowAsUnknown = true (manual mode fallback).
     public CandidatePotentialEstimate GetCandidateEstimate(CandidateData candidate, int hrSkillAverage, HiringMode mode = HiringMode.HR, bool interviewComplete = false, InterviewSystem interviewSystem = null)
     {
         if (candidate == null)
             return new CandidatePotentialEstimate { PotentialStarsMin = 1, PotentialStarsMax = 5 };
 
-        int[] tiers = _tierTable.GetTiers(candidate.Role);
-        int trueCA = AbilityCalculator.ComputeAbility(candidate.Skills, tiers);
-        if (trueCA > candidate.PotentialAbility) trueCA = candidate.PotentialAbility;
+        int[] tiers = GetTiersForRole(candidate.Role);
+        int trueCA = AbilityCalculator.ComputeAbility(candidate.Stats.Skills, tiers);
+        if (trueCA > candidate.Stats.PotentialAbility) trueCA = candidate.Stats.PotentialAbility;
 
         if (interviewSystem != null)
         {
@@ -127,7 +114,7 @@ public class AbilitySystem : ISystem
             if (hasInterview)
             {
                 int abilityStars = interviewSystem.GetAbilityStarEstimate(candidate.CandidateId, trueCA, tiers);
-                int potentialStars = interviewSystem.GetPotentialStarEstimate(candidate.CandidateId, candidate.PotentialAbility);
+                int potentialStars = interviewSystem.GetPotentialStarEstimate(candidate.CandidateId, candidate.Stats.PotentialAbility);
 
                 if (abilityStars < 0) abilityStars = 0;
                 if (potentialStars < 0) potentialStars = 0;
@@ -169,7 +156,6 @@ public class AbilitySystem : ISystem
             };
         }
 
-        // No interview started — return unknown
         return new CandidatePotentialEstimate
         {
             AbilityMin = 0, AbilityMax = 200,
@@ -178,7 +164,7 @@ public class AbilitySystem : ISystem
         };
     }
 
-    // ISystem — PA back-fill for existing employees with default (0) PA is handled by save migration.
+    // ISystem — no per-tick work needed.
     public void PreTick(int tick)  { }
     public void Tick(int tick)     { }
     public void PostTick(int tick) { }
@@ -190,28 +176,19 @@ public class AbilitySystem : ISystem
         _caCache.Clear();
     }
 
-    // PA-linked generation. Higher PA → higher floor and ceiling for all hidden attributes.
-    // PA 0–200 → floor/ceiling mapped to 0–20 attribute range.
-    // Formula: floor = PA/20 (capped 1-10), spread = (20-floor)/2 + 1.
-    private HiddenAttributes GenerateHiddenAttributesForPA(int pa)
+    // Returns the tier array for a role from the profile table, falling back to uniform Secondary.
+    private int[] GetTiersForRole(RoleId role)
     {
-        int floor = pa / 20;
-        if (floor < 1) floor = 1;
-        if (floor > 10) floor = 10;
-
-        int spread = (20 - floor) / 2 + 1;
-
-        int Attr() => Clamp(_rng.Range(floor, floor + spread + 1) + _rng.Range(-1, 2), 1, 20);
-
-        return new HiddenAttributes
-        {
-            LearningRate = Attr(),
-            WorkEthic    = Attr(),
-            Adaptability = Attr(),
-            Ambition     = Attr(),
-            Creative     = Attr()
-        };
+        var profile = _profileTable?.Get(role);
+        if (profile != null)
+            return RoleSuitabilityCalculator.BuildTierArray(profile);
+        return BuildUniformTiers();
     }
 
-    private static int Clamp(int v, int min, int max) => v < min ? min : v > max ? max : v;
+    private static int[] BuildUniformTiers()
+    {
+        var tiers = new int[SkillIdHelper.SkillCount];
+        for (int i = 0; i < SkillIdHelper.SkillCount; i++) tiers[i] = 3;
+        return tiers;
+    }
 }

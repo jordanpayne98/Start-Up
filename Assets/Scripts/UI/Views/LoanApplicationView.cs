@@ -270,7 +270,7 @@ public class LoanApplicationView : IGameView
         row.style.marginBottom = 4;
 
         var labelEl = new Label(label);
-        labelEl.AddToClassList("text-muted");
+        labelEl.AddToClassList("text-secondary");
         row.Add(labelEl);
 
         var valueEl = new Label("--");

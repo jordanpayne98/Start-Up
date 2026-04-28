@@ -29,4 +29,7 @@ public enum ScreenId
     // Competitors
     CompetitorsList,
     CompetitorsIndustryOverview,
+
+    // Product Creation
+    ProductCreationPlanning,
 }

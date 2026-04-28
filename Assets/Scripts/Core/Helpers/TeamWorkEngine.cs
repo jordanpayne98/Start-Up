@@ -96,8 +96,8 @@ public static class TeamWorkEngine
         List<EmployeeId> members,
         EmployeeSystem empSystem,
         FatigueSystem fatigueSystem,
-        SkillType requiredSkill,
-        RoleTierTable roleTierTable,
+        SkillId requiredSkill,
+        RoleProfileTable roleProfileTable,
         float overheadPerMember,
         float minContributorThreshold = MinContributorThresholdDefault,
         int optimalTeamSize = 5)
@@ -132,27 +132,36 @@ public static class TeamWorkEngine
             effectiveCapacity += emp.EffectiveOutput;
 
             int ca;
-            if (roleTierTable != null)
+            if (roleProfileTable != null)
             {
-                int[] tiers = roleTierTable.GetTiers(emp.role);
-                ca = tiers != null ? AbilityCalculator.ComputeAbility(emp.skills, tiers) : ComputeFallbackCA(emp.skills);
+                var profile = roleProfileTable.Get(emp.role);
+                if (profile != null)
+                {
+                    int[] tiers = RoleSuitabilityCalculator.BuildTierArray(profile);
+                    ca = AbilityCalculator.ComputeAbility(emp.Stats.Skills, tiers);
+                }
+                else ca = ComputeFallbackCA(emp.Stats.Skills);
             }
             else
             {
-                ca = ComputeFallbackCA(emp.skills);
+                ca = ComputeFallbackCA(emp.Stats.Skills);
             }
 
             bool isRoleFit = IsRoleFitForSkill(emp.role, requiredSkill);
             float energy = fatigueSystem != null ? fatigueSystem.GetEnergy(emp.id) : 100f;
+
+            float workEthic     = emp.Stats.GetVisibleAttribute(VisibleAttributeId.WorkEthic);
+            float creative      = emp.Stats.GetVisibleAttribute(VisibleAttributeId.Creativity);
+            float adaptability  = emp.Stats.GetVisibleAttribute(VisibleAttributeId.Adaptability);
 
             ComputeEffectiveSkills(
                 emp.GetSkill(requiredSkill),
                 ca,
                 emp.morale,
                 energy,
-                emp.hiddenAttributes.WorkEthic,
-                emp.hiddenAttributes.Creative,
-                emp.hiddenAttributes.Adaptability,
+                workEthic,
+                creative,
+                adaptability,
                 isRoleFit,
                 emp.personality,
                 avgTeamMorale,
@@ -406,29 +415,40 @@ public static class TeamWorkEngine
 
     // ─── Utility ──────────────────────────────────────────────────────────────
 
-    public static bool IsRoleFitForSkill(EmployeeRole role, SkillType skill)
+    public static bool IsRoleFitForSkill(RoleId role, SkillId skill)
     {
         switch (role)
         {
-            case EmployeeRole.Developer:     return skill == SkillType.Programming;
-            case EmployeeRole.Designer:      return skill == SkillType.Design;
-            case EmployeeRole.QAEngineer:    return skill == SkillType.QA;
-            case EmployeeRole.SoundEngineer: return skill == SkillType.SFX;
-            case EmployeeRole.VFXArtist:     return skill == SkillType.VFX;
-            default:                         return false;
+            case RoleId.SoftwareEngineer:     return skill == SkillId.Programming;
+            case RoleId.SystemsEngineer:      return skill == SkillId.SystemsArchitecture;
+            case RoleId.SecurityEngineer:     return skill == SkillId.Security;
+            case RoleId.PerformanceEngineer:  return skill == SkillId.PerformanceOptimisation;
+            case RoleId.HardwareEngineer:     return skill == SkillId.HardwareIntegration;
+            case RoleId.ManufacturingEngineer:return skill == SkillId.Manufacturing;
+            case RoleId.ProductDesigner:      return skill == SkillId.ProductDesign;
+            case RoleId.GameDesigner:         return skill == SkillId.GameDesign;
+            case RoleId.TechnicalArtist:      return skill == SkillId.Vfx;
+            case RoleId.AudioDesigner:        return skill == SkillId.AudioDesign;
+            case RoleId.QaEngineer:           return skill == SkillId.QaTesting;
+            case RoleId.TechnicalSupportSpecialist: return skill == SkillId.TechnicalSupport;
+            case RoleId.Marketer:             return skill == SkillId.Marketing;
+            case RoleId.SalesExecutive:       return skill == SkillId.Sales;
+            case RoleId.Accountant:           return skill == SkillId.Accountancy;
+            case RoleId.HrSpecialist:         return skill == SkillId.HrRecruitment;
+            default:                          return false;
         }
     }
 
-    public static SkillType MapPhaseToSkill(ProductPhaseType phaseType)
+    public static SkillId MapPhaseToSkill(ProductPhaseType phaseType)
     {
         switch (phaseType)
         {
-            case ProductPhaseType.Design:      return SkillType.Design;
-            case ProductPhaseType.Programming: return SkillType.Programming;
-            case ProductPhaseType.SFX:         return SkillType.SFX;
-            case ProductPhaseType.VFX:         return SkillType.VFX;
-            case ProductPhaseType.QA:          return SkillType.QA;
-            default:                           return SkillType.Programming;
+            case ProductPhaseType.Design:      return SkillId.ProductDesign;
+            case ProductPhaseType.Programming: return SkillId.Programming;
+            case ProductPhaseType.SFX:         return SkillId.AudioDesign;
+            case ProductPhaseType.VFX:         return SkillId.Vfx;
+            case ProductPhaseType.QA:          return SkillId.QaTesting;
+            default:                           return SkillId.Programming;
         }
     }
 

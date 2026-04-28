@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 276d49dd6012ea740947a09a115572f5, type: 3}
+  m_Name: OperationsFounder
+  m_EditorClassIdentifier: Assembly-CSharp::FounderArchetypeDefinition
+  ArchetypeId: 17
+  DisplayName: Operations Founder
+  Description: Safer finance and hiring management. Reduces early mistakes and extends
+    runway.
+  Role: 14
+  TopSkills: 190000001800000017000000
+  BestEarlyUse: Safer finance, better hiring, lower early mistakes
+  Strengths:
+  - Stable financial management
+  - Better early hiring quality
+  Risks:
+  - Weak product creation ability
+  - Needs technical co-founder
+  RecommendedPairing: Software Founder or Product Founder
+  CAMin: 65
+  CAMax: 88
+  PAMin: 105
+  PAMax: 138
+  SkillBiasProfile: 19000000180000001700000015000000
+  AttributeBias: 020000000300000006000000
+  IsGatedArchetype: 0
+  GateCondition: 
+  SortOrder: 17

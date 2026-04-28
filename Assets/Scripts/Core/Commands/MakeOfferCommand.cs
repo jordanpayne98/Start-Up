@@ -6,5 +6,5 @@ public struct MakeOfferCommand : ICommand
     public HiringMode Mode;
     public EmploymentType EmploymentType;
     public ContractLengthOption Length;
-    public EmployeeRole OfferedRole;
+    public RoleId OfferedRole;
 }

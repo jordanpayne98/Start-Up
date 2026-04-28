@@ -362,7 +362,7 @@ public class CommandHistoryInspector : MonoBehaviour
                     state.moraleState.employeeMorale.TryGetValue(emp.id, out var ms))
                     morale = ms.currentMorale;
                 AddStateRow(_stateScroll,
-                    $"[{emp.id.Value}] {emp.name}  {emp.role}  Ability:{ca}  Potential:{emp.potentialAbility}  Morale:{morale:F0}  ${emp.salary:N0}");
+                    $"[{emp.id.Value}] {emp.name}  {emp.role}  Ability:{ca}  Potential:{emp.Stats.PotentialAbility}  Morale:{morale:F0}  ${emp.salary:N0}");
                 empCount++;
             }
             if (empCount == 0) AddStateRow(_stateScroll, "  (none)", MutedGray);
@@ -820,11 +820,9 @@ public class CommandHistoryInspector : MonoBehaviour
                     Name = cand.Name,
                     Gender = cand.Gender,
                     Age = cand.Age,
-                    Skills = cand.Skills,
-                    HRSkill = cand.HRSkill,
+                    Stats = cand.Stats,
                     Salary = cand.Salary,
                     Role = cand.Role,
-                    PotentialAbility = cand.PotentialAbility,
                     Mode = HiringMode.Manual
                 });
             }
@@ -839,10 +837,10 @@ public class CommandHistoryInspector : MonoBehaviour
             EnsureSpawnRng();
             Gender gender = (Gender)_spawnRng.Range(0, 2);
             string name = NameGenerator.GenerateRandomName(_spawnRng, gender);
-            var validRoles = new[] { 0, 1, 2, 4, 5, 6, 7 };
-            EmployeeRole role = (EmployeeRole)validRoles[_spawnRng.Range(0, validRoles.Length)];
-            var skills = new int[SkillTypeHelper.SkillTypeCount];
-            for (int i = 0; i < skills.Length; i++) skills[i] = _spawnRng.Range(5, 26);
+            RoleId role = (RoleId)_spawnRng.Range(0, SkillIdHelper.SkillCount);
+            var stats = EmployeeStatBlock.Create();
+            for (int i = 0; i < SkillIdHelper.SkillCount; i++) stats.SetSkill((SkillId)i, _spawnRng.Range(5, 26));
+            stats.PotentialAbility = _spawnRng.Range(80, 181);
             _gc.QueueCommand(new HireEmployeeCommand
             {
                 Tick = _gc.CurrentTick,
@@ -850,11 +848,9 @@ public class CommandHistoryInspector : MonoBehaviour
                 Name = name,
                 Gender = gender,
                 Age = _spawnRng.Range(22, 46),
-                Skills = skills,
-                HRSkill = _spawnRng.Range(5, 26),
-                Salary = _spawnRng.Range(80, 301),
+                Stats = stats,
+                Salary = _spawnRng.Range(3000, 9000),
                 Role = role,
-                PotentialAbility = _spawnRng.Range(80, 181),
                 Mode = HiringMode.Manual
             });
             RefreshCheatsPanel();
@@ -862,11 +858,10 @@ public class CommandHistoryInspector : MonoBehaviour
         _cheatsScroll.Add(spawnRow);
 
         // Spawn by role
-        var roleNames = new List<string> { "Developer", "Designer", "QA", "HR", "Sound Eng", "VFX Artist", "Accountant" };
-        var roleValues = new List<EmployeeRole> {
-            EmployeeRole.Developer, EmployeeRole.Designer, EmployeeRole.QAEngineer,
-            EmployeeRole.HR, EmployeeRole.SoundEngineer, EmployeeRole.VFXArtist, EmployeeRole.Accountant
-        };
+        var allRoles = (RoleId[])System.Enum.GetValues(typeof(RoleId));
+        var roleNames = new List<string>(allRoles.Length);
+        for (int r = 0; r < allRoles.Length; r++) roleNames.Add(RoleIdHelper.GetName(allRoles[r]));
+        var roleValues = new List<RoleId>(allRoles);
         var roleDropdown = new PopupField<string>(roleNames, 0);
         roleDropdown.style.width = 100;
         roleDropdown.style.fontSize = 11;
@@ -885,7 +880,7 @@ public class CommandHistoryInspector : MonoBehaviour
             EnsureSpawnRng();
             int roleIdx = roleNames.IndexOf(roleDropdown.value);
             if (roleIdx < 0) roleIdx = 0;
-            EmployeeRole chosenRole = roleValues[roleIdx];
+            RoleId chosenRole = roleValues[roleIdx];
             if (!int.TryParse(spawnCountField.value, out int spawnCount)) spawnCount = 1;
             if (spawnCount < 1) spawnCount = 1;
             if (spawnCount > 20) spawnCount = 20;
@@ -901,11 +896,9 @@ public class CommandHistoryInspector : MonoBehaviour
                     Name = candidate.Name,
                     Gender = candidate.Gender,
                     Age = candidate.Age,
-                    Skills = candidate.Skills,
-                    HRSkill = candidate.HRSkill,
+                    Stats = candidate.Stats,
                     Salary = candidate.Salary,
                     Role = candidate.Role,
-                    PotentialAbility = candidate.PotentialAbility,
                     Mode = HiringMode.Manual
                 });
             }
@@ -922,11 +915,10 @@ public class CommandHistoryInspector : MonoBehaviour
             foreach (var emp in s2.employeeState.employees.Values)
             {
                 if (!emp.isActive) continue;
-                if (emp.skills != null)
-                    for (int i = 0; i < emp.skills.Length; i++)
-                        emp.skills[i] = 20;
+                for (int i = 0; i < SkillIdHelper.SkillCount; i++)
+                    emp.Stats.SetSkill((SkillId)i, 20);
                 emp.morale = 100;
-                emp.potentialAbility = 200;
+                emp.Stats.PotentialAbility = 200;
             }
             RefreshCheatsPanel();
         }));
@@ -1119,7 +1111,7 @@ public class CommandHistoryInspector : MonoBehaviour
             headerRow.style.paddingBottom = 3;
             if (isSelected) headerRow.style.backgroundColor = new Color(0.1f, 0.18f, 0.3f, 0.8f);
 
-            var empLabel = new Label($"[{emp.id.Value}] {emp.name}  {emp.role}  Ability:{ca}  Potential:{emp.potentialAbility}  M:{emp.morale}");
+            var empLabel = new Label($"[{emp.id.Value}] {emp.name}  {emp.role}  Ability:{ca}  Potential:{emp.Stats.PotentialAbility}  M:{emp.morale}");
             empLabel.style.color = isSelected ? AccentBlue : new Color(0.78f, 0.78f, 0.78f);
             empLabel.style.fontSize = 10;
             empLabel.style.flexGrow = 1;
@@ -1141,20 +1133,16 @@ public class CommandHistoryInspector : MonoBehaviour
 
                 AddEditableField(_cheatsScroll, "Salary",   emp.salary.ToString(),       v => { if (int.TryParse(v, out int n)) empRef.salary = n; });
                 AddEditableField(_cheatsScroll, "Morale",   emp.morale.ToString(),        v => { if (int.TryParse(v, out int n)) empRef.morale = n; });
-                AddEditableField(_cheatsScroll, "Potential", emp.potentialAbility.ToString(), v => { if (int.TryParse(v, out int n)) empRef.potentialAbility = n; });
+                AddEditableField(_cheatsScroll, "Potential", emp.Stats.PotentialAbility.ToString(), v => { if (int.TryParse(v, out int n)) empRef.Stats.PotentialAbility = n; });
                 AddEditableField(_cheatsScroll, "Age",      emp.age.ToString(),           v => { if (int.TryParse(v, out int n)) empRef.age = n; });
-                AddEditableField(_cheatsScroll, "HR Skill", emp.hrSkill.ToString(),       v => { if (int.TryParse(v, out int n)) empRef.hrSkill = n; });
 
-                if (emp.skills != null)
+                for (int i = 0; i < SkillIdHelper.SkillCount; i++)
                 {
-                    for (int i = 0; i < SkillTypeHelper.SkillTypeCount && i < emp.skills.Length; i++)
-                    {
-                        int skillIndex = i;
-                        Employee empRef2 = emp;
-                        string skillName = SkillTypeHelper.GetName((SkillType)i);
-                        AddEditableField(_cheatsScroll, skillName, emp.skills[i].ToString(),
-                            v => { if (int.TryParse(v, out int n)) empRef2.skills[skillIndex] = n; });
-                    }
+                    int skillIndex = i;
+                    Employee empRef2 = emp;
+                    string skillName = SkillIdHelper.GetName((SkillId)i);
+                    AddEditableField(_cheatsScroll, skillName, emp.Stats.Skills[i].ToString(),
+                        v => { if (int.TryParse(v, out int n)) empRef2.Stats.SetSkill((SkillId)skillIndex, n); });
                 }
 
                 // Quick actions
@@ -1165,10 +1153,9 @@ public class CommandHistoryInspector : MonoBehaviour
                     if (s2?.employeeState?.employees != null &&
                         s2.employeeState.employees.TryGetValue(capturedId, out var e2))
                     {
-                        if (e2.skills != null)
-                            for (int i = 0; i < e2.skills.Length; i++) e2.skills[i] = 20;
+                        for (int i = 0; i < SkillIdHelper.SkillCount; i++) e2.Stats.SetSkill((SkillId)i, 20);
                         e2.morale = 100;
-                        e2.potentialAbility = 200;
+                        e2.Stats.PotentialAbility = 200;
                     }
                     RefreshCheatsPanel();
                 }));

@@ -18,7 +18,7 @@ public class NegotiationSystem : ISystem
     private InterviewSystem _interviewSystem;
     private GameEventBus _eventBus;
     private IRng _rng;
-    private RoleTierTable _roleTierTable;
+    private RoleProfileTable _roleProfileTable;
     private ILogger _logger;
 
     private enum PendingEventType
@@ -51,14 +51,13 @@ public class NegotiationSystem : ISystem
     private List<int> _employeeIdxBuffer;
 
     public NegotiationSystem(NegotiationState state, EmployeeState employeeState,
-        InterviewSystem interviewSystem, GameEventBus eventBus, IRng rng, RoleTierTable roleTierTable, ILogger logger)
+        InterviewSystem interviewSystem, GameEventBus eventBus, IRng rng, ILogger logger)
     {
         _state = state;
         _employeeState = employeeState;
         _interviewSystem = interviewSystem;
         _eventBus = eventBus;
         _rng = rng;
-        _roleTierTable = roleTierTable;
         _logger = logger ?? new NullLogger();
         _pendingEvents = new List<PendingEvent>();
         _candidateKeyBuffer = new List<int>();
@@ -66,6 +65,11 @@ public class NegotiationSystem : ISystem
 
         if (_state.employeeNegotiations == null)
             _state.employeeNegotiations = new List<EmployeeNegotiation>();
+    }
+
+    public void SetRoleProfileTable(RoleProfileTable table)
+    {
+        _roleProfileTable = table;
     }
 
     // ─── Read-model accessors ──────────────────────────────────────────────────
@@ -135,7 +139,7 @@ public class NegotiationSystem : ISystem
         candidate.IsTargeted = true;
 
         int baseDemand = SalaryDemandCalculator.ComputeDemand(candidate);
-        RoleSuitability suitability = RoleSuitabilityCalculator.GetSuitabilityForRole(candidate.Skills, _roleTierTable, offer.OfferedRole);
+        RoleSuitability suitability = RoleSuitabilityCalculator.GetSuitabilityForRole(candidate.Stats.Skills, _roleProfileTable, offer.OfferedRole);
         int demand = SalaryModifierCalculator.ComputeOfferSalary(baseDemand, offer.EmploymentType, offer.Length,
             candidate.Preferences, candidate.Role, offer.OfferedRole, suitability);
 
@@ -146,7 +150,7 @@ public class NegotiationSystem : ISystem
         {
             if (IsSameOffer(existing.lastOffer, offer))
             {
-                if (!OfferEvaluator.EvaluateSameTermsGamble(candidate.HiddenAttributes.Adaptability, _rng))
+                if (!OfferEvaluator.EvaluateSameTermsGamble(candidate.Stats.GetVisibleAttribute(VisibleAttributeId.Adaptability), _rng))
                 {
                     existing.currentPatience = 0;
                     existing.status = NegotiationStatus.PatienceExhausted;
@@ -168,7 +172,7 @@ public class NegotiationSystem : ISystem
         OfferOutcome outcome = OfferEvaluator.Evaluate(satisfaction);
 
         int maxPatience = isFirstOffer
-            ? OfferEvaluator.ComputeMaxPatience(candidate.HiddenAttributes)
+            ? OfferEvaluator.ComputeMaxPatience(candidate.Stats)
             : existing.maxPatience;
         int currentPatience = isFirstOffer ? maxPatience : existing.currentPatience;
         int roundCount = existing.roundCount + 1;
@@ -410,13 +414,13 @@ public class NegotiationSystem : ISystem
         bool isFirstOffer = existing.roundCount == 0;
 
         int baseDemand = emp.renewalDemand > 0 ? emp.renewalDemand : emp.salary;
-        RoleSuitability suitability = RoleSuitabilityCalculator.GetSuitabilityForRole(emp.skills, _roleTierTable, offer.OfferedRole);
+        RoleSuitability suitability = RoleSuitabilityCalculator.GetSuitabilityForRole(emp.Stats.Skills, _roleProfileTable, offer.OfferedRole);
         int demand = SalaryModifierCalculator.ComputeRenewalDemand(emp, baseDemand, offer.EmploymentType,
             offer.Length, emp.StrikeCount, emp.preferredRole, offer.OfferedRole, suitability);
 
         if (!isFirstOffer && IsSameOffer(existing.lastOffer, offer))
         {
-            if (!OfferEvaluator.EvaluateSameTermsGamble(emp.hiddenAttributes.Adaptability, _rng))
+            if (!OfferEvaluator.EvaluateSameTermsGamble(emp.Stats.GetVisibleAttribute(VisibleAttributeId.Adaptability), _rng))
             {
                 existing.currentPatience = 0;
                 existing.status = NegotiationStatus.PatienceExhausted;
@@ -432,7 +436,7 @@ public class NegotiationSystem : ISystem
         OfferOutcome outcome = OfferEvaluator.Evaluate(satisfaction);
 
         int maxPatience = isFirstOffer
-            ? OfferEvaluator.ComputeMaxPatience(emp.hiddenAttributes)
+            ? OfferEvaluator.ComputeMaxPatience(emp.Stats)
             : existing.maxPatience;
         int currentPatience = isFirstOffer ? maxPatience : existing.currentPatience;
         int roundCount = existing.roundCount + 1;

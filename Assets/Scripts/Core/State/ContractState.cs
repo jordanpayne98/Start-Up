@@ -69,69 +69,35 @@ public enum ContractStatus
     Failed
 }
 
-public enum SkillType
-{
-    Programming = 0,
-    Design = 1,
-    QA = 2,
-    VFX = 3,
-    SFX = 4,
-    HR = 5,
-    Negotiation = 6,
-    Accountancy = 7,
-    Marketing = 8
-}
-
-public static class SkillTypeHelper
-{
-    public const int SkillTypeCount = 9;
-
-    private static readonly string[] _names = { "Programming", "Design", "QA", "VFX", "SFX", "HR", "Negotiation", "Accountancy", "Marketing" };
-
-    public static string GetName(SkillType type)
-    {
-        int idx = (int)type;
-        if (idx >= 0 && idx < _names.Length) return _names[idx];
-        return "Unknown";
-    }
-}
-
 [Serializable]
 public class SkillRequirements
 {
     public float[] Weights;
 
-    // Backward-compat properties for existing code and serialization
-    public float ProgrammingWeight { get => Weights[(int)SkillType.Programming]; set => Weights[(int)SkillType.Programming] = value; }
-    public float DesignWeight { get => Weights[(int)SkillType.Design]; set => Weights[(int)SkillType.Design] = value; }
-    public float QAWeight { get => Weights[(int)SkillType.QA]; set => Weights[(int)SkillType.QA] = value; }
-
-    private SkillRequirements() { Weights = new float[SkillTypeHelper.SkillTypeCount]; }
-
-    public SkillRequirements(float programmingWeight, float designWeight, float qaWeight)
-    {
-        Weights = new float[SkillTypeHelper.SkillTypeCount];
-        Weights[(int)SkillType.Programming] = programmingWeight;
-        Weights[(int)SkillType.Design] = designWeight;
-        Weights[(int)SkillType.QA] = qaWeight;
-    }
+    private SkillRequirements() { Weights = new float[SkillIdHelper.SkillCount]; }
 
     public SkillRequirements(float[] weights)
     {
-        Weights = new float[SkillTypeHelper.SkillTypeCount];
+        Weights = new float[SkillIdHelper.SkillCount];
         if (weights != null)
         {
-            int len = Math.Min(weights.Length, SkillTypeHelper.SkillTypeCount);
+            int len = Math.Min(weights.Length, SkillIdHelper.SkillCount);
             for (int i = 0; i < len; i++) Weights[i] = weights[i];
         }
     }
 
-    public float GetWeight(SkillType type) => Weights[(int)type];
+    public SkillRequirements(SkillId primarySkill, float primaryWeight)
+    {
+        Weights = new float[SkillIdHelper.SkillCount];
+        Weights[(int)primarySkill] = primaryWeight;
+    }
+
+    public float GetWeight(SkillId id) => Weights[(int)id];
 
     public bool Validate()
     {
         float sum = 0f;
-        for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++)
+        for (int i = 0; i < SkillIdHelper.SkillCount; i++)
             sum += Weights[i];
         return Math.Abs(sum - 1.0f) < 0.01f;
     }
@@ -163,7 +129,7 @@ public class Contract
     public QualityExpectation QualityExpectation;
 
     // Skill requirements resolved at generation
-    public SkillType RequiredSkill;
+    public SkillId RequiredSkill;
     public int MinSkillRequired;
     public int TargetSkill;
     public int ExcellenceSkill;
@@ -190,7 +156,7 @@ public class Contract
         int rewardMoney,
         int reputationReward,
         int deadlineDurationTicks,
-        SkillType requiredSkill,
+        SkillId requiredSkill,
         int minSkillRequired,
         int targetSkill,
         int excellenceSkill,

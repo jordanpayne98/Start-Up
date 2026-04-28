@@ -2,18 +2,9 @@ using System.Collections.Generic;
 
 public class AssignmentModalViewModel : IViewModel
 {
-    private static readonly EmployeeRole[] _roles = {
-        EmployeeRole.Developer,
-        EmployeeRole.Designer,
-        EmployeeRole.QAEngineer,
-        EmployeeRole.HR,
-        EmployeeRole.SoundEngineer,
-        EmployeeRole.VFXArtist,
-        EmployeeRole.Accountant,
-        EmployeeRole.Marketer
-    };
+    private static readonly RoleId[] _roles = (RoleId[])System.Enum.GetValues(typeof(RoleId));
 
-    private readonly List<string> _availableRoles = new List<string>(8);
+    private readonly List<string> _availableRoles = new List<string>();
     public List<string> AvailableRoles => _availableRoles;
 
     public int SelectedRoleIndex { get; set; }
@@ -30,11 +21,11 @@ public class AssignmentModalViewModel : IViewModel
     // The resolved HR team id — populated during Refresh, used by the View when dispatching the command
     public TeamId HRTeamId { get; private set; }
 
-    public EmployeeRole SelectedRole {
+    public RoleId SelectedRole {
         get {
             if (SelectedRoleIndex >= 0 && SelectedRoleIndex < _roles.Length)
                 return _roles[SelectedRoleIndex];
-            return EmployeeRole.Developer;
+            return RoleId.SoftwareEngineer;
         }
     }
 
@@ -48,7 +39,7 @@ public class AssignmentModalViewModel : IViewModel
         if (_availableRoles.Count == 0) {
             int roleCount = _roles.Length;
             for (int i = 0; i < roleCount; i++) {
-                _availableRoles.Add(UIFormatting.FormatRole(_roles[i]));
+                _availableRoles.Add(RoleIdHelper.GetName(_roles[i]));
             }
         }
 

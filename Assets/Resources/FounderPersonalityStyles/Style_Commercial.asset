@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cceb32f606429a4ea3a882571d5fb7e, type: 3}
+  m_Name: Style_Commercial
+  m_EditorClassIdentifier: Assembly-CSharp::FounderPersonalityStyleDefinition
+  StyleId: 5
+  DisplayName: Commercial
+  Description: Sales and marketing mindset. High communication and ambition but higher
+    ego risk.
+  StrengthAttributes: 0300000007000000
+  WeakAttributes: 06000000
+  HiddenTendencies: 0100000004000000
+  BestPairing: "Supportive or Calm \u2014 dampens ego and conflict risk"
+  RiskWarning: Higher ego risk. May create conflict or salary pressure as company
+    grows.
+  SortOrder: 5

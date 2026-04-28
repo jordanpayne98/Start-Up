@@ -356,7 +356,7 @@ public class CompetitorSystem : ISystem
     {
         long monthlySalary = _employeeSystem != null
             ? (long)_employeeSystem.TotalMonthlySalariesForCompany(comp.Id.ToCompanyId())
-            : (long)(comp.EmployeeIds.Count * SalaryBand.GetBase(EmployeeRole.Developer));
+            : (long)(comp.EmployeeIds.Count * SalaryBand.GetBase(RoleId.SoftwareEngineer));
         int runwayMonths = rng.Range(12, 37);
         comp.Finance.Cash = monthlySalary * runwayMonths;
     }
@@ -931,7 +931,7 @@ public class CompetitorSystem : ISystem
 
         long totalSalaries = _employeeSystem != null
             ? (long)_employeeSystem.TotalMonthlySalariesForCompany(comp.Id.ToCompanyId())
-            : (long)(comp.EmployeeIds != null ? comp.EmployeeIds.Count * SalaryBand.GetBase(EmployeeRole.Developer) : 0);
+            : (long)(comp.EmployeeIds != null ? comp.EmployeeIds.Count * SalaryBand.GetBase(RoleId.SoftwareEngineer) : 0);
 
         long budgetCoveredSalaries = 0L;
         long productBudgets = 0L;

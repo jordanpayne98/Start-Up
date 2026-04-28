@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 276d49dd6012ea740947a09a115572f5, type: 3}
+  m_Name: SoftwareFounder
+  m_EditorClassIdentifier: Assembly-CSharp::FounderArchetypeDefinition
+  ArchetypeId: 10
+  DisplayName: Software Founder
+  Description: Builds early products personally. Strong general software and product
+    development.
+  Role: 0
+  TopSkills: 000000001100000002000000
+  BestEarlyUse: Software contracts, apps, tools, general development
+  Strengths:
+  - Strong early contract delivery
+  - Broad software coverage
+  Risks:
+  - Needs design, QA, and marketing support early
+  RecommendedPairing: Product Founder or Marketing Founder
+  CAMin: 75
+  CAMax: 100
+  PAMin: 115
+  PAMax: 150
+  SkillBiasProfile: 00000000110000000200000001000000
+  AttributeBias: 020000000500000007000000
+  IsGatedArchetype: 0
+  GateCondition: 
+  SortOrder: 10

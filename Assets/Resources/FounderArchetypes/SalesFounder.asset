@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 276d49dd6012ea740947a09a115572f5, type: 3}
+  m_Name: SalesFounder
+  m_EditorClassIdentifier: Assembly-CSharp::FounderArchetypeDefinition
+  ArchetypeId: 16
+  DisplayName: Sales Founder
+  Description: Closes contracts and builds partnerships. Strong early deal-making
+    and revenue generation.
+  Role: 13
+  TopSkills: 160000001700000015000000
+  BestEarlyUse: Contracts, partnerships, enterprise and client work
+  Strengths:
+  - Fast early contract revenue
+  - Strong negotiation baseline
+  Risks:
+  - High ego risk
+  - Weak product creation ability
+  RecommendedPairing: Software Founder or Systems Founder
+  CAMin: 65
+  CAMax: 90
+  PAMin: 105
+  PAMax: 140
+  SkillBiasProfile: 16000000170000001500000014000000
+  AttributeBias: 030000000700000006000000
+  IsGatedArchetype: 0
+  GateCondition: 
+  SortOrder: 16

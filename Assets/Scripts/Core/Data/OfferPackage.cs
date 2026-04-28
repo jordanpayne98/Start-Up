@@ -1,7 +1,7 @@
 public struct OfferPackage
 {
     public int CandidateId;
-    public EmployeeRole OfferedRole;
+    public RoleId OfferedRole;
     public EmploymentType EmploymentType;
     public ContractLengthOption Length;
     public int OfferedSalary;

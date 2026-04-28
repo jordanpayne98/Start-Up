@@ -1,0 +1,349 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="project://database/Assets/UI/USS/Common/variables.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Common/base.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Common/components.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/MainMenu/new-game-wizard.uss" />
+
+    <ui:VisualElement name="new-game-wizard" class="wizard">
+        <!-- Header -->
+        <ui:VisualElement name="wizard-header" class="wizard__header">
+            <ui:VisualElement class="wizard__header-left">
+                <ui:Label name="header-label" text="NEW GAME" class="wizard__header-label" />
+                <ui:Label name="header-title" text="New Company Setup" class="wizard__header-title" />
+            </ui:VisualElement>
+            <ui:VisualElement class="wizard__header-right">
+                <ui:Label name="step-counter" text="Step 1 of 7" class="wizard__step-counter" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Progress Stepper -->
+        <ui:VisualElement name="progress-stepper" class="stepper">
+            <ui:VisualElement name="step-indicator-0" class="stepper__step stepper__step--active">
+                <ui:VisualElement class="stepper__circle">
+                    <ui:Label text="1" class="stepper__circle-label" />
+                </ui:VisualElement>
+                <ui:Label text="Company" class="stepper__step-label" />
+            </ui:VisualElement>
+            <ui:VisualElement class="stepper__connector" />
+            <ui:VisualElement name="step-indicator-1" class="stepper__step">
+                <ui:VisualElement class="stepper__circle">
+                    <ui:Label text="2" class="stepper__circle-label" />
+                </ui:VisualElement>
+                <ui:Label text="Background" class="stepper__step-label" />
+            </ui:VisualElement>
+            <ui:VisualElement class="stepper__connector" />
+            <ui:VisualElement name="step-indicator-2" class="stepper__step">
+                <ui:VisualElement class="stepper__circle">
+                    <ui:Label text="3" class="stepper__circle-label" />
+                </ui:VisualElement>
+                <ui:Label text="Founders" class="stepper__step-label" />
+            </ui:VisualElement>
+            <ui:VisualElement class="stepper__connector" />
+            <ui:VisualElement name="step-indicator-3" class="stepper__step">
+                <ui:VisualElement class="stepper__circle">
+                    <ui:Label text="4" class="stepper__circle-label" />
+                </ui:VisualElement>
+                <ui:Label text="Founder 1" class="stepper__step-label" />
+            </ui:VisualElement>
+            <ui:VisualElement class="stepper__connector" />
+            <ui:VisualElement name="step-indicator-4" class="stepper__step">
+                <ui:VisualElement class="stepper__circle">
+                    <ui:Label text="5" class="stepper__circle-label" />
+                </ui:VisualElement>
+                <ui:Label text="Founder 2" class="stepper__step-label" />
+            </ui:VisualElement>
+            <ui:VisualElement class="stepper__connector" />
+            <ui:VisualElement name="step-indicator-5" class="stepper__step">
+                <ui:VisualElement class="stepper__circle">
+                    <ui:Label text="6" class="stepper__circle-label" />
+                </ui:VisualElement>
+                <ui:Label text="Team &amp; Budget" class="stepper__step-label" />
+            </ui:VisualElement>
+            <ui:VisualElement class="stepper__connector" />
+            <ui:VisualElement name="step-indicator-6" class="stepper__step">
+                <ui:VisualElement class="stepper__circle">
+                    <ui:Label text="7" class="stepper__circle-label" />
+                </ui:VisualElement>
+                <ui:Label text="Preview" class="stepper__step-label" />
+            </ui:VisualElement>
+            <ui:VisualElement class="stepper__connector" />
+            <ui:VisualElement name="step-indicator-7" class="stepper__step">
+                <ui:VisualElement class="stepper__circle">
+                    <ui:Label text="8" class="stepper__circle-label" />
+                </ui:VisualElement>
+                <ui:Label text="Review" class="stepper__step-label" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Wizard Body: Two-panel layout -->
+        <ui:VisualElement name="wizard-body" class="wizard__body">
+            <!-- Main Content Panel (left ~60%) -->
+            <ui:VisualElement name="main-content-panel" class="wizard__main-content">
+                <!-- Step 1: Company -->
+                <ui:VisualElement name="step-company" class="wizard__step-panel">
+                    <ui:Label text="Company Details" class="wizard__section-title" />
+                    <ui:Label text="Set up your company identity. You can change these later." class="wizard__section-subtitle" />
+                    <ui:TextField name="company-name-input" label="Company Name" class="wizard__text-field" />
+                    <ui:DropdownField name="industry-selector" label="Industry Focus" class="wizard__dropdown" />
+                    <ui:DropdownField name="location-selector" label="Headquarters" class="wizard__dropdown" />
+                </ui:VisualElement>
+
+                <!-- Step 2: Background -->
+                <ui:VisualElement name="step-background" class="wizard__step-panel">
+                    <ui:Label text="Company Background" class="wizard__section-title" />
+                    <ui:Label text="Choose your company's origin story. This affects your starting conditions and early opportunities." class="wizard__section-subtitle" />
+                    <ui:VisualElement name="background-cards-container" class="wizard__card-grid" />
+                </ui:VisualElement>
+
+                <!-- Step 3: Founder Count -->
+                <ui:VisualElement name="step-founder-count" class="wizard__step-panel">
+                    <ui:Label text="Founding Team Size" class="wizard__section-title" />
+                    <ui:Label text="How many founders will start the company? More founders mean broader skills but higher initial costs." class="wizard__section-subtitle" />
+                    <ui:VisualElement name="founder-count-cards" class="wizard__card-grid wizard__card-grid--horizontal" />
+                    <ui:VisualElement name="founder-count-comparison" class="wizard__comparison-panel" />
+                </ui:VisualElement>
+
+                <!-- Step 4: Founder 1 — Archetype -->
+                <ui:VisualElement name="step-f1-archetype" class="wizard__step-panel">
+                    <ui:Label text="Founder 1 — Archetype" class="wizard__section-title text--primary" />
+                    <ui:Label text="Choose the archetype that best fits your leadership style." class="wizard__section-subtitle text--secondary" />
+                    <ui:VisualElement name="archetype-cards-container-1" class="founder__archetype-cards" />
+                </ui:VisualElement>
+
+                <!-- Step 5: Founder 1 — Identity & Compensation -->
+                <ui:VisualElement name="step-f1-identity-compensation" class="wizard__step-panel">
+                    <ui:Label text="Founder 1 — Identity &amp; Compensation" class="wizard__section-title text--primary" />
+                    <ui:Label text="Name your founder, set their profile, and choose a salary plan." class="wizard__section-subtitle text--secondary" />
+                    <ui:VisualElement class="founder__identity-row">
+                        <ui:TextField name="founder-name-input-1" label="Name" class="founder__name-input" />
+                        <ui:Button name="btn-randomise-name-1" text="?" class="founder__dice-btn" />
+                    </ui:VisualElement>
+                    <ui:Label text="Salary Plan" class="wizard__subsection-title" />
+                    <ui:VisualElement name="salary-buttons-row-1" class="founder__salary-row">
+                        <ui:Button name="salary-btn-1-0" text="No Salary" class="founder__salary-btn" />
+                        <ui:Button name="salary-btn-1-1" text="Low Salary" class="founder__salary-btn" />
+                        <ui:Button name="salary-btn-1-2" text="Market Salary" class="founder__salary-btn" />
+                        <ui:Button name="salary-btn-1-3" text="Deferred Salary" class="founder__salary-btn" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="founder__salary-preview">
+                        <ui:VisualElement class="founder__salary-preview-row">
+                            <ui:Label name="salary-monthly-cost-1" text="Monthly: —" class="founder__salary-detail" />
+                            <ui:Label name="salary-runway-impact-1" text="Runway: —" class="founder__salary-detail" />
+                            <ui:Label name="salary-pressure-1" text="Pressure: —" class="founder__salary-detail" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:Label name="salary-recommendation-1" text="Low Salary is the balanced default." class="founder__salary-recommendation text--secondary" />
+                    <ui:VisualElement class="founder__equity-row">
+                        <ui:Label name="equity-expectation-1" text="Equity Expectation 14% – 22%" class="founder__equity-label text--muted" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Step 6: Founder 1 — Personality & Weakness -->
+                <ui:VisualElement name="step-f1-personality-weakness" class="wizard__step-panel">
+                    <ui:Label text="Founder 1 — Personality &amp; Weakness" class="wizard__section-title text--primary" />
+                    <ui:Label text="Choose how this founder operates, and select one weakness." class="wizard__section-subtitle text--secondary" />
+                    <ui:Label text="Personality Style" class="wizard__subsection-title" />
+                    <ui:VisualElement name="personality-style-cards-1" class="wizard__card-grid wizard__card-grid--compact" />
+                    <ui:Label name="personality-validation-1" text="" class="wizard__inline-validation" style="display: none;" />
+                    <ui:Label text="Weakness" class="wizard__subsection-title" />
+                    <ui:VisualElement name="weakness-cards-1" class="wizard__card-grid wizard__card-grid--compact" />
+                    <ui:Label name="weakness-validation-1" text="" class="wizard__inline-validation" style="display: none;" />
+                </ui:VisualElement>
+
+                <!-- Step 7: Founder 2 — Archetype -->
+                <ui:VisualElement name="step-f2-archetype" class="wizard__step-panel">
+                    <ui:Label text="Founder 2 — Archetype" class="wizard__section-title text--primary" />
+                    <ui:Label text="Choose the archetype that best fits your leadership style." class="wizard__section-subtitle text--secondary" />
+                    <ui:VisualElement name="archetype-cards-container-2" class="founder__archetype-cards" />
+                </ui:VisualElement>
+
+                <!-- Step 8: Founder 2 — Identity & Compensation -->
+                <ui:VisualElement name="step-f2-identity-compensation" class="wizard__step-panel">
+                    <ui:Label text="Founder 2 — Identity &amp; Compensation" class="wizard__section-title text--primary" />
+                    <ui:Label text="Name your founder, set their profile, and choose a salary plan." class="wizard__section-subtitle text--secondary" />
+                    <ui:VisualElement class="founder__identity-row">
+                        <ui:TextField name="founder-name-input-2" label="Name" class="founder__name-input" />
+                        <ui:Button name="btn-randomise-name-2" text="?" class="founder__dice-btn" />
+                    </ui:VisualElement>
+                    <ui:Label text="Salary Plan" class="wizard__subsection-title" />
+                    <ui:VisualElement name="salary-buttons-row-2" class="founder__salary-row">
+                        <ui:Button name="salary-btn-2-0" text="No Salary" class="founder__salary-btn" />
+                        <ui:Button name="salary-btn-2-1" text="Low Salary" class="founder__salary-btn" />
+                        <ui:Button name="salary-btn-2-2" text="Market Salary" class="founder__salary-btn" />
+                        <ui:Button name="salary-btn-2-3" text="Deferred Salary" class="founder__salary-btn" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="founder__salary-preview">
+                        <ui:VisualElement class="founder__salary-preview-row">
+                            <ui:Label name="salary-monthly-cost-2" text="Monthly: —" class="founder__salary-detail" />
+                            <ui:Label name="salary-runway-impact-2" text="Runway: —" class="founder__salary-detail" />
+                            <ui:Label name="salary-pressure-2" text="Pressure: —" class="founder__salary-detail" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:Label name="salary-recommendation-2" text="Low Salary is the balanced default." class="founder__salary-recommendation text--secondary" />
+                    <ui:VisualElement class="founder__equity-row">
+                        <ui:Label name="equity-expectation-2" text="Equity Expectation 14% – 22%" class="founder__equity-label text--muted" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Step 9: Founder 2 — Personality & Weakness -->
+                <ui:VisualElement name="step-f2-personality-weakness" class="wizard__step-panel">
+                    <ui:Label text="Founder 2 — Personality &amp; Weakness" class="wizard__section-title text--primary" />
+                    <ui:Label text="Choose how this founder operates, and select one weakness." class="wizard__section-subtitle text--secondary" />
+                    <ui:Label text="Personality Style" class="wizard__subsection-title" />
+                    <ui:VisualElement name="personality-style-cards-2" class="wizard__card-grid wizard__card-grid--compact" />
+                    <ui:Label name="personality-validation-2" text="" class="wizard__inline-validation" style="display: none;" />
+                    <ui:Label text="Weakness" class="wizard__subsection-title" />
+                    <ui:VisualElement name="weakness-cards-2" class="wizard__card-grid wizard__card-grid--compact" />
+                    <ui:Label name="weakness-validation-2" text="" class="wizard__inline-validation" style="display: none;" />
+                </ui:VisualElement>
+
+                <!-- Step 8: Review -->
+                <ui:VisualElement name="step-review" class="wizard__step-panel">
+                    <ui:Label name="review-header" text="Review &amp; Start" class="wizard__section-title" />
+                    <ui:Label text="Check your setup before starting. Fix any blocking errors before launching." class="wizard__section-subtitle" />
+
+                    <!-- Review: All Selections Summary -->
+                    <ui:VisualElement name="review-all-selections" class="review__section">
+                        <ui:Label text="SETUP SUMMARY" class="budget__section-label" />
+                        <ui:VisualElement class="review__summary-grid">
+                            <ui:Label text="Company" class="review__summary-key" />
+                            <ui:Label name="review-company-name" text="—" class="review__summary-value" />
+                            <ui:Label text="Industry" class="review__summary-key" />
+                            <ui:Label name="review-industry" text="—" class="review__summary-value" />
+                            <ui:Label text="Background" class="review__summary-key" />
+                            <ui:Label name="review-background" text="—" class="review__summary-value" />
+                            <ui:Label text="Founders" class="review__summary-key" />
+                            <ui:Label name="review-founders-summary" text="—" class="review__summary-value" />
+                            <ui:Label text="Salary Cost" class="review__summary-key" />
+                            <ui:Label name="review-salary-cost" text="—" class="review__summary-value" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Review: Final Stats -->
+                    <ui:VisualElement name="review-final-stats" class="review__section">
+                        <ui:Label text="KEY METRICS" class="budget__section-label" />
+                        <ui:VisualElement class="budget__finance-row">
+                            <ui:VisualElement class="budget__finance-card">
+                                <ui:Label text="Starting Cash" class="budget__finance-key" />
+                                <ui:Label name="review-starting-cash" text="—" class="budget__finance-value" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="budget__finance-card">
+                                <ui:Label text="Runway" class="budget__finance-key" />
+                                <ui:Label name="review-runway" text="—" class="budget__finance-value budget__finance-value--runway" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="budget__finance-card">
+                                <ui:Label text="Team Strength" class="budget__finance-key" />
+                                <ui:Label name="review-team-strength" text="—" class="budget__finance-value" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Review: Validation -->
+                    <ui:VisualElement name="review-validation" class="review__section">
+                        <ui:VisualElement name="review-errors-container" class="review__errors" />
+                        <ui:VisualElement name="review-warnings-container" class="review__warnings" />
+                    </ui:VisualElement>
+
+                    <!-- Start Game Button -->
+                    <ui:Button name="btn-start-game" text="START GAME" class="review__start-game-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Preview Panel (right ~40%) -->
+            <ui:VisualElement name="preview-panel" class="wizard__preview-panel">
+                <ui:Label name="preview-title" text="Preview" class="wizard__preview-title" />
+                <ui:VisualElement name="preview-content" class="wizard__preview-content">
+                    <ui:Label name="preview-placeholder" text="Select options to see a preview" class="wizard__preview-placeholder" />
+                    <!-- Background preview details -->
+                    <ui:VisualElement name="preview-background-details" class="wizard__preview-section">
+                        <ui:Label name="preview-bg-name" class="wizard__preview-name" />
+                        <ui:Label name="preview-bg-description" text="" class="wizard__preview-description" />
+                        <ui:Label text="Recommended Founders" class="wizard__preview-label" />
+                        <ui:VisualElement name="preview-bg-roles" class="wizard__preview-tags" />
+                        <ui:Label text="Starting Strengths" class="wizard__preview-label" />
+                        <ui:VisualElement name="preview-bg-strengths" class="wizard__preview-list" />
+                        <ui:Label text="Starting Risks" class="wizard__preview-label" />
+                        <ui:VisualElement name="preview-bg-risks" class="wizard__preview-list" />
+                        <ui:Label text="Difficulty" class="wizard__preview-label" />
+                        <ui:Label name="preview-bg-difficulty" class="wizard__preview-difficulty" />
+                    </ui:VisualElement>
+                    <!-- Founder count preview details -->
+                    <ui:VisualElement name="preview-founder-count-details" class="wizard__preview-section">
+                        <ui:Label name="preview-fc-summary" class="wizard__preview-description" />
+                    </ui:VisualElement>
+
+                    <!-- Founder preview panel (shown during founder steps) -->
+                    <ui:VisualElement name="preview-founder-details" class="wizard__preview-section">
+                        <ui:Label text="FOUNDER PREVIEW" class="founder-preview__header" />
+
+                        <!-- Founder card -->
+                        <ui:VisualElement name="founder-preview-card" class="founder-preview__card">
+                            <ui:VisualElement name="founder-preview-portrait" class="founder-preview__portrait" />
+                            <ui:Label name="founder-preview-name" text="" class="founder-preview__name" />
+                            <ui:Label name="founder-preview-archetype-badge" text="" class="founder-preview__archetype-badge" />
+                            <ui:Label name="founder-preview-role" text="" class="founder-preview__role" />
+                            <ui:Label name="founder-preview-location" text="" class="founder-preview__location" />
+                            <ui:VisualElement name="founder-preview-top-skills" class="founder-preview__top-skills" />
+                        </ui:VisualElement>
+
+                        <!-- CA / PA ability row -->
+                        <ui:VisualElement class="founder-preview__ability-row">
+                            <ui:VisualElement class="founder-preview__ability-col">
+                                <ui:Label text="CA" class="founder-preview__ability-label" />
+                                <ui:VisualElement name="founder-preview-ca-stars" class="founder-preview__stars" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="founder-preview__ability-col">
+                                <ui:Label text="PA" class="founder-preview__ability-label" />
+                                <ui:VisualElement name="founder-preview-pa-stars" class="founder-preview__stars" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Strengths & Risks -->
+                        <ui:VisualElement class="founder-preview__str-risk-row">
+                            <ui:VisualElement class="founder-preview__str-col">
+                                <ui:Label text="STRENGTHS" class="founder-preview__col-header founder-preview__col-header--strength" />
+                                <ui:VisualElement name="founder-preview-strengths" class="founder-preview__list" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="founder-preview__risk-col">
+                                <ui:Label text="RISKS" class="founder-preview__col-header founder-preview__col-header--risk" />
+                                <ui:VisualElement name="founder-preview-risks" class="founder-preview__list" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Team Snapshot -->
+                        <ui:VisualElement class="founder-preview__team-snapshot">
+                            <ui:Label text="STARTING TEAM SNAPSHOT" class="founder-preview__subsection-header" />
+                            <ui:VisualElement name="founder-preview-dept-bars" class="founder-preview__dept-bars" />
+                            <ui:VisualElement class="founder-preview__team-total-row">
+                                <ui:Label text="Total Team" class="founder-preview__team-total-label" />
+                                <ui:Label name="founder-preview-team-total" text="0" class="founder-preview__team-total-value" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Company Preview -->
+                        <ui:VisualElement class="founder-preview__company-preview">
+                            <ui:Label text="STARTING COMPANY PREVIEW" class="founder-preview__subsection-header" />
+                            <ui:VisualElement name="founder-preview-company-logo" class="founder-preview__company-logo" />
+                            <ui:VisualElement name="founder-preview-company-details" class="founder-preview__company-details" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Footer -->
+        <ui:VisualElement name="wizard-footer" class="wizard__footer">
+            <ui:VisualElement class="wizard__footer-left">
+                <ui:Button name="btn-back" text="Back" class="wizard__btn wizard__btn--ghost" />
+                <ui:Button name="btn-randomise" text="Randomise" class="wizard__btn wizard__btn--ghost" />
+            </ui:VisualElement>
+            <ui:VisualElement class="wizard__footer-center">
+                <ui:Label name="footer-helper-text" text="You can edit all details later in the team screen." class="wizard__helper-text" />
+            </ui:VisualElement>
+            <ui:VisualElement class="wizard__footer-right">
+                <ui:Button name="btn-save-exit" text="Save &amp; Exit" class="wizard__btn wizard__btn--secondary" />
+                <ui:Button name="btn-continue" text="Continue" class="wizard__btn wizard__btn--primary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

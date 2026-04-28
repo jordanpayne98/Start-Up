@@ -125,12 +125,12 @@ public static class AbilityCalculator
         }
     }
 
-    public static int MaxAbility(EmployeeRole role, TuningConfig tuning = null)
+    public static int MaxAbility(TuningConfig tuning = null)
     {
         return tuning != null ? tuning.AbilityGlobalMax : GlobalMaxAbility;
     }
 
-    public static int MaxPotential(EmployeeRole role, TuningConfig tuning = null)
+    public static int MaxPotential(TuningConfig tuning = null)
     {
         return tuning != null ? tuning.PotentialGlobalMax : GlobalMaxPotential;
     }

@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 276d49dd6012ea740947a09a115572f5, type: 3}
+  m_Name: MarketingFounder
+  m_EditorClassIdentifier: Assembly-CSharp::FounderArchetypeDefinition
+  ArchetypeId: 15
+  DisplayName: Marketing Founder
+  Description: Drives hype, demand, and product positioning. Strong launch and market
+    awareness.
+  Role: 12
+  TopSkills: 14000000150000000f000000
+  BestEarlyUse: Hype, launch reach, product positioning
+  Strengths:
+  - Strong demand generation
+  - Good early brand awareness
+  Risks:
+  - Weak technical ability
+  - Needs technical co-founder for delivery
+  RecommendedPairing: Software Founder or Product Founder
+  CAMin: 65
+  CAMax: 90
+  PAMin: 105
+  PAMax: 140
+  SkillBiasProfile: 14000000150000000f0000000b000000
+  AttributeBias: 030000000100000007000000
+  IsGatedArchetype: 0
+  GateCondition: 
+  SortOrder: 15

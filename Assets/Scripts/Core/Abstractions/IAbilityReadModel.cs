@@ -3,11 +3,9 @@ public interface IAbilityReadModel
     int GetEmployeeAbility(EmployeeId id);
     int GetEmployeePotential(EmployeeId id);
     int GetEmployeePotentialStars(EmployeeId id);
-    // HR Skill average of the sourcing team determines Ability/Potential estimate accuracy.
-    HiddenAttributes GetEmployeeHiddenAttributes(EmployeeId id);
     CandidatePotentialEstimate GetCandidatePotentialEstimate(int candidateId);
-    // Returns the role-weighted ability score for any role given a raw skill array.
-    int ComputeAbilityForRole(int[] skills, EmployeeRole role);
+    int ComputeAbilityForRole(int[] skills, RoleId role, RoleProfileTable roleProfileTable);
+    int ComputeAbilityForRole(int[] skills, RoleId role);
 }
 
 public struct CandidatePotentialEstimate

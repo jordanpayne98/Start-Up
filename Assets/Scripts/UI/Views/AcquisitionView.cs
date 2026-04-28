@@ -83,7 +83,7 @@ public class AcquisitionView : IGameView
 
         var productsTitle = new Label("Products");
         productsTitle.AddToClassList("text-sm");
-        productsTitle.AddToClassList("text-muted");
+        productsTitle.AddToClassList("text-secondary");
         productsTitle.style.marginTop = 8;
         productsTitle.style.marginBottom = 4;
         assetsCard.Add(productsTitle);
@@ -183,7 +183,7 @@ public class AcquisitionView : IGameView
         row.style.marginBottom = 4;
 
         var label = new Label(labelText);
-        label.AddToClassList("text-muted");
+        label.AddToClassList("text-secondary");
         label.AddToClassList("text-sm");
         row.Add(label);
 

@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 276d49dd6012ea740947a09a115572f5, type: 3}
+  m_Name: GameFounder
+  m_EditorClassIdentifier: Assembly-CSharp::FounderArchetypeDefinition
+  ArchetypeId: 13
+  DisplayName: Game Founder
+  Description: Game mechanics, genre execution, and creative product direction. Strong
+    in game-focused studios.
+  Role: 7
+  TopSkills: 0a000000080000000f000000
+  BestEarlyUse: Game products, genre fit, replayability
+  Strengths:
+  - Strong game identity
+  - Good at early player experience
+  Risks:
+  - Scope creep risk
+  - Needs technical partner for delivery
+  RecommendedPairing: Software Founder or Systems Founder
+  CAMin: 70
+  CAMax: 95
+  PAMin: 110
+  PAMax: 145
+  SkillBiasProfile: 0a000000080000000f00000009000000
+  AttributeBias: 010000000300000007000000
+  IsGatedArchetype: 0
+  GateCondition: 
+  SortOrder: 13

@@ -1,4 +1,4 @@
-// SkillGrowthSystem Version: Clean v2 (role-fit XP)
+// SkillGrowthSystem Version: Clean v3 (SkillId/RoleProfileTable migration)
 using System;
 
 public static class SkillGrowthSystem
@@ -14,13 +14,13 @@ public static class SkillGrowthSystem
 
     private static readonly int[] UniformTiers = BuildUniformTiers();
 
-    // Called once per contract completion. Mutates employee.skills in-place.
+    // Called once per contract completion. Mutates employee.Stats.Skills in-place.
     public static void AwardSkillXP(
         Contract contract,
         Team team,
         EmployeeSystem employeeSystem,
         IRng rng,
-        RoleTierTable roleTierTable,
+        RoleProfileTable roleProfileTable,
         AbilitySystem abilitySystem,
         TuningConfig tuning = null)
     {
@@ -63,53 +63,54 @@ public static class SkillGrowthSystem
             if (employee.isFounder) baseXP *= 1.5f;
             if (baseXP < 0f) baseXP = 0f;
 
-            int[] tiers = roleTierTable != null
-                ? roleTierTable.GetTiers(employee.role)
-                : UniformTiers;
+            int[] tiers = GetTiersForRole(employee.role, roleProfileTable);
 
-            SkillType nativeSkill = GetNativeSkillForRole(employee.role);
+            SkillId nativeSkill = GetNativeSkillForRole(employee.role);
             bool nativeSkillAwarded = false;
             bool anyFit = false;
-            int currentCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
+            int currentCA = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
 
-            for (int s = 0; s < SkillTypeHelper.SkillTypeCount; s++)
+            int skillCount = SkillIdHelper.SkillCount;
+            for (int s = 0; s < skillCount; s++)
             {
-                float w = weights[s];
+                float w = (weights != null && s < weights.Length) ? weights[s] : 0f;
                 if (w <= 0f) continue;
 
                 float weightedXP = baseXP * w;
-                bool fit = TeamWorkEngine.IsRoleFitForSkill(employee.role, (SkillType)s);
+                bool fit = TeamWorkEngine.IsRoleFitForSkill(employee.role, (SkillId)s);
                 if (fit) anyFit = true;
                 float finalXP = fit ? weightedXP : weightedXP * misfitRate;
 
-                if (currentCA < employee.potentialAbility)
+                if (currentCA < employee.Stats.PotentialAbility)
                 {
-                    AccumulateXP(employee, s, finalXP, tiers, employee.potentialAbility);
-                    currentCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
+                    AccumulateXP(employee, s, finalXP, tiers, employee.Stats.PotentialAbility);
+                    currentCA = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
                 }
 
-                if ((SkillType)s == nativeSkill) nativeSkillAwarded = true;
+                if ((SkillId)s == nativeSkill) nativeSkillAwarded = true;
             }
 
             if (!nativeSkillAwarded && !anyFit)
             {
-                if (currentCA < employee.potentialAbility)
+                if (currentCA < employee.Stats.PotentialAbility)
                 {
-                    AccumulateXP(employee, (int)nativeSkill, baseXP * nativeRate, tiers, employee.potentialAbility);
-                    currentCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
+                    AccumulateXP(employee, (int)nativeSkill, baseXP * nativeRate, tiers, employee.Stats.PotentialAbility);
+                    currentCA = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
                 }
             }
 
-            float spilloverRate  = spilloverBase + (employee.hiddenAttributes.Adaptability / 20f) * spilloverSpread;
+            float adaptability  = employee.Stats.GetVisibleAttribute(VisibleAttributeId.Adaptability);
+            float spilloverRate  = spilloverBase + (adaptability / 20f) * spilloverSpread;
             float spilloverAward = baseXP * spilloverRate;
             if (spilloverAward > 0f)
             {
-                for (int s = 0; s < SkillTypeHelper.SkillTypeCount; s++)
+                for (int s = 0; s < skillCount; s++)
                 {
-                    if (weights[s] > 0f) continue;
-                    if (currentCA >= employee.potentialAbility) break;
-                    AccumulateXP(employee, s, spilloverAward, tiers, employee.potentialAbility);
-                    currentCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
+                    float w = (weights != null && s < weights.Length) ? weights[s] : 0f;
+                    if (w > 0f) continue;
+                    if (currentCA >= employee.Stats.PotentialAbility) break;
+                    AccumulateXP(employee, s, spilloverAward, tiers, employee.Stats.PotentialAbility);
+                    currentCA = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
                 }
             }
 
@@ -120,9 +121,9 @@ public static class SkillGrowthSystem
     // Called once per day during TickPhaseWork for active product development phases.
     public static void AwardProductPhaseXP(
         Team team,
-        SkillType phaseSkill,
+        SkillId phaseSkill,
         EmployeeSystem employeeSystem,
-        RoleTierTable roleTierTable,
+        RoleProfileTable roleProfileTable,
         AbilitySystem abilitySystem,
         TuningConfig tuning = null)
     {
@@ -146,6 +147,7 @@ public static class SkillGrowthSystem
         if (totalEffective <= 0f) totalEffective = memberCount;
         float perUnitXP = xpPerDay / totalEffective;
 
+        int skillCount = SkillIdHelper.SkillCount;
         for (int i = 0; i < memberCount; i++)
         {
             var memberId = team.members[i];
@@ -156,46 +158,45 @@ public static class SkillGrowthSystem
             float baseXP = perUnitXP * employee.EffectiveOutput * ageDecay;
             if (baseXP < 0f) baseXP = 0f;
 
-            int[] tiers = roleTierTable != null
-                ? roleTierTable.GetTiers(employee.role)
-                : UniformTiers;
+            int[] tiers = GetTiersForRole(employee.role, roleProfileTable);
 
-            int currentCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
+            int currentCA = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
             bool fit = TeamWorkEngine.IsRoleFitForSkill(employee.role, phaseSkill);
 
             if (fit)
             {
-                if (currentCA < employee.potentialAbility)
+                if (currentCA < employee.Stats.PotentialAbility)
                 {
-                    AccumulateXP(employee, (int)phaseSkill, baseXP, tiers, employee.potentialAbility);
-                    currentCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
+                    AccumulateXP(employee, (int)phaseSkill, baseXP, tiers, employee.Stats.PotentialAbility);
+                    currentCA = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
                 }
             }
             else
             {
-                if (currentCA < employee.potentialAbility)
+                if (currentCA < employee.Stats.PotentialAbility)
                 {
-                    AccumulateXP(employee, (int)phaseSkill, baseXP * misfitRate, tiers, employee.potentialAbility);
-                    currentCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
+                    AccumulateXP(employee, (int)phaseSkill, baseXP * misfitRate, tiers, employee.Stats.PotentialAbility);
+                    currentCA = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
                 }
-                SkillType nativeSkill = GetNativeSkillForRole(employee.role);
-                if (nativeSkill != phaseSkill && currentCA < employee.potentialAbility)
+                SkillId nativeSkill = GetNativeSkillForRole(employee.role);
+                if (nativeSkill != phaseSkill && currentCA < employee.Stats.PotentialAbility)
                 {
-                    AccumulateXP(employee, (int)nativeSkill, baseXP * nativeRate, tiers, employee.potentialAbility);
-                    currentCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
+                    AccumulateXP(employee, (int)nativeSkill, baseXP * nativeRate, tiers, employee.Stats.PotentialAbility);
+                    currentCA = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
                 }
             }
 
-            float spilloverRate  = spilloverBase + (employee.hiddenAttributes.Adaptability / 20f) * spilloverSpread;
+            float adaptability   = employee.Stats.GetVisibleAttribute(VisibleAttributeId.Adaptability);
+            float spilloverRate  = spilloverBase + (adaptability / 20f) * spilloverSpread;
             float spilloverAward = baseXP * spilloverRate;
             if (spilloverAward > 0f)
             {
-                for (int s = 0; s < SkillTypeHelper.SkillTypeCount; s++)
+                for (int s = 0; s < skillCount; s++)
                 {
-                    if ((SkillType)s == phaseSkill) continue;
-                    if (currentCA >= employee.potentialAbility) break;
-                    AccumulateXP(employee, s, spilloverAward, tiers, employee.potentialAbility);
-                    currentCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
+                    if ((SkillId)s == phaseSkill) continue;
+                    if (currentCA >= employee.Stats.PotentialAbility) break;
+                    AccumulateXP(employee, s, spilloverAward, tiers, employee.Stats.PotentialAbility);
+                    currentCA = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
                 }
             }
 
@@ -208,7 +209,7 @@ public static class SkillGrowthSystem
         EmployeeSystem employeeSystem,
         float xpAmount,
         IRng rng,
-        RoleTierTable roleTierTable,
+        RoleProfileTable roleProfileTable,
         AbilitySystem abilitySystem,
         TuningConfig tuning = null)
     {
@@ -239,63 +240,68 @@ public static class SkillGrowthSystem
             float ageDecay = GetAgeDecayMultiplier(employee.age, tuning);
             float finalXP = perUnitXP * employee.EffectiveOutput * variance * ageDecay;
 
-            int[] tiers = roleTierTable != null
-                ? roleTierTable.GetTiers(employee.role)
-                : UniformTiers;
+            int[] tiers = GetTiersForRole(employee.role, roleProfileTable);
 
-            int currentCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
-            if (currentCA < employee.potentialAbility)
-                AccumulateXP(employee, (int)SkillType.Marketing, finalXP, tiers, employee.potentialAbility);
+            int currentCA = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
+            if (currentCA < employee.Stats.PotentialAbility)
+                AccumulateXP(employee, (int)SkillId.Marketing, finalXP, tiers, employee.Stats.PotentialAbility);
             abilitySystem?.InvalidateCA(memberId);
         }
     }
 
-    private static SkillType GetNativeSkillForRole(EmployeeRole role)
+    private static SkillId GetNativeSkillForRole(RoleId role)
     {
         switch (role)
         {
-            case EmployeeRole.Developer:     return SkillType.Programming;
-            case EmployeeRole.Designer:      return SkillType.Design;
-            case EmployeeRole.QAEngineer:    return SkillType.QA;
-            case EmployeeRole.SoundEngineer: return SkillType.SFX;
-            case EmployeeRole.VFXArtist:     return SkillType.VFX;
-            default:                         return SkillType.Programming;
+            case RoleId.SoftwareEngineer:     return SkillId.Programming;
+            case RoleId.SystemsEngineer:      return SkillId.SystemsArchitecture;
+            case RoleId.SecurityEngineer:     return SkillId.Security;
+            case RoleId.PerformanceEngineer:  return SkillId.PerformanceOptimisation;
+            case RoleId.HardwareEngineer:     return SkillId.HardwareIntegration;
+            case RoleId.ManufacturingEngineer:return SkillId.Manufacturing;
+            case RoleId.ProductDesigner:      return SkillId.ProductDesign;
+            case RoleId.GameDesigner:         return SkillId.GameDesign;
+            case RoleId.TechnicalArtist:      return SkillId.Vfx;
+            case RoleId.AudioDesigner:        return SkillId.AudioDesign;
+            case RoleId.QaEngineer:           return SkillId.QaTesting;
+            case RoleId.TechnicalSupportSpecialist: return SkillId.TechnicalSupport;
+            case RoleId.Marketer:             return SkillId.Marketing;
+            case RoleId.SalesExecutive:       return SkillId.Sales;
+            case RoleId.Accountant:           return SkillId.Accountancy;
+            case RoleId.HrSpecialist:         return SkillId.HrRecruitment;
+            default:                          return SkillId.Programming;
         }
+    }
+
+    private static int[] GetTiersForRole(RoleId role, RoleProfileTable roleProfileTable)
+    {
+        if (roleProfileTable != null)
+        {
+            var profile = roleProfileTable.Get(role);
+            if (profile != null) return RoleSuitabilityCalculator.BuildTierArray(profile);
+        }
+        return UniformTiers;
     }
 
     private static int[] BuildUniformTiers()
     {
-        var tiers = new int[SkillTypeHelper.SkillTypeCount];
-        for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++) tiers[i] = 3;
+        int count = SkillIdHelper.SkillCount;
+        var tiers = new int[count];
+        for (int i = 0; i < count; i++) tiers[i] = 3;
         return tiers;
     }
 
-    public static SkillType? TeamTypeToSkillType(TeamType type)
+    public static SkillId? TeamTypeToSkillId(TeamType type)
     {
         switch (type)
         {
             case TeamType.Development: return null;
-            case TeamType.Design:      return SkillType.Design;
-            case TeamType.QA:          return SkillType.QA;
-            case TeamType.Marketing:   return SkillType.Marketing;
-            case TeamType.HR:          return SkillType.HR;
+            case TeamType.Design:      return SkillId.ProductDesign;
+            case TeamType.QA:          return SkillId.QaTesting;
+            case TeamType.Marketing:   return SkillId.Marketing;
+            case TeamType.HR:          return SkillId.HrRecruitment;
             default: return null;
         }
-    }
-
-    private static SkillType GetHighestSkill(Employee employee)
-    {
-        int bestIdx = 0;
-        int bestVal = employee.skills[0];
-        for (int i = 1; i < SkillTypeHelper.SkillTypeCount; i++)
-        {
-            if (employee.skills[i] > bestVal)
-            {
-                bestVal = employee.skills[i];
-                bestIdx = i;
-            }
-        }
-        return (SkillType)bestIdx;
     }
 
     private static float ComputeOverallQuality(Contract contract)
@@ -328,31 +334,27 @@ public static class SkillGrowthSystem
     private static void AccumulateXP(Employee employee, int skillIndex, float amount, int[] tiers, int potentialAbility)
     {
         if (amount <= 0f) return;
-        if (employee.skills[skillIndex] >= 20) return;
+        if (skillIndex < 0 || skillIndex >= SkillIdHelper.SkillCount) return;
+        if (employee.Stats.Skills[skillIndex] >= 20) return;
 
-        if (employee.skillXp == null)
-            employee.skillXp = new float[SkillTypeHelper.SkillTypeCount];
-        if (employee.skillDeltaDirection == null)
-            employee.skillDeltaDirection = new sbyte[SkillTypeHelper.SkillTypeCount];
+        int oldLevel = employee.Stats.Skills[skillIndex];
+        employee.Stats.SkillXp[skillIndex] += amount;
 
-        int oldLevel = employee.skills[skillIndex];
-        employee.skillXp[skillIndex] += amount;
-
-        while (employee.skillXp[skillIndex] >= 1.0f && employee.skills[skillIndex] < 20)
+        while (employee.Stats.SkillXp[skillIndex] >= 1.0f && employee.Stats.Skills[skillIndex] < 20)
         {
-            employee.skills[skillIndex]++;
-            int newCA = AbilityCalculator.ComputeAbility(employee.skills, tiers);
+            employee.Stats.Skills[skillIndex]++;
+            int newCA = AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers);
             if (newCA > potentialAbility)
             {
-                employee.skills[skillIndex]--;
-                employee.skillXp[skillIndex] = 0f;
+                employee.Stats.Skills[skillIndex]--;
+                employee.Stats.SkillXp[skillIndex] = 0f;
                 return;
             }
-            employee.skillXp[skillIndex] -= 1.0f;
+            employee.Stats.SkillXp[skillIndex] -= 1.0f;
         }
 
-        if (employee.skills[skillIndex] >= 20)
-            employee.skillXp[skillIndex] = 0f;
-        employee.skillDeltaDirection[skillIndex] = (sbyte)(employee.skills[skillIndex] > oldLevel ? 1 : 0);
+        if (employee.Stats.Skills[skillIndex] >= 20)
+            employee.Stats.SkillXp[skillIndex] = 0f;
+        employee.Stats.SkillDeltaDirection[skillIndex] = (sbyte)(employee.Stats.Skills[skillIndex] > oldLevel ? 1 : 0);
     }
 }

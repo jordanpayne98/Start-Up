@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 276d49dd6012ea740947a09a115572f5, type: 3}
+  m_Name: CreativeFounder
+  m_EditorClassIdentifier: Assembly-CSharp::FounderArchetypeDefinition
+  ArchetypeId: 14
+  DisplayName: Creative Founder
+  Description: Strong visual or audio identity. Defines brand look, feel, and creative
+    product polish.
+  Role: 8
+  TopSkills: 0d0000000e0000000a000000
+  BestEarlyUse: Games, polish, brand identity, creative tools
+  Strengths:
+  - Strong creative product identity
+  - Good at visual brand quality
+  Risks:
+  - Low commercial awareness
+  - Needs business and technical support
+  RecommendedPairing: Software Founder or Marketing Founder
+  CAMin: 65
+  CAMax: 90
+  PAMin: 105
+  PAMax: 140
+  SkillBiasProfile: 0d0000000e0000000a00000008000000
+  AttributeBias: 0100000002000000
+  IsGatedArchetype: 0
+  GateCondition: 
+  SortOrder: 14

@@ -59,7 +59,7 @@ public class GameController : MonoBehaviour
     private RecruitmentReputationSystem _recruitmentReputationSystem;
     private IRng _moraleRng;
     private InboxSystem _inboxSystem;
-    private RoleTierTable _roleTierTable;
+    private RoleProfileTable _roleProfileTable;
     private AbilitySystem _abilitySystem;
     private TuningConfig _tuning;
     private ProductSystem _productSystem;
@@ -569,28 +569,33 @@ public class GameController : MonoBehaviour
 
             int cardSeed = _gameState.masterSeed ^ (i * 6271) ^ (data.Tier * 7919) ^ ((int)data.Role * 4999);
             var founderRng = new RngStream(cardSeed);
-            int[] skills = GenerateFounderSkills(data.Tier, data.Role, founderRng);
+            int[] rawSkills = GenerateFounderSkills(data.Tier, data.Role, founderRng);
+
+            var stats = EmployeeStatBlock.Create();
+            for (int s = 0; s < SkillIdHelper.SkillCount && s < rawSkills.Length; s++)
+                stats.SetSkill((SkillId)s, rawSkills[s]);
+            stats.PotentialAbility = 200;
+
+            // Generate hidden attributes
+            stats.SetHiddenAttribute(HiddenAttributeId.LearningRate,   hiddenRng.Range(15, 21));
+            stats.SetHiddenAttribute(HiddenAttributeId.Ambition,        hiddenRng.Range(15, 21));
+            // Visible attributes
+            stats.SetVisibleAttribute(VisibleAttributeId.WorkEthic,     hiddenRng.Range(15, 21));
+            stats.SetVisibleAttribute(VisibleAttributeId.Adaptability,  hiddenRng.Range(15, 21));
+            stats.SetVisibleAttribute(VisibleAttributeId.Creativity,    hiddenRng.Range(15, 21));
 
             var emp = new Employee(
                 empId,
                 data.Name,
                 data.Gender,
                 data.Age,
-                skills,
+                stats,
                 salary: 0,
                 hireDate: _gameState.currentTick,
                 data.Role
             );
 
             emp.isFounder = true;
-            emp.potentialAbility = 200;
-            emp.hiddenAttributes = new HiddenAttributes {
-                LearningRate = hiddenRng.Range(15, 21),
-                Creative = hiddenRng.Range(15, 21),
-                WorkEthic = hiddenRng.Range(15, 21),
-                Adaptability = hiddenRng.Range(15, 21),
-                Ambition = hiddenRng.Range(15, 21)
-            };
             emp.contractExpiryTick = int.MaxValue;
             emp.morale = 100;
             emp.isActive = true;
@@ -603,16 +608,16 @@ public class GameController : MonoBehaviour
         NewGameData.Clear();
     }
 
-    private int[] GenerateFounderSkills(int tier, EmployeeRole role, IRng rng)
+    private int[] GenerateFounderSkills(int tier, RoleId role, IRng rng)
     {
-        int[] roleTiers = _roleTierTable.GetTiers(role);
-
-        const int skillCount = 9;
+        var profile = _roleProfileTable?.Get(role);
+        int[] roleTiers = profile != null ? RoleSuitabilityCalculator.BuildTierArray(profile) : null;
+        int skillCount = SkillIdHelper.SkillCount;
         var skills = new int[skillCount];
         for (int i = 0; i < skillCount; i++)
         {
+            int weight = (roleTiers != null && i < roleTiers.Length) ? roleTiers[i] : 3;
             int min, max;
-            int weight = roleTiers[i]; // 2=Primary, 3=Secondary, 4=Tertiary
             switch (tier)
             {
                 case 1:
@@ -635,7 +640,7 @@ public class GameController : MonoBehaviour
                     else if (weight == 3) { min = 6; max = 10; }
                     else { min = 2; max = 5; }
                     break;
-                default: // tier 5
+                default:
                     if (weight == 2) { min = 16; max = 20; }
                     else if (weight == 3) { min = 9; max = 13; }
                     else { min = 4; max = 7; }
@@ -644,11 +649,10 @@ public class GameController : MonoBehaviour
             skills[i] = rng.Range(min, max + 1);
         }
 
-        // Identity clamp: the Primary skill (tier value 2) must exceed all others by at least 1
         int identityIdx = -1;
         for (int i = 0; i < skillCount; i++)
         {
-            if (roleTiers[i] == 2) { identityIdx = i; break; }
+            if (roleTiers != null && i < roleTiers.Length && roleTiers[i] == 2) { identityIdx = i; break; }
         }
         if (identityIdx >= 0)
         {
@@ -658,9 +662,7 @@ public class GameController : MonoBehaviour
                 if (i != identityIdx && skills[i] > maxOther) maxOther = skills[i];
             }
             if (skills[identityIdx] <= maxOther)
-            {
                 skills[identityIdx] = maxOther + 1 > 20 ? 20 : maxOther + 1;
-            }
         }
 
         return skills;
@@ -735,7 +737,7 @@ public class GameController : MonoBehaviour
         IRng headhuntingRng = RngFactory.CreateStream(_gameState.masterSeed, "headhunting");
         IRng negotiationRng = RngFactory.CreateStream(_gameState.masterSeed, "negotiation");
         _interviewSystem = new InterviewSystem(_gameState.interviewState, _gameState.employeeState, _financeSystem, _eventBus, _logger, interviewRng);
-        _negotiationSystem = new NegotiationSystem(_gameState.negotiationState, _gameState.employeeState, _interviewSystem, _eventBus, negotiationRng, _roleTierTable, _logger);
+        _negotiationSystem = new NegotiationSystem(_gameState.negotiationState, _gameState.employeeState, _interviewSystem, _eventBus, negotiationRng, _logger);
         _hrSystem = new HRSystem(
             _gameState.hrState,
             _gameState.employeeState,
@@ -760,23 +762,23 @@ public class GameController : MonoBehaviour
         MigrateInterviewState(_gameState.interviewState, _gameState.currentTick);
 
         // AbilitySystem — CA/PA system
-        _roleTierTable = new RoleTierTable();
-        var roleTierProfiles = Resources.LoadAll<RoleTierProfile>("RoleTiers");
-        for (int p = 0; p < roleTierProfiles.Length; p++)
-            _roleTierTable.Register(roleTierProfiles[p]);
+        _roleProfileTable = new RoleProfileTable();
+        var roleProfiles = Resources.LoadAll<RoleProfileDefinition>("RoleProfiles");
+        for (int p = 0; p < roleProfiles.Length; p++)
+            _roleProfileTable.Register(roleProfiles[p]);
 
         IRng abilityRng = RngFactory.CreateStream(_gameState.masterSeed, "ability");
-        _abilitySystem = new AbilitySystem(_gameState.employeeState, _roleTierTable, abilityRng, _logger);
+        _abilitySystem = new AbilitySystem(_gameState.employeeState, _roleProfileTable, abilityRng, _logger);
         _employeeSystem.SetAbilitySystem(_abilitySystem);
-        _employeeSystem.SetRoleTierTable(_roleTierTable);
         _employeeSystem.SetEventBus(_eventBus);
         _hrSystem.SetAbilitySystem(_abilitySystem);
-        _contractSystem.SetSkillGrowthDependencies(_roleTierTable, _abilitySystem);
+        _negotiationSystem.SetRoleProfileTable(_roleProfileTable);
+        _contractSystem.SetSkillGrowthDependencies(_roleProfileTable, _abilitySystem);
         _productSystem.SetFinanceSystem(_financeSystem);
         _productSystem.SetTeamSystem(_teamSystem);
         _productSystem.SetEmployeeSystem(_employeeSystem);
         _productSystem.SetReputationSystem(_reputationSystem);
-        _productSystem.SetSkillGrowthDependencies(_roleTierTable, _abilitySystem);
+        _productSystem.SetSkillGrowthDependencies(_roleProfileTable, _abilitySystem);
         _productSystem.SetContractState(_gameState.contractState);
         _productSystem.SetTimeSystem(_timeSystem);
 
@@ -1024,6 +1026,9 @@ public class GameController : MonoBehaviour
         // Back-fill PA and hidden attributes on any existing employees/candidates without them
         MigrateAbilityDataIfNeeded();
 
+        // Back-fill EmployeeStatBlock on all existing employees/candidates
+        MigrateToV3StatModel(_gameState);
+
         _moraleSystem.OnEmployeeMayQuit += OnMoraleEmployeeMayQuit;
 
         _systems.Add(_timeSystem);
@@ -1136,9 +1141,6 @@ public class GameController : MonoBehaviour
         _autoSaveSystem = new AutoSaveSystem(this, _eventBus);
     }
 
-    // Back-fill potentialAbility and hiddenAttributes for employees and candidates that
-    // pre-date this system (PA == 0 means not yet generated). Uses a deterministic per-entity
-    // RNG seeded by entity ID so the same save always back-fills identically.
     private static ProductFeatureDefinition[] CollectAllFeatureDefinitions(ProductTemplateDefinition[] templates)
     {
         var seen = new System.Collections.Generic.HashSet<string>();
@@ -1162,93 +1164,18 @@ public class GameController : MonoBehaviour
     {
         if (_gameState.employeeState == null) return;
 
-        // Version 1 → 2: divide all employee skill values by 5 (0-100 → 0-20 scale),
-        // and divide HiddenAttributes by 5 (0-100 → 0-20).
+        // Version 1 → 2: legacy skill rescale (old fields removed; migration no-op)
         if (_gameState.version < 2)
         {
-            foreach (var kvp in _gameState.employeeState.employees)
-            {
-                var emp = kvp.Value;
-                if (emp == null) continue;
-                int skillCount = emp.skills != null ? emp.skills.Length : 0;
-                for (int i = 0; i < skillCount; i++)
-                {
-                    emp.skills[i] = UnityEngine.Mathf.Clamp(emp.skills[i] / 5, 0, 20);
-                }
-                emp.hrSkill = UnityEngine.Mathf.Clamp(emp.hrSkill / 5, 0, 20);
-
-                // Migrate HiddenAttributes from 0-100 to 0-20
-                // Only migrate if values look like the old scale (> 20 suggests 0-100)
-                if (emp.hiddenAttributes.LearningRate > 20 ||
-                    emp.hiddenAttributes.Creative     > 20 ||
-                    emp.hiddenAttributes.WorkEthic    > 20 ||
-                    emp.hiddenAttributes.Adaptability > 20 ||
-                    emp.hiddenAttributes.Ambition     > 20)
-                {
-                    emp.hiddenAttributes = new HiddenAttributes
-                    {
-                        LearningRate = UnityEngine.Mathf.Clamp(emp.hiddenAttributes.LearningRate / 5, 1, 20),
-                        Creative     = UnityEngine.Mathf.Clamp(emp.hiddenAttributes.Creative     / 5, 1, 20),
-                        WorkEthic    = UnityEngine.Mathf.Clamp(emp.hiddenAttributes.WorkEthic    / 5, 1, 20),
-                        Adaptability = UnityEngine.Mathf.Clamp(emp.hiddenAttributes.Adaptability / 5, 1, 20),
-                        Ambition     = UnityEngine.Mathf.Clamp(emp.hiddenAttributes.Ambition     / 5, 1, 20)
-                    };
-                }
-            }
             _gameState.version = 2;
-            _logger.Log("[GameController] Save migration v1→v2 complete: skills and hidden attributes divided by 5.");
+            _logger.Log("[GameController] Save migration v1→v2: legacy field migration skipped (EmployeeStatBlock migration).");
         }
 
-        // Version 2 → 3: skills array shrinks from 10 to 8 (Art2D index 3 and Art3D index 4 removed).
-        // Design (index 1) absorbs the higher of Art2D/Art3D. Remaining skills shift left.
-        // Candidates are regenerated fresh in-game, so only employees need migration.
+        // Version 2 → 3: legacy Art2D/Art3D skill merge (old fields removed; migration no-op)
         if (_gameState.version < 3)
         {
-            foreach (var kvp in _gameState.employeeState.employees)
-            {
-                var emp = kvp.Value;
-                if (emp == null) continue;
-                if (emp.skills == null || emp.skills.Length != 10) continue;
-
-                // Merge Art2D (old idx 3) and Art3D (old idx 4) into Design (idx 1)
-                int art2d = emp.skills[3];
-                int art3d = emp.skills[4];
-                int designMerged = UnityEngine.Mathf.Max(emp.skills[1], art2d, art3d);
-
-                emp.skills = new int[8]
-                {
-                    emp.skills[0],  // Programming   (was 0)
-                    designMerged,   // Design         (absorbs 1, 3, 4)
-                    emp.skills[2],  // QA             (was 2)
-                    emp.skills[5],  // VFX            (was 5 → now 3)
-                    emp.skills[6],  // SFX            (was 6 → now 4)
-                    emp.skills[7],  // HR             (was 7 → now 5)
-                    emp.skills[8],  // Negotiation    (was 8 → now 6)
-                    emp.skills[9],  // Accountancy    (was 9 → now 7)
-                };
-
-                // Resize XP and delta arrays to match
-                if (emp.skillXp != null && emp.skillXp.Length == 10)
-                {
-                    float xpDesign = UnityEngine.Mathf.Max(emp.skillXp[1], emp.skillXp[3], emp.skillXp[4]);
-                    emp.skillXp = new float[8]
-                    {
-                        emp.skillXp[0], xpDesign, emp.skillXp[2],
-                        emp.skillXp[5], emp.skillXp[6], emp.skillXp[7], emp.skillXp[8], emp.skillXp[9]
-                    };
-                }
-                if (emp.skillDeltaDirection != null && emp.skillDeltaDirection.Length == 10)
-                {
-                    emp.skillDeltaDirection = new sbyte[8]
-                    {
-                        emp.skillDeltaDirection[0], emp.skillDeltaDirection[1], emp.skillDeltaDirection[2],
-                        emp.skillDeltaDirection[5], emp.skillDeltaDirection[6], emp.skillDeltaDirection[7],
-                        emp.skillDeltaDirection[8], emp.skillDeltaDirection[9]
-                    };
-                }
-            }
             _gameState.version = 3;
-            _logger.Log("[GameController] Save migration v2→v3 complete: Art2D/Art3D merged into Design; skills array resized 10→8.");
+            _logger.Log("[GameController] Save migration v2→v3: legacy field migration skipped (EmployeeStatBlock migration).");
         }
 
         // Version 3 → 4: MailCategory enum values changed.
@@ -1276,39 +1203,9 @@ public class GameController : MonoBehaviour
             _logger.Log("[GameController] Save migration v3→v4 complete: MailCategory enum remapped.");
         }
         if (_gameState.version < 5) {
-            foreach (var kvp in _gameState.employeeState.employees) {
-                var emp = kvp.Value;
-                if (emp == null) continue;
-                if (emp.skills != null && emp.skills.Length < SkillTypeHelper.SkillTypeCount) {
-                    var old = emp.skills;
-                    emp.skills = new int[SkillTypeHelper.SkillTypeCount];
-                    for (int i = 0; i < old.Length; i++) emp.skills[i] = old[i];
-                }
-                if (emp.skillXp != null && emp.skillXp.Length < SkillTypeHelper.SkillTypeCount) {
-                    var old = emp.skillXp;
-                    emp.skillXp = new float[SkillTypeHelper.SkillTypeCount];
-                    for (int i = 0; i < old.Length; i++) emp.skillXp[i] = old[i];
-                }
-                if (emp.skillDeltaDirection != null && emp.skillDeltaDirection.Length < SkillTypeHelper.SkillTypeCount) {
-                    var old = emp.skillDeltaDirection;
-                    emp.skillDeltaDirection = new sbyte[SkillTypeHelper.SkillTypeCount];
-                    for (int i = 0; i < old.Length; i++) emp.skillDeltaDirection[i] = old[i];
-                }
-            }
-            var v5candidates = _gameState.employeeState.availableCandidates;
-            if (v5candidates != null) {
-                for (int i = 0; i < v5candidates.Count; i++) {
-                    var c = v5candidates[i];
-                    if (c == null) continue;
-                    if (c.Skills != null && c.Skills.Length < SkillTypeHelper.SkillTypeCount) {
-                        var old = c.Skills;
-                        c.Skills = new int[SkillTypeHelper.SkillTypeCount];
-                        for (int j = 0; j < old.Length; j++) c.Skills[j] = old[j];
-                    }
-                }
-            }
+            // v4→v5: legacy Marketing skill slot added (old fields removed; migration no-op)
             _gameState.version = 5;
-            _logger.Log("[GameController] Save migration v4->v5 complete: Marketing skill slot added.");
+            _logger.Log("[GameController] Save migration v4->v5 complete: legacy migration skipped (EmployeeStatBlock migration).");
         }
         if (_gameState.version < 6) {
             // SyntheticAdaptability and RoleFitRatio removed — migration no-op
@@ -1498,77 +1395,57 @@ public class GameController : MonoBehaviour
                     p.BreakoutDaysRemaining = p.BreakoutMonthsRemaining * 30;
             }
         }
-        foreach (var kvp in _gameState.employeeState.employees)
+        _logger.Log("[GameController] Ability data migration complete (legacy fields removed).");
+    }
+
+    private void MigrateToV3StatModel(GameState state)
+    {
+        if (state.employeeState == null) return;
+        int migratedEmployees = 0;
+        int migratedCandidates = 0;
+
+        foreach (var kvp in state.employeeState.employees)
         {
             var emp = kvp.Value;
             if (emp == null) continue;
-
-            if (emp.skillXp == null)
-                emp.skillXp = new float[SkillTypeHelper.SkillTypeCount];
-            if (emp.skillDeltaDirection == null)
-                emp.skillDeltaDirection = new sbyte[SkillTypeHelper.SkillTypeCount];
-
-            // Always recompute PA — use progressive Ability formula with tier multipliers.
-            var migRng = new RngStream(emp.id.Value);
-            int[] tiers = _roleTierTable.GetTiers(emp.role);
-            int ability = AbilityCalculator.ComputeAbility(emp.skills, tiers);
-            _logger.Log($"[GameController] Migration: {emp.name} ({emp.role}) Ability={ability} (progressive formula)");
-
-            int uplift = migRng.Range(8, 82);
-            int pa = ability + uplift;
-            if (pa < 10)  pa = 10;
-            if (pa > 200) pa = 200;
-            emp.potentialAbility = pa;
-            emp.hiddenAttributes = GenerateMigrationHiddenAttributes(migRng, pa);
+            if (emp.Stats.Skills != null) continue;
+            emp.Stats = EmployeeStatBlock.Create();
+            migratedEmployees++;
         }
 
-        var candidates = _gameState.employeeState.availableCandidates;
+        var candidates = state.employeeState.availableCandidates;
         if (candidates != null)
         {
-            for (int i = 0; i < candidates.Count; i++)
+            int cCount = candidates.Count;
+            for (int i = 0; i < cCount; i++)
             {
                 var c = candidates[i];
                 if (c == null) continue;
-
-                // Always recompute for the same reason as employees above.
-                var migRng = new RngStream(c.CandidateId + 500000);
-                int[] tiers = _roleTierTable.GetTiers(c.Role);
-                int ability = AbilityCalculator.ComputeAbility(c.Skills, tiers);
-
-                int uplift = migRng.Range(8, 82);
-                int pa = ability + uplift;
-                if (pa < 10)  pa = 10;
-                if (pa > 200) pa = 200;
-                c.PotentialAbility = pa;
-                c.HiddenAttributes = GenerateMigrationHiddenAttributes(migRng, pa);
+                if (c.Stats.Skills != null) continue;
+                c.Stats = EmployeeStatBlock.Create();
+                if (c.SkillConfidence == null)
+                {
+                    c.SkillConfidence = new ConfidenceLevel[SkillIdHelper.SkillCount];
+                    for (int j = 0; j < c.SkillConfidence.Length; j++)
+                        c.SkillConfidence[j] = ConfidenceLevel.Unknown;
+                }
+                if (c.VisibleAttributeConfidence == null)
+                {
+                    c.VisibleAttributeConfidence = new ConfidenceLevel[VisibleAttributeHelper.AttributeCount];
+                    for (int j = 0; j < c.VisibleAttributeConfidence.Length; j++)
+                        c.VisibleAttributeConfidence[j] = ConfidenceLevel.Unknown;
+                }
+                if (c.HiddenAttributeConfidence == null)
+                {
+                    c.HiddenAttributeConfidence = new ConfidenceLevel[HiddenAttributeHelper.AttributeCount];
+                    for (int j = 0; j < c.HiddenAttributeConfidence.Length; j++)
+                        c.HiddenAttributeConfidence[j] = ConfidenceLevel.Unknown;
+                }
+                migratedCandidates++;
             }
         }
-        _logger.Log("[GameController] Ability data migration complete.");
-    }
 
-    // Deterministic PA-linked HiddenAttributes for migration back-fill.
-    // Mirrors AbilitySystem.GenerateHiddenAttributesForPA logic without a class dependency.
-    private static HiddenAttributes GenerateMigrationHiddenAttributes(IRng rng, int pa)
-    {
-        int floor = pa / 20;
-        if (floor < 1) floor = 1;
-        if (floor > 10) floor = 10;
-        int spread = (20 - floor) / 2 + 1;
-
-        int Attr()
-        {
-            int v = rng.Range(floor, floor + spread + 1) + rng.Range(-1, 2);
-            return v < 1 ? 1 : v > 20 ? 20 : v;
-        }
-
-        return new HiddenAttributes
-        {
-            LearningRate = Attr(),
-            Creative     = Attr(),
-            WorkEthic    = Attr(),
-            Adaptability = Attr(),
-            Ambition     = Attr()
-        };
+        _logger.Log($"[GameController] V3 stat model migration: {migratedEmployees} employees, {migratedCandidates} candidates populated.");
     }
 
     // v9 -> v10: Competitor Unification migration.
@@ -2208,12 +2085,12 @@ public class GameController : MonoBehaviour
             Name = candidate.Name,
             Gender = candidate.Gender,
             Age = candidate.Age,
-            Skills = candidate.Skills,
+            Stats = candidate.Stats,
             HRSkill = candidate.HRSkill,
             Salary = candidate.Salary,
             Role = candidate.Role,
             PreferredRole = candidate.Role,
-            PotentialAbility = candidate.PotentialAbility,
+            PotentialAbility = candidate.Stats.PotentialAbility,
             Mode = HiringMode.HR,
             Personality = candidate.personality
         });
@@ -2339,11 +2216,11 @@ public class GameController : MonoBehaviour
                     Name = candidate.Name,
                     Gender = candidate.Gender,
                     Age = candidate.Age,
-                    Skills = candidate.Skills,
+                    Stats = candidate.Stats,
                     HRSkill = candidate.HRSkill,
                     Salary = agreedSalary,
                     Role = offer.Role != default ? offer.Role : candidate.Role,
-                    PotentialAbility = candidate.PotentialAbility,
+                    PotentialAbility = candidate.Stats.PotentialAbility,
                     Personality = candidate.personality,
                     EmploymentType = offer.Type,
                     ContractLength = offer.Length,

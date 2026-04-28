@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 276d49dd6012ea740947a09a115572f5, type: 3}
+  m_Name: SystemsFounder
+  m_EditorClassIdentifier: Assembly-CSharp::FounderArchetypeDefinition
+  ArchetypeId: 11
+  DisplayName: Systems Founder
+  Description: Strong technical architecture. Excels at engines, OS, and complex
+    technical systems.
+  Role: 1
+  TopSkills: 010000000000000003000000
+  BestEarlyUse: Engines, OS, enterprise systems, complex tools
+  Strengths:
+  - Deep technical foundation
+  - Architecture scales well
+  Risks:
+  - Weak early commercial awareness
+  - Needs design and product support
+  RecommendedPairing: Product Founder or Sales Founder
+  CAMin: 75
+  CAMax: 100
+  PAMin: 115
+  PAMax: 150
+  SkillBiasProfile: 01000000000000000300000002000000
+  AttributeBias: 020000000300000006000000
+  IsGatedArchetype: 0
+  GateCondition: 
+  SortOrder: 11

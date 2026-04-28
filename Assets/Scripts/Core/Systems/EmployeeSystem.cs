@@ -38,18 +38,16 @@ public class EmployeeSystem : ISystem
     private TeamState _teamState;
     private AbilitySystem _abilitySystem;
     private HRSystem _hrSystem;
-
-    private List<EmployeeId> _quitBuffer;
     private bool _pendingCandidateGeneration;
     private List<Employee> _activeEmployeesCache;
     private bool _activeEmployeesDirty;
     private int _lastDayProcessed = -1;
-    private RoleTierTable _roleTierTable;
     private GameEventBus _eventBus;
     private TuningConfig _tuning;
 
     // Event flag buffers — avoid lambda allocations in tick path
     private readonly List<EmployeeId> _firedBuffer = new List<EmployeeId>();
+    private readonly List<EmployeeId> _quitBuffer = new List<EmployeeId>();
     private readonly List<EmployeeId> _quitEventBuffer = new List<EmployeeId>();
     private readonly List<EmployeeId> _hiredBuffer = new List<EmployeeId>();
     private readonly List<EmployeeId> _salaryPaidBuffer = new List<EmployeeId>();
@@ -70,8 +68,8 @@ public class EmployeeSystem : ISystem
     private readonly List<EmployeeId> _employeeKeysScratch = new List<EmployeeId>();
 
     // Pre-allocated scratch buffers for DecaySkills — zero heap allocation during decay
-    private readonly int[] _decayScratch = new int[SkillTypeHelper.SkillTypeCount];
-    private readonly float[] _decayWeightCdf = new float[SkillTypeHelper.SkillTypeCount];
+    private readonly int[] _decayScratch = new int[SkillIdHelper.SkillCount];
+    private readonly float[] _decayWeightCdf = new float[SkillIdHelper.SkillCount];
     private readonly List<int> _expiredCandidateBuffer = new List<int>();
 
     // Company-filtered employee scratch — reused by GetActiveEmployeesForCompany; callers must not hold across ticks
@@ -134,7 +132,6 @@ public class EmployeeSystem : ISystem
         _rng = rng;
         _candidateRng = new RngStream(state.candidatePoolSeed);
         _logger = logger ?? new NullLogger();
-        _quitBuffer = new List<EmployeeId>();
         _activeEmployeesCache = new List<Employee>();
         _activeEmployeesDirty = true;
     }
@@ -172,11 +169,6 @@ public class EmployeeSystem : ISystem
     public void SetHRSystem(HRSystem hrSystem)
     {
         _hrSystem = hrSystem;
-    }
-
-    public void SetRoleTierTable(RoleTierTable table)
-    {
-        _roleTierTable = table;
     }
 
     public void SetEventBus(GameEventBus bus)
@@ -247,7 +239,7 @@ public class EmployeeSystem : ISystem
     private SkillTier DeriveEmployeeTier(Employee emp)
     {
         int maxSkill = 0;
-        int[] skills = emp.skills;
+        int[] skills = emp.Stats.Skills;
         int skillCount = skills != null ? skills.Length : 0;
         for (int i = 0; i < skillCount; i++)
             if (skills[i] > maxSkill) maxSkill = skills[i];
@@ -258,16 +250,7 @@ public class EmployeeSystem : ISystem
         return SkillTier.Apprentice;
     }
 
-    public EmployeeId HireEmployee(string name, Gender gender, int age, int programmingSkill, int designSkill, int qaSkill, int salary, int currentTick, EmployeeRole role, int hrSkill = 0)
-    {
-        var skills = new int[SkillTypeHelper.SkillTypeCount];
-        skills[(int)SkillType.Programming] = programmingSkill;
-        skills[(int)SkillType.Design] = designSkill;
-        skills[(int)SkillType.QA] = qaSkill;
-        return HireEmployee(name, gender, age, skills, salary, currentTick, role, hrSkill);
-    }
-
-    public EmployeeId HireEmployee(string name, Gender gender, int age, int[] skills, int salary, int currentTick, EmployeeRole role, int hrSkill = 0, int potentialAbility = 0)
+    public EmployeeId HireEmployee(string name, Gender gender, int age, int salary, int currentTick, RoleId role)
     {
         var offer = new EmploymentOffer
         {
@@ -275,55 +258,22 @@ public class EmployeeSystem : ISystem
             Length        = ContractLengthOption.Standard,
             MonthlySalary = salary
         };
-        return HireEmployee(name, gender, age, skills, currentTick, role, hrSkill, potentialAbility, offer, default);
+        return HireEmployee(name, gender, age, EmployeeStatBlock.Create(), currentTick, role, offer, default);
     }
 
-    public EmployeeId HireEmployee(string name, Gender gender, int age, int[] skills, int currentTick, EmployeeRole role, int hrSkill, int potentialAbility, EmploymentOffer offer, CandidatePreferences originalPreferences)
+    public EmployeeId HireEmployee(string name, Gender gender, int age, EmployeeStatBlock stats, int currentTick, RoleId role, EmploymentOffer offer, CandidatePreferences originalPreferences)
     {
         var employeeId = new EmployeeId(_state.nextEmployeeId++);
 
         if (age <= 0) age = 25;
 
-        int[] clampedSkills = new int[SkillTypeHelper.SkillTypeCount];
-        if (skills != null)
-        {
-            int len = skills.Length < SkillTypeHelper.SkillTypeCount ? skills.Length : SkillTypeHelper.SkillTypeCount;
-            for (int i = 0; i < len; i++)
-                clampedSkills[i] = skills[i] < 1 ? 1 : skills[i];
-        }
-
-        // Keep hrSkill field and skills[HR] in sync — whichever is larger wins
-        if (role == EmployeeRole.HR)
-        {
-            int fromArray = clampedSkills[(int)SkillType.HR];
-            int resolved = fromArray > hrSkill ? fromArray : hrSkill;
-            if (resolved < 1) resolved = 1;
-            clampedSkills[(int)SkillType.HR] = resolved;
-            hrSkill = resolved;
-        }
-
-        int salary = offer.MonthlySalary;
-
-        var employee = new Employee(
-            employeeId,
-            name,
-            gender,
-            age,
-            clampedSkills,
-            salary,
-            currentTick,
-            role,
-            hrSkill
-        );
-
+        var employee = new Employee(employeeId, name, gender, age, stats, stats.PotentialAbility > 0 ? stats.PotentialAbility : 0, currentTick, role);
+        employee.salary = offer.MonthlySalary;
         employee.Contract = ContractTerms.FromOffer(offer, currentTick);
         employee.OriginalPreferences = originalPreferences;
 
         _state.employees[employeeId] = employee;
         _activeEmployeesDirty = true;
-
-        if (potentialAbility > 0)
-            employee.potentialAbility = potentialAbility;
 
         int contractTicks = employee.Contract.ContractMonths * TimeState.TicksPerDay * 30;
         employee.contractExpiryTick = currentTick + contractTicks;
@@ -341,7 +291,7 @@ public class EmployeeSystem : ISystem
 
         _hiredBuffer.Add(employeeId);
 
-        _logger.Log($"[Tick {currentTick}] Hired {name} (ID: {employeeId.Value}) [{role}] Age:{age} - Skills:[{string.Join(",", clampedSkills)}] HR:{hrSkill} Salary:${salary}/month [{offer.Type}/{offer.Length}]");
+        _logger.Log($"[Tick {currentTick}] Hired {name} (ID: {employeeId.Value}) [{role}] Age:{age} Salary:${offer.MonthlySalary}/month [{offer.Type}/{offer.Length}]");
 
         return employeeId;
     }
@@ -402,24 +352,12 @@ public class EmployeeSystem : ISystem
         return null;
     }
 
-    public bool SetEmployeeSkill(EmployeeId id, SkillType skill, int value)
+    public bool SetEmployeeSkill(EmployeeId id, SkillId skill, int value)
     {
         if (!_state.employees.TryGetValue(id, out var employee)) return false;
         if (!employee.isActive) return false;
-
         if (value < 0) value = 0;
-
-        switch (skill) {
-            case SkillType.Programming:  employee.SetSkill(SkillType.Programming, value);  break;
-            case SkillType.Design:       employee.SetSkill(SkillType.Design, value);        break;
-            case SkillType.QA:           employee.SetSkill(SkillType.QA, value);            break;
-            case SkillType.VFX:          employee.SetSkill(SkillType.VFX, value);           break;
-            case SkillType.SFX:          employee.SetSkill(SkillType.SFX, value);           break;
-            case SkillType.HR:           employee.SetSkill(SkillType.HR, value);            break;
-            case SkillType.Negotiation:  employee.SetSkill(SkillType.Negotiation, value);   break;
-            case SkillType.Accountancy:  employee.SetSkill(SkillType.Accountancy, value);   break;
-            default: return false;
-        }
+        employee.Stats.SetSkill(skill, value);
         return true;
     }
     
@@ -481,8 +419,6 @@ public class EmployeeSystem : ISystem
         return total;
     }
 
-    // Creates count real Employee objects owned by companyId, using the shared candidate pipeline.
-    // Skill quality is scaled by archetype tier. Returns created EmployeeId list (allocated once at spawn, not in tick path).
     public List<EmployeeId> BulkHireForCompany(CompanyId companyId, CompetitorArchetype archetype, int count, IRng rng, int hireTick, float fullTimeRatio = 0.65f, float salaryTierModifier = 1.0f)
     {
         var result = new List<EmployeeId>(count);
@@ -490,7 +426,7 @@ public class EmployeeSystem : ISystem
 
         for (int i = 0; i < count; i++)
         {
-            EmployeeRole role = RollRoleForArchetype(archetype, rng);
+            RoleId role = RollRoleForArchetype(archetype, rng);
             var candidate = CandidateData.GenerateCandidate(rng, qualityMultiplier, role);
 
             int ftRoll = rng.Range(0, 100);
@@ -510,17 +446,8 @@ public class EmployeeSystem : ISystem
             var employeeId = new EmployeeId(_state.nextEmployeeId++);
             int age = rng.Range(22, 45);
 
-            int[] clampedSkills = new int[SkillTypeHelper.SkillTypeCount];
-            int skillLen = candidate.Skills.Length < SkillTypeHelper.SkillTypeCount
-                ? candidate.Skills.Length
-                : SkillTypeHelper.SkillTypeCount;
-            for (int s = 0; s < skillLen; s++)
-                clampedSkills[s] = candidate.Skills[s] < 1 ? 1 : candidate.Skills[s];
-
-            var employee = new Employee(employeeId, candidate.Name, candidate.Gender, age, clampedSkills, scaledSalary, hireTick, role);
+            var employee = new Employee(employeeId, candidate.Name, candidate.Gender, age, candidate.Stats, scaledSalary, hireTick, role);
             employee.ownerCompanyId = companyId;
-            employee.potentialAbility = candidate.PotentialAbility;
-            employee.hiddenAttributes = candidate.HiddenAttributes;
             employee.personality = candidate.personality;
             employee.Contract = ContractTerms.FromOffer(compOffer, hireTick);
             employee.OriginalPreferences = candidate.Preferences;
@@ -566,7 +493,7 @@ public class EmployeeSystem : ISystem
         }
     }
 
-    private static EmployeeRole RollRoleForArchetype(CompetitorArchetype archetype, IRng rng)
+    private static RoleId RollRoleForArchetype(CompetitorArchetype archetype, IRng rng)
     {
         int wDev, wDes, wQA, wSound, wVFX, wMktg;
         switch (archetype)
@@ -584,16 +511,16 @@ public class EmployeeSystem : ISystem
         }
         int total = wDev + wDes + wQA + wSound + wVFX + wMktg;
         int roll = rng.Range(0, total);
-        if (roll < wDev)               return EmployeeRole.Developer;
+        if (roll < wDev)               return RoleId.SoftwareEngineer;
         roll -= wDev;
-        if (roll < wDes)               return EmployeeRole.Designer;
+        if (roll < wDes)               return RoleId.ProductDesigner;
         roll -= wDes;
-        if (roll < wQA)                return EmployeeRole.QAEngineer;
+        if (roll < wQA)                return RoleId.QaEngineer;
         roll -= wQA;
-        if (roll < wSound)             return EmployeeRole.SoundEngineer;
+        if (roll < wSound)             return RoleId.AudioDesigner;
         roll -= wSound;
-        if (roll < wVFX)               return EmployeeRole.VFXArtist;
-        return EmployeeRole.Marketer;
+        if (roll < wVFX)               return RoleId.TechnicalArtist;
+        return RoleId.Marketer;
     }
     
     public void ProcessDailySalaries(int currentTick, FinanceSystem financeSystem)
@@ -1038,19 +965,21 @@ public class EmployeeSystem : ISystem
         }
     }
 
-    // Distributes 5–15 CA of decay across all 11 skills, weighted by inverse tier multiplier.
+    // Distributes 5–15 CA of decay across all 26 skills, weighted by inverse tier multiplier.
     // Primary skills (mult=2, weight=0.5) have higher decay probability than tertiary (mult=4, weight=0.25).
     private void DecaySkills(Employee emp, int tick)
     {
         int decayCA = _rng.Range(5, 16);
 
-        int[] roleTiers = _roleTierTable != null
-            ? _roleTierTable.GetTiers(emp.role)
+        int[] roleTiers = _abilitySystem != null
+            ? (_abilitySystem.ProfileTable?.Get(emp.role) != null
+                ? RoleSuitabilityCalculator.BuildTierArray(_abilitySystem.ProfileTable.Get(emp.role))
+                : null)
             : null;
 
-        float minFloor = 0.5f / SkillTypeHelper.SkillTypeCount;
+        float minFloor = 0.5f / SkillIdHelper.SkillCount;
         float weightSum = 0f;
-        for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++)
+        for (int i = 0; i < SkillIdHelper.SkillCount; i++)
         {
             float invMult = (roleTiers != null && i < roleTiers.Length && roleTiers[i] > 0)
                 ? 1.0f / roleTiers[i]
@@ -1061,21 +990,21 @@ public class EmployeeSystem : ISystem
 
         // Normalise into cumulative distribution
         float running = 0f;
-        for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++)
+        for (int i = 0; i < SkillIdHelper.SkillCount; i++)
         {
             running += _decayWeightCdf[i] / weightSum;
             _decayWeightCdf[i] = running;
         }
-        _decayWeightCdf[SkillTypeHelper.SkillTypeCount - 1] = 1f;
+        _decayWeightCdf[SkillIdHelper.SkillCount - 1] = 1f;
 
         // Distribute each CA unit via weighted random selection
-        for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++)
+        for (int i = 0; i < SkillIdHelper.SkillCount; i++)
             _decayScratch[i] = 0;
 
         for (int u = 0; u < decayCA; u++)
         {
             float roll = _rng.Range(0, 10000) / 10000f;
-            for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++)
+            for (int i = 0; i < SkillIdHelper.SkillCount; i++)
             {
                 if (roll <= _decayWeightCdf[i])
                 {
@@ -1085,14 +1014,8 @@ public class EmployeeSystem : ISystem
             }
         }
 
-        // Ensure accumulator arrays exist (migration safety for old saves)
-        if (emp.skillXp == null)
-            emp.skillXp = new float[SkillTypeHelper.SkillTypeCount];
-        if (emp.skillDeltaDirection == null)
-            emp.skillDeltaDirection = new sbyte[SkillTypeHelper.SkillTypeCount];
-
         // Apply skill losses via float accumulator — drains XP buffer before dropping a level
-        for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++)
+        for (int i = 0; i < SkillIdHelper.SkillCount; i++)
         {
             int caAlloc = _decayScratch[i];
             if (caAlloc == 0) continue;
@@ -1100,23 +1023,23 @@ public class EmployeeSystem : ISystem
             int tierMult = (roleTiers != null && i < roleTiers.Length && roleTiers[i] > 0)
                 ? roleTiers[i]
                 : 3;
-            int currentLevel = emp.skills[i];
+            int currentLevel = emp.Stats.Skills[i];
             int marginalCost = currentLevel > 0 ? AbilityCalculator.GetMarginalCost(currentLevel - 1, tierMult) : 1;
             if (marginalCost < 1) marginalCost = 1;
 
             float decayAmount = (float)(caAlloc * 2) / (float)(marginalCost * tierMult);
 
-            emp.skillDeltaDirection[i] = -1;
-            emp.skillXp[i] -= decayAmount;
+            emp.Stats.SkillDeltaDirection[i] = -1;
+            emp.Stats.SkillXp[i] -= decayAmount;
 
-            while (emp.skillXp[i] < 0f && emp.skills[i] > 0)
+            while (emp.Stats.SkillXp[i] < 0f && emp.Stats.Skills[i] > 0)
             {
-                emp.skillXp[i] += 1.0f;
-                emp.skills[i]--;
+                emp.Stats.SkillXp[i] += 1.0f;
+                emp.Stats.Skills[i]--;
             }
 
-            if (emp.skills[i] == 0 && emp.skillXp[i] < 0f)
-                emp.skillXp[i] = 0f;
+            if (emp.Stats.Skills[i] == 0 && emp.Stats.SkillXp[i] < 0f)
+                emp.Stats.SkillXp[i] = 0f;
         }
 
         _abilitySystem?.InvalidateCA(emp.id);
@@ -1187,7 +1110,17 @@ public class EmployeeSystem : ISystem
         {
             int finalSalary = hire.Salary;
 
-            EmployeeId hiredId = HireEmployee(hire.Name, hire.Gender, hire.Age, hire.Skills, finalSalary, command.Tick, hire.Role, hire.HRSkill, hire.PotentialAbility);
+            var hireStats = hire.Stats.Skills != null ? hire.Stats : EmployeeStatBlock.Create();
+            if (hire.PotentialAbility > 0) hireStats.PotentialAbility = hire.PotentialAbility;
+
+            var hireOffer = new EmploymentOffer
+            {
+                Type          = hire.EmploymentType != default ? hire.EmploymentType : EmploymentType.FullTime,
+                Length        = hire.ContractLength != default ? hire.ContractLength : ContractLengthOption.Standard,
+                MonthlySalary = finalSalary,
+                Role          = hire.Role
+            };
+            EmployeeId hiredId = HireEmployee(hire.Name, hire.Gender, hire.Age, hireStats, command.Tick, hire.Role, hireOffer, default);
 
             if (hiredId.Value >= 0 && _state.employees.TryGetValue(hiredId, out var hiredEmployee))
             {

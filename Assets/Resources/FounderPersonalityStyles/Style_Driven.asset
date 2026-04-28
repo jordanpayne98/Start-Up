@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cceb32f606429a4ea3a882571d5fb7e, type: 3}
+  m_Name: Style_Driven
+  m_EditorClassIdentifier: Assembly-CSharp::FounderPersonalityStyleDefinition
+  StyleId: 0
+  DisplayName: Driven
+  Description: High ambition and work ethic. Pushes hard but risks burnout and salary
+    pressure.
+  StrengthAttributes: 0500000007000000
+  WeakAttributes: 06000000
+  HiddenTendencies: 01000000
+  BestPairing: "Calm or Collaborative \u2014 balances output pressure"
+  RiskWarning: Stress and salary expectation pressure over time. Watch for burnout.
+  SortOrder: 0

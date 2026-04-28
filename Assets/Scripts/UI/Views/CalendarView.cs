@@ -79,7 +79,7 @@ public class CalendarView : IGameView
         dayHeaders.AddToClassList("flex-row");
         for (int i = 0; i < 7; i++) {
             var dayHeader = new Label(DayNames[i]);
-            dayHeader.AddToClassList("text-muted");
+            dayHeader.AddToClassList("text-secondary");
             dayHeader.AddToClassList("text-sm");
             dayHeader.AddToClassList("text-bold");
             dayHeader.style.flexGrow = 1;
@@ -270,7 +270,7 @@ public class CalendarView : IGameView
 
         var lbl = new Label(label);
         lbl.AddToClassList("text-sm");
-        lbl.AddToClassList("text-muted");
+        lbl.AddToClassList("text-secondary");
         row.Add(lbl);
 
         container.Add(row);

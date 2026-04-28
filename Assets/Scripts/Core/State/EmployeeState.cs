@@ -3,6 +3,33 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 
+public enum WorkEntryType
+{
+    Contract = 0,
+    Product  = 1,
+}
+
+public enum WorkOutcome
+{
+    Completed = 0,
+    Cancelled = 1,
+    Ongoing   = 2,
+}
+
+[Serializable]
+public struct WorkHistoryEntry
+{
+    public int        CompletedTick;
+    public WorkEntryType EntryType;
+    public string     WorkName;
+    public string     TeamName;
+    public RoleId     Role;
+    public string     ContributionLabel;
+    public int        QualityScore;
+    public string     XpSummary;
+    public WorkOutcome Outcome;
+}
+
 public class EmployeeIdConverter : TypeConverter {
     public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) {
         return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
@@ -65,23 +92,17 @@ public class Employee
     public string name;
     public Gender gender;
     public int age;
-    public int[] skills;
     public int salary;
     public int morale;
     public int hireDate;
     public bool isActive;
-    public EmployeeRole role;
-    public int hrSkill;
-    public int potentialAbility;       // 0-200; 0 = not yet generated (pre-migration save)
-    public HiddenAttributes hiddenAttributes;
+    public RoleId role;
     public int decayOnsetAge;          // Age at which skill decay begins [55-65]; 0 = not yet assigned
-    public float[] skillXp;            // sub-level growth accumulator [0,1) per skill
-    public sbyte[] skillDeltaDirection; // 1=growth, -1=decay, 0=never changed
     public int contractExpiryTick;         // tick when contract expires; 0 = no expiry set (legacy save)
     public bool contractRenewalPending;    // true = waiting for player Accept/Decline
     public int renewalDemand;              // cached salary demand at renewal trigger; 0 = not computed
     public bool isFounder;                 // founders never quit, retire, or decay; grow skills 1.5x faster
-    public EmployeeRole preferredRole;     // candidate's original preferred role at hire time
+    public RoleId preferredRole;           // candidate's original preferred role at hire time
     public CompanyId ownerCompanyId;
     public Personality personality;
 
@@ -96,74 +117,53 @@ public class Employee
     public float EffectiveOutput => Contract.EffectiveOutput;
     public EmploymentType ArrangementType => Contract.Type;
 
-    // Backward-compat properties for save migration and existing code
-    public int programmingSkill { get => skills[(int)SkillType.Programming]; set => skills[(int)SkillType.Programming] = value; }
-    public int designSkill { get => skills[(int)SkillType.Design]; set => skills[(int)SkillType.Design] = value; }
-    public int qaSkill { get => skills[(int)SkillType.QA]; set => skills[(int)SkillType.QA] = value; }
+    // Stat model
+    public EmployeeStatBlock Stats;
 
-    public int GetSkill(SkillType type) => skills[(int)type];
-    public void SetSkill(SkillType type, int value) => skills[(int)type] = value;
+    // Work history — max 20 entries, appended on contract/product completion
+    public List<WorkHistoryEntry> WorkHistory;
+    public const int MaxWorkHistoryEntries = 20;
 
-    // Returns the indexed tier array for this employee's role — used by SalaryDemandCalculator.
-    public int[] GetRoleTiersForSalary()
+    public void AppendWorkHistory(WorkHistoryEntry entry)
     {
-        return s_RoleTierTable.GetTiers(role);
+        if (WorkHistory == null) WorkHistory = new List<WorkHistoryEntry>(MaxWorkHistoryEntries);
+        if (WorkHistory.Count >= MaxWorkHistoryEntries)
+            WorkHistory.RemoveAt(0);
+        WorkHistory.Add(entry);
     }
 
-    private static readonly RoleTierTable s_RoleTierTable = BuildDefaultTierTable();
-
-    private static RoleTierTable BuildDefaultTierTable()
-    {
-        var table = new RoleTierTable();
-        var profiles = UnityEngine.Resources.LoadAll<RoleTierProfile>("RoleTiers");
-        for (int i = 0; i < profiles.Length; i++)
-            table.Register(profiles[i]);
-        return table;
-    }
+    public int GetSkill(SkillId id) => Stats.GetSkill(id);
+    public void SetSkill(SkillId id, int value) => Stats.SetSkill(id, value);
 
     private Employee() { }
 
-    public Employee(EmployeeId id, string name, Gender gender, int age, int programmingSkill, int designSkill, int qaSkill, int salary, int hireDate, EmployeeRole role, int hrSkill = 0)
+    public Employee(EmployeeId id, string name, Gender gender, int age, int salary, int hireDate, RoleId role)
     {
         this.id = id;
         this.name = name;
         this.gender = gender;
         this.age = age;
-        this.skills = new int[SkillTypeHelper.SkillTypeCount];
-        this.skills[(int)SkillType.Programming] = programmingSkill;
-        this.skills[(int)SkillType.Design] = designSkill;
-        this.skills[(int)SkillType.QA] = qaSkill;
-        this.skillXp = new float[SkillTypeHelper.SkillTypeCount];
-        this.skillDeltaDirection = new sbyte[SkillTypeHelper.SkillTypeCount];
+        this.Stats = EmployeeStatBlock.Create();
         this.salary = salary;
         this.morale = 100;
         this.hireDate = hireDate;
         this.isActive = true;
         this.role = role;
-        this.hrSkill = hrSkill;
         this.personality = Personality.Professional;
     }
 
-    public Employee(EmployeeId id, string name, Gender gender, int age, int[] skills, int salary, int hireDate, EmployeeRole role, int hrSkill = 0)
+    public Employee(EmployeeId id, string name, Gender gender, int age, EmployeeStatBlock stats, int salary, int hireDate, RoleId role)
     {
         this.id = id;
         this.name = name;
         this.gender = gender;
         this.age = age;
-        this.skills = new int[SkillTypeHelper.SkillTypeCount];
-        if (skills != null)
-        {
-            int len = skills.Length < SkillTypeHelper.SkillTypeCount ? skills.Length : SkillTypeHelper.SkillTypeCount;
-            for (int i = 0; i < len; i++) this.skills[i] = skills[i];
-        }
-        this.skillXp = new float[SkillTypeHelper.SkillTypeCount];
-        this.skillDeltaDirection = new sbyte[SkillTypeHelper.SkillTypeCount];
+        this.Stats = stats;
         this.salary = salary;
         this.morale = 100;
         this.hireDate = hireDate;
         this.isActive = true;
         this.role = role;
-        this.hrSkill = hrSkill;
         this.personality = Personality.Professional;
     }
 }

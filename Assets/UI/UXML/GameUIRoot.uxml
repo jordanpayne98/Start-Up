@@ -1,9 +1,8 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:Style src="project://database/Assets/UI/USS/Common/variables.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Common/base.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Common/components.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Screens/shell.uss" />
-    <ui:Style src="project://database/Assets/UI/USS/Screens/ResearchTree.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Screens/market-window.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Screens/marketing-window.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Screens/products-window.uss" />

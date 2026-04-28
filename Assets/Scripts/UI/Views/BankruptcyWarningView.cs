@@ -53,7 +53,7 @@ public class BankruptcyWarningView : IGameView
         cashSection.style.marginRight = 16;
         var cashKey = new Label("Current Cash");
         cashKey.AddToClassList("text-sm");
-        cashKey.AddToClassList("text-muted");
+        cashKey.AddToClassList("text-secondary");
         cashSection.Add(cashKey);
         _cashLabel = new Label("--");
         _cashLabel.AddToClassList("text-xl");
@@ -66,7 +66,7 @@ public class BankruptcyWarningView : IGameView
         burnSection.style.flexGrow = 1;
         var burnKey = new Label("Monthly Burn Rate");
         burnKey.AddToClassList("text-sm");
-        burnKey.AddToClassList("text-muted");
+        burnKey.AddToClassList("text-secondary");
         burnSection.Add(burnKey);
         _burnRateLabel = new Label("--");
         _burnRateLabel.AddToClassList("text-lg");

@@ -7,6 +7,7 @@ public static class NewGameData {
     public static string LoadSlotName;
     public static DifficultySettings Difficulty;
     public static int Seed;
+    public static NewGameSetupState SetupState;
 
     public static void Clear() {
         CompanyName = null;
@@ -15,5 +16,6 @@ public static class NewGameData {
         LoadSlotName = null;
         Difficulty = DifficultySettings.Default(DifficultyPreset.Normal);
         Seed = 0;
+        SetupState = null;
     }
 }

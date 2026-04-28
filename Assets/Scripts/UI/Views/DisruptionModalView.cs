@@ -47,7 +47,7 @@ public class DisruptionModalView : IGameView
 
         _descriptionLabel = new Label();
         _descriptionLabel.AddToClassList("text-sm");
-        _descriptionLabel.AddToClassList("text-muted");
+        _descriptionLabel.AddToClassList("text-secondary");
         _descriptionLabel.style.whiteSpace = WhiteSpace.Normal;
         titleSection.Add(_descriptionLabel);
 
@@ -77,7 +77,7 @@ public class DisruptionModalView : IGameView
         durationRow.style.marginTop = 4;
         var durationKey = new Label("Duration: ");
         durationKey.AddToClassList("text-sm");
-        durationKey.AddToClassList("text-muted");
+        durationKey.AddToClassList("text-secondary");
         durationRow.Add(durationKey);
         _durationLabel = new Label();
         _durationLabel.AddToClassList("text-sm");

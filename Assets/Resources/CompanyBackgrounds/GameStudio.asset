@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e305aa8cfd6f9ba4caf2ccb0fa06a4c0, type: 3}
+  m_Name: GameStudio
+  m_EditorClassIdentifier: Assembly-CSharp::CompanyBackgroundDefinition
+  BackgroundId: 2
+  DisplayName: Game Studio
+  Description: An indie game development studio with creative ambitions. Blend technical
+    skill with artistic vision to create memorable gaming experiences.
+  RecommendedFounderRoles: 0700000000000000
+  StartingStrengths:
+  - Creative freedom
+  - Passionate team culture
+  - High revenue potential per title
+  StartingRisks:
+  - Long development cycles
+  - Hit-driven revenue
+  - Scope creep tendency
+  SuggestedFirstActions:
+  - Prototype your first game concept
+  - Hire a technical artist
+  - Research trending game genres
+  DifficultyLabel: Standard
+  CandidatePoolBiasTags:
+  - gamedev
+  - creative
+  ContractPoolBiasTags:
+  - game
+  - entertainment

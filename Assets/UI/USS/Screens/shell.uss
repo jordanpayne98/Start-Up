@@ -324,8 +324,22 @@
 }
 
 .modal-content--large {
-    width: 900px;
-    min-height: 640px;
+    width: 78vw;
+    height: 83vh;
+    min-width: 1100px;
+    min-height: 720px;
+    max-width: 1440px;
+    max-height: 900px;
+    padding: 0;
+}
+
+.modal-content--inspector {
+    width: 78vw;
+    height: 84vh;
+    min-width: 1100px;
+    min-height: 720px;
+    max-width: 1440px;
+    max-height: 900px;
     padding: 0;
 }
 

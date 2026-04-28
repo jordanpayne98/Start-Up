@@ -36,7 +36,7 @@ public class ProductFeatureDefinition : ScriptableObject
 
     [Header("Skill Requirements")]
     public int requiredTotalSkillPoints = 0;
-    public SkillType requiredSkillType = SkillType.Programming;
+    public SkillId requiredSkillType = SkillId.Programming;
 
     [Header("Cost & Quality")]
     public int baseCost = 0;

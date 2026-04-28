@@ -94,3 +94,94 @@ public class LegacyProductTeamRoleConverter : JsonConverter<ProductTeamRole>
         writer.WriteValue(value.ToString());
     }
 }
+
+public class LegacyRoleIdConverter : JsonConverter<RoleId>
+{
+    public override RoleId ReadJson(JsonReader reader, Type objectType, RoleId existingValue, bool hasExistingValue, JsonSerializer serializer)
+    {
+        if (reader.TokenType == JsonToken.Null)
+            return RoleId.SoftwareEngineer;
+
+        string raw = reader.Value?.ToString() ?? "";
+
+        // Try new RoleId name first
+        if (System.Enum.TryParse<RoleId>(raw, out RoleId newRole))
+            return newRole;
+
+        // Map old EmployeeRole names to new RoleId
+        switch (raw)
+        {
+            case "Developer":     return RoleId.SoftwareEngineer;
+            case "Designer":      return RoleId.ProductDesigner;
+            case "QAEngineer":    return RoleId.QaEngineer;
+            case "HR":            return RoleId.HrSpecialist;
+            case "SoundEngineer": return RoleId.AudioDesigner;
+            case "VFXArtist":     return RoleId.TechnicalArtist;
+            case "Accountant":    return RoleId.Accountant;
+            case "Marketer":      return RoleId.Marketer;
+            default:
+                if (int.TryParse(raw, out int intVal))
+                    return MapLegacyRoleInt(intVal);
+                return RoleId.SoftwareEngineer;
+        }
+    }
+
+    private static RoleId MapLegacyRoleInt(int intVal)
+    {
+        switch (intVal)
+        {
+            case 0: return RoleId.SoftwareEngineer;
+            case 1: return RoleId.ProductDesigner;
+            case 2: return RoleId.QaEngineer;
+            case 4: return RoleId.HrSpecialist;
+            case 5: return RoleId.AudioDesigner;
+            case 6: return RoleId.TechnicalArtist;
+            case 7: return RoleId.Accountant;
+            case 8: return RoleId.Marketer;
+            default: return RoleId.SoftwareEngineer;
+        }
+    }
+
+    public override void WriteJson(JsonWriter writer, RoleId value, JsonSerializer serializer)
+    {
+        writer.WriteValue(value.ToString());
+    }
+}
+
+public class LegacySkillIdConverter : JsonConverter<SkillId>
+{
+    public override SkillId ReadJson(JsonReader reader, Type objectType, SkillId existingValue, bool hasExistingValue, JsonSerializer serializer)
+    {
+        if (reader.TokenType == JsonToken.Null)
+            return SkillId.Programming;
+
+        string raw = reader.Value?.ToString() ?? "";
+
+        // Try new SkillId name first
+        if (System.Enum.TryParse<SkillId>(raw, out SkillId newSkill))
+            return newSkill;
+
+        // Map old SkillType names to new SkillId
+        switch (raw)
+        {
+            case "Programming":  return SkillId.Programming;
+            case "Design":       return SkillId.ProductDesign;
+            case "QA":           return SkillId.QaTesting;
+            case "VFX":          return SkillId.Vfx;
+            case "SFX":          return SkillId.AudioDesign;
+            case "HR":           return SkillId.HrRecruitment;
+            case "Negotiation":  return SkillId.Negotiation;
+            case "Accountancy":  return SkillId.Accountancy;
+            case "Marketing":    return SkillId.Marketing;
+            default:
+                if (int.TryParse(raw, out int intVal) && intVal >= 0 && intVal < SkillIdHelper.SkillCount)
+                    return (SkillId)intVal;
+                return SkillId.Programming;
+        }
+    }
+
+    public override void WriteJson(JsonWriter writer, SkillId value, JsonSerializer serializer)
+    {
+        writer.WriteValue(value.ToString());
+    }
+}

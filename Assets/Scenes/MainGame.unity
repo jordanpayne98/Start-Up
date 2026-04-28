@@ -190,7 +190,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WindowManager
   uiDocument: {fileID: 831741532}
   customFont: {fileID: 12800000, guid: f23a072f76211694aad8e25c22a6297a, type: 3}
-  candidateDetailAsset: {fileID: 9197481963319205126, guid: 581d4bf274aa3d545978ba1d1490f3f9, type: 3}
+  candidateDetailAsset: {fileID: 9197481963319205126, guid: 582f26832f61a5b47b18b8f3343b517b, type: 3}
+  employeeDetailAsset: {fileID: 9197481963319205126, guid: 415cbee470a1d174981b5338292fd139, type: 3}
   _tooltipRegistry: {fileID: 11400000, guid: 4b7bc558638ad4b4581006f769fad26b, type: 2}
 --- !u!114 &831741535
 MonoBehaviour:

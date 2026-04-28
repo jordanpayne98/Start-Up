@@ -1,4 +1,4 @@
-// SalaryModifierCalculator Version: v2
+// SalaryModifierCalculator Version: v3
 
 /// <summary>
 /// Pure static utility. Computes salary modifiers from employment type, contract length,
@@ -33,7 +33,7 @@ public static class SalaryModifierCalculator
 
     // Returns the salary premium for offering a role different from the candidate's preferred role.
     // Same role → 0.0. Off-role premium scales with how poorly they fit the offered role.
-    public static float GetRoleMismatchPremium(EmployeeRole preferred, EmployeeRole offered, RoleSuitability suitability)
+    public static float GetRoleMismatchPremium(RoleId preferred, RoleId offered, RoleSuitability suitability)
     {
         if (preferred == offered) return 0f;
         switch (suitability)
@@ -94,7 +94,7 @@ public static class SalaryModifierCalculator
     /// base → PT ratio → length modifier → FT/PT mismatch → length mismatch → role mismatch.
     /// </summary>
     public static int ComputeOfferSalary(int baseSalary, EmploymentType type, ContractLengthOption length,
-        CandidatePreferences prefs, EmployeeRole preferredRole, EmployeeRole offeredRole, RoleSuitability suitability)
+        CandidatePreferences prefs, RoleId preferredRole, RoleId offeredRole, RoleSuitability suitability)
     {
         float running = baseSalary;
 
@@ -121,7 +121,7 @@ public static class SalaryModifierCalculator
     public static int ComputeOfferSalary(int baseSalary, EmploymentType type, ContractLengthOption length, CandidatePreferences prefs)
     {
         return ComputeOfferSalary(baseSalary, type, length, prefs,
-            EmployeeRole.Developer, EmployeeRole.Developer, RoleSuitability.Natural);
+            RoleId.SoftwareEngineer, RoleId.SoftwareEngineer, RoleSuitability.Natural);
     }
 
     public static float GetWorkCapacity(EmploymentType type)
@@ -154,7 +154,7 @@ public static class SalaryModifierCalculator
     /// </summary>
     public static int ComputeRenewalDemand(Employee emp, int marketRate, EmploymentType type,
         ContractLengthOption length, int strikeCount,
-        EmployeeRole preferredRole = EmployeeRole.Developer, EmployeeRole offeredRole = EmployeeRole.Developer,
+        RoleId preferredRole = RoleId.SoftwareEngineer, RoleId offeredRole = RoleId.SoftwareEngineer,
         RoleSuitability suitability = RoleSuitability.Natural)
     {
         if (emp == null || marketRate <= 0) return 0;

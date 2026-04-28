@@ -143,38 +143,36 @@ public static class UIFormatting
         return sb.ToString();
     }
 
-    public static string FormatRole(EmployeeRole role) {
-        switch (role) {
-            case EmployeeRole.Developer:    return "Developer";
-            case EmployeeRole.Designer:     return "Designer";
-            case EmployeeRole.QAEngineer:   return "QA Engineer";
-            case EmployeeRole.HR:           return "HR Specialist";
-            case EmployeeRole.SoundEngineer:return "SFX Artist";
-            case EmployeeRole.VFXArtist:    return "VFX Artist";
-            case EmployeeRole.Accountant:   return "Accountant";
-            case EmployeeRole.Marketer:     return "Marketing Specialist";
-            default:                        return "Unknown";
-        }
+    public static string FormatRole(RoleId role) {
+        return RoleIdHelper.GetName(role);
     }
 
     // Returns the USS modifier class for the role pill (without the base "role-pill" class).
     // Matches .role-pill--<modifier> in components.uss.
-    public static string RolePillClass(EmployeeRole role) {
+    public static string RolePillClass(RoleId role) {
         switch (role) {
-            case EmployeeRole.Developer:    return "role-pill--developer";
-            case EmployeeRole.Designer:     return "role-pill--designer";
-            case EmployeeRole.QAEngineer:   return "role-pill--qa-engineer";
-            case EmployeeRole.HR:           return "role-pill--hr-specialist";
-            case EmployeeRole.SoundEngineer:return "role-pill--sfx-artist";
-            case EmployeeRole.VFXArtist:    return "role-pill--vfx-artist";
-            case EmployeeRole.Accountant:   return "role-pill--accountant";
-            case EmployeeRole.Marketer:     return "role-pill--marketing-specialist";
-            default:                        return "role-pill--unknown";
+            case RoleId.SoftwareEngineer:           return "role-pill--developer";
+            case RoleId.SystemsEngineer:            return "role-pill--developer";
+            case RoleId.SecurityEngineer:           return "role-pill--developer";
+            case RoleId.PerformanceEngineer:        return "role-pill--developer";
+            case RoleId.HardwareEngineer:           return "role-pill--developer";
+            case RoleId.ManufacturingEngineer:      return "role-pill--developer";
+            case RoleId.ProductDesigner:            return "role-pill--designer";
+            case RoleId.GameDesigner:               return "role-pill--designer";
+            case RoleId.TechnicalArtist:            return "role-pill--vfx-artist";
+            case RoleId.AudioDesigner:              return "role-pill--sfx-artist";
+            case RoleId.QaEngineer:                 return "role-pill--qa-engineer";
+            case RoleId.TechnicalSupportSpecialist: return "role-pill--qa-engineer";
+            case RoleId.Marketer:                   return "role-pill--marketing-specialist";
+            case RoleId.SalesExecutive:             return "role-pill--marketing-specialist";
+            case RoleId.Accountant:                 return "role-pill--accountant";
+            case RoleId.HrSpecialist:               return "role-pill--hr-specialist";
+            default:                                return "role-pill--unknown";
         }
     }
 
-    // Alias for RolePillClass(EmployeeRole) — returns the USS modifier class for the role pill.
-    public static string GetRoleClass(EmployeeRole role) => RolePillClass(role);
+    // Alias for RolePillClass(RoleId) — returns the USS modifier class for the role pill.
+    public static string GetRoleClass(RoleId role) => RolePillClass(role);
 
     public static void ClearRolePillClasses(VisualElement el) {
         el.RemoveFromClassList("role-pill--developer");
@@ -202,18 +200,26 @@ public static class UIFormatting
         }
     }
 
-    public static Color GetSkillColor(SkillType skill) {
+    public static Color GetSkillColor(SkillId skill) {
         switch (skill) {
-            case SkillType.Programming: return new Color(0.376f, 0.647f, 0.980f);
-            case SkillType.Design:      return new Color(0.655f, 0.545f, 0.980f);
-            case SkillType.QA:          return new Color(0.204f, 0.827f, 0.600f);
-            case SkillType.VFX:         return new Color(0.984f, 0.573f, 0.235f);
-            case SkillType.SFX:         return new Color(0.957f, 0.447f, 0.718f);
-            case SkillType.HR:          return new Color(0.984f, 0.749f, 0.141f);
-            case SkillType.Negotiation: return new Color(0.176f, 0.831f, 0.749f);
-            case SkillType.Accountancy: return new Color(0.580f, 0.639f, 0.722f);
-            case SkillType.Marketing:   return new Color(0.961f, 0.620f, 0.043f);
-            default:                    return new Color(0.443f, 0.443f, 0.478f);
+            case SkillId.Programming:              return new Color(0.376f, 0.647f, 0.980f);
+            case SkillId.SystemsArchitecture:      return new Color(0.376f, 0.700f, 0.940f);
+            case SkillId.Security:                 return new Color(0.376f, 0.750f, 0.880f);
+            case SkillId.PerformanceOptimisation:  return new Color(0.376f, 0.800f, 0.820f);
+            case SkillId.HardwareIntegration:      return new Color(0.376f, 0.860f, 0.760f);
+            case SkillId.Manufacturing:            return new Color(0.376f, 0.900f, 0.700f);
+            case SkillId.ProductDesign:            return new Color(0.655f, 0.545f, 0.980f);
+            case SkillId.GameDesign:               return new Color(0.720f, 0.545f, 0.960f);
+            case SkillId.Vfx:                      return new Color(0.984f, 0.573f, 0.235f);
+            case SkillId.AudioDesign:              return new Color(0.957f, 0.447f, 0.718f);
+            case SkillId.QaTesting:                return new Color(0.204f, 0.827f, 0.600f);
+            case SkillId.TechnicalSupport:         return new Color(0.204f, 0.880f, 0.550f);
+            case SkillId.Marketing:                return new Color(0.961f, 0.620f, 0.043f);
+            case SkillId.Sales:                    return new Color(0.961f, 0.700f, 0.043f);
+            case SkillId.Accountancy:              return new Color(0.580f, 0.639f, 0.722f);
+            case SkillId.HrRecruitment:            return new Color(0.984f, 0.749f, 0.141f);
+            case SkillId.Negotiation:              return new Color(0.176f, 0.831f, 0.749f);
+            default:                               return new Color(0.443f, 0.443f, 0.478f);
         }
     }
 
@@ -297,19 +303,36 @@ public static class UIFormatting
         return days + " day window";
     }
 
-    // Short label for a SkillType — used in contract cards and phase rows
-    public static string FormatSkillShort(SkillType skill) {
+    // Short label for a SkillId — used in contract cards and phase rows
+    public static string FormatSkillShort(SkillId skill) {
         switch (skill) {
-            case SkillType.Programming: return "Prog";
-            case SkillType.Design:      return "Design";
-            case SkillType.QA:          return "QA";
-            case SkillType.VFX:         return "VFX";
-            case SkillType.SFX:         return "SFX";
-            case SkillType.HR:          return "HR";
-            case SkillType.Negotiation: return "Nego";
-            case SkillType.Accountancy: return "Acct";
-            case SkillType.Marketing:   return "Mktg";
-            default:                    return "?";
+            case SkillId.Programming:            return "Prog";
+            case SkillId.SystemsArchitecture:    return "Sys";
+            case SkillId.PerformanceOptimisation:return "Perf";
+            case SkillId.Security:               return "Sec";
+            case SkillId.CpuEngineering:         return "CPU";
+            case SkillId.GpuEngineering:         return "GPU";
+            case SkillId.HardwareIntegration:    return "HW";
+            case SkillId.Manufacturing:          return "Mfg";
+            case SkillId.ProductDesign:          return "Design";
+            case SkillId.UxUiDesign:             return "UX";
+            case SkillId.GameDesign:             return "Game";
+            case SkillId.UserResearch:           return "URes";
+            case SkillId.VisualArt:              return "Art";
+            case SkillId.Vfx:                    return "VFX";
+            case SkillId.AudioDesign:            return "Audio";
+            case SkillId.WritingContent:         return "Write";
+            case SkillId.QaTesting:              return "QA";
+            case SkillId.BugFixing:              return "Bug";
+            case SkillId.ReleaseManagement:      return "Rel";
+            case SkillId.TechnicalSupport:       return "Supp";
+            case SkillId.Marketing:              return "Mktg";
+            case SkillId.BrandManagement:        return "Brand";
+            case SkillId.Sales:                  return "Sales";
+            case SkillId.Negotiation:            return "Nego";
+            case SkillId.HrRecruitment:          return "HR";
+            case SkillId.Accountancy:            return "Acct";
+            default:                             return "?";
         }
     }
 
@@ -413,9 +436,9 @@ public static class UIFormatting
 
         // Build the string without string concat inside the loop
         switch (topCount) {
-            case 1: return FormatSkillShort((SkillType)topS[0]);
-            case 2: return FormatSkillShort((SkillType)topS[0]) + " / " + FormatSkillShort((SkillType)topS[1]);
-            default: return FormatSkillShort((SkillType)topS[0]) + " / " + FormatSkillShort((SkillType)topS[1]) + " / " + FormatSkillShort((SkillType)topS[2]);
+            case 1: return FormatSkillShort((SkillId)topS[0]);
+            case 2: return FormatSkillShort((SkillId)topS[0]) + " / " + FormatSkillShort((SkillId)topS[1]);
+            default: return FormatSkillShort((SkillId)topS[0]) + " / " + FormatSkillShort((SkillId)topS[1]) + " / " + FormatSkillShort((SkillId)topS[2]);
         }
     }
 

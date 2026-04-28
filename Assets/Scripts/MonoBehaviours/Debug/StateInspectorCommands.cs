@@ -99,7 +99,7 @@ public class StateInspectorCommands : MonoBehaviour, IDebugCommandHandler
             int ca = _gameController.AbilitySystem != null
                 ? _gameController.AbilitySystem.GetCA(emp.id, emp.role)
                 : 0;
-            sb.AppendLine($"  {emp.id.Value,-4} {emp.name,-18} {emp.role,-14} {ca,7} {emp.potentialAbility,9} {emp.morale,7} {emp.salary,8}");
+            sb.AppendLine($"  {emp.id.Value,-4} {emp.name,-18} {emp.role,-14} {ca,7} {emp.Stats.PotentialAbility,9} {emp.morale,7} {emp.salary,8}");
             count++;
         }
         sb.AppendLine($"  Total: {count}");

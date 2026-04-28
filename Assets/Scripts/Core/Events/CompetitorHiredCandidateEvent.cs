@@ -2,10 +2,10 @@ public class CompetitorHiredCandidateEvent : GameEvent
 {
     public CompetitorId CompetitorId;
     public string CandidateName;
-    public EmployeeRole Role;
+    public RoleId Role;
     public string CompanyName;
 
-    public CompetitorHiredCandidateEvent(int tick, CompetitorId competitorId, string candidateName, EmployeeRole role, string companyName)
+    public CompetitorHiredCandidateEvent(int tick, CompetitorId competitorId, string candidateName, RoleId role, string companyName)
         : base(tick)
     {
         CompetitorId = competitorId;

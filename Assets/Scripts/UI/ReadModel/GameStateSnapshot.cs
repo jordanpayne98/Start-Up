@@ -161,7 +161,7 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         for (int i = 0; i < count; i++) {
             var memberId = team.members[i];
             string memberName = "";
-            EmployeeRole empRole = EmployeeRole.Developer;
+            RoleId empRole = RoleId.SoftwareEngineer;
             int empCount = ActiveEmployees.Count;
             for (int e = 0; e < empCount; e++) {
                 if (ActiveEmployees[e].id == memberId) {
@@ -796,7 +796,7 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         int count = activeEmployees.Count;
         for (int i = 0; i < count; i++)
         {
-            if (activeEmployees[i].role == EmployeeRole.HR)
+            if (activeEmployees[i].role == RoleId.HrSpecialist)
                 result.Add(activeEmployees[i]);
         }
     }
@@ -828,7 +828,7 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         int empCount = ActiveEmployees.Count;
         for (int i = 0; i < empCount; i++) {
             if (ActiveEmployees[i].id == id)
-                return ActiveEmployees[i].potentialAbility;
+                return ActiveEmployees[i].Stats.PotentialAbility;
         }
         return 0;
     }
@@ -837,18 +837,17 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         return AbilityCalculator.PotentialToStars(GetEmployeePotential(id));
     }
 
-    public HiddenAttributes GetEmployeeHiddenAttributes(EmployeeId id) {
-        int empCount = ActiveEmployees.Count;
-        for (int i = 0; i < empCount; i++) {
-            if (ActiveEmployees[i].id == id)
-                return ActiveEmployees[i].hiddenAttributes;
-        }
-        return new HiddenAttributes();
+    public int ComputeAbilityForRole(int[] skills, RoleId role, RoleProfileTable roleProfileTable) {
+        if (skills == null) return 0;
+        if (roleProfileTable == null) return 0;
+        var profile = roleProfileTable.Get(role);
+        if (profile == null) return 0;
+        int[] tiers = RoleSuitabilityCalculator.BuildTierArray(profile);
+        return RoleSuitabilityCalculator.ComputeAbilityForRole(skills, tiers);
     }
 
-    public int ComputeAbilityForRole(int[] skills, EmployeeRole role) {
-        if (_abilitySystem == null || skills == null) return 0;
-        return RoleSuitabilityCalculator.ComputeAbilityForRole(skills, _abilitySystem.TierTable.GetTiers(role));
+    public int ComputeAbilityForRole(int[] skills, RoleId role) {
+        return ComputeAbilityForRole(skills, role, _abilitySystem?.ProfileTable);
     }
 
     public CandidatePotentialEstimate GetCandidatePotentialEstimate(int candidateId) {
@@ -899,8 +898,9 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         foreach (var kvp in _employeeState.employees) {
             var emp = kvp.Value;
             if (!emp.isActive) continue;
-            if (emp.role != EmployeeRole.HR) continue;
-            total += emp.hrSkill;
+            if (emp.role != RoleId.HrSpecialist) continue;
+            int hrSkill = emp.Stats.GetSkill(SkillId.HrRecruitment);
+            total += hrSkill;
             count++;
         }
         return count > 0 ? total / count : -1;
@@ -957,7 +957,7 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         int count = AvailableCandidates.Count;
         for (int i = 0; i < count; i++) {
             if (AvailableCandidates[i].CandidateId == candidateId)
-                return _interviewSystem.GetPotentialStarEstimate(candidateId, AvailableCandidates[i].PotentialAbility);
+                return _interviewSystem.GetPotentialStarEstimate(candidateId, AvailableCandidates[i].Stats.PotentialAbility);
         }
         return -1;
     }
@@ -1013,10 +1013,10 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
             var c = AvailableCandidates[i];
             if (c.CandidateId != candidateId) continue;
             if (!IsFinalReportReady(candidateId)) return null;
-            int abilityMax = AbilityCalculator.MaxAbility(c.Role);
-            int potentialMax = AbilityCalculator.MaxPotential(c.Role);
+            int abilityMax = AbilityCalculator.MaxAbility(_tuning);
+            int potentialMax = AbilityCalculator.MaxPotential(_tuning);
             return RecommendationLabelBuilder.Build(
-                c.CurrentAbility, c.PotentialAbility, abilityMax, potentialMax,
+                c.CurrentAbility, c.Stats.PotentialAbility, abilityMax, potentialMax,
                 c.Role, _tuning);
         }
         return null;

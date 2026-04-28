@@ -15,7 +15,7 @@ public static class OfferEvaluator
     // Returns a 0-100 satisfaction score for the given offer.
     // Salary contributes 50 pts, role 20 pts, FT/PT 15 pts, length 15 pts.
     public static float ComputeSatisfaction(OfferPackage offer, int computedDemand,
-        EmployeeRole preferredRole, CandidatePreferences prefs, RoleSuitability offeredRoleSuitability)
+        RoleId preferredRole, CandidatePreferences prefs, RoleSuitability offeredRoleSuitability)
     {
         float salaryScore = SalaryCurve(computedDemand > 0 ? (float)offer.OfferedSalary / computedDemand : 0f) * 50f;
         float roleScore   = RoleFactor(preferredRole, offer.OfferedRole, offeredRoleSuitability) * 20f;
@@ -33,17 +33,17 @@ public static class OfferEvaluator
     }
 
     // Returns true if the gamble succeeds (candidate accepts same terms again).
-    // adaptability is HiddenAttributes.Adaptability (1-20 scale → up to 20% chance).
+    // adaptability is EmployeeStatBlock.GetVisibleAttribute(VisibleAttributeId.Adaptability) (1-20 scale → up to 20% chance).
     public static bool EvaluateSameTermsGamble(float adaptability, IRng rng)
     {
         return rng.NextFloat01() < adaptability / 100f;
     }
 
-    // Computes max patience rounds from hidden attributes. Range 2-6.
-    public static int ComputeMaxPatience(HiddenAttributes hidden)
+    // Computes max patience rounds from stat block. Range 2-6.
+    public static int ComputeMaxPatience(EmployeeStatBlock stats)
     {
-        float adaptBonus = hidden.Adaptability / 10f;
-        float ambitionPenalty = hidden.Ambition / 20f;
+        float adaptBonus = stats.GetVisibleAttribute(VisibleAttributeId.Adaptability) / 10f;
+        float ambitionPenalty = stats.GetHiddenAttribute(HiddenAttributeId.Ambition) / 20f;
         int patience = 3 + (int)adaptBonus - (int)ambitionPenalty;
         if (patience < 2) patience = 2;
         if (patience > 6) patience = 6;
@@ -100,7 +100,7 @@ public static class OfferEvaluator
     }
 
     // Role factor: preferred role = 1.0, off-role scales down by suitability.
-    private static float RoleFactor(EmployeeRole preferred, EmployeeRole offered, RoleSuitability suitability)
+    private static float RoleFactor(RoleId preferred, RoleId offered, RoleSuitability suitability)
     {
         if (preferred == offered) return 1.0f;
         switch (suitability)

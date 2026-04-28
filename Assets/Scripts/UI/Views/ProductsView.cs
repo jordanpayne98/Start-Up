@@ -186,8 +186,8 @@ public class ProductsView : IGameView
     private bool _showingShipped;
 
     // ── Create product mode ───────────────────────────────────────────────────
-    private CreateProductView _createProductView;
-    private CreateProductViewModel _createProductVm;
+    private ProductCreationPlanningView _createProductView;
+    private ProductCreationPlanningViewModel _createProductVm;
     private VisualElement _createProductContainer;
     private bool _isInCreateMode;
     private VisualElement _tabRow;
@@ -1314,7 +1314,8 @@ public class ProductsView : IGameView
         // ── Create mode routing ──────────────────────────────────────────────
         if (_isInCreateMode && _createProductView != null && _createProductVm != null)
         {
-            _createProductVm.Refresh(viewModel as IReadOnlyGameState ?? GetSnapshotFromViewModel(viewModel));
+            var snapshot = viewModel as IReadOnlyGameState ?? GetSnapshotFromViewModel(viewModel);
+            if (snapshot != null) _createProductVm.Refresh(snapshot);
             _createProductView.Bind(_createProductVm);
             return;
         }
@@ -2899,90 +2900,40 @@ public class ProductsView : IGameView
         var definitions = _viewModel?.CachedTemplates ?? new ProductTemplateDefinition[0];
         var niches = _viewModel?.CachedNicheData ?? new MarketNicheData[0];
 
-        _createProductVm = new CreateProductViewModel();
+        _createProductVm = new ProductCreationPlanningViewModel();
         _createProductVm.SetNicheData(niches);
+        _createProductVm.SetTemplates(definitions);
 
         if (_dispatcher is WindowManager wmCreate && wmCreate.GameController != null)
         {
-            _createProductVm.SetGateConfig(wmCreate.GameController.CrossProductGateConfig, wmCreate.GameController.ProductTemplates);
             var snapshot = wmCreate.GetCurrentSnapshot() as GameStateSnapshot;
-
-            if (updateId.HasValue && snapshot?.ShippedProducts != null)
-            {
-                snapshot.ShippedProducts.TryGetValue(updateId.Value, out var updateProduct);
-                if (updateProduct != null) _createProductVm.InitAsUpdate(updateProduct, definitions);
-            }
-            else if (sequelOfId.HasValue && snapshot != null)
-            {
-                Product original = null;
-                snapshot.ShippedProducts?.TryGetValue(sequelOfId.Value, out original);
-                if (original == null)
-                    snapshot.ArchivedProducts?.TryGetValue(sequelOfId.Value, out original);
-                if (original != null) _createProductVm.InitAsSequel(original, definitions);
-            }
-            else
-            {
-                _createProductVm.SetTemplates(definitions);
-            }
 
             if (snapshot != null)
             {
                 _createProductVm.Refresh(snapshot);
 
-                var selectedTemplateId = _createProductVm.SelectedTemplateId;
-                ProductTemplateDefinition template = null;
-                if (!string.IsNullOrEmpty(selectedTemplateId))
+                if (_dispatcher is WindowManager wmHw && wmHw.GameController != null)
                 {
-                    for (int i = 0; i < definitions.Length; i++)
-                    {
-                        if (definitions[i] != null && definitions[i].templateId == selectedTemplateId)
-                        {
-                            template = definitions[i];
-                            break;
-                        }
-                    }
-                }
-
-                var playerPlatforms = new System.Collections.Generic.Dictionary<ProductId, Product>();
-                var competitorPlatforms = new System.Collections.Generic.Dictionary<ProductId, Product>();
-                var allShipped = snapshot.ShippedProducts;
-                if (allShipped != null)
-                {
-                    foreach (var kvp in allShipped)
-                    {
-                        if (kvp.Value.IsCompetitorProduct)
-                            competitorPlatforms[kvp.Key] = kvp.Value;
-                        else
-                            playerPlatforms[kvp.Key] = kvp.Value;
-                    }
-                }
-
-                _createProductVm.PopulatePlatformsFromState(
-                    playerPlatforms,
-                    competitorPlatforms,
-                    template?.validTargetPlatforms,
-                    template?.validPlatformNiches,
-                    true);
-                _createProductVm.PopulateToolsFromState(
-                    playerPlatforms,
-                    competitorPlatforms,
-                    template?.requiredToolTypes);
-
-                if (_dispatcher is WindowManager wmHw && wmHw.GameController != null) {
                     var gc = wmHw.GameController;
                     int currentGen = gc.GenerationSystem?.GetCurrentGeneration() ?? 1;
                     var hwConfigs = gc.HardwareGenerationConfigs;
-                    if (hwConfigs != null && hwConfigs.Length > 0) {
+                    if (hwConfigs != null && hwConfigs.Length > 0)
+                    {
                         HardwareGenerationConfig hwFound = null;
-                        for (int i = 0; i < hwConfigs.Length; i++) {
-                            if (hwConfigs[i] != null && hwConfigs[i].generation == currentGen) {
+                        for (int i = 0; i < hwConfigs.Length; i++)
+                        {
+                            if (hwConfigs[i] != null && hwConfigs[i].generation == currentGen)
+                            {
                                 hwFound = hwConfigs[i];
                                 break;
                             }
                         }
-                        if (hwFound == null) {
-                            for (int i = 0; i < hwConfigs.Length; i++) {
-                                if (hwConfigs[i] != null && hwConfigs[i].generation <= currentGen) {
+                        if (hwFound == null)
+                        {
+                            for (int i = 0; i < hwConfigs.Length; i++)
+                            {
+                                if (hwConfigs[i] != null && hwConfigs[i].generation <= currentGen)
+                                {
                                     if (hwFound == null || hwConfigs[i].generation > hwFound.generation)
                                         hwFound = hwConfigs[i];
                                 }
@@ -2994,13 +2945,8 @@ public class ProductsView : IGameView
                 }
             }
         }
-        else
-        {
-            _createProductVm.SetTemplates(definitions);
-        }
 
-        _createProductView = new CreateProductView(_dispatcher, _modal, _tooltipProvider, definitions, niches,
-            updateId, sequelOfId);
+        _createProductView = new ProductCreationPlanningView(_dispatcher, _modal);
         _createProductView.OnCancelRequested += OnCreateCancelled;
         _createProductView.OnProductCreated += OnCreateConfirmed;
 

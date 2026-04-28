@@ -7,7 +7,7 @@ public struct AvailableEmployeeDisplay
     public string RoleName;
     public string RolePillClass;
     public string TypeText;
-    public EmployeeRole Role;
+    public RoleId Role;
 }
 
 public class AddMemberModalViewModel : IViewModel

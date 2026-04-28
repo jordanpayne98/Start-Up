@@ -102,7 +102,7 @@ public class HRAssignmentsViewModel : IViewModel
         for (int i = 0; i < sourcedCount; i++) {
             var c = sourced[i];
             string ability = c.CurrentAbility.ToString();
-            int stars = AbilityCalculator.PotentialToStars(c.PotentialAbility);
+            int stars = AbilityCalculator.PotentialToStars(c.Stats.PotentialAbility);
             string potential = AbilityCalculator.PotentialStarsDisplay(stars);
             _sourcedCandidates.Add(new SourcedCandidateDisplay {
                 CandidateId       = c.CandidateId,

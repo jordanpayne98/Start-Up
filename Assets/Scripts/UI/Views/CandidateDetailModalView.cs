@@ -2,1313 +2,1106 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+/// <summary>
+/// UXML-backed candidate details modal.
+/// Initialize loads the CandidateDetailModal.uxml template into the provided root,
+/// queries all named elements, and wires tab switching + action button handlers.
+/// Bind performs data-only updates from the ViewModel with no structural changes.
+/// Adapts the shared profile shell from EmployeeDetailModalView with confidence overlays.
+/// </summary>
 public class CandidateDetailModalView : IGameView
 {
-    private readonly IModalPresenter _modal;
     private readonly ICommandDispatcher _dispatcher;
+    private readonly IModalPresenter    _modal;
 
-    private VisualElement _root;
+    private VisualTreeAsset _asset;
     private CandidateDetailModalViewModel _vm;
+    private VisualElement _root;
 
-    // Header
-    private Label _nameLabel;
-    private Label _ageLabel;
-    private Label _rolePill;
-    private Label _sourceLabel;
-    private Label _expiryLabel;
-    private Button _closeButton;
-    private Button _offerBackButton;
+    // ── Header ───────────────────────────────────────────────────────────────
 
-    // Detail view container
-    private VisualElement _detailView;
+    private Label         _nameLabel;
+    private Label         _ageLabel;
+    private Label         _rolePill;
+    private Label         _sourceBadge;
+    private Label         _pipelineStateLabel;
+    private Label         _salaryEstimateLabel;
+    private Label         _salaryConfidenceLabel;
+    private Label         _caEstimateLabel;
+    private Label         _paEstimateLabel;
+    private Label         _overallConfidenceLabel;
+    private Label         _expiryLabel;
+    private VisualElement _badgesContainer;
 
-    // Detail — personality / preferences (right col Preferences card)
-    private Label _personalityLabel;
-    private Label _ftPrefLabel;
-    private Label _lengthPrefLabel;
+    // ── Tabs ─────────────────────────────────────────────────────────────────
 
-    // Detail — role suitability rows (8 rows, left col)
-    private readonly List<VisualElement> _suitabilityRows = new List<VisualElement>(8);
+    private readonly List<Button>        _tabButtons  = new List<Button>(5);
+    private readonly List<VisualElement> _tabContents = new List<VisualElement>(5);
 
-    // Detail — skill table rows (9 rows, right col)
-    private readonly List<Label> _skillNameLabels  = new List<Label>(9);
-    private readonly List<Label> _skillValueLabels = new List<Label>(9);
+    // ── Overview panels ──────────────────────────────────────────────────────
 
-    // Detail — capability
-    private Label _abilityLabel;
-    private Label _potentialLabel;
+    private VisualElement _roleFitRows;
+    private VisualElement _teamSelector;
+    private Label         _teamProjectionFit;
+    private Label         _teamProjectionDetail;
+    private VisualElement _coreSkillsRows;
+    private VisualElement _supportingSkillsRows;
+    private VisualElement _attributesRows;
+    private Label         _reportSummaryLabel;
+    private VisualElement _reportStrengths;
+    private VisualElement _reportConcerns;
+    private Label         _reportConfidenceLabel;
+    private Label         _recommendationLabel;
 
-    // Detail — salary
-    private Label _salaryAskingLabel;
-    private Label _salaryMarketLabel;
+    // ── Interview panel ──────────────────────────────────────────────────────
 
-    // Detail — status bar
-    private Label _statusSourceLabel;
-    private Label _statusReliabilityLabel;
-    private Label _statusExpiryLabel;
-    private VisualElement _statusPatienceContainer;
-    private readonly List<VisualElement> _statusPatienceDots = new List<VisualElement>(6);
+    private Label         _interviewStageLabel;
+    private Label         _interviewHRTeamLabel;
+    private Label         _interviewTimeLabel;
+    private Label         _interviewKnowledgeLabel;
+    private Label         _firstReportLabel;
+    private Label         _finalReportLabel;
+    private VisualElement _revealedStrengths;
+    private VisualElement _revealedConcerns;
 
-    // Interview progress bar
-    private VisualElement _interviewProgressBar;
-    private VisualElement _interviewProgressFill;
+    // ── Personality panel ────────────────────────────────────────────────────
 
-    // Footer buttons (detail)
-    private Button _interviewButton;
-    private Button _shortlistButton;
-    private Button _rejectButton;
-    private Button _makeOfferButton;
+    private Label         _personalityTypeLabel;
+    private Label         _personalityConfidenceLabel;
+    private VisualElement _signalRows;
+    private VisualElement _riskFlagRows;
+    private Label         _retentionRiskLabel;
+    private Label         _salaryPressureLabel;
 
-    // Offer view container
-    private VisualElement _offerView;
+    // ── Comparison panel ─────────────────────────────────────────────
+    private VisualElement _comparisonTargetSelector;
+    private Label         _comparisonTargetColHeader;
+    private VisualElement _comparisonCandidateMetrics;
+    private VisualElement _comparisonLabelMetrics;
+    private VisualElement _comparisonTargetMetrics;
+    private VisualElement _comparisonDeltaMetrics;
+    private Label         _comparisonRecommendationText;
+    private DropdownField _comparisonDropdown;
+    private DropdownField _teamDropdown;
 
-    // Offer — role selector rows (one per role)
-    private readonly List<VisualElement> _roleRows = new List<VisualElement>(8);
+    // ── Offer panel ──────────────────────────────────────────────────────────
 
-    // Offer arrangement toggle
-    private Button _offerFTButton;
-    private Button _offerPTButton;
-    private EmploymentType _selectedEmploymentType = EmploymentType.FullTime;
+    private Label         _salaryDemandStateLabel;
+    private Label         _salaryEstimateDisplay;
+    private Label         _monthlyCostLabel;
+    private Label         _runwayImpactLabel;
+    private Label         _acceptanceChanceLabel;
+    private VisualElement _acceptanceFactorsList;
+    private Label         _offerStatusLabel;
+    private VisualElement _offerStatusSection;
+    private Button        _btnMakeOffer;
+    private Button        _btnHire;
+    private Button        _btnWithdrawOffer;
+    private Button        _btnAcceptCounter;
+    private Button        _btnRejectCounter;
 
-    // Offer length selector
-    private Button _offerShortBtn;
-    private Button _offerStdBtn;
-    private Button _offerLongBtn;
-    private ContractLengthOption _selectedLength = ContractLengthOption.Standard;
+    // ── Bottom status cards ──────────────────────────────────────────────────
 
-    // Offer salary slider
-    private Slider _salarySlider;
-    private Label _salarySliderValueLabel;
-    private Label _salaryDemandSubLabel;
-    private Label _salaryMarketSubLabel;
+    private Label         _statusInterestValue;
+    private Label         _statusSalaryValue;
+    private Label         _statusPotentialValue;
+    private Label         _statusRiskValue;
+    private Label         _statusAvailabilityValue;
+    private Label         _statusInterviewValue;
+    private Label         _statusTeamImpactValue;
+    private Label         _statusComparisonValue;
 
-    // Offer acceptance bar
-    private VisualElement _acceptanceBarFill;
-    private Label _acceptanceChanceLabel;
+    private VisualElement _statusCardInterest;
+    private VisualElement _statusCardSalary;
+    private VisualElement _statusCardPotential;
+    private VisualElement _statusCardRisk;
+    private VisualElement _statusCardAvailability;
+    private VisualElement _statusCardInterview;
+    private VisualElement _statusCardTeamImpact;
+    private VisualElement _statusCardComparison;
 
-    // Patience dots
-    private VisualElement _patienceDotsContainer;
-    private readonly List<VisualElement> _patienceDots = new List<VisualElement>(6);
+    // ── Footer action buttons ────────────────────────────────────────────────
 
-    // Mismatch section
-    private VisualElement _mismatchSection;
-    private Label _mismatchHintLabel;
-    private VisualElement _mismatchListContainer;
-    private ElementPool _mismatchPool;
+    private Button _btnClose;
+    private Button _btnCloseFooter;
+    private Button _btnInterview;
+    private Button _btnShortlist;
+    private Button _btnOffer;
+    private Button _btnReject;
+    private Button _btnHireFooter;
+    private Button _btnWithdrawFooter;
+    private Button _btnAcceptHR;
+    private Button _btnDeclineHR;
 
-    // Confirm offer button
-    private Button _confirmOfferButton;
+    private VisualElement _footerActions;
 
-    // Reject confirm overlay
-    private VisualElement _rejectOverlay;
-    private Button _rejectConfirmButton;
-    private Button _rejectCancelButton;
+    // ── Constructor ───────────────────────────────────────────────────────────
 
-    // Shortlist duration overlay
-    private VisualElement _shortlistOverlay;
-    private Button _shortlist1m;
-    private Button _shortlist3m;
-    private Button _shortlist6m;
-    private Button _shortlistIndef;
-    private Button _shortlistCancel;
-
-    private bool _inOfferView;
-
-    public CandidateDetailModalView(IModalPresenter modal, ICommandDispatcher dispatcher) {
-        _modal = modal;
+    public CandidateDetailModalView(IModalPresenter modal, ICommandDispatcher dispatcher)
+    {
+        _modal      = modal;
         _dispatcher = dispatcher;
     }
 
-    public void Initialize(VisualElement root) {
+    /// <summary>Called by WindowManager before Initialize to inject the UXML template asset.</summary>
+    public void SetAsset(VisualTreeAsset asset)
+    {
+        _asset = asset;
+    }
+
+    // ── IGameView ─────────────────────────────────────────────────────────────
+
+    public void Initialize(VisualElement root)
+    {
         _root = root;
-        _root.AddToClassList("candidate-detail-modal");
 
-        // --- Header ---
-        var header = new VisualElement();
-        header.AddToClassList("modal-header");
-        header.AddToClassList("flex-row");
-        header.AddToClassList("justify-between");
-
-        var headerLeft = new VisualElement();
-        headerLeft.AddToClassList("flex-row");
-        headerLeft.style.alignItems = Align.Center;
-
-        _offerBackButton = new Button();
-        _offerBackButton.text = "\u2190 Back";
-        _offerBackButton.AddToClassList("btn-ghost");
-        _offerBackButton.AddToClassList("btn-sm");
-        _offerBackButton.style.display = DisplayStyle.None;
-        _offerBackButton.style.marginRight = 8;
-        headerLeft.Add(_offerBackButton);
-
-        var nameAgeRow = new VisualElement();
-        nameAgeRow.AddToClassList("flex-col");
-        _nameLabel = new Label("Name");
-        _nameLabel.AddToClassList("text-2xl");
-        _nameLabel.AddToClassList("text-bold");
-        nameAgeRow.Add(_nameLabel);
-
-        var roleMeta = new VisualElement();
-        roleMeta.AddToClassList("flex-row");
-        roleMeta.style.alignItems = Align.Center;
-        _rolePill = new Label("Role");
-        _rolePill.AddToClassList("role-pill");
-        _rolePill.style.marginRight = 6;
-        roleMeta.Add(_rolePill);
-        _ageLabel = new Label("Age");
-        _ageLabel.AddToClassList("metric-tertiary");
-        roleMeta.Add(_ageLabel);
-        nameAgeRow.Add(roleMeta);
-
-        headerLeft.Add(nameAgeRow);
-        header.Add(headerLeft);
-
-        _closeButton = new Button();
-        _closeButton.text = "\u2715";
-        _closeButton.AddToClassList("btn-ghost");
-        _closeButton.AddToClassList("btn-icon");
-        header.Add(_closeButton);
-
-        _root.Add(header);
-
-        // --- Source / Expiry meta row ---
-        var metaRow = new VisualElement();
-        metaRow.AddToClassList("flex-row");
-        metaRow.style.marginBottom = 8;
-        _sourceLabel = new Label("Market");
-        _sourceLabel.AddToClassList("badge");
-        _sourceLabel.AddToClassList("badge--muted");
-        _sourceLabel.style.marginRight = 8;
-        metaRow.Add(_sourceLabel);
-        _expiryLabel = new Label("--d remaining");
-        _expiryLabel.AddToClassList("metric-tertiary");
-        metaRow.Add(_expiryLabel);
-        _root.Add(metaRow);
-
-        // --- Scroll body ---
-        var scroll = new ScrollView();
-        scroll.style.flexGrow = 1;
-        scroll.style.flexShrink = 1;
-        _root.Add(scroll);
-
-        // ---- Detail View ----
-        _detailView = new VisualElement();
-        _detailView.AddToClassList("detail-view");
-        scroll.Add(_detailView);
-
-        // Two-column body
-        var detailBody = new VisualElement();
-        detailBody.AddToClassList("modal-body--two-col");
-        _detailView.Add(detailBody);
-
-        // Left column (40%)
-        var leftCol = new VisualElement();
-        leftCol.AddToClassList("modal-col--left");
-        detailBody.Add(leftCol);
-
-        // Right column (60%)
-        var rightCol = new VisualElement();
-        rightCol.AddToClassList("modal-col--right");
-        detailBody.Add(rightCol);
-
-        // --- Left: Role Suitability card ---
-        var suitabilityCard = BuildSectionCard("Role Suitability", leftCol);
-        var allRoles = RoleSuitabilityCalculator.AllRoles;
-        int roleCount = allRoles.Length;
-        for (int i = 0; i < roleCount; i++) {
-            var row = new VisualElement();
-            row.AddToClassList("role-suitability-row");
-
-            var dot = new VisualElement();
-            dot.AddToClassList("suitability-dot");
-            dot.AddToClassList("suitability-dot--unsuitable");
-            dot.name = "suitability-dot";
-            row.Add(dot);
-
-            var nameLabel = new Label(UIFormatting.FormatRole(allRoles[i]));
-            nameLabel.AddToClassList("metric-secondary");
-            nameLabel.name = "suitability-name";
-            row.Add(nameLabel);
-
-            var preferredLabel = new Label("(preferred)");
-            preferredLabel.AddToClassList("metric-tertiary");
-            preferredLabel.style.marginLeft = 6;
-            preferredLabel.style.display = DisplayStyle.None;
-            preferredLabel.name = "suitability-preferred";
-            row.Add(preferredLabel);
-
-            suitabilityCard.Add(row);
-            _suitabilityRows.Add(row);
+        if (_asset != null)
+        {
+            _asset.CloneTree(root);
+        }
+        else
+        {
+            root.AddToClassList("cdm");
+            Debug.LogWarning("[CandidateDetailModalView] No VisualTreeAsset assigned. " +
+                             "Assign candidateDetailAsset in WindowManager inspector.");
         }
 
-        // --- Left: Capability card ---
-        var capCard = BuildSectionCard("Capability", leftCol);
-        (_abilityLabel, _)   = AddDetailRow(capCard, "Ability");
-        (_potentialLabel, _) = AddDetailRow(capCard, "Potential");
+        // ── Query header ──────────────────────────────────────────────────────
+        _nameLabel              = root.Q<Label>("name-label");
+        _ageLabel               = root.Q<Label>("age-label");
+        _rolePill               = root.Q<Label>("role-pill");
+        _sourceBadge            = root.Q<Label>("source-badge");
+        _pipelineStateLabel     = root.Q<Label>("pipeline-state-label");
+        _salaryEstimateLabel    = root.Q<Label>("salary-estimate-label");
+        _salaryConfidenceLabel  = root.Q<Label>("salary-confidence-label");
+        _caEstimateLabel        = root.Q<Label>("ca-estimate-label");
+        _paEstimateLabel        = root.Q<Label>("pa-estimate-label");
+        _overallConfidenceLabel = root.Q<Label>("overall-confidence-label");
+        _expiryLabel            = root.Q<Label>("expiry-label");
+        _badgesContainer        = root.Q<VisualElement>("badges-container");
 
-        // --- Left: Salary card ---
-        var salaryCard = BuildSectionCard("Salary", leftCol);
-        (_salaryAskingLabel, _) = AddDetailRow(salaryCard, "Asking");
-        (_salaryMarketLabel, _) = AddDetailRow(salaryCard, "Market Rate");
+        // ── Query tabs ────────────────────────────────────────────────────────
+        _tabButtons.Clear();
+        _tabContents.Clear();
 
-        // --- Right: Skills Table card ---
-        var skillsCard = BuildSectionCard("Skills", rightCol);
-        int skillCount = SkillTypeHelper.SkillTypeCount;
-        for (int i = 0; i < skillCount; i++) {
-            var row = new VisualElement();
-            row.AddToClassList("skill-row");
+        _tabButtons.Add(root.Q<Button>("tab-overview"));
+        _tabButtons.Add(root.Q<Button>("tab-interview"));
+        _tabButtons.Add(root.Q<Button>("tab-personality"));
+        _tabButtons.Add(root.Q<Button>("tab-comparison"));
+        _tabButtons.Add(root.Q<Button>("tab-offer"));
 
-            var nameLabel = new Label("--");
-            nameLabel.AddToClassList("skill-row__name");
-            row.Add(nameLabel);
+        _tabContents.Add(root.Q<VisualElement>("overview-content"));
+        _tabContents.Add(root.Q<VisualElement>("interview-content"));
+        _tabContents.Add(root.Q<VisualElement>("personality-content"));
+        _tabContents.Add(root.Q<VisualElement>("comparison-content"));
+        _tabContents.Add(root.Q<VisualElement>("offer-content"));
 
-            var valueLabel = new Label("--");
-            valueLabel.AddToClassList("skill-row__value");
-            row.Add(valueLabel);
+        if (_tabButtons[0] != null) _tabButtons[0].clicked += OnTab0Clicked;
+        if (_tabButtons[1] != null) _tabButtons[1].clicked += OnTab1Clicked;
+        if (_tabButtons[2] != null) _tabButtons[2].clicked += OnTab2Clicked;
+        if (_tabButtons[3] != null) _tabButtons[3].clicked += OnTab3Clicked;
+        if (_tabButtons[4] != null) _tabButtons[4].clicked += OnTab4Clicked;
 
-            skillsCard.Add(row);
-            _skillNameLabels.Add(nameLabel);
-            _skillValueLabels.Add(valueLabel);
+        ShowTab(0);
+
+        // ── Query overview panels ─────────────────────────────────────────────
+        _roleFitRows          = root.Q<VisualElement>("role-fit-rows");
+        _teamSelector         = root.Q<VisualElement>("team-selector");
+        _teamProjectionFit    = root.Q<Label>("team-projection-fit");
+        _teamProjectionDetail = root.Q<Label>("team-projection-detail");
+        _coreSkillsRows       = root.Q<VisualElement>("core-skills-rows");
+        _supportingSkillsRows = root.Q<VisualElement>("supporting-skills-rows");
+        _attributesRows       = root.Q<VisualElement>("attributes-rows");
+        _reportSummaryLabel   = root.Q<Label>("report-summary-label");
+        _reportStrengths      = root.Q<VisualElement>("report-strengths");
+        _reportConcerns       = root.Q<VisualElement>("report-concerns");
+        _reportConfidenceLabel = root.Q<Label>("report-confidence-label");
+        _recommendationLabel  = root.Q<Label>("recommendation-label");
+
+        // Create and wire team dropdown once
+        if (_teamSelector != null)
+        {
+            _teamDropdown = new DropdownField("Team", new List<string> { "Select a team..." }, 0);
+            _teamDropdown.RegisterValueChangedCallback(OnTeamDropdownChanged);
+            _teamSelector.Add(_teamDropdown);
         }
 
-        // --- Right: Preferences card ---
-        var prefCard = BuildSectionCard("Preferences", rightCol);
-        (_ftPrefLabel, _)     = AddDetailRow(prefCard, "FT / PT");
-        (_lengthPrefLabel, _) = AddDetailRow(prefCard, "Contract Length");
+        // ── Query interview panel ─────────────────────────────────────────────
+        _interviewStageLabel     = root.Q<Label>("interview-stage-label");
+        _interviewHRTeamLabel    = root.Q<Label>("interview-hr-team-label");
+        _interviewTimeLabel      = root.Q<Label>("interview-time-label");
+        _interviewKnowledgeLabel = root.Q<Label>("interview-knowledge-label");
+        _firstReportLabel        = root.Q<Label>("first-report-label");
+        _finalReportLabel        = root.Q<Label>("final-report-label");
+        _revealedStrengths       = root.Q<VisualElement>("revealed-strengths");
+        _revealedConcerns        = root.Q<VisualElement>("revealed-concerns");
 
-        var personalityRow = new VisualElement();
-        personalityRow.AddToClassList("flex-row");
-        personalityRow.AddToClassList("justify-between");
-        personalityRow.AddToClassList("detail-row");
-        personalityRow.style.marginBottom = 4;
-        var personalityKeyLabel = new Label("Personality");
-        personalityKeyLabel.AddToClassList("metric-tertiary");
-        personalityRow.Add(personalityKeyLabel);
-        _personalityLabel = new Label("Interview required");
-        _personalityLabel.AddToClassList("metric-secondary");
-        _personalityLabel.style.whiteSpace = WhiteSpace.Normal;
-        _personalityLabel.style.maxWidth = 160;
-        _personalityLabel.style.unityTextAlign = TextAnchor.MiddleRight;
-        personalityRow.Add(_personalityLabel);
-        prefCard.Add(personalityRow);
+        // ── Query personality panel ───────────────────────────────────────────
+        _personalityTypeLabel       = root.Q<Label>("personality-type-label");
+        _personalityConfidenceLabel = root.Q<Label>("personality-confidence-label");
+        _signalRows                 = root.Q<VisualElement>("signal-rows");
+        _riskFlagRows               = root.Q<VisualElement>("risk-flag-rows");
+        _retentionRiskLabel         = root.Q<Label>("retention-risk-label");
+        _salaryPressureLabel        = root.Q<Label>("salary-pressure-label");
 
-        // Interview progress bar (hidden unless in progress)
-        _interviewProgressBar = new VisualElement();
-        _interviewProgressBar.AddToClassList("progress-bar");
-        _interviewProgressBar.style.marginTop = 8;
-        _interviewProgressBar.style.display = DisplayStyle.None;
-        _interviewProgressFill = new VisualElement();
-        _interviewProgressFill.AddToClassList("progress-bar__fill");
-        _interviewProgressBar.Add(_interviewProgressFill);
-        _detailView.Add(_interviewProgressBar);
+        // ── Query comparison panel ────────────────────────────────────────────
+        _comparisonTargetSelector   = root.Q<VisualElement>("comparison-target-selector");
+        _comparisonTargetColHeader  = root.Q<Label>("comparison-target-col-header");
+        _comparisonCandidateMetrics = root.Q<VisualElement>("comparison-candidate-metrics");
+        _comparisonLabelMetrics     = root.Q<VisualElement>("comparison-metric-labels");
+        _comparisonTargetMetrics    = root.Q<VisualElement>("comparison-target-metrics");
+        _comparisonDeltaMetrics     = root.Q<VisualElement>("comparison-delta-metrics");
+        _comparisonRecommendationText = root.Q<Label>("comparison-recommendation-text");
 
-        // --- Status Bar ---
-        var statusBar = new VisualElement();
-        statusBar.AddToClassList("status-bar");
-        _root.Add(statusBar);
+        // Create and wire comparison dropdown once
+        if (_comparisonTargetSelector != null)
+        {
+            _comparisonDropdown = new DropdownField(new List<string> { "Same Role Employees", "Team Average", "Market Average" }, 0);
+            _comparisonDropdown.RegisterValueChangedCallback(OnComparisonDropdownChanged);
+            _comparisonTargetSelector.Add(_comparisonDropdown);
+        }
 
-        var sourceItem = new VisualElement();
-        sourceItem.AddToClassList("status-bar__item");
-        var sourceKeyLabel = new Label("Source");
-        sourceKeyLabel.AddToClassList("metric-tertiary");
-        sourceItem.Add(sourceKeyLabel);
-        _statusSourceLabel = new Label("--");
-        _statusSourceLabel.AddToClassList("metric-secondary");
-        sourceItem.Add(_statusSourceLabel);
-        statusBar.Add(sourceItem);
+        // ── Query offer panel ─────────────────────────────────────────────────
+        _salaryDemandStateLabel  = root.Q<Label>("salary-demand-state-label");
+        _salaryEstimateDisplay   = root.Q<Label>("salary-estimate-display");
+        _monthlyCostLabel        = root.Q<Label>("monthly-cost-label");
+        _runwayImpactLabel       = root.Q<Label>("runway-impact-label");
+        _acceptanceChanceLabel   = root.Q<Label>("acceptance-chance-label");
+        _acceptanceFactorsList   = root.Q<VisualElement>("acceptance-factors-list");
+        _offerStatusLabel        = root.Q<Label>("offer-status-label");
+        _offerStatusSection      = root.Q<VisualElement>("offer-status-section");
+        _btnMakeOffer            = root.Q<Button>("btn-make-offer");
+        _btnHire                 = root.Q<Button>("btn-hire");
+        _btnWithdrawOffer        = root.Q<Button>("btn-withdraw-offer");
+        _btnAcceptCounter        = root.Q<Button>("btn-accept-counter");
+        _btnRejectCounter        = root.Q<Button>("btn-reject-counter");
 
-        var confidenceItem = new VisualElement();
-        confidenceItem.AddToClassList("status-bar__item");
-        var confidenceKeyLabel = new Label("Reliability");
-        confidenceKeyLabel.AddToClassList("metric-tertiary");
-        confidenceItem.Add(confidenceKeyLabel);
-        _statusReliabilityLabel = new Label("--");
-        _statusReliabilityLabel.AddToClassList("metric-secondary");
-        confidenceItem.Add(_statusReliabilityLabel);
-        statusBar.Add(confidenceItem);
+        // ── Query bottom status cards ──────────────────────────────────────────
+        _statusCardInterest     = root.Q<VisualElement>("status-card-interest");
+        _statusCardSalary       = root.Q<VisualElement>("status-card-salary");
+        _statusCardPotential    = root.Q<VisualElement>("status-card-potential");
+        _statusCardRisk         = root.Q<VisualElement>("status-card-risk");
+        _statusCardAvailability = root.Q<VisualElement>("status-card-availability");
+        _statusCardInterview    = root.Q<VisualElement>("status-card-interview");
+        _statusCardTeamImpact   = root.Q<VisualElement>("status-card-team-impact");
+        _statusCardComparison   = root.Q<VisualElement>("status-card-comparison");
 
-        var expiryItem = new VisualElement();
-        expiryItem.AddToClassList("status-bar__item");
-        var expiryKeyLabel = new Label("Expires");
-        expiryKeyLabel.AddToClassList("metric-tertiary");
-        expiryItem.Add(expiryKeyLabel);
-        _statusExpiryLabel = new Label("--");
-        _statusExpiryLabel.AddToClassList("metric-secondary");
-        expiryItem.Add(_statusExpiryLabel);
-        statusBar.Add(expiryItem);
+        _statusInterestValue     = root.Q<Label>("status-interest-value");
+        _statusSalaryValue       = root.Q<Label>("status-salary-value");
+        _statusPotentialValue    = root.Q<Label>("status-potential-value");
+        _statusRiskValue         = root.Q<Label>("status-risk-value");
+        _statusAvailabilityValue = root.Q<Label>("status-availability-value");
+        _statusInterviewValue    = root.Q<Label>("status-interview-value");
+        _statusTeamImpactValue   = root.Q<Label>("status-team-impact-value");
+        _statusComparisonValue   = root.Q<Label>("status-comparison-value");
 
-        var patienceItem = new VisualElement();
-        patienceItem.AddToClassList("status-bar__item");
-        var patienceKeyLabel = new Label("Patience");
-        patienceKeyLabel.AddToClassList("metric-tertiary");
-        patienceItem.Add(patienceKeyLabel);
-        _statusPatienceContainer = new VisualElement();
-        _statusPatienceContainer.AddToClassList("flex-row");
-        patienceItem.Add(_statusPatienceContainer);
-        statusBar.Add(patienceItem);
+        // ── Query footer ──────────────────────────────────────────────────────
+        _footerActions    = root.Q<VisualElement>("footer-actions");
+        _btnClose         = root.Q<Button>("btn-close");
+        _btnCloseFooter   = root.Q<Button>("btn-close-footer");
+        _btnInterview     = root.Q<Button>("btn-interview");
+        _btnShortlist     = root.Q<Button>("btn-shortlist");
+        _btnOffer         = root.Q<Button>("btn-offer");
+        _btnReject        = root.Q<Button>("btn-reject");
+        _btnHireFooter    = root.Q<Button>("btn-hire-footer");
+        _btnWithdrawFooter = root.Q<Button>("btn-withdraw-footer");
+        _btnAcceptHR      = root.Q<Button>("btn-accept-hr");
+        _btnDeclineHR     = root.Q<Button>("btn-decline-hr");
 
-        // ---- Offer View ----
-        _offerView = new VisualElement();
-        _offerView.AddToClassList("offer-view");
-        _offerView.style.display = DisplayStyle.None;
-        scroll.Add(_offerView);
+        // ── Wire action buttons ───────────────────────────────────────────────
+        if (_btnClose           != null) _btnClose.clicked           += OnCloseClicked;
+        if (_btnCloseFooter     != null) _btnCloseFooter.clicked     += OnCloseClicked;
+        if (_btnInterview       != null) _btnInterview.clicked       += OnInterviewClicked;
+        if (_btnShortlist       != null) _btnShortlist.clicked       += OnShortlistClicked;
+        if (_btnOffer           != null) _btnOffer.clicked           += OnOfferFooterClicked;
+        if (_btnReject          != null) _btnReject.clicked          += OnRejectClicked;
+        if (_btnHireFooter      != null) _btnHireFooter.clicked      += OnHireClicked;
+        if (_btnWithdrawFooter  != null) _btnWithdrawFooter.clicked  += OnWithdrawOfferClicked;
+        if (_btnAcceptHR        != null) _btnAcceptHR.clicked        += OnAcceptHRClicked;
+        if (_btnDeclineHR       != null) _btnDeclineHR.clicked       += OnDeclineHRClicked;
 
-        BuildOfferView();
-
-        // --- Footer ---
-        var footer = new VisualElement();
-        footer.AddToClassList("modal-footer");
-        footer.AddToClassList("flex-row");
-        footer.style.justifyContent = Justify.SpaceBetween;
-        _root.Add(footer);
-
-        var footerLeft = new VisualElement();
-        footerLeft.AddToClassList("flex-row");
-
-        _rejectButton = new Button();
-        _rejectButton.text = "Reject";
-        _rejectButton.AddToClassList("btn-danger");
-        footerLeft.Add(_rejectButton);
-
-        footer.Add(footerLeft);
-
-        var footerRight = new VisualElement();
-        footerRight.AddToClassList("flex-row");
-
-        _shortlistButton = new Button();
-        _shortlistButton.text = "Shortlist";
-        _shortlistButton.AddToClassList("btn-ghost");
-        _shortlistButton.style.marginRight = 8;
-        footerRight.Add(_shortlistButton);
-
-        _interviewButton = new Button();
-        _interviewButton.text = "Start Interview";
-        _interviewButton.AddToClassList("btn-secondary");
-        _interviewButton.style.marginRight = 8;
-        footerRight.Add(_interviewButton);
-
-        _makeOfferButton = new Button();
-        _makeOfferButton.text = "Make Offer \u2192";
-        _makeOfferButton.AddToClassList("btn-primary");
-        footerRight.Add(_makeOfferButton);
-
-        _confirmOfferButton = new Button();
-        _confirmOfferButton.text = "Submit Offer";
-        _confirmOfferButton.AddToClassList("btn-primary");
-        _confirmOfferButton.style.display = DisplayStyle.None;
-        footerRight.Add(_confirmOfferButton);
-
-        footer.Add(footerRight);
-
-        // --- Reject Confirm Overlay ---
-        _rejectOverlay = new VisualElement();
-        _rejectOverlay.AddToClassList("reject-overlay");
-        _rejectOverlay.style.position = Position.Absolute;
-        _rejectOverlay.style.left = 0; _rejectOverlay.style.right = 0;
-        _rejectOverlay.style.top = 0; _rejectOverlay.style.bottom = 0;
-        _rejectOverlay.style.alignItems = Align.Center;
-        _rejectOverlay.style.justifyContent = Justify.Center;
-        _rejectOverlay.style.backgroundColor = new StyleColor(new Color(0.1f, 0.11f, 0.13f, 0.92f));
-        _rejectOverlay.style.display = DisplayStyle.None;
-
-        var rejectConfirmCard = new VisualElement();
-        rejectConfirmCard.AddToClassList("card");
-        rejectConfirmCard.style.width = 280;
-
-        var rejectMsg = new Label("Remove this candidate from your pool?");
-        rejectMsg.AddToClassList("metric-secondary");
-        rejectMsg.style.whiteSpace = WhiteSpace.Normal;
-        rejectMsg.style.marginBottom = 12;
-        rejectConfirmCard.Add(rejectMsg);
-
-        var rejectBtnRow = new VisualElement();
-        rejectBtnRow.AddToClassList("flex-row");
-        rejectBtnRow.style.justifyContent = Justify.SpaceBetween;
-
-        _rejectCancelButton = new Button();
-        _rejectCancelButton.text = "Cancel";
-        _rejectCancelButton.AddToClassList("btn-ghost");
-        rejectBtnRow.Add(_rejectCancelButton);
-
-        _rejectConfirmButton = new Button();
-        _rejectConfirmButton.text = "Confirm Reject";
-        _rejectConfirmButton.AddToClassList("btn-danger");
-        rejectBtnRow.Add(_rejectConfirmButton);
-
-        rejectConfirmCard.Add(rejectBtnRow);
-        _rejectOverlay.Add(rejectConfirmCard);
-        _root.Add(_rejectOverlay);
-
-        // --- Shortlist Duration Overlay ---
-        _shortlistOverlay = new VisualElement();
-        _shortlistOverlay.AddToClassList("reject-overlay");
-        _shortlistOverlay.style.position = Position.Absolute;
-        _shortlistOverlay.style.left = 0; _shortlistOverlay.style.right = 0;
-        _shortlistOverlay.style.top = 0; _shortlistOverlay.style.bottom = 0;
-        _shortlistOverlay.style.alignItems = Align.Center;
-        _shortlistOverlay.style.justifyContent = Justify.Center;
-        _shortlistOverlay.style.backgroundColor = new StyleColor(new Color(0f, 0f, 0f, 0.7f));
-        _shortlistOverlay.style.display = DisplayStyle.None;
-
-        var shortlistCard = new VisualElement();
-        shortlistCard.AddToClassList("card");
-        shortlistCard.style.width = 420;
-
-        var shortlistMsg = new Label("How long should this candidate be shortlisted?");
-        shortlistMsg.AddToClassList("metric-secondary");
-        shortlistMsg.style.whiteSpace = WhiteSpace.Normal;
-        shortlistMsg.style.marginBottom = 12;
-        shortlistCard.Add(shortlistMsg);
-
-        var shortlistDurationRow = new VisualElement();
-        shortlistDurationRow.AddToClassList("flex-row");
-        shortlistDurationRow.style.justifyContent = Justify.SpaceBetween;
-        shortlistDurationRow.style.marginBottom = 8;
-
-        _shortlist1m = new Button();
-        _shortlist1m.text = "1 Month";
-        _shortlist1m.AddToClassList("btn-ghost");
-        _shortlist1m.userData = 30;
-        shortlistDurationRow.Add(_shortlist1m);
-
-        _shortlist3m = new Button();
-        _shortlist3m.text = "3 Months";
-        _shortlist3m.AddToClassList("btn-ghost");
-        _shortlist3m.userData = 90;
-        shortlistDurationRow.Add(_shortlist3m);
-
-        _shortlist6m = new Button();
-        _shortlist6m.text = "6 Months";
-        _shortlist6m.AddToClassList("btn-ghost");
-        _shortlist6m.userData = 180;
-        shortlistDurationRow.Add(_shortlist6m);
-
-        _shortlistIndef = new Button();
-        _shortlistIndef.text = "Indefinitely";
-        _shortlistIndef.AddToClassList("btn-secondary");
-        _shortlistIndef.userData = -1;
-        shortlistDurationRow.Add(_shortlistIndef);
-
-        shortlistCard.Add(shortlistDurationRow);
-
-        _shortlistCancel = new Button();
-        _shortlistCancel.text = "Cancel";
-        _shortlistCancel.AddToClassList("btn-ghost");
-        _shortlistCancel.style.alignSelf = Align.Center;
-        shortlistCard.Add(_shortlistCancel);
-
-        _shortlistOverlay.Add(shortlistCard);
-        _root.Add(_shortlistOverlay);
-
-        // Wire handlers
-        _closeButton.clicked              += OnCloseClicked;
-        _offerBackButton.clicked          += OnOfferBackClicked;
-        _interviewButton.clicked          += OnInterviewClicked;
-        _shortlistButton.clicked          += OnShortlistClicked;
-        _rejectButton.clicked             += OnRejectClicked;
-        _makeOfferButton.clicked          += OnMakeOfferClicked;
-        _confirmOfferButton.clicked       += OnConfirmOfferClicked;
-        _rejectConfirmButton.clicked      += OnRejectConfirmClicked;
-        _rejectCancelButton.clicked       += OnRejectCancelClicked;
-        _offerFTButton.clicked            += OnOfferFTClicked;
-        _offerPTButton.clicked            += OnOfferPTClicked;
-        _offerShortBtn.clicked            += OnLengthShortClicked;
-        _offerStdBtn.clicked              += OnLengthStdClicked;
-        _offerLongBtn.clicked             += OnLengthLongClicked;
-        _salarySlider.RegisterValueChangedCallback(OnSalarySliderChanged);
-        _shortlist1m.RegisterCallback<ClickEvent>(OnShortlistDurationClicked);
-        _shortlist3m.RegisterCallback<ClickEvent>(OnShortlistDurationClicked);
-        _shortlist6m.RegisterCallback<ClickEvent>(OnShortlistDurationClicked);
-        _shortlistIndef.RegisterCallback<ClickEvent>(OnShortlistDurationClicked);
-        _shortlistCancel.clicked          += OnShortlistCancelClicked;
+        // ── Wire offer panel buttons ──────────────────────────────────────────
+        if (_btnMakeOffer     != null) _btnMakeOffer.clicked     += OnOfferClicked;
+        if (_btnHire          != null) _btnHire.clicked          += OnHireClicked;
+        if (_btnWithdrawOffer != null) _btnWithdrawOffer.clicked += OnWithdrawOfferClicked;
+        if (_btnAcceptCounter != null) _btnAcceptCounter.clicked += OnAcceptCounterClicked;
+        if (_btnRejectCounter != null) _btnRejectCounter.clicked += OnRejectCounterClicked;
     }
 
-    private void BuildOfferView() {
-        // Role selector card
-        var roleCard = BuildSectionCard("Role", _offerView);
-        var allRoles = RoleSuitabilityCalculator.AllRoles;
-        int roleCount = allRoles.Length;
-        for (int i = 0; i < roleCount; i++) {
-            var row = new VisualElement();
-            row.AddToClassList("role-selector-row");
-            row.AddToClassList("flex-row");
-            row.userData = allRoles[i];
-
-            var dot = new VisualElement();
-            dot.AddToClassList("suitability-dot");
-            dot.AddToClassList("suitability-dot--unsuitable");
-            dot.name = "role-dot";
-            row.Add(dot);
-
-            var nameLabel = new Label(UIFormatting.FormatRole(allRoles[i]));
-            nameLabel.AddToClassList("metric-secondary");
-            nameLabel.name = "role-name";
-            row.Add(nameLabel);
-
-            var preferredLabel = new Label("(preferred)");
-            preferredLabel.AddToClassList("metric-tertiary");
-            preferredLabel.style.marginLeft = 6;
-            preferredLabel.style.display = DisplayStyle.None;
-            preferredLabel.name = "role-preferred";
-            row.Add(preferredLabel);
-
-            row.RegisterCallback<ClickEvent>(OnRoleRowClicked);
-            _roleRows.Add(row);
-            roleCard.Add(row);
-        }
-
-        // Arrangement toggle card
-        var arrangementCard = BuildSectionCard("Arrangement", _offerView);
-        var arrangementRow = new VisualElement();
-        arrangementRow.AddToClassList("flex-row");
-        _offerFTButton = new Button();
-        _offerFTButton.text = "Full-Time";
-        _offerFTButton.AddToClassList("offer-toggle-btn");
-        _offerFTButton.AddToClassList("offer-toggle-btn--active");
-        arrangementRow.Add(_offerFTButton);
-        _offerPTButton = new Button();
-        _offerPTButton.text = "Part-Time";
-        _offerPTButton.AddToClassList("offer-toggle-btn");
-        arrangementRow.Add(_offerPTButton);
-        arrangementCard.Add(arrangementRow);
-
-        // Length selector card
-        var lengthCard = BuildSectionCard("Contract Length", _offerView);
-        var lengthRow = new VisualElement();
-        lengthRow.AddToClassList("flex-row");
-
-        _offerShortBtn = CreateLengthCard("Short", "3\u20136 mo", ContractLengthOption.Short);
-        _offerStdBtn   = CreateLengthCard("Standard", "6\u201312 mo", ContractLengthOption.Standard);
-        _offerLongBtn  = CreateLengthCard("Long", "12\u201318 mo", ContractLengthOption.Long);
-        _offerStdBtn.AddToClassList("length-card--selected");
-        lengthRow.Add(_offerShortBtn);
-        lengthRow.Add(_offerStdBtn);
-        lengthRow.Add(_offerLongBtn);
-        lengthCard.Add(lengthRow);
-
-        // Salary slider card
-        var salarySliderCard = BuildSectionCard("Offer Salary", _offerView);
-
-        _salarySlider = new Slider(0, 1);
-        _salarySlider.AddToClassList("salary-slider");
-        _salarySlider.style.marginBottom = 4;
-        salarySliderCard.Add(_salarySlider);
-
-        _salarySliderValueLabel = new Label("$0/mo");
-        _salarySliderValueLabel.AddToClassList("metric-secondary");
-        _salarySliderValueLabel.style.marginBottom = 4;
-        salarySliderCard.Add(_salarySliderValueLabel);
-
-        var salarySubRow = new VisualElement();
-        salarySubRow.AddToClassList("flex-row");
-        salarySubRow.AddToClassList("justify-between");
-        salarySubRow.style.marginTop = 2;
-
-        _salaryDemandSubLabel = new Label("Their demand: ???");
-        _salaryDemandSubLabel.AddToClassList("metric-tertiary");
-        salarySubRow.Add(_salaryDemandSubLabel);
-
-        _salaryMarketSubLabel = new Label("Market: ???");
-        _salaryMarketSubLabel.AddToClassList("metric-tertiary");
-        salarySubRow.Add(_salaryMarketSubLabel);
-
-        salarySliderCard.Add(salarySubRow);
-
-        // Offer Assessment card
-        var assessCard = BuildSectionCard("Offer Assessment", _offerView);
-
-        var acceptanceRow = new VisualElement();
-        acceptanceRow.AddToClassList("flex-row");
-        acceptanceRow.AddToClassList("justify-between");
-        acceptanceRow.style.alignItems = Align.Center;
-        acceptanceRow.style.marginBottom = 6;
-
-        var acceptanceBarOuter = new VisualElement();
-        acceptanceBarOuter.AddToClassList("acceptance-bar");
-        acceptanceBarOuter.style.flexGrow = 1;
-        acceptanceBarOuter.style.marginRight = 8;
-
-        _acceptanceBarFill = new VisualElement();
-        _acceptanceBarFill.AddToClassList("acceptance-bar__fill");
-        _acceptanceBarFill.AddToClassList("acceptance-bar--medium");
-        _acceptanceBarFill.style.width = Length.Percent(0f);
-        acceptanceBarOuter.Add(_acceptanceBarFill);
-        acceptanceRow.Add(acceptanceBarOuter);
-
-        _acceptanceChanceLabel = new Label("???");
-        _acceptanceChanceLabel.AddToClassList("metric-secondary");
-        acceptanceRow.Add(_acceptanceChanceLabel);
-
-        assessCard.Add(acceptanceRow);
-
-        // Patience dots row
-        var patienceRow = new VisualElement();
-        patienceRow.AddToClassList("flex-row");
-        patienceRow.style.alignItems = Align.Center;
-        patienceRow.style.marginBottom = 6;
-
-        var patienceLabel = new Label("Patience: ");
-        patienceLabel.AddToClassList("metric-tertiary");
-        patienceLabel.style.marginRight = 4;
-        patienceRow.Add(patienceLabel);
-
-        _patienceDotsContainer = new VisualElement();
-        _patienceDotsContainer.AddToClassList("flex-row");
-        patienceRow.Add(_patienceDotsContainer);
-        assessCard.Add(patienceRow);
-
-        // Mismatch section
-        _mismatchSection = new VisualElement();
-        _mismatchSection.AddToClassList("mismatch-section");
-        _mismatchSection.style.display = DisplayStyle.None;
-        _offerView.Add(_mismatchSection);
-
-        _mismatchHintLabel = new Label("");
-        _mismatchHintLabel.AddToClassList("metric-tertiary");
-        _mismatchHintLabel.style.whiteSpace = WhiteSpace.Normal;
-        _mismatchHintLabel.style.marginBottom = 6;
-        _mismatchSection.Add(_mismatchHintLabel);
-
-        _mismatchListContainer = new VisualElement();
-        _mismatchSection.Add(_mismatchListContainer);
-        _mismatchPool = new ElementPool(CreateMismatchWarning, _mismatchListContainer);
-    }
-
-    public void Bind(IViewModel viewModel) {
+    public void Bind(IViewModel viewModel)
+    {
         _vm = viewModel as CandidateDetailModalViewModel;
         if (_vm == null) return;
 
-        // Header
-        _nameLabel.text = _vm.Name ?? "--";
-        _ageLabel.text  = _vm.Age  ?? "--";
-        if (_rolePill != null) {
-            _rolePill.text = _vm.RoleName ?? "--";
-            UIFormatting.ClearRolePillClasses(_rolePill);
-            if (!string.IsNullOrEmpty(_vm.RolePillClass))
-                _rolePill.AddToClassList(_vm.RolePillClass);
-        }
-        _sourceLabel.text = _vm.Source  ?? "--";
-        _expiryLabel.text = _vm.ExpiryText ?? "--";
-
-        // Detail sections
-        if (_personalityLabel != null) _personalityLabel.text = _vm.PersonalityText ?? "--";
-
-        if (_ftPrefLabel != null) {
-            _ftPrefLabel.text = _vm.FTPrefText ?? "--";
-            _ftPrefLabel.RemoveFromClassList("detail-row__value--hint");
-            _ftPrefLabel.RemoveFromClassList("text-muted");
-            if (!string.IsNullOrEmpty(_vm.FTPrefClass))
-                _ftPrefLabel.AddToClassList(_vm.FTPrefClass);
-        }
-        if (_lengthPrefLabel != null) _lengthPrefLabel.text = _vm.LengthPrefText ?? "--";
-
-        // Role suitability rows
-        BindSuitabilityRows();
-
-        // Skills table
-        BindSkillTable();
-
-        if (_abilityLabel != null)   _abilityLabel.text   = _vm.AbilityEstimate   ?? "--";
-        if (_potentialLabel != null) _potentialLabel.text = _vm.PotentialEstimate ?? "--";
-        if (_salaryAskingLabel != null) _salaryAskingLabel.text = _vm.SalaryAsking ?? "--";
-        if (_salaryMarketLabel != null) _salaryMarketLabel.text = _vm.SalaryMarket ?? "--";
-
-        // Status bar
-        BindStatusBar();
-
-        // Interview progress
-        if (_interviewProgressBar != null) {
-            bool showProgress = _vm.IsInterviewInProgress || (_vm.KnowledgePercent > 0f && !_vm.IsInterviewed);
-            _interviewProgressBar.style.display = showProgress ? DisplayStyle.Flex : DisplayStyle.None;
-            if (showProgress && _interviewProgressFill != null)
-                _interviewProgressFill.style.width = Length.Percent(_vm.KnowledgePercent);
-        }
-
-        // Interview button
-        if (_interviewButton != null) {
-            _interviewButton.text = _vm.InterviewButtonText;
-            _interviewButton.RemoveFromClassList("btn-secondary");
-            _interviewButton.RemoveFromClassList("btn-ghost");
-            _interviewButton.AddToClassList(_vm.InterviewButtonClass);
-            _interviewButton.SetEnabled(_vm.InterviewButtonEnabled);
-        }
-
-        // Shortlist button
-        if (_shortlistButton != null) {
-            _shortlistButton.text = _vm.IsShortlisted ? "Shortlisted \u2713" : "Shortlist";
-            _shortlistButton.SetEnabled(!_vm.IsShortlisted);
-        }
-
-        // Make Offer button — disabled during cooldown
-        if (_makeOfferButton != null) {
-            if (_vm.IsOfferOnCooldown) {
-                _makeOfferButton.text = "Candidate is reviewing options";
-                _makeOfferButton.SetEnabled(false);
-                _makeOfferButton.RemoveFromClassList("btn-primary");
-                _makeOfferButton.AddToClassList("btn-ghost");
-            } else {
-                _makeOfferButton.text = _vm.HasPendingCounter ? "Counter Offer \u2192" : "Make Offer \u2192";
-                _makeOfferButton.SetEnabled(true);
-                _makeOfferButton.RemoveFromClassList("btn-ghost");
-                _makeOfferButton.AddToClassList("btn-primary");
-            }
-        }
-
-        if (_confirmOfferButton != null) {
-            _confirmOfferButton.text = _vm.HasPendingCounter ? "Submit Counter" : "Submit Offer";
-        }
-
-        // Offer view elements (bind regardless of visibility so they're ready when shown)
-        BindOfferElements();
+        BindHeader();
+        BindBadges();
+        BindOverviewTab();
+        BindInterviewTab();
+        BindPersonalityTab();
+        BindComparisonTab();
+        BindOfferTab();
+        BindBottomStatusCards();
+        BindActionVisibility();
     }
 
-    private void BindSuitabilityRows() {
-        var entries = _vm.RoleSuitabilities;
-        int rowCount = _suitabilityRows.Count;
-        for (int i = 0; i < rowCount && i < entries.Length; i++) {
-            var row = _suitabilityRows[i];
-            var entry = entries[i];
+    public void Dispose()
+    {
+        if (_tabButtons.Count > 0 && _tabButtons[0] != null) _tabButtons[0].clicked -= OnTab0Clicked;
+        if (_tabButtons.Count > 1 && _tabButtons[1] != null) _tabButtons[1].clicked -= OnTab1Clicked;
+        if (_tabButtons.Count > 2 && _tabButtons[2] != null) _tabButtons[2].clicked -= OnTab2Clicked;
+        if (_tabButtons.Count > 3 && _tabButtons[3] != null) _tabButtons[3].clicked -= OnTab3Clicked;
+        if (_tabButtons.Count > 4 && _tabButtons[4] != null) _tabButtons[4].clicked -= OnTab4Clicked;
 
-            var dot = row.Q<VisualElement>("suitability-dot");
-            if (dot != null) {
-                dot.RemoveFromClassList("suitability-dot--natural");
-                dot.RemoveFromClassList("suitability-dot--accomplished");
-                dot.RemoveFromClassList("suitability-dot--competent");
-                dot.RemoveFromClassList("suitability-dot--awkward");
-                dot.RemoveFromClassList("suitability-dot--unsuitable");
-                dot.RemoveFromClassList("suitability-dot--unknown");
-                string dotClass = _vm.IsSkillsRevealed ? entry.SuitabilityClass : "suitability-dot--unknown";
-                dot.AddToClassList(dotClass);
-            }
+        _tabButtons.Clear();
+        _tabContents.Clear();
 
-            var preferredEl = row.Q<Label>("suitability-preferred");
-            if (preferredEl != null)
-                preferredEl.style.display = entry.IsPreferred ? DisplayStyle.Flex : DisplayStyle.None;
+        if (_btnClose           != null) _btnClose.clicked           -= OnCloseClicked;
+        if (_btnCloseFooter     != null) _btnCloseFooter.clicked     -= OnCloseClicked;
+        if (_btnInterview       != null) _btnInterview.clicked       -= OnInterviewClicked;
+        if (_btnShortlist       != null) _btnShortlist.clicked       -= OnShortlistClicked;
+        if (_btnOffer           != null) _btnOffer.clicked           -= OnOfferFooterClicked;
+        if (_btnReject          != null) _btnReject.clicked          -= OnRejectClicked;
+        if (_btnHireFooter      != null) _btnHireFooter.clicked      -= OnHireClicked;
+        if (_btnWithdrawFooter  != null) _btnWithdrawFooter.clicked  -= OnWithdrawOfferClicked;
+        if (_btnAcceptHR        != null) _btnAcceptHR.clicked        -= OnAcceptHRClicked;
+        if (_btnDeclineHR       != null) _btnDeclineHR.clicked       -= OnDeclineHRClicked;
 
-            if (entry.IsPreferred) row.AddToClassList("role-suitability-row--preferred");
-            else row.RemoveFromClassList("role-suitability-row--preferred");
-        }
-    }
+        if (_btnMakeOffer     != null) _btnMakeOffer.clicked     -= OnOfferClicked;
+        if (_btnHire          != null) _btnHire.clicked          -= OnHireClicked;
+        if (_btnWithdrawOffer != null) _btnWithdrawOffer.clicked -= OnWithdrawOfferClicked;
+        if (_btnAcceptCounter != null) _btnAcceptCounter.clicked -= OnAcceptCounterClicked;
+        if (_btnRejectCounter != null) _btnRejectCounter.clicked -= OnRejectCounterClicked;
 
-    private void BindSkillTable() {
-        var table = _vm.SkillTable;
-        int count = _skillNameLabels.Count;
-        for (int i = 0; i < count && i < table.Length; i++) {
-            var entry = table[i];
-            var nameLabel = _skillNameLabels[i];
-            var valueLabel = _skillValueLabels[i];
+        if (_teamDropdown       != null) _teamDropdown.UnregisterValueChangedCallback(OnTeamDropdownChanged);
+        if (_comparisonDropdown != null) _comparisonDropdown.UnregisterValueChangedCallback(OnComparisonDropdownChanged);
+        _teamDropdown       = null;
+        _comparisonDropdown = null;
 
-            nameLabel.text = entry.Name;
-            nameLabel.style.color = new StyleColor(entry.NameColor);
-
-            valueLabel.text = entry.ValueText;
-            valueLabel.RemoveFromClassList("skill-row__value--up");
-            valueLabel.RemoveFromClassList("skill-row__value--down");
-            valueLabel.RemoveFromClassList("skill-row__value--unknown");
-            if (!string.IsNullOrEmpty(entry.ValueClass))
-                valueLabel.AddToClassList(entry.ValueClass);
-        }
-    }
-
-    private void BindStatusBar() {
-        if (_statusSourceLabel != null)      _statusSourceLabel.text      = _vm.Source ?? "--";
-        if (_statusReliabilityLabel != null) _statusReliabilityLabel.text = string.IsNullOrEmpty(_vm.ReliabilityText) ? "--" : _vm.ReliabilityText;
-        if (_statusExpiryLabel != null)      _statusExpiryLabel.text      = _vm.ExpiryText ?? "--";
-        BindStatusPatienceDots();
-    }
-
-    private void BindStatusPatienceDots() {
-        if (_statusPatienceContainer == null) return;
-        int max     = _vm.MaxPatience;
-        int current = _vm.CurrentPatience;
-
-        while (_statusPatienceDots.Count < max) {
-            var dot = new VisualElement();
-            dot.AddToClassList("patience-dot");
-            _statusPatienceContainer.Add(dot);
-            _statusPatienceDots.Add(dot);
-        }
-
-        int dotCount = _statusPatienceDots.Count;
-        for (int i = 0; i < dotCount; i++) {
-            _statusPatienceDots[i].style.display = i < max ? DisplayStyle.Flex : DisplayStyle.None;
-        }
-
-        for (int i = 0; i < max; i++) {
-            var dot = _statusPatienceDots[i];
-            dot.RemoveFromClassList("patience-dot--safe");
-            dot.RemoveFromClassList("patience-dot--warning");
-            dot.RemoveFromClassList("patience-dot--critical");
-            dot.RemoveFromClassList("patience-dot--empty");
-
-            if (i >= current) {
-                dot.AddToClassList("patience-dot--empty");
-            } else if (current >= 3) {
-                dot.AddToClassList("patience-dot--safe");
-            } else if (current == 2) {
-                dot.AddToClassList("patience-dot--warning");
-            } else {
-                dot.AddToClassList("patience-dot--critical");
-            }
-        }
-    }
-
-    private void BindOfferElements() {
-        if (_vm == null) return;
-
-        // Role selector rows
-        var entries = _vm.RoleSuitabilities;
-        int rowCount = _roleRows.Count;
-        for (int i = 0; i < rowCount && i < entries.Length; i++) {
-            var row = _roleRows[i];
-            var entry = entries[i];
-
-            var dot = row.Q<VisualElement>("role-dot");
-            if (dot != null) {
-                dot.RemoveFromClassList("suitability-dot--natural");
-                dot.RemoveFromClassList("suitability-dot--accomplished");
-                dot.RemoveFromClassList("suitability-dot--competent");
-                dot.RemoveFromClassList("suitability-dot--awkward");
-                dot.RemoveFromClassList("suitability-dot--unsuitable");
-                string dotClass = _vm.IsSkillsRevealed ? entry.SuitabilityClass : "suitability-dot--unsuitable";
-                dot.AddToClassList(dotClass);
-            }
-
-            var preferredEl = row.Q<Label>("role-preferred");
-            if (preferredEl != null)
-                preferredEl.style.display = entry.IsPreferred ? DisplayStyle.Flex : DisplayStyle.None;
-
-            bool isSelected = entry.Role == _vm.SelectedRole;
-            if (isSelected) row.AddToClassList("role-selector-row--selected");
-            else            row.RemoveFromClassList("role-selector-row--selected");
-
-            if (entry.IsPreferred) row.AddToClassList("role-selector-row--preferred");
-            else                   row.RemoveFromClassList("role-selector-row--preferred");
-        }
-
-        // Salary slider
-        if (_salarySlider != null) {
-            _salarySlider.lowValue  = _vm.SalarySliderMin;
-            _salarySlider.highValue = _vm.SalarySliderMax;
-            _salarySlider.SetValueWithoutNotify(_vm.CurrentOfferSalary);
-            _salarySliderValueLabel.text = UIFormatting.FormatMoney(_vm.CurrentOfferSalary) + "/mo";
-        }
-
-        // Salary sub-labels
-        if (_salaryDemandSubLabel != null) {
-            string demandText = _vm.IsSalaryDemandVisible
-                ? "Their demand: " + UIFormatting.FormatMoney(_vm.SalarySliderAnchor) + "/mo"
-                : "Their demand: ???";
-            _salaryDemandSubLabel.text = demandText;
-        }
-        if (_salaryMarketSubLabel != null) {
-            _salaryMarketSubLabel.text = "Market: " + _vm.SalaryMarket;
-        }
-
-        // Acceptance bar
-        if (_acceptanceBarFill != null) {
-            _acceptanceBarFill.RemoveFromClassList("acceptance-bar--high");
-            _acceptanceBarFill.RemoveFromClassList("acceptance-bar--medium");
-            _acceptanceBarFill.RemoveFromClassList("acceptance-bar--low");
-            _acceptanceBarFill.AddToClassList(_vm.AcceptanceChanceClass);
-            _acceptanceBarFill.style.width = Length.Percent(_vm.AcceptanceChance);
-        }
-        if (_acceptanceChanceLabel != null)
-            _acceptanceChanceLabel.text = _vm.AcceptanceChanceText ?? "???";
-
-        // Patience dots
-        BindPatienceDots();
-
-        // Mismatch
-        if (_mismatchSection != null) {
-            _mismatchSection.style.display = _vm.ShowMismatchSection ? DisplayStyle.Flex : DisplayStyle.None;
-            if (_mismatchHintLabel != null) _mismatchHintLabel.text = _vm.MismatchHintText ?? "";
-            _mismatchPool.UpdateList(_vm.MismatchWarnings, BindMismatchWarning);
-        }
-    }
-
-    private void BindPatienceDots() {
-        if (_patienceDotsContainer == null) return;
-        int max = _vm.MaxPatience;
-        int current = _vm.CurrentPatience;
-
-        // Grow pool if needed
-        while (_patienceDots.Count < max) {
-            var dot = new VisualElement();
-            dot.AddToClassList("patience-dot");
-            _patienceDotsContainer.Add(dot);
-            _patienceDots.Add(dot);
-        }
-        // Hide excess dots
-        int dotCount = _patienceDots.Count;
-        for (int i = 0; i < dotCount; i++) {
-            _patienceDots[i].style.display = i < max ? DisplayStyle.Flex : DisplayStyle.None;
-        }
-
-        // Assign USS classes based on position and current patience
-        for (int i = 0; i < max; i++) {
-            var dot = _patienceDots[i];
-            dot.RemoveFromClassList("patience-dot--safe");
-            dot.RemoveFromClassList("patience-dot--warning");
-            dot.RemoveFromClassList("patience-dot--critical");
-            dot.RemoveFromClassList("patience-dot--empty");
-
-            if (i >= current) {
-                dot.AddToClassList("patience-dot--empty");
-            } else if (current >= 3) {
-                dot.AddToClassList("patience-dot--safe");
-            } else if (current == 2) {
-                dot.AddToClassList("patience-dot--warning");
-            } else {
-                dot.AddToClassList("patience-dot--critical");
-            }
-        }
-    }
-
-    public void Dispose() {
-        if (_closeButton != null)       _closeButton.clicked       -= OnCloseClicked;
-        if (_offerBackButton != null)   _offerBackButton.clicked   -= OnOfferBackClicked;
-        if (_interviewButton != null)   _interviewButton.clicked   -= OnInterviewClicked;
-        if (_shortlistButton != null)   _shortlistButton.clicked   -= OnShortlistClicked;
-        if (_rejectButton != null)      _rejectButton.clicked      -= OnRejectClicked;
-        if (_makeOfferButton != null)   _makeOfferButton.clicked   -= OnMakeOfferClicked;
-        if (_confirmOfferButton != null) _confirmOfferButton.clicked -= OnConfirmOfferClicked;
-        if (_rejectConfirmButton != null) _rejectConfirmButton.clicked -= OnRejectConfirmClicked;
-        if (_rejectCancelButton != null)  _rejectCancelButton.clicked  -= OnRejectCancelClicked;
-        if (_offerFTButton != null)     _offerFTButton.clicked     -= OnOfferFTClicked;
-        if (_offerPTButton != null)     _offerPTButton.clicked     -= OnOfferPTClicked;
-        if (_offerShortBtn != null)     _offerShortBtn.clicked     -= OnLengthShortClicked;
-        if (_offerStdBtn != null)       _offerStdBtn.clicked       -= OnLengthStdClicked;
-        if (_offerLongBtn != null)      _offerLongBtn.clicked      -= OnLengthLongClicked;
-        if (_salarySlider != null)      _salarySlider.UnregisterValueChangedCallback(OnSalarySliderChanged);
-
-        int rowCount = _roleRows.Count;
-        for (int i = 0; i < rowCount; i++)
-            _roleRows[i].UnregisterCallback<ClickEvent>(OnRoleRowClicked);
-        _roleRows.Clear();
-        _patienceDots.Clear();
-        _suitabilityRows.Clear();
-        _skillNameLabels.Clear();
-        _skillValueLabels.Clear();
-        _statusPatienceDots.Clear();
-
-        if (_shortlist1m != null)    _shortlist1m.UnregisterCallback<ClickEvent>(OnShortlistDurationClicked);
-        if (_shortlist3m != null)    _shortlist3m.UnregisterCallback<ClickEvent>(OnShortlistDurationClicked);
-        if (_shortlist6m != null)    _shortlist6m.UnregisterCallback<ClickEvent>(OnShortlistDurationClicked);
-        if (_shortlistIndef != null) _shortlistIndef.UnregisterCallback<ClickEvent>(OnShortlistDurationClicked);
-        if (_shortlistCancel != null) _shortlistCancel.clicked -= OnShortlistCancelClicked;
-        _shortlistOverlay = null;
-        _shortlist1m = null;
-        _shortlist3m = null;
-        _shortlist6m = null;
-        _shortlistIndef = null;
-        _shortlistCancel = null;
-
-        _mismatchPool = null;
-        _vm = null;
+        _vm   = null;
         _root = null;
     }
 
-    // --- Handlers ---
+    /// <summary>Legacy compat — called by WindowManager when opening with counter-offer visible.</summary>
+    public void ShowCounterOfferView()
+    {
+        ShowTab(4);
+    }
 
-    private void OnCloseClicked() => _modal?.DismissModal();
+    // ── Tab switching ─────────────────────────────────────────────────────────
 
-    private void OnOfferBackClicked() => ShowDetailView();
+    private void OnTab0Clicked() { ShowTab(0); }
+    private void OnTab1Clicked() { ShowTab(1); }
+    private void OnTab2Clicked() { ShowTab(2); }
+    private void OnTab3Clicked() { ShowTab(3); }
+    private void OnTab4Clicked() { ShowTab(4); }
 
-    private void OnInterviewClicked() {
-        if (_vm == null) return;
-        if (!_vm.IsShortlisted) {
-            _dispatcher.Dispatch(new ShortlistCandidateCommand {
-                Tick = _dispatcher.CurrentTick,
-                CandidateId = GetCandidateId(),
-                DurationDays = -1
-            });
+    private void ShowTab(int index)
+    {
+        if (_vm != null) _vm.ActiveTabIndex = index;
+
+        for (int i = 0; i < _tabButtons.Count; i++)
+        {
+            var btn = _tabButtons[i];
+            if (btn != null)
+                btn.EnableInClassList("tab--active", i == index);
         }
-        _dispatcher.Dispatch(new StartInterviewCommand {
-            CandidateId = GetCandidateId(),
-            Mode = GetHiringMode()
-        });
-        _modal?.DismissModal();
-    }
 
-    private void OnShortlistClicked() {
-        if (_vm == null) return;
-        if (_shortlistOverlay != null)
-            _shortlistOverlay.style.display = DisplayStyle.Flex;
-    }
-
-    private void OnShortlistDurationClicked(ClickEvent evt) {
-        if (_vm == null) return;
-        int durationDays = (int)((VisualElement)evt.currentTarget).userData;
-        _dispatcher.Dispatch(new ShortlistCandidateCommand {
-            Tick = _dispatcher.CurrentTick,
-            CandidateId = GetCandidateId(),
-            DurationDays = durationDays
-        });
-        if (_shortlistOverlay != null)
-            _shortlistOverlay.style.display = DisplayStyle.None;
-        if (_shortlistButton != null) {
-            _shortlistButton.text = "Shortlisted \u2713";
-            _shortlistButton.SetEnabled(false);
+        for (int i = 0; i < _tabContents.Count; i++)
+        {
+            var content = _tabContents[i];
+            if (content != null)
+                content.EnableInClassList("cdm-tab-content--hidden", i != index);
         }
     }
 
-    private void OnShortlistCancelClicked() {
-        if (_shortlistOverlay != null)
-            _shortlistOverlay.style.display = DisplayStyle.None;
-    }
+    // ── Bind helpers ──────────────────────────────────────────────────────────
 
-    private void OnRejectClicked() {
-        if (_rejectOverlay != null)
-            _rejectOverlay.style.display = DisplayStyle.Flex;
-    }
+    private void BindHeader()
+    {
+        if (_nameLabel           != null) _nameLabel.text           = _vm.Name;
+        if (_ageLabel            != null) _ageLabel.text            = _vm.Age;
+        if (_salaryEstimateLabel != null) _salaryEstimateLabel.text = _vm.SalaryEstimateText;
+        if (_caEstimateLabel     != null) _caEstimateLabel.text     = _vm.CAEstimateText;
+        if (_paEstimateLabel     != null) _paEstimateLabel.text     = _vm.PAEstimateText;
 
-    private void OnRejectCancelClicked() {
-        if (_rejectOverlay != null)
-            _rejectOverlay.style.display = DisplayStyle.None;
-    }
+        if (_rolePill != null)
+        {
+            _rolePill.text = _vm.RoleName;
+            UIFormatting.ClearRolePillClasses(_rolePill);
+            _rolePill.AddToClassList(_vm.RolePillClass);
+        }
 
-    private void OnRejectConfirmClicked() {
-        if (_vm == null) return;
-        _dispatcher.Dispatch(new DismissCandidateCommand {
-            CandidateId = GetCandidateId()
-        });
-        _modal?.DismissModal();
-    }
+        if (_sourceBadge != null)
+        {
+            _sourceBadge.text = _vm.CandidateSource;
+            SetSingleBadgeClass(_sourceBadge, _vm.SourceBadgeClass,
+                "pipeline--hr-sourced", "pipeline--shortlisted", "pipeline--interviewing",
+                "pipeline--final-report", "pipeline--offer-pending", "pipeline--market");
+        }
 
-    private void OnMakeOfferClicked() => ShowOfferView();
+        if (_pipelineStateLabel != null)
+        {
+            _pipelineStateLabel.text = _vm.PipelineState;
+            SetSingleBadgeClass(_pipelineStateLabel, _vm.PipelineStateClass,
+                "pipeline--hr-sourced", "pipeline--shortlisted", "pipeline--interviewing",
+                "pipeline--final-report", "pipeline--offer-pending", "pipeline--market");
+        }
 
-    private void OnConfirmOfferClicked() {
-        if (_vm == null) return;
-        _dispatcher.Dispatch(new MakeOfferCommand {
-            CandidateId    = GetCandidateId(),
-            OfferedSalary  = _vm.CurrentOfferSalary,
-            OfferedRole    = _vm.SelectedRole,
-            Mode           = GetHiringMode(),
-            EmploymentType = _selectedEmploymentType,
-            Length         = _selectedLength
-        });
-        _modal?.DismissModal();
-    }
+        if (_salaryConfidenceLabel != null)
+            _salaryConfidenceLabel.text = _vm.SalaryConfidenceText;
 
-    private void OnOfferFTClicked() {
-        _selectedEmploymentType = EmploymentType.FullTime;
-        SetArrangementToggle(fullTime: true);
-        if (_vm != null) {
-            _vm.RefreshOfferData(_selectedEmploymentType, _selectedLength);
-            SyncSliderFromVm();
-            BindOfferElements();
+        if (_overallConfidenceLabel != null)
+        {
+            _overallConfidenceLabel.text = _vm.OverallConfidenceText;
+            SetSingleBadgeClass(_overallConfidenceLabel, _vm.OverallConfidenceClass,
+                "confidence--unknown", "confidence--low", "confidence--medium",
+                "confidence--high", "confidence--confirmed");
+        }
+
+        if (_expiryLabel != null)
+        {
+            _expiryLabel.text = _vm.ExpiryText;
+            SetSingleBadgeClass(_expiryLabel, _vm.ExpiryClass,
+                "expiry--urgent", "expiry--warning", "expiry--normal");
         }
     }
 
-    private void OnOfferPTClicked() {
-        _selectedEmploymentType = EmploymentType.PartTime;
-        SetArrangementToggle(fullTime: false);
-        if (_vm != null) {
-            _vm.RefreshOfferData(_selectedEmploymentType, _selectedLength);
-            SyncSliderFromVm();
-            BindOfferElements();
+    private void BindBadges()
+    {
+        if (_badgesContainer == null) return;
+        _badgesContainer.Clear();
+
+        var badges = _vm.BadgeList;
+        if (badges == null) return;
+
+        int count = badges.Count;
+        for (int i = 0; i < count; i++)
+        {
+            var data = badges[i];
+            var chip = new Label(data.Label);
+            chip.AddToClassList("badge");
+            chip.AddToClassList("cdm-badge-chip");
+            if (!string.IsNullOrEmpty(data.UssClass))
+                chip.AddToClassList(data.UssClass);
+            _badgesContainer.Add(chip);
         }
     }
 
-    private void OnLengthShortClicked() {
-        _selectedLength = ContractLengthOption.Short;
-        SetLengthSelected(_offerShortBtn);
-        if (_vm != null) {
-            _vm.RefreshOfferData(_selectedEmploymentType, _selectedLength);
-            SyncSliderFromVm();
-            BindOfferElements();
+    private void BindOverviewTab()
+    {
+        BindRoleFitRows();
+        BindEstimatedSkills();
+        BindEstimatedAttributes();
+        BindReport();
+        BindTeamProjection();
+    }
+
+    private void BindRoleFitRows()
+    {
+        if (_roleFitRows == null) return;
+        _roleFitRows.Clear();
+
+        var fits = _vm.TopProjectedFits;
+        if (fits == null) return;
+
+        int count = fits.Length;
+        for (int i = 0; i < count; i++)
+        {
+            var entry = fits[i];
+            var row = new VisualElement();
+            row.AddToClassList("cdm-role-fit-row");
+
+            var dot = new VisualElement();
+            dot.AddToClassList("role-suit-dot");
+            if (!string.IsNullOrEmpty(entry.SuitabilityClass))
+                dot.AddToClassList(entry.SuitabilityClass);
+            row.Add(dot);
+
+            var nameLabel = new Label(entry.RoleName);
+            nameLabel.AddToClassList("cdm-role-fit-row__name");
+            row.Add(nameLabel);
+
+            var rangeLabel = new Label(entry.FitRangeText);
+            rangeLabel.AddToClassList("cdm-role-fit-row__range");
+            if (!string.IsNullOrEmpty(entry.ConfidenceClass))
+                rangeLabel.AddToClassList(entry.ConfidenceClass);
+            row.Add(rangeLabel);
+
+            var confDot = new VisualElement();
+            confDot.AddToClassList("cdm-stat-row__confidence");
+            confDot.AddToClassList(entry.ConfidenceDotClass);
+            row.Add(confDot);
+
+            _roleFitRows.Add(row);
         }
     }
 
-    private void OnLengthStdClicked() {
-        _selectedLength = ContractLengthOption.Standard;
-        SetLengthSelected(_offerStdBtn);
-        if (_vm != null) {
-            _vm.RefreshOfferData(_selectedEmploymentType, _selectedLength);
-            SyncSliderFromVm();
-            BindOfferElements();
+    private void BindEstimatedSkills()
+    {
+        BindSkillRows(_coreSkillsRows, _vm.CoreSkills);
+        BindSkillRows(_supportingSkillsRows, _vm.SupportingSkills);
+    }
+
+    private void BindSkillRows(VisualElement container, CandidateDetailModalViewModel.EstimatedSkillEntry[] skills)
+    {
+        if (container == null) return;
+        container.Clear();
+
+        if (skills == null) return;
+
+        int count = skills.Length;
+        for (int i = 0; i < count; i++)
+        {
+            var entry = skills[i];
+            var row = new VisualElement();
+            row.AddToClassList("cdm-stat-row");
+
+            var nameLabel = new Label(entry.Name);
+            nameLabel.AddToClassList("cdm-stat-row__name");
+            nameLabel.style.color = entry.NameColor;
+            row.Add(nameLabel);
+
+            var rangeLabel = new Label(entry.DisplayText);
+            rangeLabel.AddToClassList("cdm-stat-row__range");
+            if (!string.IsNullOrEmpty(entry.DisplayClass))
+                rangeLabel.AddToClassList(entry.DisplayClass);
+            row.Add(rangeLabel);
+
+            var confDot = new VisualElement();
+            confDot.AddToClassList("cdm-stat-row__confidence");
+            confDot.AddToClassList(entry.ConfidenceDotClass);
+            row.Add(confDot);
+
+            container.Add(row);
         }
     }
 
-    private void OnLengthLongClicked() {
-        _selectedLength = ContractLengthOption.Long;
-        SetLengthSelected(_offerLongBtn);
-        if (_vm != null) {
-            _vm.RefreshOfferData(_selectedEmploymentType, _selectedLength);
-            SyncSliderFromVm();
-            BindOfferElements();
+    private void BindEstimatedAttributes()
+    {
+        if (_attributesRows == null) return;
+        _attributesRows.Clear();
+
+        var attrs = _vm.EstimatedAttributes;
+        if (attrs == null) return;
+
+        int count = attrs.Length;
+        for (int i = 0; i < count; i++)
+        {
+            var entry = attrs[i];
+            var row = new VisualElement();
+            row.AddToClassList("cdm-stat-row");
+
+            var nameLabel = new Label(entry.Name);
+            nameLabel.AddToClassList("cdm-stat-row__name");
+            row.Add(nameLabel);
+
+            var valueLabel = new Label(entry.DisplayText);
+            valueLabel.AddToClassList("cdm-stat-row__range");
+            if (!string.IsNullOrEmpty(entry.DisplayClass))
+                valueLabel.AddToClassList(entry.DisplayClass);
+            row.Add(valueLabel);
+
+            var confDot = new VisualElement();
+            confDot.AddToClassList("cdm-stat-row__confidence");
+            confDot.AddToClassList(entry.ConfidenceDotClass);
+            row.Add(confDot);
+
+            _attributesRows.Add(row);
         }
     }
 
-    private void OnRoleRowClicked(ClickEvent evt) {
-        if (_vm == null) return;
-        var target = evt.currentTarget as VisualElement;
-        if (target == null || !(target.userData is EmployeeRole role)) return;
-        _vm.SetSelectedRole(role);
-        SyncSliderFromVm();
-        BindOfferElements();
+    private void BindReport()
+    {
+        var report = _vm.Report;
+
+        if (_reportSummaryLabel != null)
+            _reportSummaryLabel.text = report.SummaryLabel;
+
+        BindStringList(_reportStrengths, report.Strengths, "cdm-report-item", "cdm-report-item--strength");
+        BindStringList(_reportConcerns, report.Concerns, "cdm-report-item", "cdm-report-item--concern");
+
+        if (_reportConfidenceLabel != null)
+            _reportConfidenceLabel.text = report.ReportConfidence;
+
+        if (_recommendationLabel != null)
+            _recommendationLabel.text = report.Recommendation;
     }
 
-    private void OnSalarySliderChanged(ChangeEvent<float> evt) {
-        if (_vm == null) return;
-        int rounded = SalaryDemandCalculator.Round50(evt.newValue);
-        _salarySlider.SetValueWithoutNotify(rounded);
-        _vm.SetOfferSalary(rounded);
-        if (_salarySliderValueLabel != null)
-            _salarySliderValueLabel.text = UIFormatting.FormatMoney(rounded) + "/mo";
-        // Refresh only acceptance display
-        if (_acceptanceBarFill != null) {
-            _acceptanceBarFill.RemoveFromClassList("acceptance-bar--high");
-            _acceptanceBarFill.RemoveFromClassList("acceptance-bar--medium");
-            _acceptanceBarFill.RemoveFromClassList("acceptance-bar--low");
-            _acceptanceBarFill.AddToClassList(_vm.AcceptanceChanceClass);
-            _acceptanceBarFill.style.width = Length.Percent(_vm.AcceptanceChance);
+    private void BindTeamProjection()
+    {
+        var proj = _vm.TeamProjection;
+        if (_teamProjectionFit    != null) _teamProjectionFit.text    = proj.ProjectedFitText;
+        if (_teamProjectionDetail != null) _teamProjectionDetail.text = proj.ProjectionDetailText;
+
+        if (_teamDropdown != null)
+        {
+            var teamNames = _vm.AvailableTeamNames;
+            _suppressDropdownEvents = true;
+            if (teamNames != null && teamNames.Length > 0)
+            {
+                var choices = new List<string>(teamNames);
+                _teamDropdown.choices = choices;
+                if (_teamDropdown.index < 0 || _teamDropdown.index >= choices.Count)
+                    _teamDropdown.index = 0;
+            }
+            else
+            {
+                _teamDropdown.choices = new List<string> { "No teams available" };
+                _teamDropdown.index   = 0;
+            }
+            _suppressDropdownEvents = false;
         }
+    }
+
+    private void OnTeamDropdownChanged(ChangeEvent<string> evt)
+    {
+        if (_vm == null || _teamDropdown == null || _suppressDropdownEvents) return;
+        int idx = _teamDropdown.index;
+        if (idx >= 0) _vm.SetTargetTeamIndex(idx);
+    }
+
+    private void BindInterviewTab()
+    {
+        var data = _vm.Interview;
+
+        if (_interviewStageLabel     != null) _interviewStageLabel.text     = data.StageText;
+        if (_interviewHRTeamLabel    != null) _interviewHRTeamLabel.text    = data.AssignedHRTeam;
+        if (_interviewTimeLabel      != null) _interviewTimeLabel.text      = data.TimeRemaining;
+        if (_interviewKnowledgeLabel != null) _interviewKnowledgeLabel.text = data.KnowledgeText;
+        if (_firstReportLabel        != null) _firstReportLabel.text        = data.FirstReportText;
+        if (_finalReportLabel        != null) _finalReportLabel.text        = data.FinalReportText;
+
+        BindStringList(_revealedStrengths, data.RevealedStrengths, "cdm-report-item", "cdm-report-item--strength");
+        BindStringList(_revealedConcerns, data.RevealedConcerns, "cdm-report-item", "cdm-report-item--concern");
+    }
+
+    private void BindPersonalityTab()
+    {
+        var data = _vm.Personality;
+
+        if (_personalityTypeLabel       != null) _personalityTypeLabel.text       = data.PersonalityEstimate;
+        if (_personalityConfidenceLabel != null) _personalityConfidenceLabel.text = data.PersonalityConfidence;
+        if (_retentionRiskLabel         != null) _retentionRiskLabel.text         = data.RetentionRisk;
+        if (_salaryPressureLabel        != null) _salaryPressureLabel.text        = data.SalaryPressure;
+
+        BindStringList(_riskFlagRows, data.RiskFlags, "cdm-report-item", "cdm-report-item--concern");
+
+        if (_signalRows != null)
+        {
+            _signalRows.Clear();
+            var signals = data.Signals;
+            if (signals != null)
+            {
+                int count = signals.Length;
+                for (int i = 0; i < count; i++)
+                {
+                    var sig = signals[i];
+                    var row = new VisualElement();
+                    row.AddToClassList("cdm-stat-row");
+
+                    var nameLabel = new Label(sig.Name);
+                    nameLabel.AddToClassList("cdm-stat-row__name");
+                    row.Add(nameLabel);
+
+                    var valueLabel = new Label(sig.DisplayText);
+                    valueLabel.AddToClassList("cdm-stat-row__range");
+                    if (!string.IsNullOrEmpty(sig.DisplayClass))
+                        valueLabel.AddToClassList(sig.DisplayClass);
+                    row.Add(valueLabel);
+
+                    var confDot = new VisualElement();
+                    confDot.AddToClassList("cdm-stat-row__confidence");
+                    confDot.AddToClassList(sig.ConfidenceDotClass);
+                    row.Add(confDot);
+
+                    _signalRows.Add(row);
+                }
+            }
+        }
+    }
+
+    private void BindComparisonTab()
+    {
+        var data = _vm.Comparison;
+
+        // Update comparison dropdown choices/selection
+        if (_comparisonDropdown != null && data.TargetLabels != null && data.TargetLabels.Length > 0)
+        {
+            var choices = new List<string>(data.TargetLabels);
+            _suppressDropdownEvents = true;
+            _comparisonDropdown.choices = choices;
+            int idx = data.SelectedTargetIndex;
+            if (idx >= 0 && idx < choices.Count)
+                _comparisonDropdown.index = idx;
+            _suppressDropdownEvents = false;
+        }
+
+        if (_comparisonTargetColHeader != null)
+            _comparisonTargetColHeader.text = data.TargetColumnHeader ?? "COMPARISON";
+
+        if (_comparisonRecommendationText != null)
+            _comparisonRecommendationText.text = data.RecommendationText ?? "\u2014";
+
+        // Populate metric columns
+        if (_comparisonCandidateMetrics == null) return;
+        _comparisonCandidateMetrics.Clear();
+        _comparisonLabelMetrics?.Clear();
+        _comparisonTargetMetrics?.Clear();
+        _comparisonDeltaMetrics?.Clear();
+
+        var metrics = data.Metrics;
+        if (metrics == null) return;
+
+        int count = metrics.Length;
+        for (int i = 0; i < count; i++)
+        {
+            var m = metrics[i];
+
+            var candidateCell = new Label(m.CandidateValueText ?? "\u2014");
+            candidateCell.AddToClassList("cdm-comparison-metric-cell");
+            if (!string.IsNullOrEmpty(m.ConfidenceClass))
+                candidateCell.AddToClassList(m.ConfidenceClass);
+            _comparisonCandidateMetrics.Add(candidateCell);
+
+            if (_comparisonLabelMetrics != null)
+            {
+                var labelCell = new Label(m.MetricName);
+                labelCell.AddToClassList("cdm-comparison-label-cell");
+                _comparisonLabelMetrics.Add(labelCell);
+            }
+
+            if (_comparisonTargetMetrics != null)
+            {
+                var targetCell = new Label(m.ComparisonValueText ?? "\u2014");
+                targetCell.AddToClassList("cdm-comparison-metric-cell");
+                _comparisonTargetMetrics.Add(targetCell);
+            }
+
+            if (_comparisonDeltaMetrics != null)
+            {
+                var deltaCell = new Label(m.DeltaText ?? "\u2014");
+                deltaCell.AddToClassList("cdm-comparison-metric-cell");
+                if (!string.IsNullOrEmpty(m.DeltaClass))
+                    deltaCell.AddToClassList(m.DeltaClass);
+                _comparisonDeltaMetrics.Add(deltaCell);
+            }
+        }
+    }
+
+    private bool _suppressDropdownEvents;
+
+    private void OnComparisonDropdownChanged(ChangeEvent<string> evt)
+    {
+        if (_vm == null || _comparisonDropdown == null || _suppressDropdownEvents) return;
+        _vm.SetComparisonTarget(_comparisonDropdown.index);
+        BindComparisonTab();
+    }
+
+    private void BindOfferTab()
+    {
+        var data = _vm.Offer;
+
+        if (_salaryDemandStateLabel != null)
+            _salaryDemandStateLabel.text = data.DemandStateText ?? "\u2014";
+
+        if (_salaryEstimateDisplay != null)
+            _salaryEstimateDisplay.text = data.SalaryEstimateText ?? "\u2014";
+
+        if (_monthlyCostLabel != null)
+            _monthlyCostLabel.text = data.MonthlyCostText ?? "\u2014";
+
+        if (_runwayImpactLabel != null)
+        {
+            _runwayImpactLabel.text = data.RunwayImpactText ?? "\u2014";
+            SetSingleBadgeClass(_runwayImpactLabel, data.RunwayImpactClass,
+                "runway-impact--warning", "runway-impact--danger");
+        }
+
         if (_acceptanceChanceLabel != null)
-            _acceptanceChanceLabel.text = _vm.AcceptanceChanceText ?? "???";
+        {
+            _acceptanceChanceLabel.text = data.AcceptanceChanceLabel ?? "\u2014";
+            SetSingleBadgeClass(_acceptanceChanceLabel, data.AcceptanceChanceClass,
+                "offer-acceptance--very-likely", "offer-acceptance--likely", "offer-acceptance--medium",
+                "offer-acceptance--unlikely", "offer-acceptance--very-unlikely");
+        }
+
+        // Acceptance factors
+        if (_acceptanceFactorsList != null)
+        {
+            _acceptanceFactorsList.Clear();
+            var factors = data.Factors;
+            if (factors != null)
+            {
+                int fc = factors.Length;
+                for (int i = 0; i < fc; i++)
+                {
+                    var f = factors[i];
+                    var row = new VisualElement();
+                    row.AddToClassList("cdm-offer__factor-row");
+
+                    var nameLabel = new Label(f.Name);
+                    nameLabel.AddToClassList("cdm-offer__factor-name");
+                    row.Add(nameLabel);
+
+                    var valueLabel = new Label(f.ValueText ?? "\u2014");
+                    valueLabel.AddToClassList("cdm-offer__factor-value");
+                    if (!string.IsNullOrEmpty(f.ImpactClass))
+                        valueLabel.AddToClassList(f.ImpactClass);
+                    row.Add(valueLabel);
+
+                    _acceptanceFactorsList.Add(row);
+                }
+            }
+        }
+
+        // Status
+        if (_offerStatusLabel != null)
+        {
+            _offerStatusLabel.text = data.StatusText ?? "";
+            SetSingleBadgeClass(_offerStatusLabel, data.StatusClass,
+                "cdm-offer__status-label--warning", "cdm-offer__status-label--danger",
+                "cdm-offer__status-label--success", "cdm-offer__status-label");
+            if (!string.IsNullOrEmpty(data.StatusClass))
+                _offerStatusLabel.AddToClassList(data.StatusClass);
+        }
+
+        if (_offerStatusSection != null)
+            _offerStatusSection.style.display = string.IsNullOrEmpty(data.StatusText)
+                ? DisplayStyle.None : DisplayStyle.Flex;
+
+        // Offer action buttons in offer tab
+        if (_btnMakeOffer     != null) { _btnMakeOffer.SetEnabled(data.CanMakeOffer);     _btnMakeOffer.style.display     = data.CanMakeOffer     ? DisplayStyle.Flex : DisplayStyle.None; }
+        if (_btnHire          != null) { _btnHire.SetEnabled(data.CanHire);               _btnHire.style.display          = data.CanHire          ? DisplayStyle.Flex : DisplayStyle.None; }
+        if (_btnWithdrawOffer != null) { _btnWithdrawOffer.SetEnabled(data.CanWithdrawOffer); _btnWithdrawOffer.style.display = data.CanWithdrawOffer ? DisplayStyle.Flex : DisplayStyle.None; }
+        if (_btnAcceptCounter != null) { _btnAcceptCounter.SetEnabled(data.CanAcceptCounter); _btnAcceptCounter.style.display = data.CanAcceptCounter ? DisplayStyle.Flex : DisplayStyle.None; }
+        if (_btnRejectCounter != null) { _btnRejectCounter.SetEnabled(data.CanRejectCounter); _btnRejectCounter.style.display = data.CanRejectCounter ? DisplayStyle.Flex : DisplayStyle.None; }
     }
 
-    private void SyncSliderFromVm() {
-        if (_vm == null || _salarySlider == null) return;
-        _salarySlider.lowValue  = _vm.SalarySliderMin;
-        _salarySlider.highValue = _vm.SalarySliderMax;
-        _salarySlider.SetValueWithoutNotify(_vm.CurrentOfferSalary);
-        if (_salarySliderValueLabel != null)
-            _salarySliderValueLabel.text = UIFormatting.FormatMoney(_vm.CurrentOfferSalary) + "/mo";
+    private void BindBottomStatusCards()
+    {
+        SetStatusCard(_statusCardInterest,     _statusInterestValue,     _vm.InterestCardText,     _vm.InterestCardClass);
+        SetStatusCard(_statusCardSalary,       _statusSalaryValue,       _vm.SalaryCardText,       _vm.SalaryCardClass);
+        SetStatusCard(_statusCardPotential,    _statusPotentialValue,    _vm.PotentialCardText,    _vm.PotentialCardClass);
+        SetStatusCard(_statusCardRisk,         _statusRiskValue,         _vm.RiskCardText,         _vm.RiskCardClass);
+        SetStatusCard(_statusCardAvailability, _statusAvailabilityValue, _vm.AvailabilityCardText, _vm.AvailabilityCardClass);
+        SetStatusCard(_statusCardInterview,    _statusInterviewValue,    _vm.InterviewCardText,    _vm.InterviewCardClass);
+        SetStatusCard(_statusCardTeamImpact,   _statusTeamImpactValue,   _vm.TeamImpactCardText,   _vm.TeamImpactCardClass);
+        SetStatusCard(_statusCardComparison,   _statusComparisonValue,   _vm.ComparisonCardText,   _vm.ComparisonCardClass);
     }
 
-    // --- View swap ---
+    private void BindActionVisibility()
+    {
+        var offer = _vm.Offer;
+        bool hasNeg      = _vm.HasActiveNegotiation;
+        bool isShortlisted = _vm.IsShortlisted;
+        bool interviewEnabled = _vm.InterviewButtonEnabled;
+        bool isPending = _vm.CandidateSource == "HR Sourced";
 
-    private void ShowDetailView() {
-        _inOfferView = false;
-        if (_detailView != null) _detailView.style.display = DisplayStyle.Flex;
-        if (_offerView != null) _offerView.style.display   = DisplayStyle.None;
-        if (_offerBackButton != null) _offerBackButton.style.display = DisplayStyle.None;
-        if (_makeOfferButton != null) _makeOfferButton.style.display = DisplayStyle.Flex;
-        if (_confirmOfferButton != null) _confirmOfferButton.style.display = DisplayStyle.None;
-        if (_interviewButton != null) _interviewButton.style.display = DisplayStyle.Flex;
-        if (_shortlistButton != null) _shortlistButton.style.display = DisplayStyle.Flex;
-    }
+        // Footer action visibility based on pipeline state
+        SetButtonVisible(_btnInterview,      interviewEnabled || !hasNeg);
+        SetButtonVisible(_btnShortlist,      !isShortlisted && !hasNeg);
+        SetButtonVisible(_btnOffer,          !hasNeg && !offer.CanHire);
+        SetButtonVisible(_btnReject,         !hasNeg && !offer.CanHire);
+        SetButtonVisible(_btnHireFooter,     offer.CanHire);
+        SetButtonVisible(_btnWithdrawFooter, offer.CanWithdrawOffer);
+        SetButtonVisible(_btnAcceptHR,       isPending && !hasNeg);
+        SetButtonVisible(_btnDeclineHR,      isPending && !hasNeg);
 
-    private void ShowOfferView() {
-        if (_vm != null && _vm.IsOfferOnCooldown) return;
-        _inOfferView = true;
-        if (_detailView != null) _detailView.style.display = DisplayStyle.None;
-        if (_offerView != null) _offerView.style.display   = DisplayStyle.Flex;
-        if (_offerBackButton != null) _offerBackButton.style.display = DisplayStyle.Flex;
-        if (_makeOfferButton != null) _makeOfferButton.style.display = DisplayStyle.None;
-        if (_confirmOfferButton != null) _confirmOfferButton.style.display = DisplayStyle.Flex;
-        if (_interviewButton != null) _interviewButton.style.display = DisplayStyle.None;
-        if (_shortlistButton != null) _shortlistButton.style.display = DisplayStyle.None;
+        if (_btnInterview != null)
+        {
+            _btnInterview.text = _vm.InterviewButtonText;
+            _btnInterview.SetEnabled(_vm.InterviewButtonEnabled);
+        }
 
-        if (_vm != null) {
-            _vm.RefreshOfferData(_selectedEmploymentType, _selectedLength);
-            SyncSliderFromVm();
-            BindOfferElements();
-            SetArrangementToggle(_selectedEmploymentType == EmploymentType.FullTime);
-            Button lengthBtn = _selectedLength == ContractLengthOption.Short ? _offerShortBtn
-                : _selectedLength == ContractLengthOption.Long ? _offerLongBtn
-                : _offerStdBtn;
-            SetLengthSelected(lengthBtn);
+        if (_btnShortlist != null)
+        {
+            _btnShortlist.text = isShortlisted ? "Shortlisted" : "Shortlist";
+            _btnShortlist.SetEnabled(!isShortlisted);
+        }
+
+        if (_btnOffer != null)
+            _btnOffer.SetEnabled(!_vm.IsOfferOnCooldown && !hasNeg);
+
+        // Footer class based on pipeline state
+        if (_footerActions != null)
+        {
+            _footerActions.RemoveFromClassList("cdm-footer--offer-pending");
+            _footerActions.RemoveFromClassList("cdm-footer--accepted");
+            _footerActions.RemoveFromClassList("cdm-footer--unavailable");
+
+            if (offer.CanHire)
+                _footerActions.AddToClassList("cdm-footer--accepted");
+            else if (offer.CanWithdrawOffer)
+                _footerActions.AddToClassList("cdm-footer--offer-pending");
         }
     }
 
-    // --- Helpers ---
+    // ── Action handlers ───────────────────────────────────────────────────────
 
-    // Called by WindowManager when a counter-offer is pending for this candidate.
-    // Counter-offer view rendering is handled in Plan 6.
-    public void ShowCounterOfferView() {
-        // Placeholder: reserved for Plan 6 counter-offer UI integration.
-        ShowOfferView();
+    private void OnCloseClicked()
+    {
+        _modal.DismissModal();
     }
 
-    private int GetCandidateId() => _vm?.CandidateId ?? 0;
-
-    private HiringMode GetHiringMode() {
-        if (_vm == null) return HiringMode.Manual;
-        return _vm.Source == "HR Sourced" || _vm.Source == "Shortlisted" ? HiringMode.HR : HiringMode.Manual;
+    private void OnInterviewClicked()
+    {
+        if (_vm == null || !_vm.InterviewButtonEnabled) return;
+        _dispatcher.Dispatch(new StartInterviewCommand
+        {
+            Tick        = 0,
+            CandidateId = _vm.CandidateId,
+            Mode        = _vm.IsShortlisted ? HiringMode.HR : HiringMode.Manual
+        });
     }
 
-    private static VisualElement BuildSectionCard(string title, VisualElement parent) {
-        var card = new VisualElement();
-        card.AddToClassList("card");
-        card.style.marginBottom = 8;
-        var titleLabel = new Label(title);
-        titleLabel.AddToClassList("card__title");
-        card.Add(titleLabel);
-        parent.Add(card);
-        return card;
+    private void OnShortlistClicked()
+    {
+        if (_vm == null || _vm.IsShortlisted) return;
+        _dispatcher.Dispatch(new ShortlistCandidateCommand
+        {
+            Tick        = 0,
+            CandidateId = _vm.CandidateId,
+            DurationDays = 14
+        });
     }
 
-    private static (Label value, VisualElement row) AddDetailRow(VisualElement parent, string label) {
-        var row = new VisualElement();
-        row.AddToClassList("flex-row");
-        row.AddToClassList("justify-between");
-        row.AddToClassList("detail-row");
-        row.style.marginBottom = 4;
-
-        var labelEl = new Label(label);
-        labelEl.AddToClassList("metric-tertiary");
-        row.Add(labelEl);
-
-        var valueEl = new Label("--");
-        valueEl.AddToClassList("metric-secondary");
-        valueEl.name = "detail-row__value";
-        row.Add(valueEl);
-
-        parent.Add(row);
-        return (valueEl, row);
+    private void OnOfferFooterClicked()
+    {
+        ShowTab(4);
     }
 
-    private void SetArrangementToggle(bool fullTime) {
-        if (_offerFTButton != null) {
-            if (fullTime) _offerFTButton.AddToClassList("offer-toggle-btn--active");
-            else _offerFTButton.RemoveFromClassList("offer-toggle-btn--active");
+    private void OnOfferClicked()
+    {
+        if (_vm == null || !_vm.Offer.CanMakeOffer) return;
+        _dispatcher.Dispatch(new MakeOfferCommand
+        {
+            Tick            = 0,
+            CandidateId     = _vm.CandidateId,
+            OfferedSalary   = _vm.SalarySliderAnchor,
+            Mode            = _vm.IsShortlisted ? HiringMode.HR : HiringMode.Manual,
+            EmploymentType  = EmploymentType.FullTime,
+            Length          = ContractLengthOption.Standard,
+            OfferedRole     = _vm.SelectedRole
+        });
+    }
+
+    private void OnHireClicked()
+    {
+        if (_vm == null || !_vm.Offer.CanHire) return;
+        _dispatcher.Dispatch(new AcceptCounterOfferCommand
+        {
+            Tick        = 0,
+            CandidateId = _vm.CandidateId
+        });
+        _modal.DismissModal();
+    }
+
+    private void OnWithdrawOfferClicked()
+    {
+        if (_vm == null || !_vm.Offer.CanWithdrawOffer) return;
+        _dispatcher.Dispatch(new RejectCounterOfferCommand
+        {
+            Tick        = 0,
+            CandidateId = _vm.CandidateId
+        });
+    }
+
+    private void OnAcceptCounterClicked()
+    {
+        if (_vm == null || !_vm.Offer.CanAcceptCounter) return;
+        _dispatcher.Dispatch(new AcceptCounterOfferCommand
+        {
+            Tick        = 0,
+            CandidateId = _vm.CandidateId
+        });
+    }
+
+    private void OnRejectCounterClicked()
+    {
+        if (_vm == null || !_vm.Offer.CanRejectCounter) return;
+        _dispatcher.Dispatch(new RejectCounterOfferCommand
+        {
+            Tick        = 0,
+            CandidateId = _vm.CandidateId
+        });
+    }
+
+    private void OnAcceptHRClicked()
+    {
+        if (_vm == null) return;
+        _dispatcher.Dispatch(new AcceptHRCandidateCommand
+        {
+            Tick        = 0,
+            CandidateId = _vm.CandidateId
+        });
+    }
+
+    private void OnDeclineHRClicked()
+    {
+        if (_vm == null) return;
+        _dispatcher.Dispatch(new DeclineHRCandidateCommand
+        {
+            Tick        = 0,
+            CandidateId = _vm.CandidateId
+        });
+    }
+
+    private void OnRejectClicked()
+    {
+        if (_vm == null) return;
+        _dispatcher.Dispatch(new DismissCandidateCommand
+        {
+            Tick        = 0,
+            CandidateId = _vm.CandidateId
+        });
+        _modal.DismissModal();
+    }
+
+    // ── Static helpers ────────────────────────────────────────────────────────
+
+    private static void SetButtonVisible(Button btn, bool visible)
+    {
+        if (btn == null) return;
+        btn.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
+    private static void SetStatusCard(
+        VisualElement card,
+        Label valueLabel,
+        string text,
+        string stateClass)
+    {
+        if (valueLabel != null) valueLabel.text = text ?? "\u2014";
+
+        if (card == null) return;
+        card.RemoveFromClassList("cdm-status-card--warning");
+        card.RemoveFromClassList("cdm-status-card--danger");
+        card.RemoveFromClassList("cdm-status-card--success");
+        if (!string.IsNullOrEmpty(stateClass))
+            card.AddToClassList(stateClass);
+    }
+
+    private static void SetSingleBadgeClass(Label lbl, string activeClass, params string[] allClasses)
+    {
+        foreach (var cls in allClasses)
+            lbl.RemoveFromClassList(cls);
+        if (!string.IsNullOrEmpty(activeClass))
+            lbl.AddToClassList(activeClass);
+    }
+
+    private static void BindStringList(VisualElement container, string[] items, string baseClass, string modifierClass)
+    {
+        if (container == null) return;
+        container.Clear();
+        if (items == null) return;
+
+        int count = items.Length;
+        for (int i = 0; i < count; i++)
+        {
+            var label = new Label(items[i]);
+            label.AddToClassList(baseClass);
+            label.AddToClassList(modifierClass);
+            container.Add(label);
         }
-        if (_offerPTButton != null) {
-            if (!fullTime) _offerPTButton.AddToClassList("offer-toggle-btn--active");
-            else _offerPTButton.RemoveFromClassList("offer-toggle-btn--active");
-        }
-    }
-
-    private void SetLengthSelected(Button selected) {
-        if (_offerShortBtn != null) _offerShortBtn.RemoveFromClassList("length-card--selected");
-        if (_offerStdBtn != null)   _offerStdBtn.RemoveFromClassList("length-card--selected");
-        if (_offerLongBtn != null)  _offerLongBtn.RemoveFromClassList("length-card--selected");
-        selected?.AddToClassList("length-card--selected");
-    }
-
-    private Button CreateLengthCard(string label, string sub, ContractLengthOption option) {
-        var btn = new Button();
-        btn.AddToClassList("length-card");
-        var labelEl = new Label(label);
-        labelEl.AddToClassList("text-bold");
-        btn.Add(labelEl);
-        var subEl = new Label(sub);
-        subEl.AddToClassList("metric-tertiary");
-        btn.Add(subEl);
-        return btn;
-    }
-
-    private VisualElement CreateMismatchWarning() {
-        var row = new VisualElement();
-        row.AddToClassList("mismatch-warning");
-        row.AddToClassList("flex-row");
-        var icon = new Label("\u26A0");
-        icon.AddToClassList("text-warning");
-        icon.style.marginRight = 6;
-        row.Add(icon);
-        var text = new Label();
-        text.name = "mismatch-text";
-        text.AddToClassList("metric-tertiary");
-        text.style.whiteSpace = WhiteSpace.Normal;
-        row.Add(text);
-        return row;
-    }
-
-    private void BindMismatchWarning(VisualElement el, string warning) {
-        var text = el.Q<Label>("mismatch-text");
-        if (text != null) text.text = warning;
     }
 }

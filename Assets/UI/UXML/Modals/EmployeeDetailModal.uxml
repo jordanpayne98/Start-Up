@@ -1,0 +1,487 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="project://database/Assets/UI/USS/Modals/employee-detail-modal.uss" />
+    <ui:VisualElement name="employee-detail-modal" class="employee-detail-modal">
+
+        <!-- ── Modal Header ── -->
+        <ui:VisualElement name="modal-header" class="edm-header">
+            <!-- Left: portrait placeholder, name, age, role pill, founder badge -->
+            <ui:VisualElement name="header-left" class="edm-header__left">
+                <ui:VisualElement name="portrait-placeholder" class="edm-portrait" />
+                <ui:VisualElement class="edm-header__identity">
+                    <ui:VisualElement class="edm-header__name-row">
+                        <ui:Label name="name-label" text="Employee Name" class="edm-name" />
+                        <ui:Label name="founder-badge" text="Founder" class="badge badge--founder edm-founder-badge" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="edm-header__sub-row">
+                        <ui:Label name="role-pill" text="Role" class="role-pill" />
+                        <ui:Label name="role-family-label" text="" class="edm-role-family" />
+                        <ui:Label name="seniority-label" text="Senior" class="edm-seniority" />
+                        <ui:Label name="age-label" text="0 yrs" class="edm-age" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Center: team, contract, salary, benchmark, CA/PA stars -->
+            <ui:VisualElement name="header-center" class="edm-header__center">
+                <ui:VisualElement class="edm-header__stat-row">
+                    <ui:Label class="edm-stat-label" text="Team" />
+                    <ui:Label name="team-label" text="—" class="edm-stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="edm-header__stat-row">
+                    <ui:Label class="edm-stat-label" text="Contract" />
+                    <ui:Label name="contract-type-label" text="—" class="edm-stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="edm-header__stat-row">
+                    <ui:Label class="edm-stat-label" text="Salary" />
+                    <ui:Label name="salary-label" text="—" class="edm-stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="edm-header__stat-row">
+                    <ui:Label class="edm-stat-label" text="Market" />
+                    <ui:Label name="benchmark-label" text="—" class="edm-stat-value badge" />
+                </ui:VisualElement>
+                <ui:VisualElement class="edm-header__stat-row">
+                    <ui:Label class="edm-stat-label" text="Expires" />
+                    <ui:Label name="contract-expiry-label" text="—" class="edm-stat-value" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Right: CA stars, PA stars, morale, badges, close -->
+            <ui:VisualElement name="header-right" class="edm-header__right">
+                <ui:VisualElement class="edm-stars-row">
+                    <ui:Label class="edm-stat-label" text="CA" />
+                    <ui:Label name="ca-stars-label" text="—" class="edm-stars" />
+                </ui:VisualElement>
+                <ui:VisualElement class="edm-stars-row">
+                    <ui:Label class="edm-stat-label" text="PA" />
+                    <ui:Label name="pa-stars-label" text="—" class="edm-stars" />
+                </ui:VisualElement>
+                <ui:VisualElement class="edm-header__stat-row">
+                    <ui:Label class="edm-stat-label" text="Morale" />
+                    <ui:Label name="morale-label" text="—" class="edm-stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement name="badges-container" class="edm-badges-container">
+                    <!-- badges injected at runtime -->
+                </ui:VisualElement>
+                <ui:Button name="btn-close" text="✕" class="btn-icon edm-close-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ── Tab Bar ── -->
+        <ui:VisualElement name="tab-bar" class="edm-tab-bar">
+            <ui:Button name="tab-overview"    text="Overview"    class="edm-tab tab--active" />
+            <ui:Button name="tab-personal"    text="Personal"    class="edm-tab" />
+            <ui:Button name="tab-performance" text="Performance" class="edm-tab" />
+            <ui:Button name="tab-growth"      text="Growth"      class="edm-tab" />
+            <ui:Button name="tab-career"      text="Career"      class="edm-tab" />
+            <ui:Button name="tab-comparison"  text="Comparison"  class="edm-tab" />
+        </ui:VisualElement>
+
+        <!-- ── Tab Content Area ── -->
+        <ui:ScrollView name="tab-content-area" class="edm-tab-content-area"
+                       vertical-scroller-visibility="Auto"
+                       horizontal-scroller-visibility="Hidden">
+
+            <!-- Overview: 3-column layout + team impact below -->
+            <ui:VisualElement name="overview-content" class="edm-tab-content edm-overview-content">
+
+                <!-- 3-column row -->
+                <ui:VisualElement name="overview-columns" class="edm-overview-columns">
+
+                    <!-- ── Left panel: role fit, current role summary, team fit ── -->
+                    <ui:VisualElement name="left-panel" class="edm-col edm-col--left">
+
+                        <!-- Role fit card — top 5 role fits -->
+                        <ui:VisualElement name="role-fit-card" class="col-card">
+                            <ui:Label text="ROLE FIT" class="col-card__title" />
+                            <ui:VisualElement name="role-fit-rows" class="edm-role-fit-rows">
+                                <!-- 5 role-suit-row slots populated at runtime -->
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Current role summary -->
+                        <ui:VisualElement name="current-role-summary" class="col-card">
+                            <ui:Label text="CURRENT ROLE" class="col-card__title" />
+                            <ui:VisualElement class="edm-role-summary-row">
+                                <ui:Label class="edm-stat-label" text="Role" />
+                                <ui:Label name="summary-current-role" text="—" class="edm-stat-value" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="edm-role-summary-row">
+                                <ui:Label class="edm-stat-label" text="Fit" />
+                                <ui:Label name="summary-role-fit" text="—" class="edm-stat-value" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="edm-role-summary-row">
+                                <ui:Label class="edm-stat-label" text="CA" />
+                                <ui:Label name="summary-current-ca" text="—" class="edm-stat-value" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="edm-role-summary-row">
+                                <ui:Label class="edm-stat-label" text="Best Role" />
+                                <ui:Label name="summary-best-role" text="—" class="edm-stat-value" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="edm-role-summary-row">
+                                <ui:Label class="edm-stat-label" text="Best CA" />
+                                <ui:Label name="summary-best-ca" text="—" class="edm-stat-value" />
+                            </ui:VisualElement>
+                            <ui:Label name="summary-suggestion" text="" class="edm-suggestion-text" />
+                        </ui:VisualElement>
+
+                        <!-- Team fit card -->
+                        <ui:VisualElement name="team-fit-card" class="col-card">
+                            <ui:Label text="TEAM FIT" class="col-card__title" />
+                            <ui:VisualElement class="edm-role-summary-row">
+                                <ui:Label class="edm-stat-label" text="Team" />
+                                <ui:Label name="team-fit-name" text="—" class="edm-stat-value" />
+                            </ui:VisualElement>
+                            <ui:Label name="team-fit-label" text="—" class="edm-team-fit-label" />
+                            <ui:Label name="team-fit-assignment" text="" class="edm-team-fit-detail" />
+                            <ui:VisualElement name="team-fit-notes" class="edm-team-fit-notes" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- ── Center panel: core skills, supporting skills, attributes ── -->
+                    <ui:VisualElement name="center-panel" class="edm-col edm-col--center">
+
+                        <!-- Core (Primary + Secondary) skills -->
+                        <ui:VisualElement name="core-skills-card" class="col-card">
+                            <ui:Label text="CORE SKILLS" class="col-card__title" />
+                            <ui:VisualElement name="core-skills-rows" class="edm-stat-rows">
+                                <!-- 8 pooled skill rows populated at runtime -->
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Supporting (Tertiary) skills -->
+                        <ui:VisualElement name="supporting-skills-card" class="col-card">
+                            <ui:Label text="SUPPORTING SKILLS" class="col-card__title" />
+                            <ui:VisualElement name="supporting-skills-rows" class="edm-stat-rows">
+                                <!-- 8 pooled skill rows populated at runtime -->
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:Button name="view-all-skills-btn" text="View All Skills ›" class="edm-link-btn" />
+
+                        <!-- Visible attributes -->
+                        <ui:VisualElement name="attributes-card" class="col-card">
+                            <ui:Label text="ATTRIBUTES" class="col-card__title" />
+                            <ui:VisualElement name="attributes-rows" class="edm-stat-rows">
+                                <!-- 8 attribute rows populated at runtime -->
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- ── Right panel: personality, hidden signals, notes ── -->
+                    <ui:VisualElement name="right-panel" class="edm-col edm-col--right">
+
+                        <!-- Personality + hidden signals report -->
+                        <ui:VisualElement name="reports-card" class="col-card">
+                            <ui:Label text="REPORT" class="col-card__title" />
+                            <ui:Label name="personality-label" text="—" class="badge edm-personality-badge" />
+                            <ui:VisualElement name="hidden-signals-section" class="edm-hidden-signals">
+                                <ui:Label text="HIDDEN SIGNALS" class="col-card__title edm-subsection-title" />
+                                <ui:VisualElement name="hidden-signal-rows" class="edm-signal-rows">
+                                    <!-- 7 signal rows populated at runtime -->
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- Notes card: salary, contract, recommendation -->
+                        <ui:VisualElement name="notes-card" class="col-card">
+                            <ui:Label text="NOTES" class="col-card__title" />
+                            <ui:Label name="salary-benchmark-note" text="" class="edm-note-text" />
+                            <ui:Label name="contract-risk-note" text="" class="edm-note-text" />
+                            <ui:Label name="recommendation-text" text="" class="edm-recommendation-text" />
+                        </ui:VisualElement>
+
+                        <!-- Contract details -->
+                        <ui:VisualElement name="contract-status-card" class="col-card">
+                            <ui:Label text="CONTRACT" class="col-card__title" />
+                            <ui:VisualElement name="contract-detail-rows" class="edm-stat-rows" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Team impact section (below 3 columns, inside overview) -->
+                <ui:VisualElement name="team-impact-section" class="edm-team-impact-section">
+                    <ui:Label text="TEAM IMPACT" class="col-card__title" />
+                    <ui:VisualElement name="team-impact-rows" class="edm-team-impact-rows">
+                        <!-- chemistry delta row populated at runtime -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Personal tab content -->
+            <ui:VisualElement name="personal-content" class="edm-tab-content edm-tab-content--hidden edm-personal-content">
+
+                <!-- Personality section -->
+                <ui:VisualElement name="personality-section" class="col-card edm-tab-section">
+                    <ui:Label text="PERSONALITY" class="col-card__title" />
+                    <ui:Label name="personal-personality-label" text="—" class="badge edm-personality-badge" />
+                    <ui:Label name="personal-personality-description" text="" class="edm-personality-description" />
+                </ui:VisualElement>
+
+                <!-- Hidden signals detail section -->
+                <ui:VisualElement name="hidden-signals-detail-section" class="col-card edm-tab-section">
+                    <ui:Label text="HIDDEN SIGNALS" class="col-card__title" />
+                    <ui:VisualElement name="personal-signal-rows" class="edm-signal-rows">
+                        <!-- 7 detailed signal rows populated at runtime -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Retention risk section -->
+                <ui:VisualElement name="retention-risk-section" class="col-card edm-tab-section">
+                    <ui:Label text="RETENTION RISK" class="col-card__title" />
+                    <ui:Label name="retention-risk-label" text="—" class="edm-retention-risk-label" />
+                    <ui:VisualElement name="retention-reasons-list" class="edm-retention-reasons">
+                        <!-- pooled reason labels populated at runtime -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Morale & stress section -->
+                <ui:VisualElement name="morale-stress-section" class="col-card edm-tab-section">
+                    <ui:Label text="WELLBEING" class="col-card__title" />
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="Morale" />
+                        <ui:Label name="personal-morale-status" text="—" class="edm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="Stress" />
+                        <ui:Label name="personal-stress-status" text="—" class="edm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:Label name="burnout-risk-label" text="" class="edm-burnout-warning" />
+                </ui:VisualElement>
+
+                <!-- Founder traits section (conditionally visible) -->
+                <ui:VisualElement name="founder-traits-section" class="col-card edm-tab-section edm-founder-traits">
+                    <ui:Label text="FOUNDER TRAITS" class="col-card__title" />
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="Archetype" />
+                        <ui:Label name="founder-archetype-label" text="—" class="edm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="Trait" />
+                        <ui:Label name="founder-trait-label" text="—" class="edm-stat-value edm-founder-trait-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="Weakness" />
+                        <ui:Label name="founder-weakness-label" text="—" class="edm-stat-value edm-founder-weakness-value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Performance tab content -->
+            <ui:VisualElement name="performance-content" class="edm-tab-content edm-tab-content--hidden edm-performance-content">
+
+                <!-- Form summary -->
+                <ui:VisualElement name="form-summary" class="col-card edm-tab-section">
+                    <ui:Label text="RECENT FORM" class="col-card__title" />
+                    <ui:Label name="form-score-label" text="—" class="edm-form-score" />
+                </ui:VisualElement>
+
+                <!-- Average stats section -->
+                <ui:VisualElement name="average-stats-section" class="col-card edm-tab-section">
+                    <ui:Label text="AVERAGE STATS" class="col-card__title" />
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="Avg Output" />
+                        <ui:Label name="avg-output-label" text="—" class="edm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="Avg Quality" />
+                        <ui:Label name="avg-quality-label" text="—" class="edm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="Bug Contribution" />
+                        <ui:Label name="bug-contribution-label" text="—" class="edm-stat-value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Work history list -->
+                <ui:VisualElement name="work-history-card" class="col-card edm-tab-section">
+                    <ui:Label text="WORK HISTORY" class="col-card__title" />
+                    <ui:Label name="work-history-empty" text="No completed work yet." class="edm-empty-state-label" />
+                    <ui:VisualElement name="work-history-list" class="edm-work-history-list">
+                        <!-- pooled work history rows populated at runtime -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Growth tab content -->
+            <ui:VisualElement name="growth-content" class="edm-tab-content edm-tab-content--hidden edm-growth-content">
+
+                <!-- CA/PA section -->
+                <ui:VisualElement name="ca-pa-section" class="col-card edm-tab-section">
+                    <ui:Label text="ABILITY" class="col-card__title" />
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="Current Role CA" />
+                        <ui:Label name="growth-current-ca" text="—" class="edm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="Best Role CA" />
+                        <ui:Label name="growth-best-ca" text="—" class="edm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="PA" />
+                        <ui:Label name="growth-pa" text="—" class="edm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="PA Distance" />
+                        <ui:Label name="growth-pa-distance" text="—" class="edm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:Label name="growth-outlook-label" text="" class="edm-growth-outlook-badge" />
+                </ui:VisualElement>
+
+                <!-- Growth factors section -->
+                <ui:VisualElement name="growth-factors-section" class="col-card edm-tab-section">
+                    <ui:Label text="GROWTH FACTORS" class="col-card__title" />
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="Age Effect" />
+                        <ui:Label name="growth-age-effect" text="—" class="edm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="edm-wellbeing-row">
+                        <ui:Label class="edm-stat-label" text="Mentoring" />
+                        <ui:Label name="growth-mentoring-influence" text="—" class="edm-stat-value" />
+                    </ui:VisualElement>
+                    <ui:Label name="growth-plateau-warning" text="" class="edm-plateau-warning" />
+                </ui:VisualElement>
+
+                <!-- Attribute trend section -->
+                <ui:VisualElement name="attribute-growth-section" class="col-card edm-tab-section">
+                    <ui:Label text="ATTRIBUTE TRENDS" class="col-card__title" />
+                    <ui:VisualElement name="attribute-trend-rows" class="edm-signal-rows">
+                        <!-- 8 attribute trend entries populated at runtime -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Full skill list with XP bars grouped by category -->
+                <ui:VisualElement name="skill-growth-card" class="col-card edm-tab-section">
+                    <ui:Label text="SKILL PROGRESSION" class="col-card__title" />
+                    <ui:VisualElement name="skill-growth-list" class="edm-skill-growth-list">
+                        <!-- 26 skill rows grouped by category, populated at runtime -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Career tab content -->
+            <ui:VisualElement name="career-content" class="edm-tab-content edm-tab-content--hidden edm-career-content">
+
+                <!-- Career stats grid -->
+                <ui:VisualElement name="career-stats-section" class="col-card edm-tab-section">
+                    <ui:Label text="CAREER STATS" class="col-card__title" />
+                    <ui:VisualElement class="edm-career-stats-grid">
+                        <ui:VisualElement class="edm-career-stat-card">
+                            <ui:Label class="edm-career-stat-card__label" text="Days Employed" />
+                            <ui:Label name="career-days-employed" text="—" class="edm-career-stat-card__value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="edm-career-stat-card">
+                            <ui:Label class="edm-career-stat-card__label" text="Products Shipped" />
+                            <ui:Label name="career-products-shipped" text="—" class="edm-career-stat-card__value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="edm-career-stat-card">
+                            <ui:Label class="edm-career-stat-card__label" text="Contracts Done" />
+                            <ui:Label name="career-contracts-completed" text="—" class="edm-career-stat-card__value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="edm-career-stat-card">
+                            <ui:Label class="edm-career-stat-card__label" text="Avg Quality" />
+                            <ui:Label name="career-avg-quality" text="—" class="edm-career-stat-card__value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="edm-career-stat-card">
+                            <ui:Label class="edm-career-stat-card__label" text="Total Salary Paid" />
+                            <ui:Label name="career-total-salary" text="—" class="edm-career-stat-card__value" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="edm-career-stat-card">
+                            <ui:Label class="edm-career-stat-card__label" text="Skill Increases" />
+                            <ui:Label name="career-skill-increases" text="—" class="edm-career-stat-card__value" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Career timeline -->
+                <ui:VisualElement name="career-timeline-section" class="col-card edm-tab-section">
+                    <ui:Label text="CAREER TIMELINE" class="col-card__title" />
+                    <ui:Label name="career-empty" text="No career history yet." class="edm-empty-state-label edm-tab-content--hidden" />
+                    <ui:VisualElement name="career-timeline" class="edm-career-timeline">
+                        <!-- pooled timeline entries populated at runtime -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Comparison tab content -->
+            <ui:VisualElement name="comparison-content" class="edm-tab-content edm-tab-content--hidden edm-comparison-content">
+
+                <!-- Target selector -->
+                <ui:VisualElement name="comparison-target-card" class="col-card edm-tab-section">
+                    <ui:Label text="COMPARE AGAINST" class="col-card__title" />
+                    <ui:VisualElement name="comparison-target-selector" class="edm-comparison-target-row">
+                        <!-- target buttons populated at runtime -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Metrics list -->
+                <ui:VisualElement name="comparison-metrics-card" class="col-card edm-tab-section">
+                    <ui:Label text="METRICS" class="col-card__title" />
+                    <ui:VisualElement class="edm-comparison-columns-header">
+                        <ui:Label class="edm-comparison-col-label" text="Metric" />
+                        <ui:Label class="edm-comparison-col-label edm-comparison-col-label--right" text="Employee" />
+                        <ui:Label class="edm-comparison-col-label edm-comparison-col-label--right" text="Benchmark" />
+                        <ui:Label class="edm-comparison-col-label edm-comparison-col-label--right" text="Diff" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="comparison-metrics-list" class="edm-comparison-metrics-list">
+                        <!-- pooled metric rows populated at runtime -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:ScrollView>
+
+        <!-- ── Bottom Status Strip ── -->
+        <ui:VisualElement name="bottom-status-strip" class="edm-status-strip">
+            <ui:VisualElement name="status-card-morale" class="edm-status-card">
+                <ui:Label text="MORALE" class="edm-status-card__label" />
+                <ui:Label name="status-morale-value" text="—" class="edm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-stress" class="edm-status-card">
+                <ui:Label text="STRESS" class="edm-status-card__label" />
+                <ui:Label name="status-stress-value" text="—" class="edm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-form" class="edm-status-card">
+                <ui:Label text="FORM" class="edm-status-card__label" />
+                <ui:Label name="status-form-value" text="—" class="edm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-growth" class="edm-status-card">
+                <ui:Label text="GROWTH" class="edm-status-card__label" />
+                <ui:Label name="status-growth-value" text="—" class="edm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-salary" class="edm-status-card">
+                <ui:Label text="SALARY" class="edm-status-card__label" />
+                <ui:Label name="status-salary-value" text="—" class="edm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-contract" class="edm-status-card">
+                <ui:Label text="CONTRACT" class="edm-status-card__label" />
+                <ui:Label name="status-contract-value" text="—" class="edm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-team-impact" class="edm-status-card">
+                <ui:Label text="TEAM IMPACT" class="edm-status-card__label" />
+                <ui:Label name="status-team-impact-value" text="—" class="edm-status-card__value" />
+            </ui:VisualElement>
+            <ui:VisualElement name="status-card-recent-work" class="edm-status-card">
+                <ui:Label text="RECENT WORK" class="edm-status-card__label" />
+                <ui:Label name="status-recent-work-value" text="—" class="edm-status-card__value" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ── Footer Actions ── -->
+        <ui:VisualElement name="footer-actions" class="edm-footer">
+            <ui:Button name="btn-close-footer" text="Close" class="btn-ghost" />
+            <ui:VisualElement class="edm-footer__right">
+                <ui:Button name="btn-assign-team"     text="Assign Team"      class="btn-secondary edm-action-btn" />
+                <ui:Button name="btn-renew-contract"  text="Renew Contract"   class="btn-primary edm-action-btn" />
+                <ui:Button name="btn-compare"         text="Compare"          class="btn-secondary edm-action-btn" />
+                <ui:Button name="btn-fire-employee"   text="Terminate"        class="btn-danger edm-action-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

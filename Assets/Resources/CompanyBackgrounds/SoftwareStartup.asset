@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e305aa8cfd6f9ba4caf2ccb0fa06a4c0, type: 3}
+  m_Name: SoftwareStartup
+  m_EditorClassIdentifier: Assembly-CSharp::CompanyBackgroundDefinition
+  BackgroundId: 1
+  DisplayName: Software Startup
+  Description: A classic tech startup focused on building software products. Strong
+    engineering culture with lean operations. Move fast and ship often.
+  RecommendedFounderRoles: 0000000006000000
+  StartingStrengths:
+  - Strong engineering foundation
+  - Lean operations
+  - Fast iteration speed
+  StartingRisks:
+  - High burn rate pressure
+  - Competitive market
+  - Talent retention challenges
+  SuggestedFirstActions:
+  - Hire a second engineer
+  - Start your first software product
+  - Secure a small contract for cash flow
+  DifficultyLabel: Standard
+  CandidatePoolBiasTags:
+  - engineering
+  - product
+  ContractPoolBiasTags:
+  - software
+  - web

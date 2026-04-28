@@ -7,9 +7,14 @@ using UnityEngine.InputSystem;
 
 public class MainMenuController : MonoBehaviour {
     [SerializeField] private UIDocument uiDocument;
+    [SerializeField] private VisualTreeAsset wizardTemplate;
 
-    private const int SkillCount = 9;
     private const int MaxFounders = 3;
+
+    // ── Wizard state ──
+    private VisualElement _wizardRoot;
+    private NewGameFounderCreationView _wizardView;
+    private NewGameFounderCreationViewModel _wizardViewModel;
 
     private static readonly string[] TierLabels = { "Intern", "Junior", "Mid-Level", "Senior", "Expert" };
     private static readonly string[] TierDescriptions = {
@@ -20,12 +25,12 @@ public class MainMenuController : MonoBehaviour {
         "Industry expert — peak starting capability"
     };
 
-    private RoleTierTable _roleTierTable;
+    private RoleProfileTable _roleProfileTable;
 
     private int _gameSeed;
-    private EmployeeRole[] _roleValues;
+    private RoleId[] _roleValues;
     private readonly List<string> _tierChoices = new List<string>(5);
-    private readonly List<RadarChartElement.AxisData> _radarCache = new List<RadarChartElement.AxisData>(9);
+    private readonly List<RadarChartElement.AxisData> _radarCache = new List<RadarChartElement.AxisData>(SkillIdHelper.SkillCount);
 
     // ── Main menu elements ──
     private VisualElement _mainMenuRoot;
@@ -89,9 +94,9 @@ public class MainMenuController : MonoBehaviour {
     }
 
     private void Start() {
-        _roleValues = (EmployeeRole[])System.Enum.GetValues(typeof(EmployeeRole));
+        _roleValues = (RoleId[])System.Enum.GetValues(typeof(RoleId));
         _gameSeed = System.Environment.TickCount | 1;
-        LoadRoleTierTable();
+        LoadRoleProfileTable();
         BuildTierChoices();
         BuildRoleChoices();
         QueryAndCacheElements();
@@ -110,7 +115,9 @@ public class MainMenuController : MonoBehaviour {
     }
 
     private void OnEscapePerformed(InputAction.CallbackContext ctx) {
-        if (_newGameRoot != null && _newGameRoot.style.display == DisplayStyle.Flex) {
+        if (_wizardRoot != null) {
+            OnWizardCancelled();
+        } else if (_newGameRoot != null && _newGameRoot.style.display == DisplayStyle.Flex) {
             OnBackClicked();
         } else if (_loadGameRoot != null && _loadGameRoot.style.display == DisplayStyle.Flex) {
             OnLoadBackClicked();
@@ -125,17 +132,17 @@ public class MainMenuController : MonoBehaviour {
         }
     }
 
-    private void LoadRoleTierTable() {
-        var profiles = Resources.LoadAll<RoleTierProfile>("RoleTiers");
-        _roleTierTable = new RoleTierTable();
+    private void LoadRoleProfileTable() {
+        var profiles = Resources.LoadAll<RoleProfileDefinition>("RoleProfiles");
+        _roleProfileTable = new RoleProfileTable();
         for (int i = 0; i < profiles.Length; i++) {
-            _roleTierTable.Register(profiles[i]);
+            _roleProfileTable.Register(profiles[i]);
         }
     }
 
     private void BuildRoleChoices() {
         for (int i = 0; i < _roleValues.Length; i++) {
-            _roleChoices.Add(UIFormatting.FormatRole(_roleValues[i]));
+            _roleChoices.Add(RoleIdHelper.GetName(_roleValues[i]));
         }
     }
 
@@ -145,12 +152,14 @@ public class MainMenuController : MonoBehaviour {
         }
     }
 
-    private int[] GenerateFounderSkills(int tier, EmployeeRole role, IRng rng) {
-        int[] roleTiers = _roleTierTable.GetTiers(role);
-        var skills = new int[SkillCount];
-        for (int i = 0; i < SkillCount; i++) {
+    private int[] GenerateFounderSkills(int tier, RoleId role, IRng rng) {
+        var profile = _roleProfileTable?.Get(role);
+        int[] roleTiers = profile != null ? RoleSuitabilityCalculator.BuildTierArray(profile) : null;
+        int skillCount = SkillIdHelper.SkillCount;
+        var skills = new int[skillCount];
+        for (int i = 0; i < skillCount; i++) {
+            int weight = (roleTiers != null && i < roleTiers.Length) ? roleTiers[i] : 3;
             int min, max;
-            int weight = roleTiers[i]; // 2=Primary, 3=Secondary, 4=Tertiary
             switch (tier) {
                 case 1:
                     if (weight == 2) { min = 3; max = 5; }
@@ -183,12 +192,12 @@ public class MainMenuController : MonoBehaviour {
 
         // Identity clamp: the Primary skill (tier value 2) must exceed all others by at least 1
         int identityIdx = -1;
-        for (int i = 0; i < SkillCount; i++) {
-            if (roleTiers[i] == 2) { identityIdx = i; break; }
+        for (int i = 0; i < skillCount; i++) {
+            if (roleTiers != null && i < roleTiers.Length && roleTiers[i] == 2) { identityIdx = i; break; }
         }
         if (identityIdx >= 0) {
             int maxOther = 0;
-            for (int i = 0; i < SkillCount; i++) {
+            for (int i = 0; i < skillCount; i++) {
                 if (i != identityIdx && skills[i] > maxOther) maxOther = skills[i];
             }
             if (skills[identityIdx] <= maxOther) {
@@ -203,23 +212,24 @@ public class MainMenuController : MonoBehaviour {
         for (int c = 0; c < _founderCards.Count; c++) {
             var card = _founderCards[c];
             int roleIndex = card.RoleDropdown.index;
-            EmployeeRole role = (roleIndex >= 0 && roleIndex < _roleValues.Length)
+            RoleId role = (roleIndex >= 0 && roleIndex < _roleValues.Length)
                 ? _roleValues[roleIndex]
-                : EmployeeRole.Developer;
+                : RoleId.SoftwareEngineer;
             int tier = card.TierDropdown.index + 1;
             if (tier < 1) tier = 1;
             int cardSeed = _gameSeed ^ (c * 6271) ^ (tier * 7919) ^ ((int)role * 4999);
             var rng = new RngStream(cardSeed);
             int[] skills = GenerateFounderSkills(tier, role, rng);
+            int skillCount = SkillIdHelper.SkillCount;
 
             _radarCache.Clear();
-            for (int i = 0; i < SkillCount; i++) {
+            for (int i = 0; i < skillCount; i++) {
                 _radarCache.Add(new RadarChartElement.AxisData {
-                    Name = SkillTypeHelper.GetName((SkillType)i),
+                    Name = SkillIdHelper.GetName((SkillId)i),
                     NormalizedValue = skills[i] / 20f,
                     DeltaDirection = 0,
                     RawValue = skills[i],
-                    LabelColor = UIFormatting.GetSkillColor((SkillType)i)
+                    LabelColor = UIFormatting.GetSkillColor((SkillId)i)
                 });
             }
             card.RadarChart.SetData(_radarCache);
@@ -356,7 +366,91 @@ public class MainMenuController : MonoBehaviour {
     // ── Button handlers ──
 
     private void OnNewGameClicked() {
-        ShowNewGame();
+        if (wizardTemplate != null) {
+            LaunchWizard();
+        } else {
+            ShowNewGame();
+        }
+    }
+
+    // ── Wizard Lifecycle ──
+
+    private void LaunchWizard() {
+        var rootElement = uiDocument.rootVisualElement;
+
+        // Hide all existing screens
+        SetDisplay(_mainMenuRoot, false);
+        SetDisplay(_newGameRoot, false);
+        SetDisplay(_loadGameRoot, false);
+
+        // Instantiate wizard UXML
+        _wizardRoot = wizardTemplate.Instantiate();
+        _wizardRoot.style.flexGrow = 1;
+        rootElement.Add(_wizardRoot);
+
+        // Create ViewModel and View
+        _wizardViewModel = new NewGameFounderCreationViewModel();
+        _wizardView = new NewGameFounderCreationView();
+        _wizardView.OnCancelRequested += OnWizardCancelled;
+        _wizardView.OnStartGameConfirmed += OnNewGameConfirmed;
+
+        var wizardContainer = _wizardRoot.Q<VisualElement>("new-game-wizard");
+        if (wizardContainer != null) {
+            _wizardView.Initialize(wizardContainer);
+            _wizardView.Bind(_wizardViewModel);
+        } else {
+            Debug.LogError("[MainMenuController] Could not find 'new-game-wizard' element in wizard template");
+            CleanupWizard();
+            ShowMainMenu();
+        }
+    }
+
+    private void OnWizardCancelled() {
+        CleanupWizard();
+        ShowMainMenu();
+    }
+
+    private void CleanupWizard() {
+        if (_wizardView != null) {
+            _wizardView.OnCancelRequested -= OnWizardCancelled;
+            _wizardView.OnStartGameConfirmed -= OnNewGameConfirmed;
+            _wizardView.Dispose();
+            _wizardView = null;
+        }
+        _wizardViewModel = null;
+
+        if (_wizardRoot != null) {
+            var rootElement = uiDocument.rootVisualElement;
+            rootElement.Remove(_wizardRoot);
+            _wizardRoot = null;
+        }
+    }
+
+    public void OnNewGameConfirmed(NewGameSetupState setup, FoundingEmployeeData[] founders) {
+        if (setup == null || founders == null || founders.Length == 0) {
+            Debug.LogError("[MainMenuController] OnNewGameConfirmed received invalid data");
+            return;
+        }
+
+        NewGameData.IsNewGame = true;
+        NewGameData.CompanyName = setup.CompanyName;
+        NewGameData.Seed = setup.Seed;
+        NewGameData.Difficulty = _currentDifficulty;
+
+        // Build FoundingEmployeeData list for backward-compatible game start
+        var founderList = new System.Collections.Generic.List<FoundingEmployeeData>(founders.Length);
+        for (int i = 0; i < founders.Length; i++) {
+            var f = founders[i];
+            // Ensure backward-compatible tier default
+            if (f.Tier == 0) f.Tier = 3;
+            if (f.Age == 0) f.Age = 28;
+            founderList.Add(f);
+        }
+        NewGameData.Founders = founderList;
+        NewGameData.SetupState = setup;
+
+        CleanupWizard();
+        SceneManager.LoadScene("MainGame");
     }
 
     private void OnContinueClicked() {
@@ -604,7 +698,7 @@ public class MainMenuController : MonoBehaviour {
         for (int i = 0; i < _founderCards.Count; i++) {
             var card = _founderCards[i];
             int roleIndex = card.RoleDropdown.index;
-            EmployeeRole role = roleIndex >= 0 && roleIndex < _roleValues.Length ? _roleValues[roleIndex] : EmployeeRole.Developer;
+            RoleId role = roleIndex >= 0 && roleIndex < _roleValues.Length ? _roleValues[roleIndex] : RoleId.SoftwareEngineer;
             Gender gender = card.GenderDropdown.index == 0 ? Gender.Male : Gender.Female;
             var data = new FoundingEmployeeData {
                 Name = card.NameField.value.Trim(),

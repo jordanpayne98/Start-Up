@@ -21,7 +21,7 @@ public class ContractFactory
         _rng = rng ?? throw new ArgumentNullException(nameof(rng));
         _logger = logger ?? new NullLogger();
         _weightScratch = new int[categories.Length];
-        _skillWeightsScratch = new float[SkillTypeHelper.SkillTypeCount];
+        _skillWeightsScratch = new float[SkillIdHelper.SkillCount];
         _variantWeightScratch = new int[16];
     }
 
@@ -152,7 +152,7 @@ public class ContractFactory
         PhaseSkillProfile dominant = PickDominantFromVariant(variant);
 
         // SkillRequirements: blend across all phases in the variant, weighted by WorkFraction
-        for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++) _skillWeightsScratch[i] = 0f;
+        for (int i = 0; i < SkillIdHelper.SkillCount; i++) _skillWeightsScratch[i] = 0f;
         if (variant.Phases != null)
         {
             for (int i = 0; i < variant.Phases.Length; i++)
@@ -162,9 +162,9 @@ public class ContractFactory
             }
         }
         float total = 0f;
-        for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++) total += _skillWeightsScratch[i];
-        if (total < 0.001f) { _skillWeightsScratch[(int)SkillType.Programming] = 1f; total = 1f; }
-        for (int i = 0; i < SkillTypeHelper.SkillTypeCount; i++) _skillWeightsScratch[i] /= total;
+        for (int i = 0; i < SkillIdHelper.SkillCount; i++) total += _skillWeightsScratch[i];
+        if (total < 0.001f) { _skillWeightsScratch[(int)SkillId.Programming] = 1f; total = 1f; }
+        for (int i = 0; i < SkillIdHelper.SkillCount; i++) _skillWeightsScratch[i] /= total;
         var requirements = new SkillRequirements(_skillWeightsScratch);
 
         string name        = GenerateName(category);
@@ -255,7 +255,7 @@ public class ContractFactory
         {
             PhaseProfileSet v = category.PhaseProfileVariants[i];
             // Find dominant skill (highest WorkFraction) in this variant
-            SkillType dominant = SkillType.Programming;
+            SkillId dominant = SkillId.Programming;
             float bestFraction = -1f;
             if (v.Phases != null)
             {
@@ -288,7 +288,7 @@ public class ContractFactory
     private PhaseSkillProfile PickDominantFromVariant(PhaseProfileSet variant)
     {
         if (variant.Phases == null || variant.Phases.Length == 0)
-            return new PhaseSkillProfile { PrimarySkill = SkillType.Programming, WorkFraction = 1f, QualityWeight = 1f };
+            return new PhaseSkillProfile { PrimarySkill = SkillId.Programming, WorkFraction = 1f, QualityWeight = 1f };
         int best = 0;
         for (int i = 1; i < variant.Phases.Length; i++)
             if (variant.Phases[i].WorkFraction > variant.Phases[best].WorkFraction)

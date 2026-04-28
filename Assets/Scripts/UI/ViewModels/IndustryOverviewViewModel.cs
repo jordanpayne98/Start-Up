@@ -166,10 +166,10 @@ public class IndustryOverviewViewModel : IViewModel
     }
 
     private static int ComputeAvgSkill(Employee emp) {
-        if (emp.skills == null || emp.skills.Length == 0) return 0;
+        if (emp.Stats.Skills == null || emp.Stats.Skills.Length == 0) return 0;
         int sum = 0;
-        int len = emp.skills.Length;
-        for (int i = 0; i < len; i++) sum += emp.skills[i];
+        int len = emp.Stats.Skills.Length;
+        for (int i = 0; i < len; i++) sum += emp.Stats.Skills[i];
         return sum / len;
     }
 

@@ -82,7 +82,7 @@
 
 .confirmation-message {
     font-size: var(--font-md);
-    color: var(--text-muted);
+    color: var(--text-secondary);
     margin-bottom: 20px;
     white-space: normal;
 }

@@ -10,6 +10,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
     [SerializeField] private UIDocument uiDocument;
     [SerializeField] private Font customFont;
     [SerializeField] private VisualTreeAsset candidateDetailAsset;
+    [SerializeField] private VisualTreeAsset employeeDetailAsset;
 
     private GameController _gameController;
     public GameController GameController => _gameController;
@@ -78,6 +79,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
     // Dirty flag coalescing
     private bool _viewDirty;
     private bool _topBarDirty;
+    private bool _modalDirty;
 
     // View cache — keeps views alive across navigation
     private readonly Dictionary<ScreenId, (IGameView view, IViewModel vm, VisualElement container)> _viewCache
@@ -308,8 +310,17 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
                 loanVM.OnDismiss -= DismissModal;
             };
         }
-        bool isLarge = modalVM is CompetitorProfileViewModel;
+        bool isInspector = modalVM is EmployeeDetailModalViewModel
+                        || modalVM is CandidateDetailModalViewModel;
+        bool isLarge = !isInspector && modalVM is CompetitorProfileViewModel;
+        _modalContent.EnableInClassList("modal-content--inspector", isInspector);
         _modalContent.EnableInClassList("modal-content--large", isLarge);
+
+        // Inject UXML asset into views that require it
+        if (_currentModalView is EmployeeDetailModalView empDetailView && employeeDetailAsset != null)
+            empDetailView.SetAsset(employeeDetailAsset);
+        if (_currentModalView is CandidateDetailModalView candDetailView && candidateDetailAsset != null)
+            candDetailView.SetAsset(candidateDetailAsset);
 
         _modalContent.Clear();
         _currentModalView.Initialize(_modalContent);
@@ -532,6 +543,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
     private void RefreshAll() {
         _topBarDirty = true;
         _viewDirty = true;
+        _modalDirty = true;
     }
 
     private void MarkViewDirtyFor<T>() {
@@ -554,6 +566,18 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
             RefreshCurrentViewModel();
             _currentView?.Bind(_currentViewModel);
         }
+        if (_modalDirty) {
+            _modalDirty = false;
+            RefreshCurrentModal();
+        }
+    }
+
+    private void RefreshCurrentModal() {
+        if (_currentModalView == null || _currentModalViewModel == null) return;
+        var snapshot = BuildSnapshot();
+        if (snapshot == null) return;
+        _currentModalViewModel.Refresh(snapshot);
+        _currentModalView.Bind(_currentModalViewModel);
     }
 
     private GameStateSnapshot BuildSnapshot() {
@@ -792,6 +816,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         _currentModalViewModel = null;
         if (_modalContent != null) {
             _modalContent.RemoveFromClassList("modal-content--large");
+            _modalContent.RemoveFromClassList("modal-content--inspector");
         }
     }
 

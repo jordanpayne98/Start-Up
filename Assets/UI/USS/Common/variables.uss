@@ -14,6 +14,7 @@
     --border-strong: rgba(255, 255, 255, 0.12);
 
     /* Text (expanded tiers) */
+    --text-primary:  #E4E4E7;
     --text-light:    #E4E4E7;
     --text-secondary:#A1A1AA;
     --text-muted:    #71717A;

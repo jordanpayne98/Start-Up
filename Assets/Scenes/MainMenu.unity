@@ -394,6 +394,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuController
   uiDocument: {fileID: 1292002269}
+  wizardTemplate: {fileID: 9197481963319205126, guid: b3db8ce0e99eae94f859288b1d10c9fd, type: 3}
 --- !u!114 &1292002269
 MonoBehaviour:
   m_ObjectHideFlags: 0

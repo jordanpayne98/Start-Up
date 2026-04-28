@@ -1,4 +1,4 @@
-// RecommendationLabelBuilder Version: Clean v1
+// RecommendationLabelBuilder Version: Clean v2
 /// <summary>
 /// Pure static class. Maps Ability tier × Potential tier to a role-contextual recommendation label.
 /// Always returns an accurate label — no mislabelling noise.
@@ -13,7 +13,7 @@ public static class RecommendationLabelBuilder
     public const float PotentialHighThresholdPercent = 0.4f;
 
     public static string Build(int candidateAbility, int candidatePotential, int abilityMax, int potentialMax,
-        EmployeeRole role, TuningConfig tuning = null)
+        RoleId role, TuningConfig tuning = null)
     {
         float abilityThreshold = tuning != null ? tuning.RecommendationAbilityHighThreshold : AbilityHighThresholdPercent;
         float potentialThreshold = tuning != null ? tuning.RecommendationPotentialHighThreshold : PotentialHighThresholdPercent;
@@ -44,18 +44,8 @@ public static class RecommendationLabelBuilder
         return (float)potential / potentialMax >= threshold ? PotentialTier.High : PotentialTier.Low;
     }
 
-    public static string RoleLabel(EmployeeRole role)
+    public static string RoleLabel(RoleId role)
     {
-        switch (role)
-        {
-            case EmployeeRole.Developer:    return "Developer";
-            case EmployeeRole.Designer:     return "Designer";
-            case EmployeeRole.QAEngineer:   return "QA Engineer";
-            case EmployeeRole.HR:           return "HR Specialist";
-            case EmployeeRole.SoundEngineer: return "SFX Artist";
-            case EmployeeRole.VFXArtist:    return "VFX Artist";
-            case EmployeeRole.Accountant:   return "Accountant";
-            default:                        return "Employee";
-        }
+        return RoleIdHelper.GetName(role);
     }
 }

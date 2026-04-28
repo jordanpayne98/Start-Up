@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 276d49dd6012ea740947a09a115572f5, type: 3}
+  m_Name: TechnicalSupportFounder
+  m_EditorClassIdentifier: Assembly-CSharp::FounderArchetypeDefinition
+  ArchetypeId: 22
+  DisplayName: Technical Support Founder
+  Description: Enterprise support and client services expertise. Reduces early churn
+    and builds client trust.
+  Role: 11
+  TopSkills: 130000001800000017000000
+  BestEarlyUse: Enterprise support products, client services, SLA-driven contracts
+  Strengths:
+  - Strong client retention
+  - Good at building support team processes
+  Risks:
+  - Low product creation ability
+  - Needs technical co-founder for product delivery
+  RecommendedPairing: Systems Founder or Sales Founder
+  CAMin: 60
+  CAMax: 85
+  PAMin: 100
+  PAMax: 135
+  SkillBiasProfile: 130000001800000017000000
+  AttributeBias: 030000000600000002000000
+  IsGatedArchetype: 1
+  GateCondition: Technical Support Founder requires Enterprise Consultancy background.
+  SortOrder: 22
