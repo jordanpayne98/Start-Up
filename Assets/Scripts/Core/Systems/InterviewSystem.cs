@@ -25,6 +25,7 @@ public class InterviewSystem : ISystem
     private GameEventBus _eventBus;
     private ILogger _logger;
     private IRng _rng;
+    private RoleProfileTable _roleProfileTable;
 
     // Pre-allocated scratch buffers — no alloc in steady state
     private readonly List<int> _keyScratch = new List<int>();
@@ -49,6 +50,11 @@ public class InterviewSystem : ISystem
     public void SetHRSystem(HRSystem hrSystem)
     {
         _hrSystem = hrSystem;
+    }
+
+    public void SetRoleProfileTable(RoleProfileTable roleProfileTable)
+    {
+        _roleProfileTable = roleProfileTable;
     }
 
     // ─── Public queries ──────────────────────────────────────────────────────
@@ -374,6 +380,12 @@ public class InterviewSystem : ISystem
                     {
                         _thresholdBuffer.Add((key, threshold));
                         interview.lastRevealThreshold = threshold;
+
+                        // Update candidate confidence and regenerate report at key milestones
+                        if (threshold == 40 || threshold == 100)
+                        {
+                            UpdateCandidateConfidenceAndReport(key, (int)interview.knowledgeLevel);
+                        }
                     }
                 }
 
@@ -468,6 +480,23 @@ public class InterviewSystem : ISystem
     }
 
     // ─── Private helpers ─────────────────────────────────────────────────────
+
+    private void UpdateCandidateConfidenceAndReport(int candidateId, int knowledgeLevel)
+    {
+        int count = _employeeState.availableCandidates.Count;
+        for (int i = 0; i < count; i++)
+        {
+            var candidate = _employeeState.availableCandidates[i];
+            if (candidate.CandidateId != candidateId) continue;
+
+            if (candidate.Confidence == null)
+                candidate.Confidence = CandidateConfidenceData.FromSource(candidate.Source);
+
+            candidate.Confidence.ApplyInterview(knowledgeLevel);
+            candidate.Report = CandidateReportGenerator.Generate(candidate, _roleProfileTable);
+            return;
+        }
+    }
 
     private float ComputeMaxGainPerTick()
     {

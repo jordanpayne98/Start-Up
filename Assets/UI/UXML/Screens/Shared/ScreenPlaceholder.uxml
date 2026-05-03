@@ -1,0 +1,4 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- ScreenPlaceholder — built programmatically by PlaceholderView.Initialize() -->
+    <ui:Style src="project://database/Assets/UI/USS/Screens/Shared/ScreenPlaceholder.uss" />
+</ui:UXML>

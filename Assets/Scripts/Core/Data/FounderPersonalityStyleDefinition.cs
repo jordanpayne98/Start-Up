@@ -9,6 +9,23 @@ public class FounderPersonalityStyleDefinition : ScriptableObject
     public VisibleAttributeId[] StrengthAttributes;
     public VisibleAttributeId[] WeakAttributes;
     public HiddenAttributeId[] HiddenTendencies;
+
+    /// <summary>
+    /// Per-hidden-attribute modifier array (length 7, indexed by HiddenAttributeId).
+    /// Applied during founder hidden attribute generation.
+    /// Positive = boost, Negative = penalty.
+    /// </summary>
+    public int[] HiddenAttributeModifiers;
+
+    /// <summary>Visible attributes explicitly boosted by this personality style (may overlap StrengthAttributes).</summary>
+    public VisibleAttributeId[] BoostAttributes;
+
+    /// <summary>How much to add to BoostAttributes / StrengthAttributes during generation.</summary>
+    public int BoostAmount;
+
+    /// <summary>How much to subtract from WeakAttributes during generation.</summary>
+    public int PenaltyAmount;
+
     public string BestPairing;
     [TextArea] public string RiskWarning;
     public int SortOrder;

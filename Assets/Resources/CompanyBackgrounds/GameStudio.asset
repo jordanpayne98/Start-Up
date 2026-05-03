@@ -36,3 +36,16 @@ MonoBehaviour:
   ContractPoolBiasTags:
   - game
   - entertainment
+  CandidatePoolBiasFamilies: 0200000003000000
+  CandidatePoolBiasWeights:
+  - 3
+  - 2.5
+  ContractPoolBiasCategories:
+  - design
+  - creative
+  - product
+  WelcomeMessage: "Your studio is set up and ready for its first project. Design
+    and creativity are your strengths \u2014 use them to win contracts that play
+    to that edge."
+  HiringHint: Creative studios often struggle without Engineering support. A Software
+    Engineer early on will expand the kind of contracts you can take.

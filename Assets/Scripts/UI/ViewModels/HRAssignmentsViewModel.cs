@@ -35,7 +35,11 @@ public class HRAssignmentsViewModel : IViewModel
     private readonly List<SourcedCandidateDisplay> _sourcedCandidates = new List<SourcedCandidateDisplay>(16);
     public List<SourcedCandidateDisplay> SourcedCandidates => _sourcedCandidates;
 
-    public void Refresh(IReadOnlyGameState state) {
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
+        IReadOnlyGameState state = snapshot;
         if (state == null) return;
 
         int currentTick = state.CurrentTick;

@@ -179,17 +179,22 @@ public class ProductCreationPlanningViewModel : IViewModel
 
     // ── IViewModel ──────────────────────────────────────────────────────────
 
-    public void Refresh(IReadOnlyGameState state)
+    public void Refresh(GameStateSnapshot snapshot)
     {
-        _lastState = state;
-        RebuildNicheOptions(state);
-        RebuildPlatformOptions(state);
-        RebuildAvailableTeams(state);
+        _lastState = snapshot;
+        RebuildNicheOptions(snapshot);
+        RebuildPlatformOptions(snapshot);
+        RebuildAvailableTeams(snapshot);
         RecalculateForecasts();
         RecalculatePricingPreview();
         RecalculateBudgetPreview();
         RecalculateValidation();
+        _isDirty = true;
     }
+
+    private bool _isDirty;
+    public bool IsDirty => _isDirty;
+    public void ClearDirty() => _isDirty = false;
 
     // ── Navigation ──────────────────────────────────────────────────────────
 

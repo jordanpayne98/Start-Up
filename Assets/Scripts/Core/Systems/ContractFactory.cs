@@ -332,4 +332,49 @@ public class ContractFactory
     }
 
     private static float Lerp(float a, float b, float t) => a + (b - a) * t;
+
+    /// <summary>
+    /// Generates starting contracts biased toward the given categories and matching founder roles.
+    /// Contracts are low–medium difficulty to suit early game.
+    /// </summary>
+    public System.Collections.Generic.List<Contract> GenerateStartingContracts(
+        string[] biasCategories,
+        RoleId[] founderRoles,
+        int count,
+        IRng rng,
+        int currentTick)
+    {
+        var results = new System.Collections.Generic.List<Contract>(count);
+
+        bool hasCategories = biasCategories != null && biasCategories.Length > 0;
+
+        for (int i = 0; i < count; i++)
+        {
+            // Slot 0: easy, matched to first bias category
+            // Slot count-1: slightly harder stretch goal
+            // Others: random low-medium difficulty
+            int difficulty;
+            if (i == 0)
+                difficulty = 1;
+            else if (i == count - 1)
+                difficulty = 2;
+            else
+                difficulty = rng.Range(1, 3);
+
+            string preferredCategory = null;
+            if (hasCategories)
+            {
+                // 70% chance to honour bias, 30% open market
+                if (rng.Range(0, 100) < 70)
+                    preferredCategory = biasCategories[rng.Range(0, biasCategories.Length)];
+            }
+
+            // Difficulty cap: starting contracts never exceed 2
+            var contract = GenerateContract(currentTick, Math.Min(difficulty, 2), null, preferredCategory);
+            if (contract != null)
+                results.Add(contract);
+        }
+
+        return results;
+    }
 }

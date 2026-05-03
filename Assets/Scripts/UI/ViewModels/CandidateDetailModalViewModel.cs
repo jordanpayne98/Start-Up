@@ -161,6 +161,11 @@ public class CandidateDetailModalViewModel : IViewModel
     private IReadOnlyGameState _state;
     private int _targetTeamIndex = -1;
 
+    // ── IViewModel dirty tracking ────────────────────────────────────────────
+
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
     // ── Header properties ────────────────────────────────────────────────────
 
     public string Name               { get; private set; }
@@ -312,18 +317,18 @@ public class CandidateDetailModalViewModel : IViewModel
         }
     }
 
-    public void Refresh(IReadOnlyGameState state)
+    public void Refresh(GameStateSnapshot snapshot)
     {
-        if (state == null) return;
-        _state = state;
+        if (snapshot == null) return;
+        _state = snapshot;
 
-        _candidate = FindCandidate(state);
+        _candidate = FindCandidate(snapshot);
         if (_candidate == null) return;
 
-        int currentTick  = state.CurrentTick;
-        float knowledge  = state.GetInterviewKnowledgeLevel(_candidateId);
-        bool inProgress  = state.IsInterviewInProgress(_candidateId);
-        bool interviewDone = state.IsFinalReportReady(_candidateId);
+        int currentTick  = snapshot.CurrentTick;
+        float knowledge  = snapshot.GetInterviewKnowledgeLevel(_candidateId);
+        bool inProgress  = snapshot.IsInterviewInProgress(_candidateId);
+        bool interviewDone = snapshot.IsFinalReportReady(_candidateId);
 
         // Knowledge thresholds
         KnowledgePercent        = knowledge;
@@ -334,16 +339,17 @@ public class CandidateDetailModalViewModel : IViewModel
         IsPotentialRevealed     = knowledge >= 80f;
         IsSkillsRevealed        = knowledge >= 40f;
 
-        RefreshHeader(state, currentTick, knowledge, inProgress, interviewDone);
-        RefreshBadges(state, currentTick, knowledge);
-        RefreshOverviewData(state, knowledge);
-        RefreshInterviewData(state, knowledge, inProgress, interviewDone);
-        RefreshPersonalityData(state, knowledge);
-        RefreshBottomStatusCards(state, currentTick, knowledge, inProgress, interviewDone);
-        RefreshActionVisibility(state, knowledge, inProgress, interviewDone);
-        RefreshOfferState(state);
-        RefreshComparisonData(state);
-        RefreshOfferTabData(state);
+        RefreshHeader(snapshot, currentTick, knowledge, inProgress, interviewDone);
+        RefreshBadges(snapshot, currentTick, knowledge);
+        RefreshOverviewData(snapshot, knowledge);
+        RefreshInterviewData(snapshot, knowledge, inProgress, interviewDone);
+        RefreshPersonalityData(snapshot, knowledge);
+        RefreshBottomStatusCards(snapshot, currentTick, knowledge, inProgress, interviewDone);
+        RefreshActionVisibility(snapshot, knowledge, inProgress, interviewDone);
+        RefreshOfferState(snapshot);
+        RefreshComparisonData(snapshot);
+        RefreshOfferTabData(snapshot);
+        IsDirty = true;
     }
 
     // ── Header refresh ───────────────────────────────────────────────────────

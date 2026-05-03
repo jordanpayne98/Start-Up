@@ -21,7 +21,10 @@ public class AcquisitionViewModel : IViewModel
         ProductsGained = _productsGained;
     }
 
-    public void Refresh(IReadOnlyGameState state) { }
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) { IsDirty = true; }
 
     public void Refresh(CompetitorId id, CompetitorState compState, ProductState productState,
         StockState stockState, FinanceState financeState) {

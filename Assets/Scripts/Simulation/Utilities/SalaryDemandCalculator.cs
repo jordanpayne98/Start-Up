@@ -81,6 +81,65 @@ public static class SalaryDemandCalculator
         return ComputeDemand(candidate.Role, candidate.Stats, ability, candidate.Age);
     }
 
+    // ─── Founder salary calculation ──────────────────────────────────────────
+
+    // Salary choice: 0=NoSalary, 1=LowSalary, 2=MarketSalary, 3=DeferredSalary
+    public static int ComputeFounderSalary(int salaryChoice, RoleId role, int ca)
+    {
+        switch (salaryChoice)
+        {
+            case 0: return 0;                                           // No salary
+            case 1: return ComputeFounderLowSalary(role, ca);           // Low (40-60% of market)
+            case 2: return ComputeFounderMarketSalary(role, ca);        // Market rate
+            case 3: return 0;                                           // Deferred (tracked via DeferredSalaryOwed)
+            default: return ComputeFounderMarketSalary(role, ca);
+        }
+    }
+
+    private static int ComputeFounderMarketSalary(RoleId role, int ca)
+    {
+        int baseSalary = SalaryBand.GetBase(role);
+        float caFactor = 1f + (float)System.Math.Max(0, ca - 40) / 100f;
+        if (caFactor > 1.8f) caFactor = 1.8f;
+        return Round50(baseSalary * caFactor);
+    }
+
+    private static int ComputeFounderLowSalary(RoleId role, int ca)
+    {
+        int market = ComputeFounderMarketSalary(role, ca);
+        // 40-60% of market rate; use 50% as midpoint
+        return Round50(market * 0.50f);
+    }
+
+    // ─── Confidence-based salary estimate range (Wave 4B) ────────────────────
+
+    /// <summary>
+    /// Returns (estimateMin, estimateMax) based on salary confidence level.
+    /// Low:       +/- 40%
+    /// Medium:    +/- 20%
+    /// High:      +/- 8%
+    /// Confirmed: exact
+    /// </summary>
+    public static (int estimateMin, int estimateMax) ComputeEstimateRange(
+        int actualSalary, ConfidenceLevel confidence, CandidateArchetype archetype)
+    {
+        float rangeFactor;
+        switch (confidence)
+        {
+            case ConfidenceLevel.Confirmed: rangeFactor = 0.00f; break;
+            case ConfidenceLevel.High:      rangeFactor = 0.08f; break;
+            case ConfidenceLevel.Medium:    rangeFactor = 0.20f; break;
+            case ConfidenceLevel.Low:       rangeFactor = 0.40f; break;
+            default:                        rangeFactor = 0.50f; break; // Unknown
+        }
+
+        int min = Round50(actualSalary * (1f - rangeFactor));
+        int max = Round50(actualSalary * (1f + rangeFactor));
+        if (min < MinimumWage) min = MinimumWage;
+        if (max < min) max = min;
+        return (min, max);
+    }
+
     // ─── Unchanged utilities ──────────────────────────────────────────────────
 
     public static bool IsSalaryRevealed(CandidateData candidate)

@@ -139,6 +139,7 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
     private TuningConfig _tuning;
     private TeamChemistrySystem _teamChemistrySystem;
     private FatigueSystem _fatigueSystem;
+    private TeamMeterSystem _teamMeterSystem;
 
     public int GetCategoryReputation(ProductCategory category) {
         if (_reputationSystem != null)
@@ -819,7 +820,7 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         int empCount = ActiveEmployees.Count;
         for (int i = 0; i < empCount; i++) {
             if (ActiveEmployees[i].id == id)
-                return _abilitySystem.GetCA(id, ActiveEmployees[i].role);
+                return _abilitySystem.GetRoleCA(id, ActiveEmployees[i].role);
         }
         return 0;
     }
@@ -841,9 +842,8 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         if (skills == null) return 0;
         if (roleProfileTable == null) return 0;
         var profile = roleProfileTable.Get(role);
-        if (profile == null) return 0;
-        int[] tiers = RoleSuitabilityCalculator.BuildTierArray(profile);
-        return RoleSuitabilityCalculator.ComputeAbilityForRole(skills, tiers);
+        if (profile == null || profile.SkillBands == null) return 0;
+        return AbilityCalculator.ComputeRoleCA(skills, profile.SkillBands);
     }
 
     public int ComputeAbilityForRole(int[] skills, RoleId role) {
@@ -1172,6 +1172,10 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
         _fatigueSystem = fatigueSystem;
     }
 
+    public void SetTeamMeterSystem(TeamMeterSystem teamMeterSystem) {
+        _teamMeterSystem = teamMeterSystem;
+    }
+
     public Personality GetEmployeePersonality(EmployeeId employeeId) {
         if (_employeeState == null) return Personality.Professional;
         if (_employeeState.employees.TryGetValue(employeeId, out var emp))
@@ -1202,5 +1206,78 @@ public class GameStateSnapshot : IReadOnlyGameState, IAbilityReadModel
     public int GetProjectedChemistryChange(TeamId teamId, EmployeeId candidate) {
         if (_teamChemistrySystem != null) return _teamChemistrySystem.ProjectChemistryChange(teamId, candidate);
         return 0;
+    }
+
+    // ── Ability — role-aware CA queries (Wave 3A) ──────────────────────────────
+
+    public int GetRoleCA(EmployeeId id, RoleId role) {
+        if (_abilitySystem != null) return _abilitySystem.GetRoleCA(id, role);
+        return 0;
+    }
+
+    public int GetCurrentRoleCA(EmployeeId id) {
+        if (_abilitySystem != null) return _abilitySystem.GetCurrentRoleCA(id);
+        return 0;
+    }
+
+    public int GetBestRoleCA(EmployeeId id) {
+        if (_abilitySystem != null) return _abilitySystem.GetBestRoleCA(id);
+        return 0;
+    }
+
+    public RoleId GetBestRole(EmployeeId id) {
+        if (_abilitySystem != null) return _abilitySystem.GetBestRole(id);
+        return RoleId.SoftwareEngineer;
+    }
+
+    // ── Team meters (Wave 3C) ──────────────────────────────────────────────────
+
+    public TeamMeterSnapshot GetTeamMeters(TeamId teamId) {
+        if (_teamMeterSystem != null) return _teamMeterSystem.GetTeamMeters(teamId);
+        return new TeamMeterSnapshot();
+    }
+
+    public TeamImpactResult GetEmployeeTeamImpact(EmployeeId empId, TeamId teamId) {
+        if (_teamMeterSystem != null) return _teamMeterSystem.GetEmployeeTeamImpact(empId, teamId);
+        return TeamImpactResult.Zero();
+    }
+
+    // ── Convenience overload — populates from a single GameController reference ──
+
+    /// <summary>
+    /// Convenience overload. Reads all subsystems from a GameController and populates
+    /// the snapshot in one call. Equivalent to calling PopulateFrom(GameState, ...) with
+    /// all systems extracted from the controller.
+    /// </summary>
+    public void PopulateFrom(GameController controller)
+    {
+        if (controller == null)
+        {
+            PopulateFrom(null);
+            return;
+        }
+
+        SetTaxSystem(controller.TaxSystem);
+        SetTeamChemistrySystem(controller.TeamChemistrySystem);
+        SetFatigueSystem(controller.FatigueSystem);
+        SetTeamMeterSystem(controller.TeamMeterSystem);
+
+        PopulateFrom(
+            gameState:                    controller.GetGameState(),
+            loanReadModel:                controller.LoanReadModel,
+            interviewSystem:              controller.InterviewSystem,
+            negotiationSystem:            controller.NegotiationSystem,
+            hrSystem:                     controller.HRSystem,
+            recruitmentReputationSystem:  controller.RecruitmentReputationSystem,
+            gameController:               controller,
+            teamSystem:                   controller.TeamSystem,
+            contractSystem:               controller.ContractSystem,
+            abilitySystem:                controller.AbilitySystem,
+            tuning:                       controller.Tuning,
+            productSystem:                controller.ProductSystem,
+            marketSystem:                 controller.MarketSystem,
+            reputationSystem:             controller.ReputationSystem,
+            generationSystem:             controller.GenerationSystem
+        );
     }
 }

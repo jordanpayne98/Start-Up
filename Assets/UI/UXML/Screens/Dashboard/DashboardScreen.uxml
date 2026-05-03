@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- DashboardScreen — layout built programmatically by DashboardView.Initialize() -->
+    <!-- This UXML is referenced by ScreenConfig.UxmlPath for asset tracking only. -->
+    <!-- Styles are imported here so the USS files are included in the asset pipeline. -->
+    <ui:Style src="project://database/Assets/UI/USS/Screens/Dashboard/DashboardScreen.uss" />
+</ui:UXML>

@@ -4453,7 +4453,7 @@ public class ProductSystem : ISystem
         {
             SkillGrowthSystem.AwardProductPhaseXP(
                 primaryTeam, skill, _employeeSystem,
-                _roleProfileTable, _abilitySystem, _tuning);
+                _abilitySystem, _moraleSystem, _roleProfileTable, _tuning);
         }
 
         // Initial-phase bug accumulation during active development
@@ -4920,8 +4920,10 @@ public class ProductSystem : ISystem
             if (employee == null || !employee.isActive) continue;
 
             var profile = _roleProfileTable.Get(employee.role);
-            int[] tiers = profile != null ? RoleSuitabilityCalculator.BuildTierArray(profile) : null;
-            int currentCA = tiers != null ? AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers) : 0;
+            var skillBands = profile?.SkillBands;
+            int currentCA = skillBands != null
+                ? AbilityCalculator.ComputeRoleCA(employee.Stats.Skills, skillBands)
+                : 0;
             if (currentCA >= employee.Stats.PotentialAbility) continue;
 
             float learningRate = employee.Stats.GetHiddenAttribute(HiddenAttributeId.LearningRate);
@@ -4938,7 +4940,7 @@ public class ProductSystem : ISystem
             while (employee.Stats.SkillXp[skillIdx] >= 1.0f && employee.Stats.Skills[skillIdx] < 20)
             {
                 employee.Stats.Skills[skillIdx]++;
-                int newCA = tiers != null ? AbilityCalculator.ComputeAbility(employee.Stats.Skills, tiers) : 0;
+                int newCA = skillBands != null ? AbilityCalculator.ComputeRoleCA(employee.Stats.Skills, skillBands) : 0;
                 if (newCA > employee.Stats.PotentialAbility)
                 {
                     employee.Stats.Skills[skillIdx]--;

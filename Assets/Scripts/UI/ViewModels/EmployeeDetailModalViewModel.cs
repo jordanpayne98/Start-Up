@@ -380,6 +380,11 @@ public class EmployeeDetailModalViewModel : IViewModel
         return _cachedProfileTable;
     }
 
+    // ── IViewModel dirty tracking ────────────────────────────────────────────
+
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
     // ── API ───────────────────────────────────────────────────────────────────
 
     public void SetEmployeeId(EmployeeId id)
@@ -387,29 +392,30 @@ public class EmployeeDetailModalViewModel : IViewModel
         _employeeId = id;
     }
 
-    public void Refresh(IReadOnlyGameState state)
+    public void Refresh(GameStateSnapshot snapshot)
     {
-        if (state == null) return;
-        LastState = state;
+        if (snapshot == null) return;
+        LastState = snapshot;
 
-        var emp = FindEmployee(state);
+        var emp = FindEmployee(snapshot);
         if (emp == null) return;
 
-        RefreshHeader(emp, state);
-        RefreshBadges(emp, state);
-        RefreshRoleSuitability(emp, state);
+        RefreshHeader(emp, snapshot);
+        RefreshBadges(emp, snapshot);
+        RefreshRoleSuitability(emp, snapshot);
         RefreshSkillTable(emp);
-        RefreshContractDetail(emp, state);
-        RefreshPersonality(emp, state);
-        RefreshBottomStatusCards(emp, state);
-        RefreshActionVisibility(emp, state);
-        RefreshRenewalNegotiation(emp, state);
-        RefreshOverviewTabData(emp, state);
-        RefreshPersonalTab(emp, state);
-        RefreshPerformanceTab(emp, state);
-        RefreshGrowthTab(emp, state);
-        RefreshCareerTab(emp, state);
-        RefreshComparisonTab(emp, state);
+        RefreshContractDetail(emp, snapshot);
+        RefreshPersonality(emp, snapshot);
+        RefreshBottomStatusCards(emp, snapshot);
+        RefreshActionVisibility(emp, snapshot);
+        RefreshRenewalNegotiation(emp, snapshot);
+        RefreshOverviewTabData(emp, snapshot);
+        RefreshPersonalTab(emp, snapshot);
+        RefreshPerformanceTab(emp, snapshot);
+        RefreshGrowthTab(emp, snapshot);
+        RefreshCareerTab(emp, snapshot);
+        RefreshComparisonTab(emp, snapshot);
+        IsDirty = true;
     }
 
     // ── Stub methods for Plans 2B-2D ─────────────────────────────────────────

@@ -214,7 +214,9 @@ public class NewGameFounderCreationViewModel : IViewModel
     /// <summary>
     /// No-op for wizard — state doesn't come from game state.
     /// </summary>
-    public void Refresh(IReadOnlyGameState state) { }
+    public void Refresh(GameStateSnapshot snapshot) { }
+    public bool IsDirty => false;
+    public void ClearDirty() { }
 
     // ── Navigation ──
 
@@ -804,31 +806,33 @@ public class NewGameFounderCreationViewModel : IViewModel
             var setup = SetupState.FounderSetups[i];
 
             RoleId role = RoleId.SoftwareEngineer;
-            if (setup.ArchetypeId >= 0)
+            string archetypeName = "";
+            for (int a = 0; a < ArchetypeOptions.Length; a++)
             {
-                for (int a = 0; a < ArchetypeOptions.Length; a++)
+                if (ArchetypeOptions[a].Id == setup.ArchetypeId)
                 {
-                    if (ArchetypeOptions[a].Id == setup.ArchetypeId)
-                    {
-                        role = ArchetypeOptions[a].Role;
-                        break;
-                    }
+                    role = ArchetypeOptions[a].Role;
+                    archetypeName = ArchetypeOptions[a].DisplayName ?? "";
+                    break;
                 }
             }
 
-            int salaryAmount = GetSalaryAmount(setup.SalaryOptionId);
+            int salaryChoice = setup.SalaryOptionId;
+            int salaryAmount = GetSalaryAmount(salaryChoice);
 
             result[i] = new FoundingEmployeeData
             {
-                Name = string.IsNullOrWhiteSpace(setup.Name) ? $"Founder {i + 1}" : setup.Name,
-                Age = setup.Age > 0 ? setup.Age : 30,
-                Tier = 3,
-                Role = role,
-                ArchetypeId = setup.ArchetypeId,
+                Name             = string.IsNullOrWhiteSpace(setup.Name) ? $"Founder {i + 1}" : setup.Name,
+                Age              = setup.Age > 0 ? setup.Age : 30,
+                Role             = role,
+                ArchetypeId      = setup.ArchetypeId,
                 PersonalityStyleId = setup.PersonalityStyleId,
-                WeaknessId = setup.WeaknessId,
-                SalaryAmount = salaryAmount,
-                IsFounder = true
+                WeaknessId       = setup.WeaknessId,
+                SalaryChoice     = salaryChoice,
+                SalaryAmount     = salaryAmount,
+                TraitId          = -1,
+                ArchetypeName    = archetypeName,
+                IsFounder        = true
             };
         }
         return result;

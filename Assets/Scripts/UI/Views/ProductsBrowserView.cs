@@ -29,7 +29,7 @@ public class ProductsBrowserView : IGameView
         _navigation = navigation;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
 
         var title = new Label("Products Browser");

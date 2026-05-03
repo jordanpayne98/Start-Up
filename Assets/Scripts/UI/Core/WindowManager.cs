@@ -17,6 +17,14 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
     private GameEventBus _eventBus;
     private ScreenRegistry _registry;
     private TopBarViewModel _topBarViewModel;
+    private TopBarView      _topBarView;
+
+    // Sidebar shell components
+    private SidebarView      _sidebarView;
+    private SidebarViewModel _sidebarViewModel;
+
+    // Screen host — manages screen mounting in screen-content-host
+    private ScreenHost _screenHost;
 
     // Cached root elements
     private VisualElement _root;
@@ -76,10 +84,31 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
     private TooltipService _tooltipService;
     public TooltipService TooltipService => _tooltipService;
 
-    // Dirty flag coalescing
+    // Shell overlay services (ModalPresenter, ToastService, ShellTooltipProvider)
+    private ModalPresenter       _modalPresenter;
+    private ToastService         _shellToastService;
+    private ShellTooltipProvider _shellTooltipProvider;
+
+    // Shell effects controller
+    private ShellEffectsController _shellEffects;
+
+    // ITooltipProvider — delegates to ShellTooltipProvider when available, falls back to legacy
+    void ITooltipProvider.Show(TooltipData data, UnityEngine.UIElements.VisualElement anchor) {
+        if (_shellTooltipProvider != null) { _shellTooltipProvider.Show(data, anchor); return; }
+        if (_tooltipService == null || anchor == null) return;
+        var bounds = anchor.worldBound;
+        _tooltipService.Show(data, new UnityEngine.Vector2(bounds.center.x, bounds.yMin));
+    }
+    void ITooltipProvider.Hide() {
+        if (_shellTooltipProvider != null) { _shellTooltipProvider.Hide(); return; }
+        _tooltipService?.Hide();
+    }
+    TooltipService ITooltipProvider.TooltipService => _tooltipService;
+
     private bool _viewDirty;
     private bool _topBarDirty;
     private bool _modalDirty;
+    private bool _sidebarDirty;
 
     // View cache — keeps views alive across navigation
     private readonly Dictionary<ScreenId, (IGameView view, IViewModel vm, VisualElement container)> _viewCache
@@ -113,7 +142,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         Initialize(uiDocument);
         SubscribeToEvents();
         RefreshTopBar();
-        NavigateTo(ScreenId.DashboardInbox);
+        NavigateTo(ScreenId.Dashboard);
 
         // Wire ToastNotificationController
         _toastController = GetComponent<ToastNotificationController>();
@@ -133,6 +162,15 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
 
         InitializePauseMenu();
         SetupEscapeKey();
+
+        // Initial sidebar bind
+        if (_sidebarView != null && _sidebarViewModel != null)
+        {
+            var snapshot = BuildSnapshot();
+            if (snapshot != null) _sidebarViewModel.Refresh(snapshot);
+            _sidebarViewModel.SetActiveScreen(ScreenId.Dashboard);
+            _sidebarView.Bind(_sidebarViewModel);
+        }
     }
 
     private void OnDestroy() {
@@ -144,8 +182,20 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         }
         _viewCache.Clear();
         DisposeCurrentModal();
+        _modalPresenter?.DismissAll();
+        _shellToastService = null;
+        _shellTooltipProvider = null;
+        _shellEffects?.Dispose();
+        _shellEffects = null;
+        _sidebarView?.Dispose();
+        _sidebarView      = null;
+        _sidebarViewModel = null;
+        _screenHost?.DisposeAll();
+        _screenHost = null;
         _pauseMenuView?.Dispose();
         _pauseMenuView = null;
+        _topBarView?.Dispose();
+        _topBarView = null;
         if (_escapeAction != null) {
             _escapeAction.performed -= OnEscapePerformed;
             _escapeAction.Disable();
@@ -217,6 +267,70 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
             _tooltipService?.Hide();
             _tooltipService?.ReregisterScrollViews();
         };
+
+        // Wire shell overlay services
+        var modalLayer  = _root.Q<VisualElement>("modal-layer");
+        var toastLayer  = _root.Q<VisualElement>("toast-layer");
+
+        if (modalLayer != null)
+        {
+            _modalPresenter = new ModalPresenter();
+            _modalPresenter.Initialize(modalLayer, BuildUIServices());
+        }
+        else
+        {
+            Debug.LogWarning("[WindowManager] modal-layer not found — ModalPresenter not initialized.");
+        }
+
+        if (toastLayer != null)
+        {
+            _shellToastService = new ToastService();
+            _shellToastService.Initialize(toastLayer);
+        }
+        else
+        {
+            Debug.LogWarning("[WindowManager] toast-layer not found — ToastService not initialized.");
+        }
+
+        _shellTooltipProvider = new ShellTooltipProvider(_tooltipService);
+
+        // Wire ShellEffectsController
+        _shellEffects = new ShellEffectsController();
+        _shellEffects.Initialize(_root);
+
+        // Wire TopBarView against the new-shell top-status-bar (if present)
+        var topStatusBar = _root.Q<VisualElement>("top-status-bar");
+        if (topStatusBar != null && _gameController != null)
+        {
+            _topBarView = new TopBarView(_gameController);
+            _topBarView.Initialize(topStatusBar, BuildUIServices());
+        }
+
+        // Wire SidebarView + SidebarViewModel
+        var sidebarNavEl = _root.Q<VisualElement>("sidebar-navigation");
+        if (sidebarNavEl != null)
+        {
+            _sidebarViewModel = new SidebarViewModel();
+            _sidebarView      = new SidebarView();
+            _sidebarView.Initialize(_root, BuildUIServices());  // passes root so Q("sidebar-navigation") resolves
+        }
+        else
+        {
+            Debug.LogWarning("[WindowManager] sidebar-navigation not found — SidebarView not initialized.");
+        }
+
+        // Wire ScreenHost
+        var screenContentHost = _root.Q<VisualElement>("screen-content-host");
+        if (screenContentHost != null)
+        {
+            _screenHost = new ScreenHost();
+            _screenHost.Initialize(screenContentHost, BuildUIServices());
+            _screenHost.SnapshotBuilder = BuildSnapshot;
+        }
+        else
+        {
+            Debug.LogWarning("[WindowManager] screen-content-host not found — ScreenHost not initialized.");
+        }
     }
 
     public void NavigateTo(ScreenId screen) {
@@ -226,6 +340,9 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
             return;
         }
 
+        // Capture previous for v2 event
+        var previousScreen = _currentScreenId;
+
         // Hide current view's container instead of disposing
         if (_currentView != null && _viewCache.TryGetValue(_currentScreenId, out var currentCached)) {
             currentCached.container.style.display = DisplayStyle.None;
@@ -234,35 +351,51 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         _currentScreenId = screen;
         _accordion?.SetActiveScreen(screen);
 
-        if (_contentArea == null) return;
+        // Update sidebar active state immediately (local UI — no coalesced refresh needed)
+        _sidebarViewModel?.SetActiveScreen(screen);
+        if (_sidebarView != null && _sidebarViewModel != null)
+        {
+            _sidebarView.Bind(_sidebarViewModel);
+        }
 
-        if (_viewCache.TryGetValue(screen, out var cached)) {
-            // Cache hit — show existing container, refresh and bind
-            cached.container.style.display = DisplayStyle.Flex;
-            _currentView = cached.view;
-            _currentViewModel = cached.vm;
-            RefreshCurrentViewModel();
-            _currentView.Bind(_currentViewModel);
-        } else {
-            // Cache miss — create new view + container, initialize, store
-            _currentViewModel = config.ViewModelFactory();
-            _currentView = config.ViewFactory();
+        // Route through ScreenHost (new shell) if screen-body-host exists
+        if (_screenHost != null)
+        {
+            _screenHost.ShowScreen(config);
+            // Sync _currentView/_currentViewModel from ScreenHost's internal cache
+            _currentView      = _screenHost.CurrentView;
+            _currentViewModel = _screenHost.CurrentViewModel;
+        }
+        else if (_contentArea != null)
+        {
+            // Legacy path — content-area based
+            if (_viewCache.TryGetValue(screen, out var cached)) {
+                cached.container.style.display = DisplayStyle.Flex;
+                _currentView = cached.view;
+                _currentViewModel = cached.vm;
+                RefreshCurrentViewModel();
+                _currentView.Bind(_currentViewModel);
+            } else {
+                _currentViewModel = config.ViewModelFactory();
+                _currentView = config.ViewFactory();
 
-            var screenContainer = new VisualElement();
-            screenContainer.name = "screen-container";
-            screenContainer.AddToClassList("screen-container");
-            _contentArea.Add(screenContainer);
+                var screenContainer = new VisualElement();
+                screenContainer.name = "screen-container";
+                screenContainer.AddToClassList("screen-container");
+                _contentArea.Add(screenContainer);
 
-            _currentView.Initialize(screenContainer);
-            RefreshCurrentViewModel();
-            _currentView.Bind(_currentViewModel);
+                _currentView.Initialize(screenContainer, BuildUIServices());
+                RefreshCurrentViewModel();
+                _currentView.Bind(_currentViewModel);
 
-            _viewCache[screen] = (_currentView, _currentViewModel, screenContainer);
+                _viewCache[screen] = (_currentView, _currentViewModel, screenContainer);
 
-            UIAnimator.FadeSlideIn(screenContainer);
+                UIAnimator.FadeSlideIn(screenContainer);
+            }
         }
 
         OnScreenChanged?.Invoke(screen);
+        _onScreenChangedV2?.Invoke(previousScreen, screen);
         _tooltipService?.Hide();
     }
 
@@ -323,7 +456,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
             candDetailView.SetAsset(candidateDetailAsset);
 
         _modalContent.Clear();
-        _currentModalView.Initialize(_modalContent);
+        _currentModalView.Initialize(_modalContent, BuildUIServices());
 
         if (_currentModalViewModel != null) {
             var snapshot = BuildSnapshot();
@@ -382,12 +515,22 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
     }
 
     // ICommandDispatcher
-    void ICommandDispatcher.Dispatch(ICommand command) => QueueCommand(command);
+    bool ICommandDispatcher.Dispatch(ICommand command) {
+        QueueCommand(command);
+        return true;
+    }
+    bool ICommandDispatcher.TryDispatch(ICommand command, out string error) {
+        QueueCommand(command);
+        error = null;
+        return true;
+    }
     int ICommandDispatcher.CurrentTick => CurrentTick;
 
     // IModalPresenter
-    void IModalPresenter.ShowModal(IGameView view, IViewModel viewModel) => ShowModal(view, viewModel);
+    void IModalPresenter.ShowModal(IGameView view, IViewModel viewModel, ModalOptions options) => ShowModal(view, viewModel);
     void IModalPresenter.DismissModal() => DismissModal();
+    void IModalPresenter.DismissAll() => DismissModal();
+    bool IModalPresenter.IsModalOpen => _currentModalView != null;
 
     void IModalPresenter.OpenCompetitorProfile(CompetitorId competitorId) {
         var snapshot = BuildSnapshot();
@@ -415,7 +558,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
     void IModalPresenter.ShowCandidateDetailModal(int candidateId, bool showCounterOffer) {
         var vm = new CandidateDetailModalViewModel();
         vm.SetCandidateId(candidateId);
-        var view = new CandidateDetailModalView(this, this);
+        var view = new CandidateDetailModalView();
         ShowModal(view, vm);
         if (showCounterOffer && vm.HasPendingCounter) {
             view.ShowCounterOfferView();
@@ -426,15 +569,28 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
 
     // INavigationService
     void INavigationService.NavigateTo(ScreenId screenId) => NavigateTo(screenId);
-
     void INavigationService.NavigateTo(ScreenId screenId, int tabHint) {
         NavigateTo(screenId);
         if (tabHint >= 0 && _currentView is ITabNavigable tabView) {
             tabView.SwitchToTab(tabHint);
         }
     }
+    void INavigationService.GoBack() { /* no history stack yet — no-op */ }
+    ScreenId INavigationService.CurrentScreen => _currentScreenId;
+    event Action<ScreenId, ScreenId> INavigationService.OnScreenChanged {
+        add    { _onScreenChangedV2 += value; }
+        remove { _onScreenChangedV2 -= value; }
+    }
+    private event Action<ScreenId, ScreenId> _onScreenChangedV2;
 
     // --- Private helpers ---
+
+    private void RefreshSidebar() {
+        if (_sidebarView == null || _sidebarViewModel == null) return;
+        var snapshot = BuildSnapshot();
+        if (snapshot != null) _sidebarViewModel.Refresh(snapshot);
+        _sidebarView.Bind(_sidebarViewModel);
+    }
 
     private void RefreshTopBar() {
         var snapshot = BuildSnapshot();
@@ -443,11 +599,29 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         float previousMoney = _lastMoneyValue;
         _topBarViewModel.Refresh(snapshot);
 
+        // Push game-speed level (not in snapshot) before binding
+        if (_gameController != null)
+            _topBarViewModel.SetCurrentSpeed(_gameController.GameSpeedLevel);
+
+        // Bind via new TopBarView if it is wired to the new-shell top-status-bar
+        if (_topBarView != null)
+        {
+            _topBarView.Bind(_topBarViewModel);
+        }
+
         if (_companyNameLabel != null) _companyNameLabel.text = _topBarViewModel.CompanyName;
-        if (_dateLabel != null) _dateLabel.text = _topBarViewModel.DateDisplay;
+        if (_dateLabel != null) _dateLabel.text = _topBarViewModel.TimelineDisplay;
         if (_reputationSubtitle != null) {
-            _reputationSubtitle.text = "★ " + _topBarViewModel.ReputationTier;
-            string newRepClass = _topBarViewModel.ReputationColourClass;
+            string repTier = UIFormatting.FormatReputationTier(snapshot.CurrentReputationTier);
+            _reputationSubtitle.text = "★ " + repTier;
+            string newRepClass = snapshot.CurrentReputationTier switch {
+                ReputationTier.Unknown        => "text-muted",
+                ReputationTier.Startup        => "text-warning",
+                ReputationTier.Established    => "text-accent",
+                ReputationTier.Respected      => "text-success",
+                ReputationTier.IndustryLeader => "text-special",
+                _                             => "text-muted"
+            };
             if (newRepClass != _lastReputationClass) {
                 if (!string.IsNullOrEmpty(_lastReputationClass))
                     _reputationSubtitle.RemoveFromClassList(_lastReputationClass);
@@ -480,12 +654,12 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
 
             _lastMoneyValue = newMoneyValue;
         } else if (_moneyLabel != null) {
-            _moneyLabel.text = _topBarViewModel.MoneyDisplay;
+            _moneyLabel.text = UIFormatting.FormatMoney(snapshot.Money);
             _lastMoneyValue = newMoneyValue;
         }
 
-        // Continue button + advancing module class
-        bool isAdvancing = _topBarViewModel.IsAdvancing;
+        // Continue button + advancing module class (legacy top-bar elements)
+        bool isAdvancing = snapshot.IsAdvancing;
         if (_continueButton != null) {
             _continueButton.text = isAdvancing ? "Pause" : "Continue";
         }
@@ -496,21 +670,32 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
                 _moduleControls.RemoveFromClassList("top-bar__module--advancing");
             }
         }
+        // Finance health class derived from snapshot directly
+        string financeHealthClass = snapshot.FinancialHealth switch {
+            FinancialHealthState.Stable     => "finance--stable",
+            FinancialHealthState.Tight      => "finance--tight",
+            FinancialHealthState.Distressed => "finance--tight",
+            FinancialHealthState.Insolvent  => "finance--critical",
+            FinancialHealthState.Bankrupt   => "finance--critical",
+            _                               => "finance--stable"
+        };
         if (_moduleFinance != null) {
             _moduleFinance.RemoveFromClassList("finance--stable");
             _moduleFinance.RemoveFromClassList("finance--tight");
             _moduleFinance.RemoveFromClassList("finance--critical");
-            _moduleFinance.AddToClassList(_topBarViewModel.FinanceHealthClass);
+            _moduleFinance.AddToClassList(financeHealthClass);
         }
+        int netIncome = snapshot.TotalRevenue - snapshot.MonthlyExpenses;
+        bool isNetPositive = netIncome >= 0;
         if (_netIncomeLabel != null) {
-            _netIncomeLabel.text = _topBarViewModel.NetIncomeDisplay;
-            string incomeClass = _topBarViewModel.IsNetPositive ? "text-success" : "text-danger";
+            _netIncomeLabel.text = "Net: " + (isNetPositive ? "+" : "") + UIFormatting.FormatMoney(netIncome) + "/mo";
+            string incomeClass = isNetPositive ? "text-success" : "text-danger";
             _netIncomeLabel.RemoveFromClassList("text-success");
             _netIncomeLabel.RemoveFromClassList("text-danger");
             _netIncomeLabel.AddToClassList(incomeClass);
         }
         if (_moneyLabel != null) {
-            string moneyClass = _topBarViewModel.FinanceHealthClass switch {
+            string moneyClass = financeHealthClass switch {
                 "finance--stable"   => "text-success",
                 "finance--tight"    => "text-warning",
                 "finance--critical" => "text-danger",
@@ -541,9 +726,10 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
     }
 
     private void RefreshAll() {
-        _topBarDirty = true;
-        _viewDirty = true;
-        _modalDirty = true;
+        _topBarDirty  = true;
+        _viewDirty    = true;
+        _modalDirty   = true;
+        _sidebarDirty = true;
     }
 
     private void MarkViewDirtyFor<T>() {
@@ -561,10 +747,21 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
             _topBarDirty = false;
             RefreshTopBar();
         }
+        if (_sidebarDirty) {
+            _sidebarDirty = false;
+            RefreshSidebar();
+        }
         if (_viewDirty) {
             _viewDirty = false;
-            RefreshCurrentViewModel();
-            _currentView?.Bind(_currentViewModel);
+            if (_screenHost != null)
+            {
+                _screenHost.RefreshCurrentScreen();
+            }
+            else
+            {
+                RefreshCurrentViewModel();
+                _currentView?.Bind(_currentViewModel);
+            }
         }
         if (_modalDirty) {
             _modalDirty = false;
@@ -607,6 +804,16 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
     }
 
     public IReadOnlyGameState GetCurrentSnapshot() => BuildSnapshot();
+
+    private UIServices BuildUIServices() {
+        return new UIServices(
+            navigation: this,
+            modals:     _modalPresenter ?? (IModalPresenter)this,
+            commands:   this,
+            toasts:     _shellToastService,
+            tooltips:   _shellTooltipProvider ?? (ITooltipProvider)this
+        );
+    }
 
     private void DisposeCurrentView() {
         if (_currentView != null) {
@@ -827,6 +1034,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         } else {
             _gameController.StartAdvance();
         }
+        _shellEffects?.SetGameRunning(_gameController.IsAdvancing);
         RefreshTopBar();
     }
 
@@ -840,7 +1048,7 @@ public class WindowManager : MonoBehaviour, ICommandDispatcher, IModalPresenter,
         pauseContainer.name = "pause-overlay";
         _root.Add(pauseContainer);
 
-        _pauseMenuView.Initialize(pauseContainer);
+        _pauseMenuView.Initialize(pauseContainer, BuildUIServices());
 
         var snapshot = BuildSnapshot();
         if (snapshot != null) {

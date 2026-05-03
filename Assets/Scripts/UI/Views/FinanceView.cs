@@ -86,7 +86,7 @@ public class FinanceView : IGameView
         _tooltipProvider = tooltipProvider;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
 
         var title = new Label("Finance");

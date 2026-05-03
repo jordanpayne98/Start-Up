@@ -145,11 +145,14 @@ public class MarketViewModel : IViewModel
         }
     }
 
-    public void Refresh(IReadOnlyGameState state)
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot)
     {
-        if (state == null) return;
-        var snapshot = state as GameStateSnapshot;
-        Refresh(state, snapshot?.CompetitorState, snapshot?.MarketStateRef);
+        if (snapshot == null) return;
+        Refresh(snapshot, snapshot.CompetitorState, snapshot.MarketStateRef);
+        IsDirty = true;
     }
 
     public void Refresh(IReadOnlyGameState state, CompetitorState compState, MarketState marketState)

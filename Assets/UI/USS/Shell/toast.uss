@@ -1,0 +1,149 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Toast Layer and Toast Card Styles — Page 30 / Page 31 / Page 28
+   Depends on: tokens.uss (loaded globally via MainGameShell.uxml)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Toast Layer ─────────────────────────────────────────────────────────── */
+
+#toast-layer {
+    position: absolute;
+    top: 64px; /* topbar-height (48) + space-16 (16) */
+    right: var(--space-16);
+    flex-direction: column;
+    row-gap: var(--space-8);
+    max-width: 360px;
+    width: 360px;
+    display: none;
+}
+
+/* ── Toast Card ──────────────────────────────────────────────────────────── */
+
+.toast {
+    background-color: var(--color-bg-panel-raised);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    border-radius: var(--radius-8);
+    border-left-width: 3px;
+    flex-direction: row;
+    align-items: flex-start;
+    padding-top: var(--space-10);
+    padding-bottom: var(--space-10);
+    padding-left: var(--space-12);
+    padding-right: var(--space-8);
+    min-width: 280px;
+    max-width: 360px;
+}
+
+/* ── Toast Icon ──────────────────────────────────────────────────────────── */
+
+.toast-icon {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    flex-shrink: 0;
+    margin-right: var(--space-8);
+    margin-top: 1px;
+    -unity-text-align: middle-center;
+    font-size: 14px;
+}
+
+/* ── Toast Content ───────────────────────────────────────────────────────── */
+
+.toast-content {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.toast-title {
+    font-size: var(--font-size-md);
+    -unity-font-style: bold;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.toast-message {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+/* ── Toast Action Button ─────────────────────────────────────────────────── */
+
+.toast-action {
+    background-color: transparent;
+    border-width: 0;
+    border-radius: var(--radius-4);
+    color: var(--color-text-accent);
+    font-size: var(--font-size-xs);
+    -unity-font-style: bold;
+    align-self: flex-end;
+    margin-top: var(--space-4);
+    padding-left: 0;
+    padding-right: 0;
+    height: var(--btn-height-sm);
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+    transition: color 150ms ease-in-out;
+}
+
+.toast-action:hover {
+    color: var(--color-accent-hover);
+}
+
+/* ── Toast Close ─────────────────────────────────────────────────────────── */
+
+.toast-close {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    flex-shrink: 0;
+    padding: 0;
+    background-color: transparent;
+    border-width: 0;
+    border-radius: var(--radius-4);
+    color: var(--color-text-muted);
+    font-size: 12px;
+    -unity-text-align: middle-center;
+    margin-left: var(--space-4);
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+    transition: background-color 150ms ease-in-out, color 150ms ease-in-out;
+}
+
+.toast-close:hover {
+    background-color: var(--color-bg-panel-hover);
+    color: var(--color-text-primary);
+}
+
+/* ── Toast Type Variants (border-left colour + icon colour) ──────────────── */
+
+.toast--success {
+    border-left-color: var(--color-border-success);
+}
+
+.toast--success .toast-icon {
+    color: var(--color-text-success);
+}
+
+.toast--warning {
+    border-left-color: var(--color-border-warning);
+}
+
+.toast--warning .toast-icon {
+    color: var(--color-text-warning);
+}
+
+.toast--error {
+    border-left-color: var(--color-border-danger);
+}
+
+.toast--error .toast-icon {
+    color: var(--color-text-danger);
+}
+
+.toast--info {
+    border-left-color: var(--color-info);
+}
+
+.toast--info .toast-icon {
+    color: var(--color-text-info);
+}

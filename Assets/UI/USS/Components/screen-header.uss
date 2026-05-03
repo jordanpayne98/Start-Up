@@ -1,0 +1,54 @@
+/* ── Screen Header Component (Page 27 + Page 28) ─────────────────────────── */
+
+.screen-header {
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: var(--space-12);
+    min-height: var(--screen-header-height);
+}
+
+.screen-header__breadcrumb {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-8);
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+    transition: color 150ms ease-in-out;
+}
+
+.screen-header__breadcrumb:hover {
+    color: var(--color-text-secondary);
+}
+
+.screen-header__row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.screen-header__icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: var(--radius-8);
+    background-color: var(--color-bg-panel-raised);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    margin-right: var(--space-12);
+}
+
+.screen-header__text {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.screen-header__title {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xl);
+    -unity-font-style: bold;
+    -unity-font: var(--font-display);
+}
+
+.screen-header__subtitle {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-2);
+}

@@ -1,0 +1,35 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Tooltips — Page 30
+   Depends on: tokens.uss
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tooltip {
+    background-color: var(--color-bg-tooltip);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    border-radius: var(--radius-6);
+    padding: var(--space-12);
+    max-width: 320px;
+    flex-direction: column;
+}
+
+.tooltip-title {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-md);
+    -unity-font-style: bold;
+    margin-bottom: var(--space-4);
+}
+
+.tooltip-body {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.tooltip-calc {
+    background-color: var(--color-bg-panel);
+    border-radius: var(--radius-4);
+    padding: var(--space-8);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    margin-top: var(--space-8);
+}

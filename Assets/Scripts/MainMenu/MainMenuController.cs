@@ -396,7 +396,7 @@ public class MainMenuController : MonoBehaviour {
 
         var wizardContainer = _wizardRoot.Q<VisualElement>("new-game-wizard");
         if (wizardContainer != null) {
-            _wizardView.Initialize(wizardContainer);
+            _wizardView.Initialize(wizardContainer, null);
             _wizardView.Bind(_wizardViewModel);
         } else {
             Debug.LogError("[MainMenuController] Could not find 'new-game-wizard' element in wizard template");
@@ -441,8 +441,6 @@ public class MainMenuController : MonoBehaviour {
         var founderList = new System.Collections.Generic.List<FoundingEmployeeData>(founders.Length);
         for (int i = 0; i < founders.Length; i++) {
             var f = founders[i];
-            // Ensure backward-compatible tier default
-            if (f.Tier == 0) f.Tier = 3;
             if (f.Age == 0) f.Age = 28;
             founderList.Add(f);
         }
@@ -705,7 +703,8 @@ public class MainMenuController : MonoBehaviour {
                 Age = card.AgeSlider.value,
                 Gender = gender,
                 Role = role,
-                Tier = card.TierDropdown.index + 1
+                SalaryChoice = 2,
+                IsFounder = true
             };
             result.Add(data);
         }

@@ -4,6 +4,13 @@ public enum SortDirection
     Descending
 }
 
+public enum SeverityState
+{
+    Normal,
+    Warning,
+    Danger
+}
+
 public enum HRTab
 {
     Employees = 0,

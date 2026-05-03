@@ -1,5 +1,6 @@
 public interface ICommandDispatcher
 {
-    void Dispatch(ICommand command);
+    bool Dispatch(ICommand command);
+    bool TryDispatch(ICommand command, out string error);
     int CurrentTick { get; }
 }

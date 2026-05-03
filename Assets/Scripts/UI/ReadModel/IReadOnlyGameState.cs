@@ -223,4 +223,14 @@ public interface IReadOnlyGameState : IAbilityReadModel
     float GetEmployeeEnergy(EmployeeId employeeId);
     EnergyBand GetEmployeeEnergyBand(EmployeeId employeeId);
     float GetTeamAverageEnergy(TeamId teamId);
+
+    // Ability — role-aware CA queries (Wave 3A)
+    int GetRoleCA(EmployeeId id, RoleId role);
+    int GetCurrentRoleCA(EmployeeId id);
+    int GetBestRoleCA(EmployeeId id);
+    RoleId GetBestRole(EmployeeId id);
+
+    // Team meters (Wave 3C)
+    TeamMeterSnapshot GetTeamMeters(TeamId teamId);
+    TeamImpactResult GetEmployeeTeamImpact(EmployeeId empId, TeamId teamId);
 }

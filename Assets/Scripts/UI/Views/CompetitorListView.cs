@@ -15,7 +15,7 @@ public class CompetitorListView : IGameView
         _modal = modal;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
 
         var title = new Label("Competitors");

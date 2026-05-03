@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="project://database/Assets/UI/USS/Core/tokens.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Core/components.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Components/tab-bar.uss" />
+
+    <!-- Tab Bar — horizontal flex with tab items and optional count badges -->
+    <ui:VisualElement name="tab-bar-root" class="tab-bar">
+
+        <!-- Tab item template — label + optional count badge
+             Views wire click handlers per tab in Initialize()
+             Add items dynamically or populate template slots at startup -->
+        <ui:VisualElement name="tab-item-slot-1" class="tab-item tab-item--active">
+            <ui:Label name="tab-label-1" text="Tab One" class="tab-item__label" />
+            <ui:Label name="tab-count-1" text="" class="tab-item__count hidden" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="tab-item-slot-2" class="tab-item">
+            <ui:Label name="tab-label-2" text="Tab Two" class="tab-item__label" />
+            <ui:Label name="tab-count-2" text="" class="tab-item__count hidden" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="tab-item-slot-3" class="tab-item">
+            <ui:Label name="tab-label-3" text="Tab Three" class="tab-item__label" />
+            <ui:Label name="tab-count-3" text="" class="tab-item__count hidden" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,24 @@
+/* ── Filter Bar Component (Page 30 Filter Bar contract) ─────────────────── */
+
+/* All base .filter-bar and .filter-chip rules are defined in components.uss —
+   this file adds filter-bar-specific layout overrides and child selectors. */
+
+.filter-bar__count {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    min-width: 64px;
+}
+
+.filter-bar__chips {
+    flex-direction: row;
+    align-items: center;
+}
+
+.filter-bar__search {
+    width: 200px;
+    margin-right: var(--space-8);
+}
+
+.filter-bar__action {
+    flex-shrink: 0;
+}

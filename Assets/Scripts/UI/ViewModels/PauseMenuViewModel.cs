@@ -28,9 +28,13 @@ public class PauseMenuViewModel : IViewModel {
         DefaultSaveName = "New Save";
     }
 
-    public void Refresh(IReadOnlyGameState state) {
-        _state = state;
-        DefaultSaveName = BuildDefaultSaveName(state);
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
+        _state = snapshot;
+        DefaultSaveName = BuildDefaultSaveName(snapshot);
+        IsDirty = true;
     }
 
     public void RefreshSaveSlots() {

@@ -29,8 +29,16 @@ MonoBehaviour:
   CAMax: 95
   PAMin: 110
   PAMax: 145
+  SoloCAMin: 90
+  SoloCAMax: 115
+  SoloPAMin: 125
+  SoloPAMax: 160
   SkillBiasProfile: 02000000040000000500000001000000
+  PrimarySkillBiases: 0200000000000000
+  SecondarySkillBiases: 0100000010000000
   AttributeBias: 020000000500000004000000
+  HiddenBias: 0500000000000000
+  WeaknessRiskAttributes: 0300000000000000
   IsGatedArchetype: 1
   GateCondition: Performance Founder requires Hardware Startup or Software Startup
     background.

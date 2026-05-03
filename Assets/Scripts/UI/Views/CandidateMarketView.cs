@@ -40,7 +40,7 @@ public class CandidateMarketView : IGameView
         _tooltip = tooltip;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
         _root.AddToClassList("candidate-market");
 
@@ -384,6 +384,6 @@ public class CandidateMarketView : IGameView
 
         var vm = new CandidateDetailModalViewModel();
         vm.SetCandidateId(candidateId);
-        _modal.ShowModal(new CandidateDetailModalView(_modal, _dispatcher), vm);
+        _modal.ShowModal(new CandidateDetailModalView(), vm);
     }
 }

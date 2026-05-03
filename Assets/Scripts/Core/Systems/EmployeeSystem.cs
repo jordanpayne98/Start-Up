@@ -178,6 +178,13 @@ public class EmployeeSystem : ISystem
 
     public void SetTuningConfig(TuningConfig tuning) { _tuning = tuning; }
 
+    private RoleProfileTable _roleProfileTable;
+
+    public void SetRoleProfileTable(RoleProfileTable roleProfileTable)
+    {
+        _roleProfileTable = roleProfileTable;
+    }
+
     // ── Industry Salary Benchmarks ───────────────────────────────────────────
     private readonly Dictionary<SkillTier, int> _industrySalaryBenchmarks = new Dictionary<SkillTier, int>();
 
@@ -1024,7 +1031,8 @@ public class EmployeeSystem : ISystem
                 ? roleTiers[i]
                 : 3;
             int currentLevel = emp.Stats.Skills[i];
-            int marginalCost = currentLevel > 0 ? AbilityCalculator.GetMarginalCost(currentLevel - 1, tierMult) : 1;
+            // Approximate marginal cost: higher-level skills cost more to decay (flat scale 1–3).
+            int marginalCost = 1 + (currentLevel / 7); // 0-6→1, 7-13→2, 14-20→3
             if (marginalCost < 1) marginalCost = 1;
 
             float decayAmount = (float)(caAlloc * 2) / (float)(marginalCost * tierMult);
@@ -1332,16 +1340,89 @@ public class EmployeeSystem : ISystem
         int newSlots = count - autoGenCount;
         if (newSlots <= 0) return;
 
+        // Anti-frustration bias: build role weight overrides if company is missing critical functions
+        float[] roleWeightOverrides = BuildAntiFrustrationWeights();
+
+        // Pool composition tracking for diversity guarantee (Page 05 section 22.2)
+        bool hasEngineeringOrProduct = false;
+        bool hasQualitySupport = false;
+        bool hasCommercialOrOps = false;
+        bool hasJuniorRawTalent = false;
+
         for (int i = 0; i < newSlots; i++)
         {
             if (_state.availableCandidates.Count >= ListMax) break;
-            var candidate = CandidateData.GenerateCandidate(_candidateRng, qualityMultiplier);
+
+            var genParams = CandidateGenerationParams.OpenMarket(qualityMultiplier);
+            genParams.RoleWeightOverrides = roleWeightOverrides;
+
+            // Diversity guarantee: force missing pool composition roles in last few slots
+            int remaining = newSlots - i;
+            if (remaining <= 4)
+            {
+                if (!hasEngineeringOrProduct)
+                    genParams.ForceFamily = _candidateRng.Range(0, 2) == 0 ? RoleFamily.Engineering : RoleFamily.Product;
+                else if (!hasQualitySupport)
+                    genParams.ForceFamily = RoleFamily.QualityAndSupport;
+                else if (!hasCommercialOrOps)
+                    genParams.ForceFamily = _candidateRng.Range(0, 2) == 0 ? RoleFamily.Commercial : RoleFamily.Operations;
+                else if (!hasJuniorRawTalent)
+                    genParams.ForceCareerStage = CareerStage.Junior;
+            }
+
+            var candidate = CandidateData.GenerateCandidate(_candidateRng, _roleProfileTable, genParams);
             candidate.CandidateId = _state.nextCandidateId++;
             _abilitySystem?.GenerateCandidateAbility(candidate);
             _state.availableCandidates.Add(candidate);
+
+            // Track composition
+            RoleFamily family = RoleIdHelper.GetFamily(candidate.Role);
+            if (family == RoleFamily.Engineering || family == RoleFamily.Product) hasEngineeringOrProduct = true;
+            if (family == RoleFamily.QualityAndSupport) hasQualitySupport = true;
+            if (family == RoleFamily.Commercial || family == RoleFamily.Operations) hasCommercialOrOps = true;
+            if (candidate.CareerStage == CareerStage.Junior || candidate.Archetype == CandidateArchetype.RawTalent) hasJuniorRawTalent = true;
         }
     }
     
+    // Anti-frustration bias: if company has no employees in a critical function,
+    // increase that role family's weight slightly (Page 05 section 22.3).
+    // Returns null if no overrides needed, or a float[] of length RoleIdHelper.RoleCount.
+    private float[] BuildAntiFrustrationWeights()
+    {
+        if (_state == null || _state.employees == null) return null;
+
+        // Count active employees per family
+        int[] familyCounts = new int[7]; // matches RoleFamily enum range
+        foreach (var kvp in _state.employees)
+        {
+            var emp = kvp.Value;
+            if (emp == null || !emp.isActive) continue;
+            int familyIdx = (int)RoleIdHelper.GetFamily(emp.role);
+            if (familyIdx >= 0 && familyIdx < familyCounts.Length)
+                familyCounts[familyIdx]++;
+        }
+
+        bool needsOverride = false;
+        for (int f = 0; f < familyCounts.Length; f++)
+        {
+            if (familyCounts[f] == 0) { needsOverride = true; break; }
+        }
+        if (!needsOverride) return null;
+
+        int roleCount = RoleIdHelper.RoleCount;
+        float[] overrides = new float[roleCount];
+        for (int i = 0; i < roleCount; i++) overrides[i] = 1.0f;
+
+        // Small weight boost for roles in missing families (+0.3)
+        for (int i = 0; i < roleCount; i++)
+        {
+            int familyIdx = (int)RoleIdHelper.GetFamily((RoleId)i);
+            if (familyIdx >= 0 && familyIdx < familyCounts.Length && familyCounts[familyIdx] == 0)
+                overrides[i] += 0.3f;
+        }
+        return overrides;
+    }
+
     public IEnumerable<CandidateData> GetAvailableCandidates()
     {
         return _state.availableCandidates;

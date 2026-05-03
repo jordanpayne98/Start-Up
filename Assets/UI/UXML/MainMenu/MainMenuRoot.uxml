@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <ui:Style src="project://database/Assets/UI/USS/Common/variables.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Core/tokens.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Common/base.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Common/components.uss" />
     <ui:Style src="project://database/Assets/UI/USS/Screens/main-menu.uss" />

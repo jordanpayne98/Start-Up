@@ -1,0 +1,53 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Modals — Page 26 + Page 31
+   Depends on: tokens.uss
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.modal-backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-window {
+    background-color: var(--color-bg-modal);
+    border-radius: var(--radius-12);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-window--sm  { width: var(--modal-width-sm); }
+.modal-window--md  { width: var(--modal-width-md); }
+.modal-window--lg  { width: var(--modal-width-lg); }
+
+.modal-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-16) var(--space-20);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-divider);
+    background-color: var(--color-bg-modal-raised);
+}
+
+.modal-body {
+    flex-direction: column;
+    padding: var(--space-20);
+    flex-grow: 1;
+    overflow-y: scroll;
+}
+
+.modal-footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    padding: var(--space-12) var(--space-20);
+    border-top-width: 1px;
+    border-top-color: var(--color-divider);
+    background-color: var(--color-bg-modal-raised);
+}

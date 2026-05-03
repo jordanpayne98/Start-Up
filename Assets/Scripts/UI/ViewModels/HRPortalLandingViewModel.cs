@@ -66,7 +66,11 @@ public class HRPortalLandingViewModel : IViewModel
     private readonly List<TeamMiniItem> _teamsNeedingAttention = new List<TeamMiniItem>(3);
     public List<TeamMiniItem> TeamsNeedingAttention => _teamsNeedingAttention;
 
-    public void Refresh(IReadOnlyGameState state) {
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
+        IReadOnlyGameState state = snapshot;
         if (state == null) return;
 
         int currentTick = state.CurrentTick;

@@ -30,8 +30,16 @@ MonoBehaviour:
   CAMax: 85
   PAMin: 100
   PAMax: 135
+  SoloCAMin: 90
+  SoloCAMax: 115
+  SoloPAMin: 125
+  SoloPAMax: 160
   SkillBiasProfile: 130000001800000017000000
+  PrimarySkillBiases: 1300000010000000
+  SecondarySkillBiases: 1100000012000000
   AttributeBias: 030000000600000002000000
+  HiddenBias: 0200000006000000
+  WeaknessRiskAttributes: 0100000007000000
   IsGatedArchetype: 1
   GateCondition: Technical Support Founder requires Enterprise Consultancy background.
   SortOrder: 22

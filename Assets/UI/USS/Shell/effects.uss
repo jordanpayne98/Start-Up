@@ -1,0 +1,101 @@
+/*
+ * effects.uss
+ * Shell shader effect classes — Page 29 preset families, Page 31 colour mappings.
+ * Every .effect-* class has a USS-only fallback so the game looks correct without shaders.
+ * Shader materials are applied via custom draw or VisualElement background-image references.
+ * All effect classes are strictly presentation-only and must never affect simulation state.
+ *
+ * Source pages: Page 25, Page 29, Page 31
+ * Wave 2F-7 — Shader Presets and Page Updates
+ */
+
+/* ─────────────────────────────────────────────────────────────────
+   1. Sidebar Active Glow
+   Preset family : highlight (Page 29 §7)
+   Intensity band: Subtle (0.03–0.08) → _Intensity = 0.08
+   Material      : mat_sidebar-active-glow (UIGlow shader)
+   Colour token  : --color-accent (#45CBB7, Page 31)
+   USS fallback  : left-rail teal border + soft background tint
+   ───────────────────────────────────────────────────────────────── */
+.effect-sidebar-glow {
+    border-left-width: 2px;
+    border-left-color: var(--color-accent);
+    background-color: rgba(69, 203, 183, 0.06);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   2. Top Bar Running Underline
+   Preset family : highlight (Page 29 §7)
+   Speed band    : Slow Drift (0.05–0.15) → _Speed = 0.10
+   Opacity band  : Subtle → _Opacity = 0.12
+   Material      : mat_topbar-underline (UIGradientOverlay shader)
+   Colours       : _AccentColor = --color-accent, _PanelColor = --color-bg-shell
+   USS fallback  : 2px bottom border in accent colour
+   ───────────────────────────────────────────────────────────────── */
+.effect-topbar-underline {
+    border-bottom-width: 2px;
+    border-bottom-color: var(--color-accent);
+}
+
+/* State variant: apply when game is running */
+.effect-topbar-underline--running {
+    border-bottom-color: var(--color-accent);
+    /* Material animation handled at runtime via View; fallback is static border */
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   3. Modal Backdrop Noise
+   Preset family : surface (Page 29 §7)
+   Opacity band  : Subtle → _Opacity = 0.04
+   Noise scale   : _NoiseScale = 50
+   Speed band    : Slow Drift → _Speed = 0.05
+   Material      : mat_modal-backdrop (UINoise shader)
+   Colour token  : _PanelColor = #000000 (pure black noise base)
+   USS fallback  : solid dark overlay at 60% opacity
+   ───────────────────────────────────────────────────────────────── */
+.effect-modal-backdrop-noise {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   4. Card Hover Glow
+   Preset family : highlight (Page 29 §7)
+   Intensity band: Subtle (0.03–0.08) → _Intensity = 0.05
+   Material      : mat_card-hover-glow (UIGlow shader)
+   Colour token  : --color-accent (#45CBB7, Page 31)
+   USS fallback  : hover background shift via --color-bg-panel-hover
+   ───────────────────────────────────────────────────────────────── */
+.effect-card-hover-glow {
+    background-color: var(--color-bg-panel-hover, rgba(69, 203, 183, 0.04));
+    border-color: rgba(69, 203, 183, 0.2);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   5. Toast Accent Glow
+   Preset family : highlight (Page 29 §7)
+   Intensity band: Normal (0.08–0.18) → _Intensity = 0.10
+   Material      : mat_toast-accent (UIGlow shader)
+   Colour token  : --color-accent (#45CBB7, Page 31)
+   USS fallback  : left border per toast severity (matches Page 30/31 toast contracts)
+   ───────────────────────────────────────────────────────────────── */
+.effect-toast-accent {
+    border-left-width: 3px;
+    border-left-color: var(--color-accent);
+}
+
+/* Toast severity variants — fallback left-border colour per Page 31 semantic tokens */
+.effect-toast-accent--success {
+    border-left-color: var(--color-success);
+}
+
+.effect-toast-accent--warning {
+    border-left-color: var(--color-warning);
+}
+
+.effect-toast-accent--danger {
+    border-left-color: var(--color-danger);
+}
+
+.effect-toast-accent--info {
+    border-left-color: var(--color-info);
+}

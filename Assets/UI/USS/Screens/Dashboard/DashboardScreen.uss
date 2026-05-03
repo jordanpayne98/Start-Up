@@ -1,0 +1,238 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   DashboardScreen layout styles
+   Depends on: tokens.uss (variables), components.uss (card, chip, meter-bar)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Dashboard root ──────────────────────────────────────────────────────── */
+
+.dashboard-root {
+    flex-direction: column;
+    flex-grow: 1;
+    padding: var(--space-16);
+    gap: var(--space-16);
+    background-color: var(--color-bg-screen);
+}
+
+/* ── Screen header ───────────────────────────────────────────────────────── */
+
+.dashboard-header {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-12);
+    min-height: 72px;
+    padding-bottom: var(--space-12);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-divider);
+}
+
+.dashboard-header__icon {
+    font-size: var(--font-size-2xl);
+    color: var(--color-text-accent);
+    width: 36px;
+    -unity-text-align: middle-center;
+}
+
+.dashboard-header__labels {
+    flex-direction: column;
+}
+
+.dashboard-header__title {
+    font-size: var(--font-size-xl);
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+}
+
+.dashboard-header__subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+/* ── Metric strip ────────────────────────────────────────────────────────── */
+
+.metric-strip {
+    flex-direction: row;
+    gap: var(--space-12);
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    flex-direction: column;
+    flex: 1 1 0;
+    min-width: 180px;
+    padding: var(--space-16);
+    gap: var(--space-4);
+    background-color: var(--color-bg-panel-raised);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    border-radius: var(--radius-8);
+}
+
+.stat-card__label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    -unity-font-style: bold;
+    letter-spacing: 0.5px;
+}
+
+.stat-card__value {
+    font-size: var(--font-size-xl);
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+}
+
+.stat-card__sublabel {
+    font-size: var(--font-size-micro);
+    color: var(--color-text-secondary);
+}
+
+/* ── Dashboard grid ──────────────────────────────────────────────────────── */
+
+.dashboard-grid {
+    flex-direction: row;
+    gap: var(--space-12);
+    flex-wrap: wrap;
+    flex-grow: 1;
+}
+
+.dashboard-grid > .card {
+    flex: 1 1 300px;
+    min-height: 280px;
+    flex-direction: column;
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+}
+
+.dashboard-grid > .card:hover {
+    border-color: var(--color-border-hover);
+}
+
+/* ── Card header ─────────────────────────────────────────────────────────── */
+
+.card-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-12);
+    padding-bottom: var(--space-8);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-divider);
+}
+
+.card-header__title {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+}
+
+/* ── Product rows ────────────────────────────────────────────────────────── */
+
+.product-row {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-8);
+    padding: var(--space-8);
+    border-radius: var(--radius-4);
+    transition: background-color var(--transition-normal) ease-in-out;
+}
+
+.product-row:hover {
+    background-color: var(--color-bg-panel-hover);
+}
+
+.product-row__name {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+    flex: 1 1 0;
+    min-width: 80px;
+}
+
+.product-row__meter {
+    flex: 2 1 0;
+    min-width: 60px;
+}
+
+.product-row__pct {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    min-width: 32px;
+    -unity-text-align: upper-right;
+}
+
+/* ── Contract rows ───────────────────────────────────────────────────────── */
+
+.contract-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+    padding: var(--space-8);
+    border-radius: var(--radius-4);
+    transition: background-color var(--transition-normal) ease-in-out;
+}
+
+.contract-row:hover {
+    background-color: var(--color-bg-panel-hover);
+}
+
+.contract-row__name {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    flex-grow: 1;
+}
+
+/* ── Activity rows ───────────────────────────────────────────────────────── */
+
+.activity-row {
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--space-10);
+    padding: var(--space-8);
+    border-radius: var(--radius-4);
+    transition: background-color var(--transition-normal) ease-in-out;
+}
+
+.activity-row:hover {
+    background-color: var(--color-bg-panel-hover);
+}
+
+.activity-severity {
+    width: 4px;
+    min-width: 4px;
+    align-self: stretch;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-border-subtle);
+}
+
+.activity-severity--info {
+    background-color: var(--color-info);
+}
+
+.activity-severity--warning {
+    background-color: var(--color-warning);
+}
+
+.activity-severity--danger {
+    background-color: var(--color-danger);
+}
+
+.activity-severity--success {
+    background-color: var(--color-success);
+}
+
+.activity-row__labels {
+    flex-direction: column;
+    flex-grow: 1;
+    gap: var(--space-2);
+}
+
+.activity-row__title {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+}
+
+.activity-row__subtitle {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}

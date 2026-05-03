@@ -18,6 +18,10 @@ MonoBehaviour:
   StrengthAttributes: 0300000000000000
   WeakAttributes: 07000000
   HiddenTendencies: 0600000002000000
+  HiddenAttributeModifiers: 01000000feffffff0300000001000000ffffffff0100000003000000
+  BoostAttributes: 03000000
+  BoostAmount: 2
+  PenaltyAmount: 2
   BestPairing: "Driven or Commercial \u2014 adds momentum and direction"
   RiskWarning: Lower ambition may reduce growth urgency. Needs high-drive co-founder.
   SortOrder: 6

@@ -36,7 +36,7 @@ public class MarketView : IGameView
         _tooltipProvider = tooltipProvider;
     }
 
-    public void Initialize(VisualElement root)
+    public void Initialize(VisualElement root, UIServices services)
     {
         _root = root;
         root.AddToClassList("screen-container");

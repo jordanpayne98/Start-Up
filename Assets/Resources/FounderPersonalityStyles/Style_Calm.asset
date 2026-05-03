@@ -19,6 +19,10 @@ MonoBehaviour:
   StrengthAttributes: 0600000004000000
   WeakAttributes: 07000000
   HiddenTendencies: 0500000003000000
+  HiddenAttributeModifiers: 00000000ffffffff0100000003000000ffffffff0200000001000000
+  BoostAttributes: 06000000
+  BoostAmount: 2
+  PenaltyAmount: 2
   BestPairing: "Driven or Independent \u2014 adds momentum"
   RiskWarning: Lower initiative may slow early traction. Needs a high-energy co-founder.
   SortOrder: 1

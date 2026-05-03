@@ -19,6 +19,10 @@ MonoBehaviour:
   StrengthAttributes: 0300000007000000
   WeakAttributes: 06000000
   HiddenTendencies: 0100000004000000
+  HiddenAttributeModifiers: 00000000030000000000000001000000020000000000000000000000
+  BoostAttributes: 0300000007000000
+  BoostAmount: 2
+  PenaltyAmount: 2
   BestPairing: "Supportive or Calm \u2014 dampens ego and conflict risk"
   RiskWarning: Higher ego risk. May create conflict or salary pressure as company
     grows.

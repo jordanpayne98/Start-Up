@@ -114,9 +114,13 @@ public class FinanceViewModel : IViewModel
         RunwayWarningClass = "";
     }
 
-    public void Refresh(IReadOnlyGameState state) {
-        if (state == null) return;
-        RefreshWithStocks(state, null, null);
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
+        if (snapshot == null) return;
+        RefreshWithStocks(snapshot, snapshot.StockState, null);
+        IsDirty = true;
     }
 
     public void RefreshWithStocks(IReadOnlyGameState state, StockState stockState, FinanceState financeState) {
@@ -263,10 +267,10 @@ public class FinanceViewModel : IViewModel
         IsBankruptcyWarning = state.Money < 0 || isDistressed;
         if (IsBankruptcyWarning)
         {
-            BankruptcyVM.Refresh(state);
+            BankruptcyVM.Refresh(state as GameStateSnapshot);
         }
 
-        TaxVM.Refresh(state);
+        TaxVM.Refresh(state as GameStateSnapshot);
     }
 
     private static string HealthToClass(FinancialHealthState health)

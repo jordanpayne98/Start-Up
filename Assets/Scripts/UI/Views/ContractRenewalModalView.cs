@@ -53,7 +53,7 @@ public class ContractRenewalModalView : IGameView
         _onConfirmed = onConfirmed;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
         _root.AddToClassList("contract-renewal-modal");
 

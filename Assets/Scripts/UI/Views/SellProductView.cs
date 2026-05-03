@@ -19,7 +19,7 @@ public class SellProductView : IGameView
         _dispatcher = dispatcher;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
         _root.AddToClassList("sell-product-modal");
 

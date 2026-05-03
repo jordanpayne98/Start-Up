@@ -17,7 +17,7 @@ public class StockInvestmentsView : IGameView
         _dispatcher = dispatcher;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
 
         var title = new Label("Stock / Investments");

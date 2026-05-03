@@ -36,3 +36,15 @@ MonoBehaviour:
   ContractPoolBiasTags:
   - hardware
   - embedded
+  CandidatePoolBiasFamilies: 0100000000000000
+  CandidatePoolBiasWeights:
+  - 3
+  - 2
+  ContractPoolBiasCategories:
+  - hardware
+  - manufacturing
+  - engineering
+  WelcomeMessage: Your hardware expertise puts you ahead in a field most startups
+    avoid. Lean into manufacturing and systems contracts while your reputation grows.
+  HiringHint: Hardware teams often lack Commercial coverage. A Sales Executive or
+    Marketer will help you turn prototypes into paying contracts.

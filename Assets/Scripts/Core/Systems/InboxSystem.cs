@@ -913,4 +913,90 @@ public class InboxSystem
             default:                            return "Standard";
         }
     }
+
+    /// <summary>
+    /// Sends friendly tutorial-style startup messages based on company background and missing role families.
+    /// Called once at game start after founders are created.
+    /// </summary>
+    public void SendStartupMessages(
+        string companyName,
+        CompanyBackgroundDefinition background,
+        RoleFamily[] missingFamilies,
+        int currentTick)
+    {
+        // Welcome message — friendly, not critical
+        string welcomeBody = BuildWelcomeBody(companyName, background);
+        Prepend(new MailItem
+        {
+            Tick     = currentTick,
+            Category = MailCategory.Operations,
+            Priority = MailPriority.Info,
+            Title    = $"Welcome to {companyName}",
+            Body     = welcomeBody,
+            Actions  = new MailAction[0]
+        });
+
+        // Hiring hint if there are uncovered role families
+        if (missingFamilies != null && missingFamilies.Length > 0)
+        {
+            string missingFamilyName = RoleFamilyDisplayName(missingFamilies[0]);
+            string hintBody = BuildHiringHintBody(background, missingFamilyName);
+            Prepend(new MailItem
+            {
+                Tick     = currentTick,
+                Category = MailCategory.Recruitment,
+                Priority = MailPriority.Info,
+                Title    = "Hiring Suggestion",
+                Body     = hintBody,
+                Actions  = new[] { NavTab("View Candidates", ScreenId.HRCandidates, (int)HRTab.Candidates) }
+            });
+        }
+
+        // First action hint from background definition
+        if (background != null
+            && background.SuggestedFirstActions != null
+            && background.SuggestedFirstActions.Length > 0)
+        {
+            Prepend(new MailItem
+            {
+                Tick     = currentTick,
+                Category = MailCategory.Operations,
+                Priority = MailPriority.Info,
+                Title    = "First Steps",
+                Body     = background.SuggestedFirstActions[0],
+                Actions  = new[] { Nav("View Contracts", ScreenId.ProductionContracts) }
+            });
+        }
+    }
+
+    private static string BuildWelcomeBody(string companyName, CompanyBackgroundDefinition background)
+    {
+        if (background != null && !string.IsNullOrEmpty(background.WelcomeMessage))
+            return $"{companyName} is ready. {background.WelcomeMessage}";
+
+        return $"{companyName} is ready. Check the candidate pool and pick up your first contract to get started.";
+    }
+
+    private static string BuildHiringHintBody(CompanyBackgroundDefinition background, string missingFamilyName)
+    {
+        if (background != null && !string.IsNullOrEmpty(background.HiringHint))
+            return background.HiringHint;
+
+        return $"Consider hiring a {missingFamilyName} specialist to cover gaps in your founding team's skills.";
+    }
+
+    private static string RoleFamilyDisplayName(RoleFamily family)
+    {
+        switch (family)
+        {
+            case RoleFamily.Engineering:       return "Engineering";
+            case RoleFamily.Hardware:          return "Hardware";
+            case RoleFamily.Product:           return "Product";
+            case RoleFamily.Creative:          return "Creative";
+            case RoleFamily.QualityAndSupport: return "Quality & Support";
+            case RoleFamily.Commercial:        return "Commercial";
+            case RoleFamily.Operations:        return "Operations";
+            default:                           return family.ToString();
+        }
+    }
 }

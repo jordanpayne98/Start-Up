@@ -135,12 +135,10 @@ public static class TeamWorkEngine
             if (roleProfileTable != null)
             {
                 var profile = roleProfileTable.Get(emp.role);
-                if (profile != null)
-                {
-                    int[] tiers = RoleSuitabilityCalculator.BuildTierArray(profile);
-                    ca = AbilityCalculator.ComputeAbility(emp.Stats.Skills, tiers);
-                }
-                else ca = ComputeFallbackCA(emp.Stats.Skills);
+                if (profile != null && profile.SkillBands != null)
+                    ca = AbilityCalculator.ComputeRoleCA(emp.Stats.Skills, profile.SkillBands);
+                else
+                    ca = ComputeFallbackCA(emp.Stats.Skills);
             }
             else
             {

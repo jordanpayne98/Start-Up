@@ -36,7 +36,7 @@ public class EmployeesView : IGameView
         _nav = nav;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
         _root.AddToClassList("employees-screen");
 
@@ -342,7 +342,7 @@ public class EmployeesView : IGameView
     private void OpenDetailModal(EmployeeId id) {
         var vm = new EmployeeDetailModalViewModel();
         vm.SetEmployeeId(id);
-        _modal.ShowModal(new EmployeeDetailModalView(_dispatcher, _modal), vm);
+        _modal.ShowModal(new EmployeeDetailModalView(), vm);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

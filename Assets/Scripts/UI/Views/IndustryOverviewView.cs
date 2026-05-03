@@ -28,7 +28,7 @@ public class IndustryOverviewView : IGameView
     private VisualElement _disruptionContainer;
     private ElementPool _disruptionPool;
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
 
         var title = new Label("Industry Overview");

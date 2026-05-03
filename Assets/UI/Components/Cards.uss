@@ -1,0 +1,146 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Cards — Page 30 + Page 31 §8.2
+   Depends on: tokens.uss
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.card {
+    background-color: var(--color-bg-panel);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    border-radius: var(--radius-6);
+    padding: var(--space-12);
+    transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out;
+}
+
+.card--hover {
+    background-color: var(--color-bg-panel-hover);
+    border-color: var(--color-border-hover);
+}
+
+.card--selected {
+    background-color: var(--color-bg-panel-selected);
+    border-color: var(--color-border-selected);
+}
+
+.card--warning {
+    background-color: var(--color-warning-soft);
+    border-color: var(--color-border-warning);
+}
+
+.card--danger {
+    background-color: var(--color-danger-soft);
+    border-color: var(--color-border-danger);
+}
+
+.card--success {
+    background-color: var(--color-success-soft);
+    border-color: var(--color-border-success);
+}
+
+.card--info {
+    background-color: var(--color-info-soft);
+    border-color: var(--color-info);
+}
+
+/* ── Panel Depth System (Page 33 §19.2) ──────────────────────────────────── */
+
+.panel {
+    background-color: var(--color-bg-panel);
+    border-radius: var(--radius-8);
+    padding: var(--space-16);
+}
+
+.panel--subtle {
+    background-color: var(--color-bg-screen);
+    border-radius: var(--radius-8);
+    padding: var(--space-16);
+}
+
+.panel--raised {
+    background-color: var(--color-bg-panel-raised);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    border-radius: var(--radius-8);
+    padding: var(--space-16);
+}
+
+.panel--interactive {
+    background-color: var(--color-bg-panel-raised);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    border-radius: var(--radius-8);
+    padding: var(--space-16);
+    transition: background-color var(--transition-normal) ease-in-out, border-color var(--transition-normal) ease-in-out;
+}
+
+.panel--interactive:hover {
+    background-color: var(--color-bg-panel-hover);
+    border-color: var(--color-border-hover);
+}
+
+/* ── Card Hierarchy ──────────────────────────────────────────────────────── */
+
+.card__header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--space-8);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-divider);
+    margin-bottom: var(--space-12);
+}
+
+.card__title {
+    font-size: var(--font-size-md);
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+}
+
+.card__subtitle {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.card__body {
+    flex-direction: column;
+    padding-top: var(--space-4);
+}
+
+.card__footer {
+    flex-direction: row;
+    align-items: center;
+    padding-top: var(--space-8);
+    border-top-width: 1px;
+    border-top-color: var(--color-divider);
+    margin-top: var(--space-12);
+}
+
+/* ── Metric Card ─────────────────────────────────────────────────────────── */
+
+.metric-card {
+    flex-direction: column;
+    padding: var(--space-16);
+    gap: var(--space-4);
+    background-color: var(--color-bg-panel-raised);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    border-radius: var(--radius-8);
+}
+
+.metric-card__label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-accent);
+    -unity-font-style: bold;
+    letter-spacing: 0.5px;
+}
+
+.metric-card__value {
+    font-size: var(--font-size-2xl);
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+}
+
+.metric-card__subtext {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}

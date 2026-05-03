@@ -120,6 +120,15 @@ public class Employee
     // Stat model
     public EmployeeStatBlock Stats;
 
+    // Founder metadata — only meaningful when isFounder == true; default to 0/-1 for non-founders
+    public int FounderArchetypeId;
+    public int FounderPersonalityStyleId;
+    public int FounderWeaknessId;
+    public int FounderTraitId;
+    public int FounderSalaryChoice;
+    public bool IsFounderSalaryDeferred;
+    public float DeferredSalaryOwed;
+
     // Work history — max 20 entries, appended on contract/product completion
     public List<WorkHistoryEntry> WorkHistory;
     public const int MaxWorkHistoryEntries = 20;

@@ -36,3 +36,15 @@ MonoBehaviour:
   ContractPoolBiasTags:
   - design
   - branding
+  CandidatePoolBiasFamilies: 0200000003000000
+  CandidatePoolBiasWeights:
+  - 3
+  - 2.5
+  ContractPoolBiasCategories:
+  - design
+  - creative
+  - ux
+  WelcomeMessage: Your design studio is built for quality. Pick up contracts that
+    highlight your creative and product skills to build an early reputation.
+  HiringHint: Design studios scale better with Engineering support. Bringing in a
+    Software or Systems Engineer early will unlock more complex contracts.

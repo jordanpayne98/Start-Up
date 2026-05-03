@@ -68,10 +68,12 @@ public class GameController : MonoBehaviour
     private CompetitorSystem _competitorSystem;
     private CompetitorContractBridge _competitorContractBridge;
     private StockSystem _stockSystem;
+    private IRng _hiddenShiftRng;
     
     private AIDecisionSystem _aiDecisionSystem;
     private TeamChemistrySystem _teamChemistrySystem;
     private IRng _chemistryRng;
+    private TeamMeterSystem _teamMeterSystem;
     private DisruptionSystem _disruptionSystem;
     private TaxSystem _taxSystem;
     private PlatformSystem _platformSystem;
@@ -118,6 +120,7 @@ public class GameController : MonoBehaviour
     public MarketSystem MarketSystem => _marketSystem;
     public CompetitorSystem CompetitorSystem => _competitorSystem;
     public StockSystem StockSystem => _stockSystem;
+    public TeamMeterSystem TeamMeterSystem => _teamMeterSystem;
     public DisruptionSystem DisruptionSystem => _disruptionSystem;
     public TaxSystem TaxSystem => _taxSystem;
     public PlatformSystem PlatformSystem => _platformSystem;
@@ -307,6 +310,26 @@ public class GameController : MonoBehaviour
     public void StopAdvance()
     {
         _stopAdvanceRequested = true;
+    }
+
+    /// <summary>
+    /// Sets the simulation speed level (1, 2, or 3).
+    /// Speed 1 = 480 ticks/frame (normal).
+    /// Speed 2 = 960 ticks/frame (2×).
+    /// Speed 3 = 1920 ticks/frame (4×).
+    /// </summary>
+    public int GameSpeedLevel { get; private set; } = 1;
+
+    public void SetGameSpeed(int level)
+    {
+        GameSpeedLevel = UnityEngine.Mathf.Clamp(level, 1, 3);
+        ticksPerFrame = GameSpeedLevel switch
+        {
+            1 => 480,
+            2 => 960,
+            3 => 1920,
+            _ => 480
+        };
     }
     
     private IEnumerator AdvanceCoroutine()
@@ -557,32 +580,58 @@ public class GameController : MonoBehaviour
             return;
         }
 
-        IRng hiddenRng = RngFactory.CreateStream(_gameState.masterSeed, "founder-hidden");
+        // Load founder definition SOs
+        var archetypeDefs  = Resources.LoadAll<FounderArchetypeDefinition>("FounderArchetypes");
+        var personalityDefs = Resources.LoadAll<FounderPersonalityStyleDefinition>("FounderPersonalityStyles");
+        var weaknessDefs   = Resources.LoadAll<FounderWeaknessDefinition>("FounderWeaknesses");
 
         var founders = NewGameData.Founders;
         int count = founders.Count;
+        bool isSolo = count == 1;
+
+        // Create founding team before adding employees
+        var foundingTeamId = _teamSystem.CreateTeam(
+            TeamType.Development,
+            _gameState.currentTick,
+            CompanyId.Player,
+            "Founding Team");
+
         for (int i = 0; i < count; i++)
         {
             var data = founders[i];
             var empId = new EmployeeId(_gameState.employeeState.nextEmployeeId);
             _gameState.employeeState.nextEmployeeId++;
 
-            int cardSeed = _gameState.masterSeed ^ (i * 6271) ^ (data.Tier * 7919) ^ ((int)data.Role * 4999);
+            int cardSeed = _gameState.masterSeed ^ (i * 6271) ^ ((int)data.Role * 4999) ^ (data.ArchetypeId * 3331);
             var founderRng = new RngStream(cardSeed);
-            int[] rawSkills = GenerateFounderSkills(data.Tier, data.Role, founderRng);
 
-            var stats = EmployeeStatBlock.Create();
-            for (int s = 0; s < SkillIdHelper.SkillCount && s < rawSkills.Length; s++)
-                stats.SetSkill((SkillId)s, rawSkills[s]);
-            stats.PotentialAbility = 200;
+            // Resolve SO references by id
+            FounderArchetypeDefinition archetypeDef = FindById(archetypeDefs, d => d.ArchetypeId == data.ArchetypeId);
+            FounderPersonalityStyleDefinition personalityDef = FindById(personalityDefs, d => d.StyleId == data.PersonalityStyleId);
+            FounderWeaknessDefinition weaknessDef = FindById(weaknessDefs, d => d.WeaknessId == data.WeaknessId);
 
-            // Generate hidden attributes
-            stats.SetHiddenAttribute(HiddenAttributeId.LearningRate,   hiddenRng.Range(15, 21));
-            stats.SetHiddenAttribute(HiddenAttributeId.Ambition,        hiddenRng.Range(15, 21));
-            // Visible attributes
-            stats.SetVisibleAttribute(VisibleAttributeId.WorkEthic,     hiddenRng.Range(15, 21));
-            stats.SetVisibleAttribute(VisibleAttributeId.Adaptability,  hiddenRng.Range(15, 21));
-            stats.SetVisibleAttribute(VisibleAttributeId.Creativity,    hiddenRng.Range(15, 21));
+            RoleId role = archetypeDef != null ? archetypeDef.Role : data.Role;
+            RoleProfileDefinition roleProfile = _roleProfileTable?.Get(role);
+
+            var genParams = new FounderGenerationParams
+            {
+                Archetype       = archetypeDef,
+                PersonalityStyle = personalityDef,
+                Weakness        = weaknessDef,
+                Age             = data.Age,
+                IsSoloFounder   = isSolo,
+                RoleProfile     = roleProfile
+            };
+
+            var stats = FounderStatGenerator.Generate(genParams, founderRng, _roleProfileTable);
+
+            // Compute salary
+            int ca = AbilityCalculator.ComputeRoleCA(stats.Skills, roleProfile?.SkillBands);
+            int salary = SalaryDemandCalculator.ComputeFounderSalary(data.SalaryChoice, role, ca);
+            bool isDeferred = data.SalaryChoice == 3;
+
+            // Derive Personality enum from personality style index
+            var personalityEnum = DerivePersonalityFromStyle(data.PersonalityStyleId, founderRng);
 
             var emp = new Employee(
                 empId,
@@ -590,82 +639,223 @@ public class GameController : MonoBehaviour
                 data.Gender,
                 data.Age,
                 stats,
-                salary: 0,
+                salary: salary,
                 hireDate: _gameState.currentTick,
-                data.Role
+                role
             );
 
-            emp.isFounder = true;
-            emp.contractExpiryTick = int.MaxValue;
-            emp.morale = 100;
-            emp.isActive = true;
-            emp.salary = 0;
-            emp.personality = PersonalitySystem.GeneratePersonality(founderRng);
+            emp.isFounder             = true;
+            emp.contractExpiryTick    = int.MaxValue;
+            emp.morale                = 100;
+            emp.isActive              = true;
+            emp.preferredRole         = role;
+            emp.personality           = personalityEnum;
+            emp.FounderArchetypeId    = data.ArchetypeId;
+            emp.FounderPersonalityStyleId = data.PersonalityStyleId;
+            emp.FounderWeaknessId     = data.WeaknessId;
+            emp.FounderTraitId        = data.TraitId;
+            emp.FounderSalaryChoice   = data.SalaryChoice;
+            emp.IsFounderSalaryDeferred = isDeferred;
+            emp.DeferredSalaryOwed    = 0f;
 
             _gameState.employeeState.employees[empId] = emp;
+
+            // Assign to founding team
+            _teamSystem.AssignEmployeeToTeam(empId, foundingTeamId);
         }
+
+        // --- Starting pool generation ---
+        GenerateStartingPools(founders, count);
 
         NewGameData.Clear();
     }
 
-    private int[] GenerateFounderSkills(int tier, RoleId role, IRng rng)
+    /// <summary>
+    /// Generates the starting candidate and contract pools, then sends startup inbox messages.
+    /// Must be called after founding employees are in _gameState.employeeState.employees.
+    /// </summary>
+    private void GenerateStartingPools(List<FoundingEmployeeData> founders, int founderCount)
     {
-        var profile = _roleProfileTable?.Get(role);
-        int[] roleTiers = profile != null ? RoleSuitabilityCalculator.BuildTierArray(profile) : null;
+        // Load background SO
+        CompanyBackgroundDefinition background = null;
+        int backgroundId = NewGameData.SetupState?.CompanyBackgroundId ?? -1;
+        if (backgroundId >= 0)
+        {
+            var allBackgrounds = Resources.LoadAll<CompanyBackgroundDefinition>("CompanyBackgrounds");
+            for (int i = 0; i < allBackgrounds.Length; i++)
+            {
+                if (allBackgrounds[i].BackgroundId == backgroundId)
+                {
+                    background = allBackgrounds[i];
+                    break;
+                }
+            }
+        }
+
+        // --- Founder weakness analysis ---
+        // Collect founder roles and identify weak skills / weak families
+        var founderRoles = new RoleId[founderCount];
+        for (int i = 0; i < founderCount; i++)
+            founderRoles[i] = founders[i].Role;
+
+        // Build set of covered families
+        bool[] coveredFamilies = new bool[7]; // RoleFamily has 7 values
+        for (int i = 0; i < founderCount; i++)
+        {
+            int fidx = (int)RoleIdHelper.GetFamily(founderRoles[i]);
+            if (fidx >= 0 && fidx < coveredFamilies.Length)
+                coveredFamilies[fidx] = true;
+        }
+
+        // Count weak families (not covered by any founder)
+        int weakFamilyCount = 0;
+        for (int i = 0; i < coveredFamilies.Length; i++)
+            if (!coveredFamilies[i]) weakFamilyCount++;
+
+        var weakFamilies = new RoleFamily[weakFamilyCount];
+        int wf = 0;
+        for (int i = 0; i < coveredFamilies.Length; i++)
+            if (!coveredFamilies[i]) weakFamilies[wf++] = (RoleFamily)i;
+
+        // Identify weak skills from founders (skills below threshold)
+        const int skillWeaknessThreshold = 8;
         int skillCount = SkillIdHelper.SkillCount;
-        var skills = new int[skillCount];
-        for (int i = 0; i < skillCount; i++)
+        bool[] weakSkillMask = new bool[skillCount];
+        foreach (var kvp in _gameState.employeeState.employees)
         {
-            int weight = (roleTiers != null && i < roleTiers.Length) ? roleTiers[i] : 3;
-            int min, max;
-            switch (tier)
+            var emp = kvp.Value;
+            if (!emp.isFounder) continue;
+            for (int s = 0; s < skillCount; s++)
             {
-                case 1:
-                    if (weight == 2) { min = 3; max = 5; }
-                    else if (weight == 3) { min = 1; max = 3; }
-                    else { min = 1; max = 1; }
-                    break;
-                case 2:
-                    if (weight == 2) { min = 5; max = 8; }
-                    else if (weight == 3) { min = 2; max = 5; }
-                    else { min = 1; max = 2; }
-                    break;
-                case 3:
-                    if (weight == 2) { min = 8; max = 12; }
-                    else if (weight == 3) { min = 4; max = 7; }
-                    else { min = 1; max = 3; }
-                    break;
-                case 4:
-                    if (weight == 2) { min = 12; max = 15; }
-                    else if (weight == 3) { min = 6; max = 10; }
-                    else { min = 2; max = 5; }
-                    break;
-                default:
-                    if (weight == 2) { min = 16; max = 20; }
-                    else if (weight == 3) { min = 9; max = 13; }
-                    else { min = 4; max = 7; }
-                    break;
+                if (emp.Stats.GetSkill((SkillId)s) < skillWeaknessThreshold)
+                    weakSkillMask[s] = true;
             }
-            skills[i] = rng.Range(min, max + 1);
+        }
+        int weakSkillCount = 0;
+        for (int s = 0; s < skillCount; s++)
+            if (weakSkillMask[s]) weakSkillCount++;
+        var weakSkills = new SkillId[weakSkillCount];
+        int ws = 0;
+        for (int s = 0; s < skillCount; s++)
+            if (weakSkillMask[s]) weakSkills[ws++] = (SkillId)s;
+
+        // --- Generate starting candidate pool ---
+        IRng poolRng = RngFactory.CreateStream(_gameState.masterSeed, "starting-pool");
+        var poolParams = new StartingPoolParams
+        {
+            Background           = background,
+            FounderRoles         = founderRoles,
+            FounderWeakSkills    = weakSkills,
+            FounderWeakFamilies  = weakFamilies,
+            PoolSize             = 10,
+            QualityMultiplier    = 1.0f
+        };
+
+        var startingCandidates = StartingPoolGenerator.GenerateStartingCandidatePool(
+            poolParams, poolRng, _roleProfileTable);
+
+        // Assign IDs and add to candidate pool
+        for (int i = 0; i < startingCandidates.Count; i++)
+        {
+            var c = startingCandidates[i];
+            c.CandidateId = _gameState.employeeState.nextCandidateId++;
+            _gameState.employeeState.availableCandidates.Add(c);
         }
 
-        int identityIdx = -1;
-        for (int i = 0; i < skillCount; i++)
+        // --- Generate starting contract pool ---
+        if (_contractFactory != null)
         {
-            if (roleTiers != null && i < roleTiers.Length && roleTiers[i] == 2) { identityIdx = i; break; }
-        }
-        if (identityIdx >= 0)
-        {
-            int maxOther = 0;
-            for (int i = 0; i < skillCount; i++)
+            var contractParams = new StartingContractParams
             {
-                if (i != identityIdx && skills[i] > maxOther) maxOther = skills[i];
+                Background           = background,
+                FounderRoles         = founderRoles,
+                DifficultyMultiplier = 1.0f
+            };
+
+            IRng contractRng = RngFactory.CreateStream(_gameState.masterSeed, "starting-contracts");
+            string[] biasCategories = background?.ContractPoolBiasCategories != null
+                && background.ContractPoolBiasCategories.Length > 0
+                ? background.ContractPoolBiasCategories
+                : background?.ContractPoolBiasTags;
+
+            var startingContracts = _contractFactory.GenerateStartingContracts(
+                biasCategories,
+                founderRoles,
+                4,
+                contractRng,
+                _gameState.currentTick);
+
+            for (int i = 0; i < startingContracts.Count; i++)
+            {
+                var c = startingContracts[i];
+                c.Id = new ContractId(_gameState.contractState.nextContractId++);
+                _gameState.contractState.availableContracts[c.Id] = c;
             }
-            if (skills[identityIdx] <= maxOther)
-                skills[identityIdx] = maxOther + 1 > 20 ? 20 : maxOther + 1;
         }
 
-        return skills;
+        // --- Send startup inbox messages ---
+        if (_inboxSystem != null)
+        {
+            _inboxSystem.SendStartupMessages(
+                _gameState.companyName,
+                background,
+                weakFamilies,
+                _gameState.currentTick);
+        }
+    }
+
+    private static T FindById<T>(T[] array, System.Func<T, bool> predicate) where T : class
+    {
+        if (array == null) return null;
+        for (int i = 0; i < array.Length; i++)
+            if (array[i] != null && predicate(array[i])) return array[i];
+        return null;
+    }
+
+    private static int InferArchetypeIdFromRole(RoleId role)
+    {
+        // Mapping: Role → default archetype id (matches FounderArchetypeDefinition.ArchetypeId in SOs)
+        // These ids correspond to the 9 core archetypes + 4 specialist archetypes.
+        // 0 = Software Founder, 1 = Systems, 2 = Product, 3 = Game, 4 = Creative,
+        // 5 = Marketing, 6 = Sales, 7 = Operations, 8 = Hardware,
+        // 9 = Security, 10 = Performance, 11 = Manufacturing, 12 = Technical Support
+        switch (role)
+        {
+            case RoleId.SoftwareEngineer:           return 0;
+            case RoleId.SystemsEngineer:            return 1;
+            case RoleId.ProductDesigner:            return 2;
+            case RoleId.GameDesigner:               return 3;
+            case RoleId.TechnicalArtist:
+            case RoleId.AudioDesigner:              return 4;
+            case RoleId.Marketer:                   return 5;
+            case RoleId.SalesExecutive:             return 6;
+            case RoleId.Accountant:
+            case RoleId.HrSpecialist:               return 7;
+            case RoleId.HardwareEngineer:           return 8;
+            case RoleId.SecurityEngineer:           return 9;
+            case RoleId.PerformanceEngineer:        return 10;
+            case RoleId.ManufacturingEngineer:      return 11;
+            case RoleId.TechnicalSupportSpecialist: return 12;
+            default:                                return 0;
+        }
+    }
+
+    private static Personality DerivePersonalityFromStyle(int styleId, IRng rng)
+    {
+        // Map FounderPersonalityStyle IDs to the closest Personality enum value
+        // Style IDs: 0=Driven, 1=Calm, 2=Collaborative, 3=Inventive, 4=Disciplined, 5=Commercial, 6=Supportive, 7=Independent
+        switch (styleId)
+        {
+            case 0: return Personality.Competitive;   // Driven → Competitive
+            case 1: return Personality.Professional;  // Calm → Professional
+            case 2: return Personality.Collaborative; // Collaborative → Collaborative
+            case 3: return Personality.Easygoing;     // Inventive → Easygoing
+            case 4: return Personality.Perfectionist; // Disciplined → Perfectionist
+            case 5: return Personality.Competitive;   // Commercial → Competitive
+            case 6: return Personality.Collaborative; // Supportive → Collaborative
+            case 7: return Personality.Independent;   // Independent → Independent
+            default: return PersonalitySystem.GeneratePersonality(rng);
+        }
     }
     
     private void InitializeSystems()
@@ -769,9 +959,13 @@ public class GameController : MonoBehaviour
 
         IRng abilityRng = RngFactory.CreateStream(_gameState.masterSeed, "ability");
         _abilitySystem = new AbilitySystem(_gameState.employeeState, _roleProfileTable, abilityRng, _logger);
+        _hiddenShiftRng = RngFactory.CreateStream(_gameState.masterSeed, "hiddenShift");
         _employeeSystem.SetAbilitySystem(_abilitySystem);
         _employeeSystem.SetEventBus(_eventBus);
         _hrSystem.SetAbilitySystem(_abilitySystem);
+        _hrSystem.SetRoleProfileTable(_roleProfileTable);
+        _employeeSystem.SetRoleProfileTable(_roleProfileTable);
+        _interviewSystem?.SetRoleProfileTable(_roleProfileTable);
         _negotiationSystem.SetRoleProfileTable(_roleProfileTable);
         _contractSystem.SetSkillGrowthDependencies(_roleProfileTable, _abilitySystem);
         _productSystem.SetFinanceSystem(_financeSystem);
@@ -796,6 +990,16 @@ public class GameController : MonoBehaviour
         _contractSystem.SetChemistrySystem(_teamChemistrySystem);
         _productSystem.SetChemistrySystem(_teamChemistrySystem);
         _teamChemistrySystem.SetFatigueSystem(_fatigueSystem);
+
+        _teamMeterSystem = new TeamMeterSystem(
+            _teamSystem,
+            _employeeSystem,
+            _abilitySystem,
+            _moraleSystem,
+            _teamChemistrySystem,
+            _roleProfileTable,
+            _logger);
+
         var safeProductTemplates = (productTemplates != null && productTemplates.Length > 0)
             ? productTemplates
             : new ProductTemplateDefinition[0];
@@ -1030,6 +1234,7 @@ public class GameController : MonoBehaviour
         MigrateToV3StatModel(_gameState);
 
         _moraleSystem.OnEmployeeMayQuit += OnMoraleEmployeeMayQuit;
+        _fatigueSystem.OnBurnoutStarted += OnFatigueBurnoutStarted;
 
         _systems.Add(_timeSystem);
         _systems.Add(_financeSystem);
@@ -1050,6 +1255,29 @@ public class GameController : MonoBehaviour
         _systems.Add(_hrSystem);
         _systems.Add(_recruitmentReputationSystem);
         _systems.Add(_abilitySystem);
+
+        // Wire skill growth → TeamMeterSystem dirty (per-employee team lookup)
+        _contractSystem.OnSkillsAwarded += empIds =>
+        {
+            for (int i = 0; i < empIds.Count; i++)
+            {
+                var teamId = _teamSystem.GetEmployeeTeam(empIds[i]);
+                if (teamId.HasValue) _teamMeterSystem.MarkTeamDirty(teamId.Value);
+            }
+        };
+        _productSystem.OnSkillsAwarded += empIds =>
+        {
+            for (int i = 0; i < empIds.Count; i++)
+            {
+                var teamId = _teamSystem.GetEmployeeTeam(empIds[i]);
+                if (teamId.HasValue) _teamMeterSystem.MarkTeamDirty(teamId.Value);
+            }
+        };
+        _systems.Add(_teamMeterSystem);
+
+        // Invalidate all caches on load to ensure formula consistency across saves
+        _abilitySystem.InvalidateAllAbilityCaches();
+        _teamMeterSystem.MarkAllDirty();
 
         _competitorContractBridge = new CompetitorContractBridge();
         _competitorContractBridge.Initialize(_competitorSystem, _contractSystem, _gameState.productState);
@@ -1384,6 +1612,81 @@ public class GameController : MonoBehaviour
             _logger.Log("[GameController] Save migration v14->v15 complete: preferredRole initialized for all employees.");
         }
 
+        if (_gameState.version < 16)
+        {
+            // Wave 4B: default Source, Archetype, CareerStage, Confidence, and Report for legacy candidates
+            if (_gameState.employeeState?.availableCandidates != null)
+            {
+                var cands = _gameState.employeeState.availableCandidates;
+                int cCount = cands.Count;
+                for (int i = 0; i < cCount; i++)
+                {
+                    var c = cands[i];
+                    if (c == null) continue;
+
+                    // Default source
+                    if (c.Source == default)
+                        c.Source = c.IsTargeted ? CandidateSource.HRSearch : CandidateSource.OpenMarket;
+
+                    // Default archetype
+                    if (c.Archetype == default)
+                        c.Archetype = CandidateArchetype.Generalist;
+
+                    // Derive career stage from age
+                    var migRng = new RngStream(unchecked(c.CandidateId ^ (int)0xC4FE2B));
+                    c.CareerStage = CareerStageHelper.FromAge(c.Age, migRng);
+                    c.RoleFamily  = RoleIdHelper.GetFamily(c.Role);
+                    c.TargetRole  = c.Role;
+
+                    // Derive confidence from interview stage
+                    if (c.Confidence == null)
+                        c.Confidence = CandidateConfidenceData.FromLegacyInterviewStage(c.InterviewStage, c.Source);
+
+                    // Calculate salary estimates
+                    if (c.SalaryDemandActual == 0)
+                        c.SalaryDemandActual = c.Salary > 0 ? c.Salary : c.ComputeSalary();
+
+                    var (estMin, estMax) = SalaryDemandCalculator.ComputeEstimateRange(
+                        c.SalaryDemandActual, c.Confidence.SalaryConfidence, c.Archetype);
+                    c.SalaryEstimateMin = estMin;
+                    c.SalaryEstimateMax = estMax;
+
+                    if (c.ProjectedRoleFits == null)
+                        c.ProjectedRoleFits = new System.Collections.Generic.List<RoleId>();
+
+                    // Generate report from existing stats (no roleProfileTable in migration)
+                    if (c.Report == null)
+                        c.Report = CandidateReportGenerator.Generate(c, _roleProfileTable);
+                }
+            }
+
+            _gameState.version = 16;
+            _logger.Log("[GameController] Save migration v15->v16 complete: CandidateSource, Archetype, CareerStage, Confidence, SalaryEstimates, and Reports defaulted for all legacy candidates.");
+        }
+
+        if (_gameState.version < 17)
+        {
+            // Backfill founder metadata fields for legacy founders that pre-date Wave 4A.
+            // Infer archetype from role; preserve all existing stats.
+            foreach (var kvp in _gameState.employeeState.employees)
+            {
+                var emp = kvp.Value;
+                if (emp == null || !emp.isFounder) continue;
+                if (emp.FounderArchetypeId != 0) continue; // already set
+
+                // Map role to a default archetype id (matches ArchetypeId values in SOs)
+                emp.FounderArchetypeId       = InferArchetypeIdFromRole(emp.role);
+                emp.FounderPersonalityStyleId = 0;  // Default: Driven
+                emp.FounderWeaknessId         = -1; // None/legacy
+                emp.FounderTraitId            = -1; // None
+                emp.FounderSalaryChoice       = 2;  // Market (legacy assumption)
+                emp.IsFounderSalaryDeferred   = false;
+                emp.DeferredSalaryOwed        = 0f;
+            }
+            _gameState.version = 17;
+            _logger.Log("[GameController] Save migration v16->v17 complete: founder metadata backfilled from role for legacy founders.");
+        }
+
         // Always run: convert BreakoutMonthsRemaining -> BreakoutDaysRemaining for products that pre-date daily revenue
         if (_gameState.productState != null)
         {
@@ -1608,6 +1911,9 @@ public class GameController : MonoBehaviour
 
         // Chemistry processing
         _teamChemistrySystem?.ProcessDailyChemistry(_gameState.currentTick);
+
+        // Team meter recalculation — runs after chemistry and morale are updated
+        _teamMeterSystem?.MarkAllDirty();
         
         // Reputation penalty for extended debt
         if (_financeSystem.ConsecutiveDaysNegativeCash >= 3) {
@@ -1876,6 +2182,58 @@ public class GameController : MonoBehaviour
             var team = _teamSystem.GetTeam(contract.AssignedTeamId.Value);
             if (team != null) {
                 _moraleSystem.ApplyContractCompletedBonus(team.members, quality);
+
+                // Attribute growth triggers for each team member
+                var attrResults = new System.Collections.Generic.List<AttributeIncreaseRecord>(4);
+                int memberCount = team.members.Count;
+                bool isHighPressure = contract.Difficulty >= 7;
+                for (int i = 0; i < memberCount; i++)
+                {
+                    var memberId = team.members[i];
+                    var emp = _employeeSystem.GetEmployee(memberId);
+                    if (emp == null || !emp.isActive) continue;
+
+                    bool isSenior = i == 0; // first member treated as team lead proxy
+                    bool isOffRole = emp.role != emp.preferredRole;
+                    var ctx = new AttributeGrowthContext
+                    {
+                        IsTeamSenior       = isSenior,
+                        HasTeamDelivery    = true,
+                        IsCreativePhase    = false,
+                        HasReliableCompletion = quality >= 60f,
+                        IsTeamWork         = memberCount > 1,
+                        IsOffRoleWork      = isOffRole,
+                        IsPressureWork     = isHighPressure,
+                        IsAutonomousTask   = memberCount == 1
+                    };
+                    attrResults.Clear();
+                    SkillGrowthSystem.ProcessAttributeGrowthTriggers(emp, memberId, ctx, attrResults, _tuning);
+                    for (int r = 0; r < attrResults.Count; r++)
+                    {
+                        var rec = attrResults[r];
+                        _eventBus.Raise(new EmployeeAttributeIncreasedEvent(
+                            _gameState.currentTick,
+                            rec.EmployeeId,
+                            rec.Attribute,
+                            rec.OldValue,
+                            rec.NewValue,
+                            "Contract"
+                        ));
+                        var memberTeamId = _teamSystem.GetEmployeeTeam(memberId);
+                        if (memberTeamId.HasValue) _teamMeterSystem.MarkTeamDirty(memberTeamId.Value);
+                    }
+
+                    // Hidden attribute shift on contract success
+                    var shiftResult = HiddenAttributeShiftHelper.OnContractSuccess(emp, _hiddenShiftRng);
+                    if (shiftResult.HasValue)
+                    {
+                        _eventBus.Raise(new EmployeePersonalitySignalChangedEvent(
+                            _gameState.currentTick,
+                            shiftResult.Value.EmployeeId,
+                            shiftResult.Value.ReportText
+                        ));
+                    }
+                }
             }
         }
 
@@ -1930,6 +2288,15 @@ public class GameController : MonoBehaviour
                 if (penalty < 5)  penalty = 5;
                 if (penalty > 15) penalty = 15;
                 _moraleSystem.ApplyContractFailedPenalty(team.members, penalty);
+
+                // Hidden attribute shift on contract failure
+                int memberCount = team.members.Count;
+                for (int i = 0; i < memberCount; i++)
+                {
+                    var emp = _employeeSystem.GetEmployee(team.members[i]);
+                    if (emp == null || !emp.isActive) continue;
+                    HiddenAttributeShiftHelper.OnContractFailure(emp, _hiddenShiftRng);
+                }
             }
         }
         
@@ -2143,6 +2510,21 @@ public class GameController : MonoBehaviour
         var employees = _gameState.employeeState.employees;
         if (employees.TryGetValue(employeeId, out var emp) && emp.isFounder) return;
         _employeeSystem.QuitEmployee(employeeId);
+    }
+
+    private void OnFatigueBurnoutStarted(EmployeeId employeeId)
+    {
+        var employee = _employeeSystem.GetEmployee(employeeId);
+        if (employee == null || !employee.isActive) return;
+        var shiftResult = HiddenAttributeShiftHelper.OnBurnout(employee, _hiddenShiftRng);
+        if (shiftResult.HasValue)
+        {
+            _eventBus.Raise(new EmployeePersonalitySignalChangedEvent(
+                _gameState.currentTick,
+                shiftResult.Value.EmployeeId,
+                shiftResult.Value.ReportText
+            ));
+        }
     }
 
     private void OnCandidateWithdrew(CandidateWithdrewEvent evt)
@@ -2499,6 +2881,11 @@ public class GameController : MonoBehaviour
         if (_moraleSystem != null)
         {
             _moraleSystem.OnEmployeeMayQuit -= OnMoraleEmployeeMayQuit;
+        }
+
+        if (_fatigueSystem != null)
+        {
+            _fatigueSystem.OnBurnoutStarted -= OnFatigueBurnoutStarted;
         }
         
         if (_reputationSystem != null)

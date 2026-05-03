@@ -18,6 +18,10 @@ MonoBehaviour:
   StrengthAttributes: 0200000006000000
   WeakAttributes: 01000000
   HiddenTendencies: 05000000
+  HiddenAttributeModifiers: 00000000ffffffff0100000002000000ffffffff0300000000000000
+  BoostAttributes: 02000000
+  BoostAmount: 2
+  PenaltyAmount: 2
   BestPairing: "Inventive or Collaborative \u2014 adds creativity and team energy"
   RiskWarning: Lower creativity may limit product innovation and pivots.
   SortOrder: 4

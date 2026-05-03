@@ -44,13 +44,15 @@ public class IndustryOverviewViewModel : IViewModel
     public int ActiveCompanyCount { get; private set; }
     public int TotalProductsOnMarket { get; private set; }
 
-    public void Refresh(IReadOnlyGameState state) {
-        if (state == null) return;
-        var snapshot = state as GameStateSnapshot;
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
         if (snapshot == null) return;
         Refresh(snapshot.CompetitorState, snapshot.MarketStateRef, snapshot.ProductStateRef,
                 snapshot.StockState, snapshot.DisruptionStateRef, snapshot.CurrentTick, snapshot.CompanyName,
                 snapshot.EmployeeStateRef);
+        IsDirty = true;
     }
 
     public void Refresh(CompetitorState compState, MarketState marketState, ProductState productState,

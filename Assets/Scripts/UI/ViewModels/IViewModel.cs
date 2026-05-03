@@ -1,4 +1,6 @@
 public interface IViewModel
 {
-    void Refresh(IReadOnlyGameState state);
+    void Refresh(GameStateSnapshot snapshot);
+    bool IsDirty { get; }
+    void ClearDirty();
 }

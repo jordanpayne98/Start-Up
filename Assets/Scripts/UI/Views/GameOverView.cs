@@ -20,7 +20,7 @@ public class GameOverView : IGameView
         _navigation = navigation;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
         _root.AddToClassList("game-over-screen");
         _root.style.flexGrow = 1;

@@ -1,0 +1,107 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Chips / Badges — Page 30
+   Depends on: tokens.uss
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.chip {
+    border-radius: var(--radius-4);
+    height: 24px;
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+    padding-left: var(--space-10);
+    padding-right: var(--space-10);
+    font-size: var(--font-size-xs);
+    -unity-font-style: bold;
+    letter-spacing: 0.3px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-width: 0;
+    background-color: var(--color-bg-panel-raised);
+    color: var(--color-text-secondary);
+}
+
+/* Semantic chip variants — filled background, no border */
+.chip--success {
+    background-color: var(--color-success-muted);
+    color: var(--color-text-success);
+}
+
+.chip--warning {
+    background-color: var(--color-warning-muted);
+    color: var(--color-text-warning);
+}
+
+.chip--danger {
+    background-color: var(--color-danger-muted);
+    color: var(--color-text-danger);
+}
+
+.chip--info {
+    background-color: var(--color-info-muted);
+    color: var(--color-text-info);
+}
+
+.chip--special {
+    background-color: var(--color-special-muted);
+    color: var(--color-special);
+}
+
+/* Role chip variants (Page 31 §9.1) — filled background */
+.chip--engineering {
+    background-color: rgba(90, 167, 255, 0.22);
+    color: var(--color-role-engineering);
+}
+
+.chip--hardware {
+    background-color: rgba(167, 139, 250, 0.22);
+    color: var(--color-role-hardware);
+}
+
+.chip--product {
+    background-color: rgba(69, 203, 183, 0.22);
+    color: var(--color-role-product);
+}
+
+.chip--creative {
+    background-color: rgba(245, 158, 202, 0.22);
+    color: var(--color-role-creative);
+}
+
+.chip--quality {
+    background-color: rgba(53, 208, 138, 0.22);
+    color: var(--color-role-quality);
+}
+
+.chip--commercial {
+    background-color: rgba(226, 169, 59, 0.22);
+    color: var(--color-role-commercial);
+}
+
+.chip--operations {
+    background-color: rgba(156, 167, 181, 0.22);
+    color: var(--color-role-operations);
+}
+
+.badge {
+    border-radius: var(--radius-pill);
+    background-color: var(--color-accent);
+    color: var(--color-text-inverse);
+    min-width: 20px;
+    height: 20px;
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+    font-size: var(--font-size-micro);
+    -unity-font-style: bold;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
+
+.badge--warning {
+    background-color: var(--color-warning);
+}
+
+.badge--danger {
+    background-color: var(--color-danger);
+}

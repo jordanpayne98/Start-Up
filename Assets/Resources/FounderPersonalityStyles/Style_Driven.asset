@@ -19,6 +19,10 @@ MonoBehaviour:
   StrengthAttributes: 0500000007000000
   WeakAttributes: 06000000
   HiddenTendencies: 01000000
+  HiddenAttributeModifiers: 010000000300000000000000ffffffff010000000200000000000000
+  BoostAttributes: 0500000007000000
+  BoostAmount: 2
+  PenaltyAmount: 2
   BestPairing: "Calm or Collaborative \u2014 balances output pressure"
   RiskWarning: Stress and salary expectation pressure over time. Watch for burnout.
   SortOrder: 0

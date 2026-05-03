@@ -23,7 +23,7 @@ public class ShowdownResultView : IGameView
         _modal = modal;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
         _root.AddToClassList("showdown-result-modal");
 

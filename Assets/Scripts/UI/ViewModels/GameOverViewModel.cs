@@ -20,7 +20,10 @@ public class GameOverViewModel : IViewModel
         BiggestCompetitor = "--";
     }
 
-    public void Refresh(IReadOnlyGameState state) { }
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) { IsDirty = true; }
 
     public void Refresh(GameState gameState, CompetitorState compState, string reason) {
         if (gameState == null) return;

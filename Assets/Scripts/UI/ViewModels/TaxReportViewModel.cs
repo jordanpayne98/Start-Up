@@ -14,9 +14,11 @@ public class TaxReportViewModel : IViewModel
     public bool ShowBankruptcyWarning { get; private set; }
     public string NextCycleEstimate { get; private set; }
 
-    public void Refresh(IReadOnlyGameState state)
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot)
     {
-        var snapshot = state as GameStateSnapshot;
         if (snapshot == null)
         {
             SetDefaults();

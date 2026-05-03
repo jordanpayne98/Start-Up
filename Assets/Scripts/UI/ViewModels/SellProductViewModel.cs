@@ -25,7 +25,10 @@ public class SellProductViewModel : IViewModel
         Offers = _offers;
     }
 
-    public void Refresh(IReadOnlyGameState state) { }
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) { IsDirty = true; }
 
     public void Refresh(ProductId id, ProductState productState, CompetitorState compState, StockState stockState) {
         _offers.Clear();

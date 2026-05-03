@@ -75,16 +75,14 @@ public class CalendarViewModel : IViewModel
         Refresh(_lastState, _lastCompState, _lastDisruptionState, _lastProductState);
     }
 
-    public void Refresh(IReadOnlyGameState state) {
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
+        IReadOnlyGameState state = snapshot;
         if (state == null) return;
-        var snapshot = state as GameStateSnapshot;
-        if (snapshot != null) {
-            Refresh(state, snapshot.CompetitorState, snapshot.DisruptionStateRef, snapshot.ProductStateRef);
-        } else {
-            CurrentDay = state.CurrentDay;
-            CurrentMonth = state.CurrentMonth;
-            CurrentYear = state.CurrentYear;
-        }
+        Refresh(state, snapshot.CompetitorState, snapshot.DisruptionStateRef, snapshot.ProductStateRef);
+        IsDirty = true;
     }
 
     public void Refresh(IReadOnlyGameState state, CompetitorState compState, DisruptionState disruptionState, ProductState productState = null) {

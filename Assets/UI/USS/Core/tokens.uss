@@ -1,0 +1,243 @@
+:root {
+    /* ── Root / Shell Backgrounds (Page 31 §6.1) ─────────────────────────── */
+    --color-bg-root:    #080B0E;
+    --color-bg-shell:   #10151B;
+    --color-bg-sidebar: #0D1218;
+    --color-bg-topbar:  #10151B;
+    --color-bg-screen:  #0B0F14;
+
+    /* ── Panel / Surface Colours (Page 31 §6.2) ──────────────────────────── */
+    --color-bg-panel:          #171D24;
+    --color-bg-panel-raised:   #202731;
+    --color-bg-panel-hover:    #242D38;
+    --color-bg-panel-selected: #173C39;
+    --color-bg-panel-disabled: #11161C;
+    --color-bg-modal:          #151B22;
+    --color-bg-modal-raised:   #1E2630;
+    --color-bg-tooltip:        #111820;
+    --color-bg-dropdown:       #151D25;
+
+    /* ── Text Colours (Page 31 §6.3) ─────────────────────────────────────── */
+    --color-text-primary:   #E6EAF0;
+    --color-text-secondary: #9CA7B5;
+    --color-text-muted:     #65717F;
+    --color-text-disabled:  #4F5A66;
+    --color-text-inverse:   #071013;
+    --color-text-accent:    #73E0D1;
+    --color-text-warning:   #F0C66A;
+    --color-text-danger:    #FF8FA0;
+    --color-text-success:   #70E2A3;
+    --color-text-info:      #8CC4FF;
+
+    /* ── Border / Divider Colours (Page 31 §6.4) ─────────────────────────── */
+    --color-border-subtle:   #2B343F;
+    --color-border-strong:   #3A4654;
+    --color-border-hover:    #4B5A68;
+    --color-border-selected: #45CBB7;
+    --color-border-focus:    #73E0D1;
+    --color-border-warning:  #E2A93B;
+    --color-border-danger:   #F06C82;
+    --color-border-success:  #35D08A;
+    --color-divider:         #25303A;
+
+    /* ── Primary Accent (Page 31 §6.5) ───────────────────────────────────── */
+    --color-accent:         #45CBB7;
+    --color-accent-hover:   #62DCCA;
+    --color-accent-pressed: #2FAE9D;
+    --color-accent-muted:   #164E45;
+    --color-accent-soft:    rgba(69, 203, 183, 0.14);
+
+    /* ── Semantic Status Colours (Page 31 §6.5) ──────────────────────────── */
+    --color-success:       #35D08A;
+    --color-success-muted: #143F2C;
+    --color-success-soft:  rgba(53, 208, 138, 0.14);
+
+    --color-warning:       #E2A93B;
+    --color-warning-muted: #4A3512;
+    --color-warning-soft:  rgba(226, 169, 59, 0.16);
+
+    --color-danger:       #F06C82;
+    --color-danger-muted: #4A1F2A;
+    --color-danger-soft:  rgba(240, 108, 130, 0.16);
+
+    --color-info:       #5AA7FF;
+    --color-info-muted: #183A5C;
+    --color-info-soft:  rgba(90, 167, 255, 0.14);
+
+    --color-special:       #A78BFA;
+    --color-special-muted: #322A55;
+    --color-special-soft:  rgba(167, 139, 250, 0.14);
+
+    /* ── Role / Family Colours (Page 31 §9.1) ────────────────────────────── */
+    --color-role-engineering: #5AA7FF;
+    --color-role-hardware:    #A78BFA;
+    --color-role-product:     #45CBB7;
+    --color-role-creative:    #F59ECA;
+    --color-role-quality:     #35D08A;
+    --color-role-commercial:  #E2A93B;
+    --color-role-operations:  #9CA7B5;
+
+    /* ── Category Colours (Page 31 §10) ──────────────────────────────────── */
+    --color-category-software:    #5AA7FF;
+    --color-category-game:        #A78BFA;
+    --color-category-hardware:    #F59E0B;
+    --color-category-platform:    #45CBB7;
+    --color-category-finance:     #35D08A;
+    --color-category-market:      #E2A93B;
+    --color-category-competitor:  #F06C82;
+
+    /* ── Chart Colours (Page 31 §11.1) ───────────────────────────────────── */
+    --color-chart-1:    #45CBB7;
+    --color-chart-2:    #5AA7FF;
+    --color-chart-3:    #A78BFA;
+    --color-chart-4:    #E2A93B;
+    --color-chart-5:    #35D08A;
+    --color-chart-6:    #F06C82;
+    --color-chart-grid: #25303A;
+    --color-chart-axis: #65717F;
+    --color-chart-label: #9CA7B5;
+
+    /* ── Spacing Tokens (Page 28) ─────────────────────────────────────────── */
+    --space-2:  2px;
+    --space-4:  4px;
+    --space-6:  6px;
+    --space-8:  8px;
+    --space-10: 10px;
+    --space-12: 12px;
+    --space-16: 16px;
+    --space-20: 20px;
+    --space-24: 24px;
+    --space-28: 28px;
+    --space-32: 32px;
+    --space-40: 40px;
+    --space-48: 48px;
+
+    /* ── Radius Tokens (Page 28) ──────────────────────────────────────────── */
+    --radius-2:   2px;
+    --radius-4:   4px;
+    --radius-6:   6px;
+    --radius-8:   8px;
+    --radius-12:  12px;
+    --radius-16:  16px;
+    --radius-pill: 999px;
+
+    /* ── Shell Dimension Tokens (Page 28) ────────────────────────────────── */
+    --topbar-height:          48px;
+    --sidebar-width:          232px;
+    --sidebar-collapsed-width: 56px;
+    --screen-padding:         16px;
+    --screen-header-height:   90px;
+    --toolbar-height:         44px;
+
+    /* ── Component Dimension Tokens (Page 28) ────────────────────────────── */
+    --btn-height-sm:       26px;
+    --btn-height-md:       32px;
+    --btn-height-lg:       38px;
+    --input-height-sm:     28px;
+    --input-height-md:     32px;
+    --input-height-lg:     38px;
+    --row-height-compact:  36px;
+    --row-height-standard: 42px;
+    --scrollbar-width:     6px;
+    --modal-width-sm:      480px;
+    --modal-width-md:      640px;
+    --modal-width-lg:      900px;
+
+    /* ── Typography Tokens (Page 28) ─────────────────────────────────────── */
+    --font-size-micro: 10px;
+    --font-size-xs:    11px;
+    --font-size-sm:    12px;
+    --font-size-md:    13px;
+    --font-size-lg:    15px;
+    --font-size-xl:    18px;
+    --font-size-2xl:   22px;
+    --font-size-3xl:   28px;
+    --font-size-hero:  40px;
+
+    /* ── Font Assets ──────────────────────────────────────────────────────── */
+    --font-body:    url("/Assets/Graphics/Font/Inter-VariableFont_opsz,wght.ttf");
+    --font-display: url("/Assets/Graphics/Font/SpaceGrotesk-VariableFont_wght.ttf");
+
+    /* ── Transition Timing Tokens (Page 28) ──────────────────────────────── */
+    --transition-fast:   100ms;
+    --transition-normal: 150ms;
+    --transition-slow:   250ms;
+
+    /* ═════════════════════════════════════════════════════════════════════
+       Legacy Token Aliases
+       Maps old token names used in base.uss, components.uss, main-menu.uss
+       and other legacy USS files to the current Page 28/31 tokens.
+       ═════════════════════════════════════════════════════════════════════ */
+
+    /* ── Legacy Background Aliases ───────────────────────────────────────── */
+    --bg-floor:     var(--color-bg-root);
+    --bg-primary:   var(--color-bg-panel);
+    --bg-secondary: var(--color-bg-panel-raised);
+    --bg-tertiary:  var(--color-bg-panel-hover);
+    --bg-hover:     var(--color-bg-panel-hover);
+    --bg-elevated:  var(--color-bg-modal-raised);
+
+    /* ── Legacy Text Aliases ─────────────────────────────────────────────── */
+    --text-light:     var(--color-text-primary);
+    --text-primary:   var(--color-text-primary);
+    --text-secondary: var(--color-text-secondary);
+    --text-muted:     var(--color-text-muted);
+    --text-disabled:  var(--color-text-disabled);
+    --text-dark:      var(--color-text-inverse);
+
+    /* ── Legacy Accent / Semantic Aliases ─────────────────────────────────── */
+    --accent-primary: var(--color-accent);
+    --accent-danger:  var(--color-danger);
+    --accent-warning: var(--color-warning);
+    --accent-success: var(--color-success);
+    --accent-info:    var(--color-info);
+    --accent-special: var(--color-special);
+
+    /* ── Legacy Border Aliases ───────────────────────────────────────────── */
+    --border-strong: var(--color-border-strong);
+    --border-subtle: var(--color-border-subtle);
+
+    /* ── Legacy Typography Aliases ───────────────────────────────────────── */
+    --font-xs:  var(--font-size-xs);
+    --font-sm:  var(--font-size-sm);
+    --font-md:  var(--font-size-md);
+    --font-lg:  var(--font-size-lg);
+    --font-xl:  var(--font-size-xl);
+    --font-2xl: var(--font-size-2xl);
+    --font-3xl: var(--font-size-3xl);
+    --font-data-tracking: -0.2px;
+
+    /* ── Legacy Spacing Aliases ──────────────────────────────────────────── */
+    --spacing-xs:  var(--space-4);
+    --spacing-sm:  var(--space-8);
+    --spacing-md:  var(--space-12);
+    --spacing-lg:  var(--space-16);
+    --spacing-xl:  var(--space-24);
+    --spacing-2xl: var(--space-32);
+
+    /* ── Legacy Radius Aliases ──────────────────────────────────────────── */
+    --radius-sm: var(--radius-4);
+    --radius-md: var(--radius-6);
+    --radius-lg: var(--radius-8);
+    --radius-xl: var(--radius-12);
+
+    /* ── Legacy Role Colour Aliases ──────────────────────────────────────── */
+    --role-programming: var(--color-role-engineering);
+    --role-design:      var(--color-role-creative);
+    --role-qa:          var(--color-role-quality);
+    --role-hr:          var(--color-role-commercial);
+    --role-negotiation: var(--color-role-product);
+    --role-sfx:         #F59ECA;
+    --role-vfx:         #F06C82;
+    --role-accountancy: var(--color-role-operations);
+    --role-marketing:   var(--color-role-commercial);
+
+    /* ── Legacy Category Colour Aliases ──────────────────────────────────── */
+    --cat-videogame:     var(--color-category-game);
+    --cat-mobileapp:     #38BDF8;
+    --cat-website:       var(--color-category-software);
+    --cat-office:        var(--color-role-operations);
+    --cat-onlineservice: var(--color-special);
+    --cat-security:      var(--color-danger);
+    --cat-hosting:       var(--color-warning);
+}

@@ -1,0 +1,261 @@
+/* ── Global Reset ────────────────────────────────────────────────────────── */
+* {
+    margin: 0;
+    padding: 0;
+    -unity-font: var(--font-body);
+}
+
+/* ── Default Typography ───────────────────────────────────────────────────── */
+Label {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+}
+
+/* ── Focus Ring ──────────────────────────────────────────────────────────── */
+*:focus {
+    border-width: 2px;
+    border-color: var(--color-border-focus);
+}
+
+/* ── Scrollbar Styling (Page 28: 6px width) ──────────────────────────────── */
+Scroller {
+    width: var(--scrollbar-width);
+    background-color: transparent;
+}
+
+Scroller > RepeatButton {
+    display: none;
+}
+
+Scroller #unity-slider {
+    min-width: var(--scrollbar-width);
+    background-color: transparent;
+}
+
+Scroller #unity-tracker {
+    background-color: var(--color-bg-panel);
+    border-width: 0;
+    border-radius: var(--radius-pill);
+}
+
+Scroller #unity-dragger-border {
+    border-width: 0;
+}
+
+Scroller #unity-dragger {
+    background-color: var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    border-width: 0;
+    min-height: 24px;
+    transition: background-color 150ms ease-in-out;
+}
+
+Scroller #unity-dragger:hover {
+    background-color: var(--color-border-hover);
+}
+
+Scroller #unity-dragger:active {
+    background-color: var(--color-accent);
+}
+
+/* ── TextField Defaults ───────────────────────────────────────────────────── */
+TextField > #unity-text-input {
+    background-color: var(--color-bg-panel);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    border-radius: var(--radius-4);
+    color: var(--color-text-primary);
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-6);
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+    font-size: var(--font-size-sm);
+    height: var(--input-height-md);
+    transition: border-color 150ms ease-in-out;
+}
+
+TextField > #unity-text-input:focus {
+    border-color: var(--color-border-focus);
+}
+
+TextField > #unity-text-input:hover {
+    border-color: var(--color-border-hover);
+}
+
+TextField > .unity-base-text-field__input--placeholder > .unity-text-element {
+    color: var(--color-text-muted);
+}
+
+/* ── Toggle Defaults ─────────────────────────────────────────────────────── */
+Toggle > .unity-toggle__input > .unity-toggle__checkmark {
+    background-color: var(--color-bg-panel);
+    border-width: 1px;
+    border-color: var(--color-border-strong);
+    border-radius: var(--radius-4);
+    width: 16px;
+    height: 16px;
+    -unity-background-image-tint-color: var(--color-accent);
+}
+
+Toggle:checked > .unity-toggle__input > .unity-toggle__checkmark {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+    -unity-background-image-tint-color: var(--color-text-inverse);
+}
+
+Toggle:hover > .unity-toggle__input > .unity-toggle__checkmark {
+    border-color: var(--color-border-focus);
+}
+
+Toggle > .unity-toggle__text {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+}
+
+/* ── Cursor Defaults ─────────────────────────────────────────────────────── */
+Button {
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+}
+
+/* ── Utility Classes ─────────────────────────────────────────────────────── */
+.hidden {
+    display: none;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-1 {
+    flex-grow: 1;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.full-height {
+    height: 100%;
+}
+
+/* ── Typography Utilities ────────────────────────────────────────────────── */
+.text-primary {
+    color: var(--color-text-primary);
+}
+
+.text-secondary {
+    color: var(--color-text-secondary);
+}
+
+.text-muted {
+    color: var(--color-text-muted);
+}
+
+.text-disabled {
+    color: var(--color-text-disabled);
+}
+
+.text-accent {
+    color: var(--color-text-accent);
+}
+
+.text-warning {
+    color: var(--color-text-warning);
+}
+
+.text-danger {
+    color: var(--color-text-danger);
+}
+
+.text-success {
+    color: var(--color-text-success);
+}
+
+.text-info {
+    color: var(--color-text-info);
+}
+
+.text-bold {
+    -unity-font-style: bold;
+}
+
+.font-display {
+    -unity-font: var(--font-display);
+}
+
+.font-body {
+    -unity-font: var(--font-body);
+}
+
+/* ── Font Size Utilities ─────────────────────────────────────────────────── */
+.text-micro { font-size: var(--font-size-micro); }
+.text-xs    { font-size: var(--font-size-xs); }
+.text-sm    { font-size: var(--font-size-sm); }
+.text-md    { font-size: var(--font-size-md); }
+.text-lg    { font-size: var(--font-size-lg); }
+.text-xl    { font-size: var(--font-size-xl); }
+.text-2xl   { font-size: var(--font-size-2xl); }
+.text-3xl   { font-size: var(--font-size-3xl); }
+
+/* ── Heading Utilities ───────────────────────────────────────────────────── */
+.h1 {
+    font-size: var(--font-size-3xl);
+    -unity-font-style: bold;
+    -unity-font: var(--font-display);
+}
+
+.h2 {
+    font-size: var(--font-size-2xl);
+    -unity-font-style: bold;
+    -unity-font: var(--font-display);
+}
+
+.h3 {
+    font-size: var(--font-size-xl);
+    -unity-font-style: bold;
+    -unity-font: var(--font-display);
+}
+
+.h4 {
+    font-size: var(--font-size-lg);
+    -unity-font-style: bold;
+    -unity-font: var(--font-display);
+}
+
+.h5 {
+    font-size: var(--font-size-md);
+    -unity-font-style: bold;
+    -unity-font: var(--font-display);
+}
+
+/* ── Data Table Typography ───────────────────────────────────────────────── */
+.text-data {
+    font-size: var(--font-size-sm);
+    letter-spacing: -0.3px;
+}
+
+.text-data-bold {
+    font-size: var(--font-size-sm);
+    letter-spacing: -0.3px;
+    -unity-font-style: bold;
+}

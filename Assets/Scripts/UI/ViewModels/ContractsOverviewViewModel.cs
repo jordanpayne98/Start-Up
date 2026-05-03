@@ -59,10 +59,13 @@ public class ContractsOverviewViewModel : IViewModel
         RerollCostDisplay = "$0";
     }
 
-    public void Refresh(IReadOnlyGameState state)
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot)
     {
-        var snapshot = state as GameStateSnapshot;
-        Refresh(state, snapshot?.CompetitorState);
+        Refresh(snapshot, snapshot?.CompetitorState);
+        IsDirty = true;
     }
 
     public void Refresh(IReadOnlyGameState state, CompetitorState compState)

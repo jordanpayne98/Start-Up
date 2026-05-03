@@ -36,3 +36,15 @@ MonoBehaviour:
   ContractPoolBiasTags:
   - marketing
   - growth
+  CandidatePoolBiasFamilies: 0500000002000000
+  CandidatePoolBiasWeights:
+  - 3
+  - 2
+  ContractPoolBiasCategories:
+  - marketing
+  - growth
+  - commercial
+  WelcomeMessage: "Growth is your language. Your Commercial background means you
+    know how to win clients \u2014 now build the team to deliver for them."
+  HiringHint: Growth agencies need delivery credibility. An Engineering hire will
+    let you take on technical contracts alongside commercial ones.

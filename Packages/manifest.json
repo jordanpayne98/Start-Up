@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.adjoint.editor": "https://github.com/adjointdev/adjoint-beta-dist.git#v1.5.10",
+    "com.adjoint.editor": "https://github.com/adjointdev/adjoint-beta-dist.git#v1.6.0",
     "com.unity.2d.animation": "13.0.4",
     "com.unity.2d.aseprite": "3.0.1",
     "com.unity.2d.psdimporter": "12.0.1",

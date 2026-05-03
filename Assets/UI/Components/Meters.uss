@@ -1,0 +1,36 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Meters — Page 30
+   Depends on: tokens.uss
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.meter-bar {
+    background-color: rgba(43, 52, 63, 0.6);
+    border-radius: var(--radius-4);
+    height: 10px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.meter-fill {
+    background-color: var(--color-accent);
+    border-radius: var(--radius-4);
+    height: 100%;
+    min-width: 4px;
+    transition: width 300ms ease-in-out;
+}
+
+.meter-fill--success {
+    background-color: var(--color-success);
+}
+
+.meter-fill--warning {
+    background-color: var(--color-warning);
+}
+
+.meter-fill--danger {
+    background-color: var(--color-danger);
+}
+
+.meter-fill--info {
+    background-color: var(--color-info);
+}

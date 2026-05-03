@@ -41,7 +41,7 @@ public class InboxView : IGameView
         _nav = nav;
     }
 
-    public void Initialize(VisualElement root)
+    public void Initialize(VisualElement root, UIServices services)
     {
         _root = root;
 

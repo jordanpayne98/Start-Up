@@ -1,0 +1,131 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Buttons — Page 30 §6 + Page 31 §8.1 + Page 28 §11
+   Depends on: tokens.uss
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.btn {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-6);
+    font-size: var(--font-size-sm);
+    height: var(--btn-height-md);
+    padding-left: var(--space-12);
+    padding-right: var(--space-12);
+    border-width: 1px;
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+    transition: background-color 150ms ease-in-out;
+    -unity-font-style: normal;
+}
+
+.btn:focus {
+    border-color: var(--color-border-focus);
+}
+
+.btn-primary {
+    background-color: var(--color-accent);
+    color: var(--color-text-inverse);
+    border-color: rgba(255, 255, 255, 0.12);
+    -unity-font-style: bold;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-accent-hover);
+}
+
+.btn-primary:active {
+    background-color: var(--color-accent-pressed);
+}
+
+.btn-secondary {
+    background-color: var(--color-bg-panel-raised);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-strong);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-bg-panel-hover);
+    border-color: var(--color-border-hover);
+}
+
+.btn-secondary:active {
+    background-color: var(--color-bg-panel);
+}
+
+.btn-ghost {
+    background-color: rgba(0, 0, 0, 0);
+    color: var(--color-text-secondary);
+    border-color: rgba(0, 0, 0, 0);
+}
+
+.btn-ghost:hover {
+    background-color: var(--color-bg-panel-hover);
+    color: var(--color-text-primary);
+}
+
+.btn-ghost:active {
+    background-color: var(--color-bg-panel);
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: var(--color-text-inverse);
+    border-color: rgba(255, 255, 255, 0.12);
+    -unity-font-style: bold;
+}
+
+.btn-danger:hover {
+    background-color: var(--color-border-danger);
+}
+
+.btn-danger:active {
+    background-color: var(--color-danger-muted);
+}
+
+.btn-disabled {
+    background-color: var(--color-bg-panel-disabled);
+    color: var(--color-text-disabled);
+    border-color: var(--color-border-subtle);
+}
+
+.btn-icon {
+    width: var(--btn-height-md);
+    height: var(--btn-height-md);
+    min-width: var(--btn-height-md);
+    padding: 0;
+    border-radius: var(--radius-4);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    background-color: var(--color-bg-panel-raised);
+    color: var(--color-text-secondary);
+    align-items: center;
+    justify-content: center;
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+    transition: background-color 150ms ease-in-out;
+}
+
+.btn-icon:hover {
+    background-color: var(--color-bg-panel-hover);
+    color: var(--color-text-primary);
+}
+
+.btn-sm {
+    height: var(--btn-height-sm);
+    font-size: var(--font-size-xs);
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+}
+
+.btn-md {
+    height: var(--btn-height-md);
+    font-size: var(--font-size-sm);
+    padding-left: var(--space-12);
+    padding-right: var(--space-12);
+}
+
+.btn-lg {
+    height: var(--btn-height-lg);
+    font-size: var(--font-size-md);
+    padding-left: var(--space-16);
+    padding-right: var(--space-16);
+}

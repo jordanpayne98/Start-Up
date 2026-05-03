@@ -11,6 +11,10 @@ public struct EmployeeStatBlock
     public sbyte[] SkillDeltaDirection;
     public int PotentialAbility;
 
+    // Visible attribute XP accumulator — null on old saves; use EnsureAttributeXpArrays() before accessing.
+    public float[] VisibleAttributeXp;
+    public sbyte[] VisibleAttributeDeltaDirection;
+
     public int GetSkill(SkillId id)
     {
         return Skills[(int)id];
@@ -49,12 +53,42 @@ public struct EmployeeStatBlock
         block.HiddenAttributes = new int[HiddenAttributeHelper.AttributeCount];
         block.SkillXp = new float[SkillIdHelper.SkillCount];
         block.SkillDeltaDirection = new sbyte[SkillIdHelper.SkillCount];
+        block.VisibleAttributeXp = new float[VisibleAttributeHelper.AttributeCount];
+        block.VisibleAttributeDeltaDirection = new sbyte[VisibleAttributeHelper.AttributeCount];
         block.PotentialAbility = 0;
         for (int i = 0; i < VisibleAttributeHelper.AttributeCount; i++)
             block.VisibleAttributes[i] = 10;
         for (int i = 0; i < HiddenAttributeHelper.AttributeCount; i++)
             block.HiddenAttributes[i] = 10;
         return block;
+    }
+
+    /// <summary>
+    /// Ensures VisibleAttributeXp and VisibleAttributeDeltaDirection arrays exist.
+    /// Must be called before reading/writing these arrays on old saves where they may be null.
+    /// </summary>
+    public void EnsureAttributeXpArrays()
+    {
+        if (VisibleAttributeXp == null || VisibleAttributeXp.Length < VisibleAttributeHelper.AttributeCount)
+        {
+            var old = VisibleAttributeXp;
+            VisibleAttributeXp = new float[VisibleAttributeHelper.AttributeCount];
+            if (old != null)
+            {
+                int copyLen = old.Length < VisibleAttributeHelper.AttributeCount ? old.Length : VisibleAttributeHelper.AttributeCount;
+                for (int i = 0; i < copyLen; i++) VisibleAttributeXp[i] = old[i];
+            }
+        }
+        if (VisibleAttributeDeltaDirection == null || VisibleAttributeDeltaDirection.Length < VisibleAttributeHelper.AttributeCount)
+        {
+            var old = VisibleAttributeDeltaDirection;
+            VisibleAttributeDeltaDirection = new sbyte[VisibleAttributeHelper.AttributeCount];
+            if (old != null)
+            {
+                int copyLen = old.Length < VisibleAttributeHelper.AttributeCount ? old.Length : VisibleAttributeHelper.AttributeCount;
+                for (int i = 0; i < copyLen; i++) VisibleAttributeDeltaDirection[i] = old[i];
+            }
+        }
     }
 
 }

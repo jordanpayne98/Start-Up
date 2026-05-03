@@ -8,7 +8,10 @@ public class BankruptcyWarningViewModel : IViewModel
     public bool HasProductsToSell { get; private set; }
     public bool IsActive { get; private set; }
 
-    public void Refresh(IReadOnlyGameState state) { }
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) { IsDirty = true; }
 
     public void Refresh(FinanceState financeState, StockState stockState,
         ProductState productState, LoanSystem loanSystem) {

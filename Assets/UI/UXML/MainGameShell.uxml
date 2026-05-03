@@ -1,0 +1,149 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Core token and base styles — tokens first so CSS variables are available globally -->
+    <ui:Style src="project://database/Assets/UI/USS/Core/tokens.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Core/base.uss" />
+    <!-- Component files (split from Core/components.uss per Page 33 §11.1) -->
+    <ui:Style src="project://database/Assets/UI/Components/Buttons.uss" />
+    <ui:Style src="project://database/Assets/UI/Components/Cards.uss" />
+    <ui:Style src="project://database/Assets/UI/Components/Tables.uss" />
+    <ui:Style src="project://database/Assets/UI/Components/Badges.uss" />
+    <ui:Style src="project://database/Assets/UI/Components/Meters.uss" />
+    <ui:Style src="project://database/Assets/UI/Components/Forms.uss" />
+    <ui:Style src="project://database/Assets/UI/Components/Tabs.uss" />
+    <ui:Style src="project://database/Assets/UI/Components/Toasts.uss" />
+    <ui:Style src="project://database/Assets/UI/Components/Tooltips.uss" />
+    <ui:Style src="project://database/Assets/UI/Components/Modals.uss" />
+    <ui:Style src="project://database/Assets/UI/Components/Dropdowns.uss" />
+    <!-- Dashboard screen styles -->
+    <ui:Style src="project://database/Assets/UI/USS/Screens/Dashboard/DashboardScreen.uss" />
+    <!-- Placeholder screen styles -->
+    <ui:Style src="project://database/Assets/UI/USS/Screens/Shared/ScreenPlaceholder.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Core/shell.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Shell/top-bar.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Shell/sidebar.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Shell/modal.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Shell/toast.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Shell/tooltip.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Shell/effects.uss" />
+
+    <!-- Shell root — absolute fullscreen container -->
+    <ui:VisualElement name="shell-root">
+
+        <!-- Top Status Bar — 48px fixed height, persists across all screens -->
+        <ui:VisualElement name="top-status-bar">
+
+            <!-- Company block: logo + name/tier -->
+            <ui:VisualElement class="top-bar__company">
+                <ui:VisualElement name="company-logo" />
+                <ui:VisualElement class="top-bar__company-labels">
+                    <ui:Label name="company-name" text="My Company" />
+                    <ui:Label name="company-tier" text="Indie Studio" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Divider -->
+            <ui:VisualElement class="top-bar__divider" />
+
+            <!-- Metrics group: Cash / Net / Runway -->
+            <ui:VisualElement class="top-bar__metrics">
+
+                <!-- Cash block -->
+                <ui:VisualElement class="top-bar__metric">
+                    <ui:Label class="top-bar__metric-header" text="CASH" />
+                    <ui:Label name="cash-value"  class="top-bar__metric-value" text="$0" />
+                    <ui:Label name="cash-label"  class="top-bar__metric-label" text="Available Funds" />
+                </ui:VisualElement>
+
+                <!-- Net / month block -->
+                <ui:VisualElement class="top-bar__metric">
+                    <ui:Label class="top-bar__metric-header" text="NET / MONTH" />
+                    <ui:Label name="net-value"  class="top-bar__metric-value" text="$0" />
+                    <ui:Label name="net-label"  class="top-bar__metric-label" text="Burn Rate" />
+                </ui:VisualElement>
+
+                <!-- Runway block -->
+                <ui:VisualElement class="top-bar__metric">
+                    <ui:Label class="top-bar__metric-header" text="RUNWAY" />
+                    <ui:VisualElement class="top-bar__runway-row">
+                        <ui:Label name="runway-value"     class="top-bar__metric-value" text="—" />
+                        <ui:VisualElement name="runway-info-icon" />
+                    </ui:VisualElement>
+                    <ui:Label name="runway-label" class="top-bar__metric-label" text="Est. Runway" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- Divider -->
+            <ui:VisualElement class="top-bar__divider" />
+
+            <!-- Timeline: flex-grow spacer + centered label -->
+            <ui:VisualElement class="top-bar__spacer" />
+            <ui:Label name="timeline-label" text="Day 1 · Month 1 · Year 1" />
+            <ui:VisualElement class="top-bar__spacer" />
+
+            <!-- Speed toggle group -->
+            <ui:VisualElement class="top-bar__speed-group">
+                <ui:Button name="speed-1x" class="speed-btn speed-active" text="1x" />
+                <ui:Button name="speed-2x" class="speed-btn" text="2x" />
+                <ui:Button name="speed-3x" class="speed-btn" text="3x" />
+            </ui:VisualElement>
+
+            <!-- Continue / Pause button -->
+            <ui:Button name="continue-button" class="btn-primary" text="Continue" />
+
+            <!-- Settings gear button -->
+            <ui:Button name="settings-button" text="⚙" />
+
+        </ui:VisualElement>
+
+        <!-- Main Body — horizontal flex container for sidebar + content -->
+        <ui:VisualElement name="main-body">
+
+            <!-- Sidebar Navigation — 232px fixed-width, vertical nav -->
+            <ui:VisualElement name="sidebar-navigation">
+
+                <!-- Scrollable nav tree region -->
+                <ui:ScrollView name="sidebar-scroll" class="sidebar-scroll">
+
+                    <!-- Dynamically built category/item tree (managed by SidebarView) -->
+                    <ui:VisualElement name="sidebar-nav-tree" class="sidebar-nav-tree" />
+
+                </ui:ScrollView>
+
+                <!-- Collapse toggle — anchored to sidebar bottom -->
+                <ui:Button name="sidebar-collapse-toggle" text="«" />
+
+            </ui:VisualElement>
+
+            <!-- Screen Content Host — flex-grow, holds header/toolbar/body sub-regions -->
+            <ui:VisualElement name="screen-content-host">
+
+                <!-- Screen Header Host — fixed region for ScreenHeader component -->
+                <ui:VisualElement name="screen-header-host" />
+
+                <!-- Screen Toolbar Host — tab bar + filter bar region -->
+                <ui:VisualElement name="screen-toolbar-host" />
+
+                <!-- Screen Body Host — flex-grow scrollable content region -->
+                <ui:VisualElement name="screen-body-host" />
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Shell Effects Layer — behind modal, pointer-events none, for shader effects -->
+        <ui:VisualElement name="shell-effects-layer" />
+
+        <!-- Modal Layer — absolute overlay, shown programmatically by ModalPresenter -->
+        <ui:VisualElement name="modal-layer">
+            <ui:VisualElement name="modal-backdrop" />
+            <ui:VisualElement name="modal-content" />
+        </ui:VisualElement>
+
+        <!-- Toast Layer — absolute top-right, shown programmatically by ToastPresenter -->
+        <ui:VisualElement name="toast-layer" />
+
+        <!-- Tooltip Layer — absolute, shown programmatically by TooltipPresenter -->
+        <ui:VisualElement name="tooltip-layer" />
+
+    </ui:VisualElement>
+</ui:UXML>

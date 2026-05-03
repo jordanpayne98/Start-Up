@@ -37,7 +37,11 @@ public class TeamAssignmentViewModel : IViewModel
 
     private readonly List<TeamMemberDisplay> _memberScratch = new List<TeamMemberDisplay>(8);
 
-    public void Refresh(IReadOnlyGameState state) {
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
+        IReadOnlyGameState state = snapshot;
         if (state == null) return;
         _teams.Clear();
 

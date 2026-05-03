@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="project://database/Assets/UI/USS/Core/tokens.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Core/components.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Components/pagination.uss" />
+
+    <!-- Pagination row — range label + page buttons + rows-per-page -->
+    <ui:VisualElement name="pagination-root" class="pagination">
+
+        <!-- "Showing X to Y of Z" range label -->
+        <ui:Label name="pagination-range-label" text="Showing 1 to 25 of 0" class="pagination__range" />
+
+        <!-- Spacer -->
+        <ui:VisualElement class="flex-1" />
+
+        <!-- Previous page button -->
+        <ui:Button name="btn-page-prev" text="‹" class="btn btn-icon btn-sm pagination__btn" />
+
+        <!-- Page number buttons container — Views populate dynamically -->
+        <ui:VisualElement name="page-buttons-host" class="pagination__pages" />
+
+        <!-- Next page button -->
+        <ui:Button name="btn-page-next" text="›" class="btn btn-icon btn-sm pagination__btn" />
+
+        <!-- Divider -->
+        <ui:VisualElement class="divider--vertical" />
+
+        <!-- Rows per page -->
+        <ui:Label text="Rows:" class="pagination__rows-label" />
+        <ui:VisualElement name="rows-per-page-host" class="pagination__rows-select" />
+
+    </ui:VisualElement>
+</ui:UXML>

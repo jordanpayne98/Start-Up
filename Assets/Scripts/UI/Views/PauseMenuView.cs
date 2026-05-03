@@ -59,7 +59,7 @@ public class PauseMenuView : IGameView {
         _gameController = gameController;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _pauseRoot = root;
         _pauseRoot.AddToClassList("pause-overlay");
         _pauseRoot.style.display = DisplayStyle.None;

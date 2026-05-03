@@ -33,11 +33,13 @@ public class MyInvestmentsViewModel : IViewModel
     public int CompaniesInvested { get; private set; }
     public string ClosestToBuyout { get; private set; }
 
-    public void Refresh(IReadOnlyGameState state) {
-        if (state == null) return;
-        var snapshot = state as GameStateSnapshot;
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
         if (snapshot == null) return;
         Refresh(snapshot.StockState, snapshot.CompetitorState);
+        IsDirty = true;
     }
 
     public void Refresh(StockState stockState, CompetitorState compState) {

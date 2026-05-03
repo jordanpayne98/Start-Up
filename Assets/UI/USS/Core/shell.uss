@@ -1,0 +1,156 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Shell Layout Rules — All shell region IDs per Page 26
+   Depends on: tokens.uss
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Root Container ──────────────────────────────────────────────────────── */
+
+#shell-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-bg-root);
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ── Top Status Bar ──────────────────────────────────────────────────────── */
+
+#top-status-bar {
+    height: var(--topbar-height);
+    min-height: var(--topbar-height);
+    max-height: var(--topbar-height);
+    background-color: var(--color-bg-topbar);
+    flex-direction: row;
+    align-items: center;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border-subtle);
+    padding-left: var(--space-16);
+    padding-right: var(--space-16);
+    flex-shrink: 0;
+}
+
+/* ── Main Body (sidebar + content host) ──────────────────────────────────── */
+
+#main-body {
+    flex-grow: 1;
+    flex-direction: row;
+    overflow: hidden;
+}
+
+/* ── Sidebar Navigation ──────────────────────────────────────────────────── */
+
+#sidebar-navigation {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    background-color: var(--color-bg-sidebar);
+    flex-direction: column;
+    border-right-width: 1px;
+    border-right-color: var(--color-border-subtle);
+    flex-shrink: 0;
+}
+
+/* ── Screen Content Host ─────────────────────────────────────────────────── */
+
+#screen-content-host {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: var(--color-bg-screen);
+    padding: var(--screen-padding);
+    overflow: hidden;
+}
+
+/* ── Screen Sub-regions ──────────────────────────────────────────────────── */
+
+#screen-header-host {
+    min-height: var(--screen-header-height);
+    max-height: var(--screen-header-height);
+    flex-shrink: 0;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+#screen-toolbar-host {
+    height: var(--toolbar-height);
+    min-height: var(--toolbar-height);
+    max-height: var(--toolbar-height);
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+}
+
+#screen-body-host {
+    flex-grow: 1;
+    flex-direction: column;
+    overflow-y: scroll;
+}
+
+/* ── Modal Layer ─────────────────────────────────────────────────────────── */
+
+#modal-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#modal-backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+#modal-content {
+    flex-direction: column;
+    background-color: var(--color-bg-modal);
+    border-radius: var(--radius-12);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    max-width: var(--modal-width-lg);
+    overflow: hidden;
+    position: relative;
+}
+
+/* ── Toast Layer ─────────────────────────────────────────────────────────── */
+
+#toast-layer {
+    position: absolute;
+    top: 64px; /* topbar-height (48) + space-16 (16) */
+    right: var(--space-16);
+    flex-direction: column;
+    display: none;
+    width: 380px;
+}
+
+/* ── Tooltip Layer ───────────────────────────────────────────────────────── */
+
+#tooltip-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: none;
+    pointer-events: none;
+}
+
+/* ── Shell Effects Layer ─────────────────────────────────────────────────── */
+
+#shell-effects-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    display: none;
+}

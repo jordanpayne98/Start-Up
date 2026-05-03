@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="project://database/Assets/UI/USS/Core/tokens.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Components/screen-header.uss" />
+
+    <!-- Screen Header — back breadcrumb + icon/title/subtitle row -->
+    <ui:VisualElement name="screen-header" class="screen-header">
+
+        <!-- Back Breadcrumb — "← Parent" clickable nav label -->
+        <ui:Label name="back-breadcrumb" text="← Overview" class="screen-header__breadcrumb" />
+
+        <!-- Header Row — icon slot + title + subtitle -->
+        <ui:VisualElement name="header-row" class="screen-header__row">
+            <ui:VisualElement name="header-icon" class="screen-header__icon" />
+            <ui:VisualElement name="header-text" class="screen-header__text">
+                <ui:Label name="screen-title" text="Screen Title" class="screen-header__title" />
+                <ui:Label name="screen-subtitle" text="Subtitle or description" class="screen-header__subtitle" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

@@ -44,7 +44,7 @@ public class HRAssignmentsView : IGameView
         _tooltip = tooltip;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
         _root.AddToClassList("hr-assignments");
 
@@ -492,6 +492,6 @@ public class HRAssignmentsView : IGameView
 
         var vm = new CandidateDetailModalViewModel();
         vm.SetCandidateId(candidateId);
-        _modal.ShowModal(new CandidateDetailModalView(_modal, _dispatcher), vm);
+        _modal.ShowModal(new CandidateDetailModalView(), vm);
     }
 }

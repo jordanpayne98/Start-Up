@@ -1,8 +1,44 @@
 public static class CandidateExpiryHelper
 {
-    private const int HRSourcedExpiryDays = 20;
+    private const int HRSourcedExpiryDays          = 20;
+    private const int OpenMarketOrdinaryExpiryMin   = 12;
+    private const int OpenMarketOrdinaryExpiryMax   = 20;
+    private const int OpenMarketStrongExpiryMin     = 8;
+    private const int OpenMarketStrongExpiryMax     = 14;
+    private const int HRSearchExpiryMin             = 18;
+    private const int HRSearchExpiryMax             = 28;
     private const float UrgencyMediumThreshold = 0.50f;
     private const float UrgencyHighThreshold   = 0.25f;
+
+    // Returns the expiry window in days for a candidate based on their source and CA.
+    public static int GetExpiryWindowDays(CandidateData candidate, IRng rng, TuningConfig tuning = null)
+    {
+        // FormerEmployee: longer or no normal expiry
+        if (candidate.Source == CandidateSource.FormerEmployee)
+            return int.MaxValue / TimeState.TicksPerDay; // effectively no expiry
+
+        if (candidate.Source == CandidateSource.HRSearch)
+        {
+            int hrExpiry = tuning != null ? tuning.CandidateHRExpiryDays : HRSourcedExpiryDays;
+            // Expand range around the tuning value
+            int min = (int)(hrExpiry * 0.85f);
+            int max = (int)(hrExpiry * 1.40f);
+            return rng != null ? rng.Range(min, max + 1) : hrExpiry;
+        }
+
+        // OpenMarket: strong candidates (CA > 120) leave faster
+        if (candidate.Source == CandidateSource.OpenMarket)
+        {
+            bool isStrong = candidate.CurrentAbility >= 120;
+            int min = isStrong ? OpenMarketStrongExpiryMin : OpenMarketOrdinaryExpiryMin;
+            int max = isStrong ? OpenMarketStrongExpiryMax : OpenMarketOrdinaryExpiryMax;
+            return rng != null ? rng.Range(min, max + 1) : (min + max) / 2;
+        }
+
+        // StartingPool, Referral, CompetitorLayoff: use HR defaults
+        int defaultExpiry = tuning != null ? tuning.CandidateHRExpiryDays : HRSourcedExpiryDays;
+        return rng != null ? rng.Range(defaultExpiry - 3, defaultExpiry + 5) : defaultExpiry;
+    }
 
     public static void AssignExpiryTicks(EmployeeState employeeState, IRng rng, int currentTick,
         TuningConfig tuning = null)
@@ -20,11 +56,22 @@ public static class CandidateExpiryHelper
                 continue;
             }
 
-            int windowTicks = hrExpiry * TimeState.TicksPerDay;
+            // Use source-based window if source is populated, fall back to legacy HR window
+            int windowDays = candidate.Source != default
+                ? GetExpiryWindowDays(candidate, rng, tuning)
+                : hrExpiry;
+
+            if (windowDays >= int.MaxValue / TimeState.TicksPerDay)
+            {
+                candidate.ExpiryTick = int.MaxValue;
+                employeeState.availableCandidates[i] = candidate;
+                continue;
+            }
+
+            int windowTicks = windowDays * TimeState.TicksPerDay;
             if (candidate.ExpiryTick <= 0 || candidate.ExpiryTick < currentTick)
             {
-                int varianceTicks = rng.Range(0, TimeState.TicksPerDay);
-                candidate.ExpiryTick = currentTick + windowTicks + varianceTicks;
+                candidate.ExpiryTick = currentTick + windowTicks;
                 employeeState.availableCandidates[i] = candidate;
             }
         }

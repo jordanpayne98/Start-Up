@@ -111,7 +111,7 @@ public class NewGameFounderCreationView : IGameView
     private Label _previewFcSummary;
     private VisualElement _previewFounderDetails;
 
-    public void Initialize(VisualElement root)
+    public void Initialize(VisualElement root, UIServices services)
     {
         _root = root;
 

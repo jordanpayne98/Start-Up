@@ -202,7 +202,7 @@ public class ProductsView : IGameView
         _viewMode = viewMode;
     }
 
-    public void Initialize(VisualElement root)
+    public void Initialize(VisualElement root, UIServices services)
     {
         _root = root;
 
@@ -1314,7 +1314,7 @@ public class ProductsView : IGameView
         // ── Create mode routing ──────────────────────────────────────────────
         if (_isInCreateMode && _createProductView != null && _createProductVm != null)
         {
-            var snapshot = viewModel as IReadOnlyGameState ?? GetSnapshotFromViewModel(viewModel);
+            var snapshot = (viewModel as GameStateSnapshot) ?? (GetSnapshotFromViewModel(viewModel) as GameStateSnapshot);
             if (snapshot != null) _createProductVm.Refresh(snapshot);
             _createProductView.Bind(_createProductVm);
             return;
@@ -2946,12 +2946,12 @@ public class ProductsView : IGameView
             }
         }
 
-        _createProductView = new ProductCreationPlanningView(_dispatcher, _modal);
+        _createProductView = new ProductCreationPlanningView();
         _createProductView.OnCancelRequested += OnCreateCancelled;
         _createProductView.OnProductCreated += OnCreateConfirmed;
 
         _createProductContainer.Clear();
-        _createProductView.Initialize(_createProductContainer);
+        _createProductView.Initialize(_createProductContainer, null);
         _createProductView.Bind(_createProductVm);
         _createProductContainer.style.display = DisplayStyle.Flex;
     }

@@ -1,0 +1,260 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Top Bar Layout & Component Styles — Page 26 / Page 28 / Page 30 / Page 31
+   Depends on: tokens.uss (already loaded globally via MainGameShell.uxml)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Company Block ───────────────────────────────────────────────────────── */
+
+.top-bar__company {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: var(--space-16);
+}
+
+#company-logo {
+    width: 28px;
+    height: 28px;
+    background-color: var(--color-accent-muted);
+    border-radius: var(--radius-6);
+    flex-shrink: 0;
+    margin-right: var(--space-8);
+}
+
+#company-name {
+    font-size: var(--font-size-md);
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+    white-space: nowrap;
+}
+
+#company-tier {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    margin-top: var(--space-2);
+}
+
+.top-bar__company-labels {
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* ── Vertical Divider ────────────────────────────────────────────────────── */
+
+.top-bar__divider {
+    width: 1px;
+    height: 28px;
+    background-color: var(--color-divider);
+    flex-shrink: 0;
+    margin-left: var(--space-12);
+    margin-right: var(--space-12);
+}
+
+/* ── Metrics Group ───────────────────────────────────────────────────────── */
+
+.top-bar__metrics {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    column-gap: var(--space-12);
+}
+
+.top-bar__metric {
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    min-width: 64px;
+}
+
+.top-bar__metric-header {
+    font-size: var(--font-size-micro);
+    color: var(--color-text-muted);
+    -unity-font-style: bold;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    margin-bottom: var(--space-2);
+    /* uppercase via letter-spacing — UI Toolkit has no text-transform */
+}
+
+.top-bar__metric-value {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+    white-space: nowrap;
+}
+
+.top-bar__metric-label {
+    font-size: var(--font-size-micro);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+/* Runway row — value + info icon side by side */
+.top-bar__runway-row {
+    flex-direction: row;
+    align-items: center;
+    column-gap: var(--space-4);
+}
+
+#runway-info-icon {
+    width: 13px;
+    height: 13px;
+    border-radius: var(--radius-pill);
+    border-width: 1px;
+    border-color: var(--color-text-muted);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: link;
+}
+
+/* ── Severity Modifiers ──────────────────────────────────────────────────── */
+
+.severity-warning {
+    color: var(--color-text-warning);
+}
+
+.severity-danger {
+    color: var(--color-text-danger);
+}
+
+/* ── Spacer ──────────────────────────────────────────────────────────────── */
+
+.top-bar__spacer {
+    flex-grow: 1;
+}
+
+/* ── Timeline Label ──────────────────────────────────────────────────────── */
+
+#timeline-label {
+    font-size: var(--font-size-md);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: var(--space-8);
+    margin-right: var(--space-8);
+}
+
+/* ── Speed Toggle Group ──────────────────────────────────────────────────── */
+
+.top-bar__speed-group {
+    flex-direction: row;
+    align-items: center;
+    column-gap: var(--space-4);
+    flex-shrink: 0;
+    margin-left: var(--space-12);
+}
+
+.speed-btn {
+    height: var(--btn-height-md);
+    min-width: 36px;
+    max-width: 44px;
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+    background-color: var(--color-bg-panel);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    border-radius: var(--radius-4);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    -unity-text-align: middle-center;
+    transition: background-color 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.speed-btn:hover {
+    background-color: var(--color-bg-panel-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
+}
+
+/* Active speed button */
+.speed-btn.speed-active {
+    background-color: var(--color-accent-muted);
+    border-color: var(--color-border-selected);
+    color: var(--color-text-accent);
+}
+
+/* ── Continue Button ─────────────────────────────────────────────────────── */
+
+#continue-button {
+    height: var(--btn-height-md);
+    min-width: 84px;
+    max-width: 104px;
+    flex-shrink: 0;
+    margin-left: var(--space-8);
+    padding-left: var(--space-12);
+    padding-right: var(--space-12);
+    border-radius: var(--radius-4);
+    font-size: var(--font-size-sm);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    transition: background-color 0.1s, color 0.1s, border-color 0.1s;
+}
+
+/* btn-primary — Continue state */
+#continue-button.btn-primary {
+    background-color: var(--color-accent);
+    border-width: 0;
+    color: var(--color-text-inverse);
+}
+
+#continue-button.btn-primary:hover {
+    background-color: var(--color-accent-hover);
+}
+
+/* btn-secondary — Pause state */
+#continue-button.btn-secondary {
+    background-color: transparent;
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    color: var(--color-text-secondary);
+}
+
+#continue-button.btn-secondary:hover {
+    background-color: var(--color-bg-panel-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
+}
+
+/* ── Settings Button ─────────────────────────────────────────────────────── */
+
+#settings-button {
+    width: var(--btn-height-md);
+    height: var(--btn-height-md);
+    min-width: var(--btn-height-md);
+    min-height: var(--btn-height-md);
+    flex-shrink: 0;
+    margin-left: var(--space-8);
+    background-color: transparent;
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    border-radius: var(--radius-4);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-md);
+    -unity-text-align: middle-center;
+    transition: background-color 0.1s, color 0.1s, border-color 0.1s;
+}
+
+#settings-button:hover {
+    background-color: var(--color-bg-panel-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text-secondary);
+}
+
+/* ── Top Bar Underline Accent ────────────────────────────────────────────── */
+
+.top-bar__underline {
+    height: 2px;
+    background-color: var(--color-accent);
+    opacity: 0.5;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: opacity 250ms ease-in-out;
+}
+
+.top-bar__underline--running {
+    opacity: 1.0;
+}

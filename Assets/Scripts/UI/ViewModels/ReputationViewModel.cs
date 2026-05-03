@@ -57,8 +57,12 @@ public class ReputationViewModel : IViewModel
         TierName = "Unknown";
     }
 
-    public void Refresh(IReadOnlyGameState state) {
-        Refresh(state, null);
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
+        Refresh(snapshot, snapshot?.CompetitorState);
+        IsDirty = true;
     }
 
     public void Refresh(IReadOnlyGameState state, CompetitorState compState) {

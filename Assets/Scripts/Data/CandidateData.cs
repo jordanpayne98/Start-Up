@@ -38,9 +38,23 @@ public class CandidateData
 
     // Stat model
     public EmployeeStatBlock Stats;
-    public ConfidenceLevel[] SkillConfidence;           // length 26, per-skill confidence
+    public ConfidenceLevel[] SkillConfidence;           // length 26, per-skill confidence (legacy; use Confidence for grouped)
     public ConfidenceLevel[] VisibleAttributeConfidence; // length 8
     public ConfidenceLevel[] HiddenAttributeConfidence;  // length 7
+
+    // ── Wave 4B: new generation fields ───────────────────────────────────────
+    public CandidateSource Source;
+    public CandidateArchetype Archetype;
+    public CareerStage CareerStage;
+    public RoleId TargetRole;
+    public RoleFamily RoleFamily;
+    public CandidateConfidenceData Confidence;
+    public CandidateReport Report;
+    public int SalaryDemandActual;          // true salary (hidden from player until confirmed)
+    public int SalaryEstimateMin;           // displayed estimate range min
+    public int SalaryEstimateMax;           // displayed estimate range max
+    public bool CompetitorInterest;
+    public List<RoleId> ProjectedRoleFits;  // roles this candidate could also fit
 
     public int GetSkill(SkillId id) => Stats.GetSkill(id);
 
@@ -123,72 +137,72 @@ public class CandidateData
         }
     }
 
-    // Candidate generation using new RoleId-based system.
-    public static CandidateData GenerateCandidate(IRng rng, RoleProfileTable roleProfileTable, float qualityMultiplier = 1.0f, RoleId? forceRole = null)
+    // ── New primary generation entry point (16-step pipeline) ─────────────────
+    public static CandidateData GenerateCandidate(
+        IRng rng,
+        RoleProfileTable roleProfileTable,
+        CandidateGenerationParams genParams)
     {
-        int genderIndex = rng.Range(0, 2);
-        Gender gender = (Gender)genderIndex;
-        string name = NameGenerator.GenerateRandomName(rng, gender);
+        // Step 1: Pick source
+        CandidateSource source = genParams.Source;
 
+        // Step 2: Pick target role
         RoleId role;
-        if (forceRole.HasValue)
+        if (genParams.ForceRole.HasValue)
         {
-            role = forceRole.Value;
+            role = genParams.ForceRole.Value;
         }
         else
         {
-            // Free candidate pool: common roles weighted by CandidatePoolWeight from profile table
-            // Fallback: equal distribution across all 16 roles
-            int poolIndex = rng.Range(0, RoleIdHelper.RoleCount);
-            role = (RoleId)poolIndex;
+            role = PickWeightedRole(rng, roleProfileTable, genParams);
         }
 
-        // ── Phase 1: Roll CA from weighted distribution ─────────────────────────
-        float q = qualityMultiplier - 1.0f;
-        int wLow  = Clamp((int)(45 - q * 50),  5, 45);
-        int wAvg  = Clamp((int)(40 - q * 15), 15, 40);
-        int wHigh = Clamp((int)(10 + q * 40), 10, 55);
-        int wExc  = Clamp((int)( 2 + q * 30),  2, 40);
-        int wTotal = wLow + wAvg + wHigh + wExc;
+        // Step 3: Determine role family from role
+        RoleFamily roleFamily = genParams.ForceFamily ?? RoleIdHelper.GetFamily(role);
 
-        int caMin, caMax;
-        int caRoll = rng.Range(0, wTotal);
-        if      (caRoll < wLow)                      { caMin = 15;  caMax = 59;  }
-        else if (caRoll < wLow + wAvg)               { caMin = 60;  caMax = 119; }
-        else if (caRoll < wLow + wAvg + wHigh)       { caMin = 120; caMax = 169; }
-        else                                          { caMin = 170; caMax = 200; }
+        // Step 4: Pick archetype
+        CandidateArchetype archetype = genParams.ForceArchetype ?? PickArchetypeForSource(rng, source);
 
-        int ca = rng.Range(caMin, caMax + 1);
+        // Step 5: Pick career stage (may be overridden later after age is rolled)
+        // We roll age first to allow stage derivation, then use stage for CA target
+        int rawAge = rng.Range(18, 66);
+        CareerStage careerStage = genParams.ForceCareerStage ?? CareerStageHelper.FromAge(rawAge, rng);
+        CareerStageData stageData = CareerStageHelper.GetData(careerStage);
 
-        // ── Phase 2: Roll age independently, soft-nudge toward CA-plausible range
-        int rawAge = rng.Range(18, 46);
-        int ageBias;
-        if      (ca >= 170) ageBias = 38;
-        else if (ca >= 120) ageBias = 30;
-        else if (ca >= 60)  ageBias = 24;
-        else                ageBias = 20;
-        int age = Clamp((int)(rawAge * 0.6f + ageBias * 0.4f), 20, 55);
+        // Clamp age to stage range
+        int age = Clamp(rawAge, stageData.AgeMin, stageData.AgeMax);
 
-        // ── Phase 3: Derive PA
-        int maxUplift;
-        if      (age <= 22) maxUplift = 110;
-        else if (age <= 26) maxUplift = 85;
-        else if (age <= 30) maxUplift = 60;
-        else if (age <= 36) maxUplift = 35;
-        else                maxUplift = 18;
+        // Step 6: Generate CA target using career stage bands + quality multiplier
+        float q = genParams.QualityMultiplier;
+        int caRangeMin = stageData.CAMin;
+        int caRangeMax = stageData.CAMax;
 
-        int pa = ca + rng.Range(8, maxUplift + 1);
-        if (pa > 200) pa = 200;
+        // Quality multiplier shifts distribution within stage band
+        float qBias = (q - 1.0f) * 0.5f; // -0.5 to +0.5 range bias
+        int caTarget = rng.Range(caRangeMin, caRangeMax + 1);
+        // Apply quality bias: pull toward high end if q > 1, low end if q < 1
+        int caBiased = Clamp((int)(caTarget + (caRangeMax - caRangeMin) * qBias), caRangeMin, caRangeMax);
+        int ca = caBiased;
 
-        // ── Phase 4: Distribute CA as skill budget across new 26-skill model ────
+        // Step 7: Generate PA target using career stage PA margin, clamp to [CA, 200]
+        int paMargin = rng.Range(stageData.PAMarginMin, stageData.PAMarginMax + 1);
+        if (paMargin < 0) paMargin = 0; // ensure PA >= CA floor
+        int pa = Clamp(ca + paMargin, ca, 200);
+
+        // RawTalent archetype: boost PA significantly
+        if (archetype == CandidateArchetype.RawTalent)
+        {
+            int extraPa = rng.Range(20, 50);
+            pa = Clamp(pa + extraPa, pa, 200);
+        }
+
+        // Step 8: Generate role-weighted skills with archetype modifiers
         var stats = EmployeeStatBlock.Create();
         stats.PotentialAbility = pa;
 
         RoleProfileDefinition profile = roleProfileTable?.Get(role);
         int totalSkills = SkillIdHelper.SkillCount;
 
-        // Build tier int array from profile bands (Primary=2, Secondary=3, Tertiary=4, None=4)
-        int[] tiers = new int[totalSkills];
         int[] primaryIndices;
         int[] secondaryIndices;
         int[] tertiaryIndices;
@@ -200,211 +214,531 @@ public class CandidateData
             {
                 switch (profile.SkillBands[i])
                 {
-                    case RoleWeightBand.Primary:   tiers[i] = 2; pCount++; break;
-                    case RoleWeightBand.Secondary: tiers[i] = 3; sCount++; break;
-                    default:                       tiers[i] = 4; tCount++; break;
+                    case RoleWeightBand.Primary:   pCount++; break;
+                    case RoleWeightBand.Secondary: sCount++; break;
+                    default:                       tCount++; break;
                 }
             }
-            primaryIndices = new int[pCount];
+            primaryIndices   = new int[pCount];
             secondaryIndices = new int[sCount];
-            tertiaryIndices = new int[tCount];
+            tertiaryIndices  = new int[tCount];
             int pi = 0, si = 0, ti = 0;
             for (int i = 0; i < totalSkills; i++)
             {
-                if (tiers[i] == 2) primaryIndices[pi++] = i;
-                else if (tiers[i] == 3) secondaryIndices[si++] = i;
-                else tertiaryIndices[ti++] = i;
+                switch (profile.SkillBands[i])
+                {
+                    case RoleWeightBand.Primary:   primaryIndices[pi++]   = i; break;
+                    case RoleWeightBand.Secondary: secondaryIndices[si++] = i; break;
+                    default:                       tertiaryIndices[ti++]  = i; break;
+                }
             }
         }
         else
         {
-            for (int i = 0; i < totalSkills; i++) tiers[i] = 3;
-            primaryIndices = new int[0];
+            primaryIndices   = new int[0];
             secondaryIndices = new int[totalSkills];
-            tertiaryIndices = new int[0];
+            tertiaryIndices  = new int[0];
             for (int i = 0; i < totalSkills; i++) secondaryIndices[i] = i;
         }
 
-        int remaining = ca;
+        // Archetype modifiers for skill distribution
+        GetArchetypeSkillModifiers(archetype, out float primaryMod, out float secondaryMod, out float tertiaryMod);
 
-        // Primary allocation: ~30% of CA budget
-        int primaryTarget = (ca * 30) / 100;
-        int primarySpent = 0;
-        bool primaryActive = true;
-        while (primaryActive && primarySpent < primaryTarget)
-        {
-            primaryActive = false;
-            for (int p = 0; p < primaryIndices.Length; p++)
-            {
-                int idx = primaryIndices[p];
-                if (stats.Skills[idx] >= 20) continue;
-                int marginal = AbilityCalculator.GetMarginalCost(stats.Skills[idx], tiers[idx]);
-                if (marginal > 0 && marginal <= remaining && primarySpent + marginal <= primaryTarget + 5)
-                {
-                    stats.Skills[idx]++;
-                    remaining -= marginal;
-                    primarySpent += marginal;
-                    primaryActive = true;
-                }
-            }
-        }
+        int skillBudget = ca;
 
-        // Secondary allocation: ~32% of CA budget
-        int secondaryTarget = (ca * 32) / 100;
-        int secondarySpent = 0;
-        bool secondaryActive = true;
-        while (secondaryActive && secondarySpent < secondaryTarget)
-        {
-            secondaryActive = false;
-            for (int s = 0; s < secondaryIndices.Length; s++)
-            {
-                int idx = secondaryIndices[s];
-                if (stats.Skills[idx] >= 20) continue;
-                int marginal = AbilityCalculator.GetMarginalCost(stats.Skills[idx], tiers[idx]);
-                if (marginal > 0 && marginal <= remaining && secondarySpent + marginal <= secondaryTarget + 5)
-                {
-                    stats.Skills[idx]++;
-                    remaining -= marginal;
-                    secondarySpent += marginal;
-                    secondaryActive = true;
-                }
-            }
-        }
-
-        // Tertiary allocation: distribute remaining budget
-        bool tertiaryActive = true;
-        while (tertiaryActive && remaining > 0)
-        {
-            tertiaryActive = false;
-            for (int t = 0; t < tertiaryIndices.Length; t++)
-            {
-                int idx = tertiaryIndices[t];
-                if (stats.Skills[idx] >= 20) continue;
-                int marginal = AbilityCalculator.GetMarginalCost(stats.Skills[idx], tiers[idx]);
-                if (marginal > 0 && marginal <= remaining)
-                {
-                    stats.Skills[idx]++;
-                    remaining -= marginal;
-                    tertiaryActive = true;
-                }
-            }
-        }
-
-        // Apply variance to primary and secondary skills
-        for (int p = 0; p < primaryIndices.Length; p++)
+        // Primary allocation
+        int pLen = primaryIndices.Length;
+        for (int p = 0; p < pLen; p++)
         {
             int idx = primaryIndices[p];
-            int variance = rng.Range(-2, 3);
-            stats.Skills[idx] = Clamp(stats.Skills[idx] + variance, 0, 20);
+            int share = pLen > 0 ? (int)(skillBudget * 3 * primaryMod / (10f * pLen)) : 0;
+            stats.Skills[idx] = Clamp(share + rng.Range(-1, 2), 0, 20);
         }
-        for (int s = 0; s < secondaryIndices.Length; s++)
+
+        // Secondary allocation
+        int sLen = secondaryIndices.Length;
+        for (int s = 0; s < sLen; s++)
         {
             int idx = secondaryIndices[s];
-            int variance = rng.Range(-1, 2);
-            stats.Skills[idx] = Clamp(stats.Skills[idx] + variance, 0, 20);
+            int share = sLen > 0 ? (int)(skillBudget * 2 * secondaryMod / (10f * sLen)) : 0;
+            stats.Skills[idx] = Clamp(share + rng.Range(-1, 2), 0, 20);
         }
 
-        // Compute actual CA and trim/bump to stay within [ca-5, ca+5]
-        int actualCA = AbilityCalculator.ComputeAbility(stats.Skills, tiers);
+        // Tertiary allocation
+        int tLen = tertiaryIndices.Length;
+        for (int t = 0; t < tLen; t++)
+        {
+            int idx = tertiaryIndices[t];
+            int share = tLen > 0 ? (int)(skillBudget * tertiaryMod / (10f * tLen)) : 0;
+            stats.Skills[idx] = Clamp(share + rng.Range(-1, 1), 0, 20);
+        }
+
+        // CommercialClimber: boost sales/marketing/negotiation skills
+        if (archetype == CandidateArchetype.CommercialClimber)
+        {
+            ApplyCommercialClimberBoost(stats, rng);
+        }
+
+        // Compute actual CA and nudge primary skills to match target
+        RoleWeightBand[] skillBandsForCA = profile != null ? profile.SkillBands : null;
+        int actualCA = skillBandsForCA != null
+            ? AbilityCalculator.ComputeRoleCA(stats.Skills, skillBandsForCA)
+            : 0;
         int delta = actualCA - ca;
 
-        if (delta > 5)
+        if (delta > 5 && pLen > 0)
         {
-            for (int t = tertiaryIndices.Length - 1; t >= 0 && delta > 5; t--)
+            for (int p = pLen - 1; p >= 0 && delta > 5; p--)
             {
-                int idx = tertiaryIndices[t];
-                while (stats.Skills[idx] > 0 && delta > 5)
-                {
-                    int marginal = AbilityCalculator.GetMarginalCost(stats.Skills[idx] - 1, tiers[idx]);
-                    stats.Skills[idx]--;
-                    delta -= marginal;
-                }
+                int idx = primaryIndices[p];
+                while (stats.Skills[idx] > 0 && delta > 5) { stats.Skills[idx]--; delta--; }
             }
         }
-        else if (delta < -5 && secondaryIndices.Length > 0)
+        else if (delta < -5 && pLen > 0)
         {
-            int sIdx = secondaryIndices[0];
-            while (stats.Skills[sIdx] < 20 && delta < -5)
-            {
-                int marginal = AbilityCalculator.GetMarginalCost(stats.Skills[sIdx], tiers[sIdx]);
-                stats.Skills[sIdx]++;
-                delta += marginal;
-            }
+            int pIdx = primaryIndices[0];
+            while (stats.Skills[pIdx] < 20 && delta < -5) { stats.Skills[pIdx]++; delta++; }
         }
 
-        // 5% chance cross-skill spike
+        // 5% chance cross-skill spike on a non-role skill
         if (rng.Range(0, 100) < 5)
         {
             int crossIdx = rng.Range(0, totalSkills);
             bool isRoleSkill = false;
-            for (int p = 0; p < primaryIndices.Length; p++) if (primaryIndices[p] == crossIdx) { isRoleSkill = true; break; }
-            if (!isRoleSkill)
-                for (int s = 0; s < secondaryIndices.Length; s++) if (secondaryIndices[s] == crossIdx) { isRoleSkill = true; break; }
-            if (!isRoleSkill && stats.Skills[crossIdx] < 20)
-            {
-                int spikeAmt = rng.Range(2, 4);
-                int spikeCost = 0;
-                for (int bump = 0; bump < spikeAmt && stats.Skills[crossIdx] + bump < 20; bump++)
-                    spikeCost += AbilityCalculator.GetMarginalCost(stats.Skills[crossIdx] + bump, tiers[crossIdx]);
-                if (AbilityCalculator.ComputeAbility(stats.Skills, tiers) + spikeCost <= ca + 10)
-                    stats.Skills[crossIdx] = Clamp(stats.Skills[crossIdx] + spikeAmt, 0, 20);
-            }
+            for (int p = 0; p < pLen && !isRoleSkill; p++) if (primaryIndices[p] == crossIdx) isRoleSkill = true;
+            for (int s = 0; s < sLen && !isRoleSkill; s++) if (secondaryIndices[s] == crossIdx) isRoleSkill = true;
+            if (!isRoleSkill && stats.Skills[crossIdx] < 18)
+                stats.Skills[crossIdx] = Clamp(stats.Skills[crossIdx] + rng.Range(2, 5), 0, 20);
         }
 
-        int computedCA = AbilityCalculator.ComputeAbility(stats.Skills, tiers);
+        int computedCA = skillBandsForCA != null
+            ? AbilityCalculator.ComputeRoleCA(stats.Skills, skillBandsForCA)
+            : actualCA;
 
-        // Generate hidden attributes from PA
-        {
-            int floor = pa / 20;
-            if (floor < 1) floor = 1;
-            if (floor > 10) floor = 10;
-            int spread = (20 - floor) / 2 + 1;
-            int Attr() => Clamp(rng.Range(floor, floor + spread + 1) + rng.Range(-1, 2), 1, 20);
-            stats.HiddenAttributes[(int)HiddenAttributeId.LearningRate] = Attr();
-            stats.HiddenAttributes[(int)HiddenAttributeId.Ambition]     = Attr();
-            stats.HiddenAttributes[(int)HiddenAttributeId.Loyalty]      = Attr();
-            stats.HiddenAttributes[(int)HiddenAttributeId.PressureTolerance] = Attr();
-            stats.HiddenAttributes[(int)HiddenAttributeId.Ego]          = Attr();
-            stats.HiddenAttributes[(int)HiddenAttributeId.Consistency]  = Attr();
-            stats.HiddenAttributes[(int)HiddenAttributeId.Mentoring]    = Attr();
-            stats.VisibleAttributes[(int)VisibleAttributeId.WorkEthic]  = Attr();
-            stats.VisibleAttributes[(int)VisibleAttributeId.Creativity] = Attr();
-            stats.VisibleAttributes[(int)VisibleAttributeId.Adaptability] = Attr();
-            // remaining visible attributes: default 10 from Create()
-        }
+        // Step 9: Generate all 8 visible attributes using role profile AttributeBands + archetype bias
+        GenerateVisibleAttributes(stats, profile, archetype, pa, rng);
 
+        // Step 10: Generate 7 hidden attributes with archetype-driven bias
+        GenerateHiddenAttributes(stats, archetype, pa, rng);
+
+        // Step 11: Compute projected role fits (secondary roles with decent fit)
+        var projectedFits = ComputeProjectedRoleFits(stats, role, roleProfileTable);
+
+        // Step 12: Calculate salary demand with confidence-based estimate
+        CandidateConfidenceData confidence = CandidateConfidenceData.FromSource(source);
+        int actualSalary    = SalaryDemandCalculator.ComputeDemand(role, stats, computedCA, age);
+        var (estimateMin, estimateMax) = SalaryDemandCalculator.ComputeEstimateRange(actualSalary, confidence.SalaryConfidence, archetype);
+
+        // Apply archetype salary modifier
+        actualSalary = ApplyArchetypeSalaryModifier(actualSalary, archetype);
+        estimateMin  = ApplyArchetypeSalaryModifier(estimateMin, archetype);
+        estimateMax  = ApplyArchetypeSalaryModifier(estimateMax, archetype);
+
+        // Step 13: Competitor interest — 10% chance for high CA candidates
+        bool competitorInterest = computedCA >= 120 && rng.Range(0, 100) < 10;
+
+        // Step 14: Generate gender and name
+        int genderIndex = rng.Range(0, 2);
+        Gender gender = (Gender)genderIndex;
+        string name = NameGenerator.GenerateRandomName(rng, gender);
+
+        // Step 15: Preference generation (carried over from previous implementation)
+        bool isCoreRole = role == RoleId.SoftwareEngineer || role == RoleId.ProductDesigner || role == RoleId.QaEngineer;
+        CandidatePreferences preferences = GeneratePreferences(rng, age, isCoreRole);
+
+        // Step 16: Assemble candidate
         var candidateData = new CandidateData
         {
-            Name = name,
-            Gender = gender,
-            Age = age,
-            Role = role,
-            CurrentAbility = computedCA,
-            Stats = stats,
+            Name             = name,
+            Gender           = gender,
+            Age              = age,
+            Role             = role,
+            TargetRole       = role,
+            RoleFamily       = roleFamily,
+            CurrentAbility   = computedCA,
+            Stats            = stats,
+            Source           = source,
+            Archetype        = archetype,
+            CareerStage      = careerStage,
+            Confidence       = confidence,
+            SalaryDemandActual = actualSalary,
+            SalaryEstimateMin  = estimateMin,
+            SalaryEstimateMax  = estimateMax,
+            CompetitorInterest = competitorInterest,
+            ProjectedRoleFits  = projectedFits,
+            Preferences      = preferences,
         };
 
-        // Salary derived from CA, role base band, and Ambition
-        candidateData.Salary = candidateData.ComputeSalary();
+        candidateData.Salary      = actualSalary;
         candidateData.personality = PersonalitySystem.GeneratePersonality(rng);
 
-        // ── Preference generation ─────────────────────────────────────────────
-        bool isCoreRole = role == RoleId.SoftwareEngineer || role == RoleId.ProductDesigner || role == RoleId.QaEngineer;
+        // Generate report (cached on candidate; updated after interviews)
+        candidateData.Report = CandidateReportGenerator.Generate(candidateData, roleProfileTable);
 
-        int wFT  = isCoreRole ? 65 : 40;
+        return candidateData;
+    }
+
+    // ── Backward-compatible wrapper (old callers during incremental migration) ──
+    public static CandidateData GenerateCandidate(IRng rng, RoleProfileTable roleProfileTable, float qualityMultiplier = 1.0f, RoleId? forceRole = null)
+    {
+        var genParams = new CandidateGenerationParams
+        {
+            Source            = CandidateSource.OpenMarket,
+            ForceRole         = forceRole,
+            QualityMultiplier = qualityMultiplier
+        };
+        return GenerateCandidate(rng, roleProfileTable, genParams);
+    }
+
+    // ── Backward-compatible wrapper without table ─────────────────────────────
+    public static CandidateData GenerateCandidate(IRng rng, float qualityMultiplier = 1.0f, RoleId? forceRole = null)
+    {
+        return GenerateCandidate(rng, null, qualityMultiplier, forceRole);
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────────
+
+    private static RoleId PickWeightedRole(IRng rng, RoleProfileTable roleProfileTable, CandidateGenerationParams genParams)
+    {
+        int roleCount = RoleIdHelper.RoleCount;
+
+        // Build weight array
+        float[] weights = new float[roleCount];
+        float totalWeight = 0f;
+        for (int i = 0; i < roleCount; i++)
+        {
+            RoleId candidate = (RoleId)i;
+
+            // Skip roles not in forced family
+            if (genParams.ForceFamily.HasValue && RoleIdHelper.GetFamily(candidate) != genParams.ForceFamily.Value)
+            {
+                weights[i] = 0f;
+                continue;
+            }
+
+            float w = 1.0f;
+            // Use profile pool weight if available
+            if (roleProfileTable != null && roleProfileTable.HasProfile(candidate))
+                w = roleProfileTable.Get(candidate).CandidatePoolWeight;
+            // Apply override if provided
+            if (genParams.RoleWeightOverrides != null && i < genParams.RoleWeightOverrides.Length)
+                w *= genParams.RoleWeightOverrides[i];
+
+            weights[i] = w > 0f ? w : 0f;
+            totalWeight += weights[i];
+        }
+
+        if (totalWeight <= 0f)
+            return (RoleId)rng.Range(0, roleCount);
+
+        // Pick via CDF
+        float pick = rng.Range(0, (int)(totalWeight * 1000)) / 1000f;
+        float cumulative = 0f;
+        for (int i = 0; i < roleCount; i++)
+        {
+            cumulative += weights[i];
+            if (pick < cumulative) return (RoleId)i;
+        }
+        return (RoleId)(roleCount - 1);
+    }
+
+    private static CandidateArchetype PickArchetypeForSource(IRng rng, CandidateSource source)
+    {
+        // Archetype weights vary by source (Page 05 section 7.1)
+        switch (source)
+        {
+            case CandidateSource.HRSearch:
+                // HR search tends to find more specialists and reliable workers
+                return PickFromWeights(rng, new int[] { 25, 15, 5, 5, 20, 8, 8, 5, 5, 4 });
+
+            case CandidateSource.StartingPool:
+                // Starting pool is generalist-heavy
+                return PickFromWeights(rng, new int[] { 10, 30, 15, 5, 20, 5, 5, 5, 3, 2 });
+
+            case CandidateSource.Referral:
+                // Referrals lean specialist or reliable
+                return PickFromWeights(rng, new int[] { 20, 15, 8, 8, 20, 8, 10, 5, 4, 2 });
+
+            case CandidateSource.FormerEmployee:
+                // Former employees are reliable or mentors
+                return PickFromWeights(rng, new int[] { 15, 15, 5, 5, 25, 5, 20, 5, 3, 2 });
+
+            case CandidateSource.CompetitorLayoff:
+                // Layoffs produce specialists and difficult stars
+                return PickFromWeights(rng, new int[] { 25, 10, 5, 20, 10, 8, 5, 8, 5, 4 });
+
+            default: // OpenMarket: uniform-ish
+                return PickFromWeights(rng, new int[] { 15, 15, 12, 8, 15, 10, 8, 7, 5, 5 });
+        }
+    }
+
+    // weights maps 1:1 to CandidateArchetype enum values
+    private static CandidateArchetype PickFromWeights(IRng rng, int[] weights)
+    {
+        int total = 0;
+        int count = weights.Length;
+        for (int i = 0; i < count; i++) total += weights[i];
+        int roll = rng.Range(0, total);
+        int cumulative = 0;
+        for (int i = 0; i < count; i++)
+        {
+            cumulative += weights[i];
+            if (roll < cumulative) return (CandidateArchetype)i;
+        }
+        return CandidateArchetype.Generalist;
+    }
+
+    // Returns (primaryMod, secondaryMod, tertiaryMod) skill multipliers per archetype (Page 05 section 11.3)
+    private static void GetArchetypeSkillModifiers(CandidateArchetype archetype,
+        out float primaryMod, out float secondaryMod, out float tertiaryMod)
+    {
+        switch (archetype)
+        {
+            case CandidateArchetype.Specialist:
+                primaryMod = 1.3f; secondaryMod = 0.9f; tertiaryMod = 0.6f;
+                break;
+            case CandidateArchetype.Generalist:
+                primaryMod = 0.9f; secondaryMod = 1.1f; tertiaryMod = 1.1f;
+                break;
+            case CandidateArchetype.RawTalent:
+                primaryMod = 0.9f; secondaryMod = 0.9f; tertiaryMod = 0.8f;
+                break;
+            case CandidateArchetype.DifficultStar:
+                primaryMod = 1.4f; secondaryMod = 0.8f; tertiaryMod = 0.5f;
+                break;
+            case CandidateArchetype.ReliableWorker:
+                primaryMod = 1.0f; secondaryMod = 1.0f; tertiaryMod = 0.9f;
+                break;
+            case CandidateArchetype.CreativeRisk:
+                primaryMod = 1.1f; secondaryMod = 1.1f; tertiaryMod = 0.7f;
+                break;
+            case CandidateArchetype.Mentor:
+                primaryMod = 1.1f; secondaryMod = 1.2f; tertiaryMod = 1.0f;
+                break;
+            case CandidateArchetype.PressurePlayer:
+                primaryMod = 1.0f; secondaryMod = 1.0f; tertiaryMod = 0.9f;
+                break;
+            case CandidateArchetype.CommercialClimber:
+                primaryMod = 0.9f; secondaryMod = 0.9f; tertiaryMod = 0.8f;
+                break;
+            case CandidateArchetype.StableOperator:
+                primaryMod = 1.0f; secondaryMod = 1.0f; tertiaryMod = 1.0f;
+                break;
+            default:
+                primaryMod = 1.0f; secondaryMod = 1.0f; tertiaryMod = 1.0f;
+                break;
+        }
+    }
+
+    private static void ApplyCommercialClimberBoost(EmployeeStatBlock stats, IRng rng)
+    {
+        // Boost Sales, Marketing, Negotiation skills
+        int[] commercialIndices = new int[]
+        {
+            (int)SkillId.Marketing,
+            (int)SkillId.Sales,
+            (int)SkillId.Negotiation
+        };
+        for (int ci = 0; ci < commercialIndices.Length; ci++)
+        {
+            int idx = commercialIndices[ci];
+            stats.Skills[idx] = Clamp(stats.Skills[idx] + rng.Range(2, 5), 0, 20);
+        }
+    }
+
+    // Step 9: Generate all 8 visible attributes using role profile AttributeBands + archetype bias
+    private static void GenerateVisibleAttributes(EmployeeStatBlock stats, RoleProfileDefinition profile, CandidateArchetype archetype, int pa, IRng rng)
+    {
+        int attrCount = VisibleAttributeHelper.AttributeCount;
+        int paFloor = pa / 20;
+        if (paFloor < 1) paFloor = 1;
+        if (paFloor > 10) paFloor = 10;
+        int spread = (20 - paFloor) / 2 + 1;
+
+        for (int i = 0; i < attrCount; i++)
+        {
+            int baseVal;
+            if (profile != null)
+            {
+                AttributeWeightBand band = profile.AttributeBands[i];
+                switch (band)
+                {
+                    case AttributeWeightBand.Critical:
+                        baseVal = Clamp(rng.Range(paFloor + 3, paFloor + spread + 4), 6, 20);
+                        break;
+                    case AttributeWeightBand.Useful:
+                        baseVal = Clamp(rng.Range(paFloor + 1, paFloor + spread + 2), 4, 18);
+                        break;
+                    case AttributeWeightBand.Minor:
+                        baseVal = Clamp(rng.Range(paFloor, paFloor + spread + 1), 2, 16);
+                        break;
+                    default: // Irrelevant
+                        baseVal = Clamp(rng.Range(1, spread + 1), 1, 12);
+                        break;
+                }
+            }
+            else
+            {
+                baseVal = Clamp(rng.Range(paFloor, paFloor + spread + 1) + rng.Range(-1, 2), 1, 20);
+            }
+
+            // Archetype biases
+            baseVal = ApplyArchetypeAttributeBias(baseVal, (VisibleAttributeId)i, archetype, rng);
+            stats.VisibleAttributes[i] = Clamp(baseVal, 1, 20);
+        }
+    }
+
+    private static int ApplyArchetypeAttributeBias(int val, VisibleAttributeId attrId, CandidateArchetype archetype, IRng rng)
+    {
+        switch (archetype)
+        {
+            case CandidateArchetype.DifficultStar:
+                // High primary ability but lower communication and adaptability
+                if (attrId == VisibleAttributeId.Communication || attrId == VisibleAttributeId.Adaptability)
+                    return Clamp(val - rng.Range(2, 5), 1, 20);
+                break;
+            case CandidateArchetype.CreativeRisk:
+                if (attrId == VisibleAttributeId.Creativity)
+                    return Clamp(val + rng.Range(2, 5), 1, 20);
+                break;
+            case CandidateArchetype.Mentor:
+                if (attrId == VisibleAttributeId.Leadership || attrId == VisibleAttributeId.Communication)
+                    return Clamp(val + rng.Range(2, 4), 1, 20);
+                break;
+            case CandidateArchetype.PressurePlayer:
+                if (attrId == VisibleAttributeId.Composure || attrId == VisibleAttributeId.Focus)
+                    return Clamp(val + rng.Range(2, 4), 1, 20);
+                break;
+            case CandidateArchetype.ReliableWorker:
+                if (attrId == VisibleAttributeId.WorkEthic)
+                    return Clamp(val + rng.Range(1, 3), 1, 20);
+                break;
+            case CandidateArchetype.CommercialClimber:
+                if (attrId == VisibleAttributeId.Initiative || attrId == VisibleAttributeId.Communication)
+                    return Clamp(val + rng.Range(1, 3), 1, 20);
+                break;
+        }
+        return val;
+    }
+
+    // Step 10: Generate 7 hidden attributes with archetype-driven bias (Page 05 section 13.2)
+    private static void GenerateHiddenAttributes(EmployeeStatBlock stats, CandidateArchetype archetype, int pa, IRng rng)
+    {
+        int floor = pa / 20;
+        if (floor < 1) floor = 1;
+        if (floor > 10) floor = 10;
+        int spread = (20 - floor) / 2 + 1;
+
+        int BaseAttr() => Clamp(rng.Range(floor, floor + spread + 1) + rng.Range(-1, 2), 1, 20);
+
+        int learning  = BaseAttr();
+        int ambition  = BaseAttr();
+        int loyalty   = BaseAttr();
+        int pressure  = BaseAttr();
+        int ego       = BaseAttr();
+        int consist   = BaseAttr();
+        int mentoring = BaseAttr();
+
+        // Archetype biases on hidden attributes
+        switch (archetype)
+        {
+            case CandidateArchetype.DifficultStar:
+                ambition = Clamp(ambition + rng.Range(3, 7), 1, 20);
+                ego      = Clamp(ego      + rng.Range(3, 7), 1, 20);
+                loyalty  = Clamp(loyalty  - rng.Range(1, 4), 1, 20);
+                break;
+            case CandidateArchetype.RawTalent:
+                learning = Clamp(learning + rng.Range(3, 7), 1, 20);
+                ambition = Clamp(ambition + rng.Range(2, 5), 1, 20);
+                break;
+            case CandidateArchetype.Mentor:
+                mentoring = Clamp(mentoring + rng.Range(3, 7), 1, 20);
+                loyalty   = Clamp(loyalty   + rng.Range(2, 4), 1, 20);
+                break;
+            case CandidateArchetype.PressurePlayer:
+                pressure = Clamp(pressure + rng.Range(3, 6), 1, 20);
+                consist  = Clamp(consist  + rng.Range(2, 4), 1, 20);
+                break;
+            case CandidateArchetype.ReliableWorker:
+                consist  = Clamp(consist  + rng.Range(2, 4), 1, 20);
+                loyalty  = Clamp(loyalty  + rng.Range(1, 3), 1, 20);
+                ego      = Clamp(ego      - rng.Range(1, 3), 1, 20);
+                break;
+            case CandidateArchetype.CommercialClimber:
+                ambition = Clamp(ambition + rng.Range(2, 5), 1, 20);
+                ego      = Clamp(ego      + rng.Range(1, 3), 1, 20);
+                break;
+            case CandidateArchetype.CreativeRisk:
+                consist  = Clamp(consist  - rng.Range(1, 3), 1, 20);
+                learning = Clamp(learning + rng.Range(1, 3), 1, 20);
+                break;
+            case CandidateArchetype.Generalist:
+                // No strong biases — all moderate
+                break;
+        }
+
+        stats.HiddenAttributes[(int)HiddenAttributeId.LearningRate]    = learning;
+        stats.HiddenAttributes[(int)HiddenAttributeId.Ambition]        = ambition;
+        stats.HiddenAttributes[(int)HiddenAttributeId.Loyalty]         = loyalty;
+        stats.HiddenAttributes[(int)HiddenAttributeId.PressureTolerance] = pressure;
+        stats.HiddenAttributes[(int)HiddenAttributeId.Ego]             = ego;
+        stats.HiddenAttributes[(int)HiddenAttributeId.Consistency]     = consist;
+        stats.HiddenAttributes[(int)HiddenAttributeId.Mentoring]       = mentoring;
+    }
+
+    // Step 11: Compute projected role fits — roles where computed CA would also be respectable
+    private static List<RoleId> ComputeProjectedRoleFits(EmployeeStatBlock stats, RoleId primaryRole, RoleProfileTable roleProfileTable)
+    {
+        var fits = new List<RoleId>();
+        if (roleProfileTable == null) return fits;
+
+        int roleCount = RoleIdHelper.RoleCount;
+        for (int i = 0; i < roleCount; i++)
+        {
+            RoleId candidateRole = (RoleId)i;
+            if (candidateRole == primaryRole) continue;
+            var altProfile = roleProfileTable.Get(candidateRole);
+            if (altProfile == null) continue;
+            int altCA = AbilityCalculator.ComputeRoleCA(stats.Skills, altProfile.SkillBands);
+            if (altCA >= 60) // minimum threshold for a viable fit
+                fits.Add(candidateRole);
+        }
+        return fits;
+    }
+
+    private static int ApplyArchetypeSalaryModifier(int salary, CandidateArchetype archetype)
+    {
+        float mod;
+        switch (archetype)
+        {
+            case CandidateArchetype.DifficultStar:     mod = 1.20f; break;
+            case CandidateArchetype.CommercialClimber: mod = 1.10f; break;
+            case CandidateArchetype.Specialist:        mod = 1.05f; break;
+            case CandidateArchetype.ReliableWorker:    mod = 0.95f; break;
+            case CandidateArchetype.RawTalent:         mod = 0.90f; break;
+            case CandidateArchetype.StableOperator:    mod = 0.95f; break;
+            default:                                   mod = 1.00f; break;
+        }
+        return SalaryDemandCalculator.Round50(salary * mod);
+    }
+
+    private static CandidatePreferences GeneratePreferences(IRng rng, int age, bool isCoreRole)
+    {
+        int wFT   = isCoreRole ? 65 : 40;
         int wFlex = isCoreRole ? 20 : 35;
-        int wPT  = isCoreRole ? 15 : 25;
+        int wPT   = isCoreRole ? 15 : 25;
 
         if (age > 40)
         {
             int shift = 8;
             wFT  += shift;
-            wPT  -= shift < wPT ? shift : wPT;
+            wPT   = wPT > shift ? wPT - shift : 0;
         }
         else if (age < 28)
         {
             int shift = 7;
             wPT  += shift;
-            wFT  -= shift < wFT ? shift : wFT;
+            wFT   = wFT > shift ? wFT - shift : 0;
         }
 
         int ftPtTotal = wFT + wFlex + wPT;
@@ -417,21 +751,21 @@ public class CandidateData
         else
             ftPtPref = FtPtPreference.PrefersPartTime;
 
-        int wSec = 40;
-        int wNone = 35;
+        int wSec   = 40;
+        int wNone  = 35;
         int wFlex2 = 25;
 
         if (age > 40)
         {
             int shift = 5;
             wSec   += shift;
-            wFlex2 -= shift < wFlex2 ? shift : wFlex2;
+            wFlex2  = wFlex2 > shift ? wFlex2 - shift : 0;
         }
         else if (age < 28)
         {
             int shift = 5;
             wFlex2 += shift;
-            wSec   -= shift < wSec ? shift : wSec;
+            wSec    = wSec > shift ? wSec - shift : 0;
         }
 
         int lenTotal = wSec + wNone + wFlex2;
@@ -444,18 +778,7 @@ public class CandidateData
         else
             lengthPref = LengthPreference.PrefersFlexibility;
 
-        candidateData.Preferences = new CandidatePreferences
-        {
-            FtPtPref  = ftPtPref,
-            LengthPref = lengthPref
-        };
-
-        return candidateData;
-    }
-
-    public static CandidateData GenerateCandidate(IRng rng, float qualityMultiplier = 1.0f, RoleId? forceRole = null)
-    {
-        return GenerateCandidate(rng, null, qualityMultiplier, forceRole);
+        return new CandidatePreferences { FtPtPref = ftPtPref, LengthPref = lengthPref };
     }
 
     private static int Clamp(int value, int min, int max)

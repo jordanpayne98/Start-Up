@@ -24,7 +24,11 @@ public class AddMemberModalViewModel : IViewModel
         _teamId = id;
     }
 
-    public void Refresh(IReadOnlyGameState state) {
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
+        IReadOnlyGameState state = snapshot;
         if (state == null) return;
         _availableEmployees.Clear();
         TeamName = "";
@@ -56,5 +60,6 @@ public class AddMemberModalViewModel : IViewModel
                 Role = emp.role
             });
         }
+        IsDirty = true;
     }
 }

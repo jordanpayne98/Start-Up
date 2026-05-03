@@ -1,0 +1,52 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   theme-dark.uss — Dark theme application layer (Page 33 §11)
+   Relationship: variables.uss declares the token set; theme-dark.uss is the
+   active dark variant. A future theme-light.uss would override the same
+   tokens with lighter values.
+   Source of truth for token values: Assets/UI/USS/Core/tokens.uss
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* The dark theme is currently the default theme.
+   All token values are declared in Core/tokens.uss and mirrored in
+   Themes/variables.uss. This file exists to make the theme layer explicit
+   and ready for a future light-theme fork.
+
+   To override for a light theme: copy this file as theme-light.uss and
+   replace :root values with light-palette equivalents. Add/remove the
+   theme USS from your UIDocument PanelSettings at runtime to switch themes. */
+
+:root {
+    /* ── Dark theme confirmation ─────────────────────────────────────────────
+       Values below match Core/tokens.uss exactly.
+       Override here to diverge from the base dark theme.
+    ─────────────────────────────────────────────────────────────────────── */
+
+    --color-bg-root:    #080B0E;
+    --color-bg-shell:   #10151B;
+    --color-bg-sidebar: #0D1218;
+    --color-bg-topbar:  #10151B;
+    --color-bg-screen:  #0B0F14;
+
+    --color-bg-panel:          #171D24;
+    --color-bg-panel-raised:   #202731;
+    --color-bg-panel-hover:    #242D38;
+    --color-bg-panel-selected: #173C39;
+    --color-bg-panel-disabled: #11161C;
+
+    --color-text-primary:   #E6EAF0;
+    --color-text-secondary: #9CA7B5;
+    --color-text-muted:     #65717F;
+    --color-text-disabled:  #4F5A66;
+    --color-text-inverse:   #071013;
+    --color-text-accent:    #73E0D1;
+
+    --color-accent:         #45CBB7;
+    --color-accent-hover:   #62DCCA;
+    --color-accent-pressed: #2FAE9D;
+    --color-accent-muted:   #164E45;
+
+    --color-success:        #35D08A;
+    --color-warning:        #E2A93B;
+    --color-danger:         #F06C82;
+    --color-info:           #5AA7FF;
+}

@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="project://database/Assets/UI/USS/Core/tokens.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Core/components.uss" />
+    <ui:Style src="project://database/Assets/UI/USS/Components/filter-bar.uss" />
+
+    <!-- Filter Bar — count badge, filter chips, search, action buttons -->
+    <ui:VisualElement name="filter-bar-root" class="filter-bar">
+
+        <!-- Result count badge -->
+        <ui:Label name="filter-count-label" text="0 results" class="filter-bar__count" />
+
+        <!-- Divider -->
+        <ui:VisualElement class="divider--vertical" />
+
+        <!-- Filter chip slots — Views add/bind these dynamically -->
+        <ui:VisualElement name="filter-chips-host" class="filter-bar__chips" />
+
+        <!-- Spacer -->
+        <ui:VisualElement class="flex-1" />
+
+        <!-- Search input -->
+        <ui:TextField name="filter-search" class="search-bar filter-bar__search" />
+
+        <!-- Primary action button slot -->
+        <ui:Button name="filter-action-primary" text="+ New" class="btn btn-primary btn-sm filter-bar__action" />
+
+    </ui:VisualElement>
+</ui:UXML>

@@ -38,7 +38,7 @@ public class TeamAssignmentView : IGameView
         _createTeamView = new CreateTeamModalView(dispatcher, modal);
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
         _root.AddToClassList("team-assignment-screen");
 

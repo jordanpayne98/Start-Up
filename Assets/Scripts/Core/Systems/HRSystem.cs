@@ -572,12 +572,18 @@ public class HRSystem : ISystem
         _abilitySystem = abilitySystem;
     }
 
+    private RoleProfileTable _roleProfileTable;
+
+    public void SetRoleProfileTable(RoleProfileTable roleProfileTable)
+    {
+        _roleProfileTable = roleProfileTable;
+    }
+
     // ── Candidate generation ──────────────────────────────────────────
 
     private CandidateData GenerateTargetedCandidate(ActiveHRSearch search)
     {
-        float qualityMultiplier = 1.0f;
-        qualityMultiplier *= 1.4f; // HR-sourced candidates are higher quality
+        float qualityMultiplier = 1.4f; // HR-sourced candidates are higher quality
         if (qualityMultiplier > 2.0f) qualityMultiplier = 2.0f;
 
         bool hasCAFilter = search.minCA > 0 || search.maxCA > 0;
@@ -589,16 +595,18 @@ public class HRSystem : ISystem
         int paStarMin = (hasPAFilter && search.minPAStars > 0) ? search.minPAStars : 1;
         int paStarMax = (hasPAFilter && search.maxPAStars > 0) ? search.maxPAStars : 5;
 
-        // Fix C: maxAttempts = 1 when fully unconstrained
         bool hasAnyFilter = hasCAFilter || hasPAFilter;
         int maxAttempts = hasAnyFilter ? 20 : 1;
 
         CandidateData bestCandidate = null;
         int bestScore = -1;
 
+        RoleFamily targetFamily = RoleIdHelper.GetFamily(search.targetRole);
+        var genParams = CandidateGenerationParams.HRSearch(search.targetRole, targetFamily, qualityMultiplier);
+
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
-            var candidate = CandidateData.GenerateCandidate(_rng, qualityMultiplier, search.targetRole);
+            var candidate = CandidateData.GenerateCandidate(_rng, _roleProfileTable, genParams);
 
             int candidateCA      = _abilitySystem != null ? _abilitySystem.ComputeCandidateCA(candidate) : 0;
             int candidatePAStars = AbilityCalculator.PotentialToStars(candidate.Stats.PotentialAbility);
@@ -623,7 +631,7 @@ public class HRSystem : ISystem
 
         _abilitySystem?.GenerateCandidateAbility(bestCandidate);
 
-        int finalCA     = _abilitySystem != null ? _abilitySystem.ComputeCandidateCA(bestCandidate) : 0;
+        int finalCA      = _abilitySystem != null ? _abilitySystem.ComputeCandidateCA(bestCandidate) : 0;
         int finalPAStars = AbilityCalculator.PotentialToStars(bestCandidate.Stats.PotentialAbility);
         _logger.Log($"[HRSystem] Delivered {bestCandidate.Name} — Ability:{finalCA} Potential:★{finalPAStars} (filter Ability:{effectiveMinCA}–{effectiveMaxCA} Potential:★{paStarMin}–★{paStarMax})");
 

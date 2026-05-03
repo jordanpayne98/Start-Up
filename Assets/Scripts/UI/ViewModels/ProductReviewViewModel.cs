@@ -56,7 +56,11 @@ public class ProductReviewViewModel : IViewModel
         PopulateFromResult(result);
     }
 
-    public void Refresh(IReadOnlyGameState state) {
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
+        IReadOnlyGameState state = snapshot;
         _outletScores.Clear();
         _dimensionScores.Clear();
 

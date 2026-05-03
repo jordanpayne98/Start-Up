@@ -707,6 +707,145 @@ public class TuningConfig
         set { _skillAgeDecayMultipliers = value; OnParameterChanged?.Invoke("SkillAgeDecayMultipliers", null, value); }
     }
 
+    // ── Skill Growth — Growth Multipliers (Wave 3B) ──────────────────────────────
+    private float _learningRateLowMultiplier = 0.70f;
+    public float LearningRateLowMultiplier {
+        get => _learningRateLowMultiplier;
+        set { if (value != _learningRateLowMultiplier) { var o = _learningRateLowMultiplier; _learningRateLowMultiplier = value; OnParameterChanged?.Invoke("LearningRateLowMultiplier", o, value); } }
+    }
+
+    private float _learningRateBelowAvgMultiplier = 0.85f;
+    public float LearningRateBelowAvgMultiplier {
+        get => _learningRateBelowAvgMultiplier;
+        set { if (value != _learningRateBelowAvgMultiplier) { var o = _learningRateBelowAvgMultiplier; _learningRateBelowAvgMultiplier = value; OnParameterChanged?.Invoke("LearningRateBelowAvgMultiplier", o, value); } }
+    }
+
+    private float _learningRateAvgMultiplier = 1.00f;
+    public float LearningRateAvgMultiplier {
+        get => _learningRateAvgMultiplier;
+        set { if (value != _learningRateAvgMultiplier) { var o = _learningRateAvgMultiplier; _learningRateAvgMultiplier = value; OnParameterChanged?.Invoke("LearningRateAvgMultiplier", o, value); } }
+    }
+
+    private float _learningRateAboveAvgMultiplier = 1.15f;
+    public float LearningRateAboveAvgMultiplier {
+        get => _learningRateAboveAvgMultiplier;
+        set { if (value != _learningRateAboveAvgMultiplier) { var o = _learningRateAboveAvgMultiplier; _learningRateAboveAvgMultiplier = value; OnParameterChanged?.Invoke("LearningRateAboveAvgMultiplier", o, value); } }
+    }
+
+    private float _learningRateHighMultiplier = 1.30f;
+    public float LearningRateHighMultiplier {
+        get => _learningRateHighMultiplier;
+        set { if (value != _learningRateHighMultiplier) { var o = _learningRateHighMultiplier; _learningRateHighMultiplier = value; OnParameterChanged?.Invoke("LearningRateHighMultiplier", o, value); } }
+    }
+
+    private float _moraleLowXPMultiplier = 0.50f;
+    public float MoraleLowXPMultiplier {
+        get => _moraleLowXPMultiplier;
+        set { if (value != _moraleLowXPMultiplier) { var o = _moraleLowXPMultiplier; _moraleLowXPMultiplier = value; OnParameterChanged?.Invoke("MoraleLowXPMultiplier", o, value); } }
+    }
+
+    private float _moraleBelowAvgXPMultiplier = 0.75f;
+    public float MoraleBelowAvgXPMultiplier {
+        get => _moraleBelowAvgXPMultiplier;
+        set { if (value != _moraleBelowAvgXPMultiplier) { var o = _moraleBelowAvgXPMultiplier; _moraleBelowAvgXPMultiplier = value; OnParameterChanged?.Invoke("MoraleBelowAvgXPMultiplier", o, value); } }
+    }
+
+    private float _moraleAvgXPMultiplier = 1.00f;
+    public float MoraleAvgXPMultiplier {
+        get => _moraleAvgXPMultiplier;
+        set { if (value != _moraleAvgXPMultiplier) { var o = _moraleAvgXPMultiplier; _moraleAvgXPMultiplier = value; OnParameterChanged?.Invoke("MoraleAvgXPMultiplier", o, value); } }
+    }
+
+    private float _moraleAboveAvgXPMultiplier = 1.05f;
+    public float MoraleAboveAvgXPMultiplier {
+        get => _moraleAboveAvgXPMultiplier;
+        set { if (value != _moraleAboveAvgXPMultiplier) { var o = _moraleAboveAvgXPMultiplier; _moraleAboveAvgXPMultiplier = value; OnParameterChanged?.Invoke("MoraleAboveAvgXPMultiplier", o, value); } }
+    }
+
+    private float _moraleHighXPMultiplier = 1.10f;
+    public float MoraleHighXPMultiplier {
+        get => _moraleHighXPMultiplier;
+        set { if (value != _moraleHighXPMultiplier) { var o = _moraleHighXPMultiplier; _moraleHighXPMultiplier = value; OnParameterChanged?.Invoke("MoraleHighXPMultiplier", o, value); } }
+    }
+
+    private float _roleFitPoorMultiplier = 0.50f;
+    public float RoleFitPoorMultiplier {
+        get => _roleFitPoorMultiplier;
+        set { if (value != _roleFitPoorMultiplier) { var o = _roleFitPoorMultiplier; _roleFitPoorMultiplier = value; OnParameterChanged?.Invoke("RoleFitPoorMultiplier", o, value); } }
+    }
+
+    private float _roleFitBelowAvgMultiplier = 0.75f;
+    public float RoleFitBelowAvgMultiplier {
+        get => _roleFitBelowAvgMultiplier;
+        set { if (value != _roleFitBelowAvgMultiplier) { var o = _roleFitBelowAvgMultiplier; _roleFitBelowAvgMultiplier = value; OnParameterChanged?.Invoke("RoleFitBelowAvgMultiplier", o, value); } }
+    }
+
+    private float _roleFitAvgMultiplier = 1.00f;
+    public float RoleFitAvgMultiplier {
+        get => _roleFitAvgMultiplier;
+        set { if (value != _roleFitAvgMultiplier) { var o = _roleFitAvgMultiplier; _roleFitAvgMultiplier = value; OnParameterChanged?.Invoke("RoleFitAvgMultiplier", o, value); } }
+    }
+
+    private float _roleFitGoodMultiplier = 1.10f;
+    public float RoleFitGoodMultiplier {
+        get => _roleFitGoodMultiplier;
+        set { if (value != _roleFitGoodMultiplier) { var o = _roleFitGoodMultiplier; _roleFitGoodMultiplier = value; OnParameterChanged?.Invoke("RoleFitGoodMultiplier", o, value); } }
+    }
+
+    private float _roleFitExcellentMultiplier = 1.20f;
+    public float RoleFitExcellentMultiplier {
+        get => _roleFitExcellentMultiplier;
+        set { if (value != _roleFitExcellentMultiplier) { var o = _roleFitExcellentMultiplier; _roleFitExcellentMultiplier = value; OnParameterChanged?.Invoke("RoleFitExcellentMultiplier", o, value); } }
+    }
+
+    private float _mentoringAvgBonus = 0.03f;
+    public float MentoringAvgBonus {
+        get => _mentoringAvgBonus;
+        set { if (value != _mentoringAvgBonus) { var o = _mentoringAvgBonus; _mentoringAvgBonus = value; OnParameterChanged?.Invoke("MentoringAvgBonus", o, value); } }
+    }
+
+    private float _mentoringGoodBonus = 0.07f;
+    public float MentoringGoodBonus {
+        get => _mentoringGoodBonus;
+        set { if (value != _mentoringGoodBonus) { var o = _mentoringGoodBonus; _mentoringGoodBonus = value; OnParameterChanged?.Invoke("MentoringGoodBonus", o, value); } }
+    }
+
+    private float _mentoringExceptionalBonus = 0.12f;
+    public float MentoringExceptionalBonus {
+        get => _mentoringExceptionalBonus;
+        set { if (value != _mentoringExceptionalBonus) { var o = _mentoringExceptionalBonus; _mentoringExceptionalBonus = value; OnParameterChanged?.Invoke("MentoringExceptionalBonus", o, value); } }
+    }
+
+    private float _mentoringMaxBonus = 0.15f;
+    public float MentoringMaxBonus {
+        get => _mentoringMaxBonus;
+        set { if (value != _mentoringMaxBonus) { var o = _mentoringMaxBonus; _mentoringMaxBonus = value; OnParameterChanged?.Invoke("MentoringMaxBonus", o, value); } }
+    }
+
+    private int _mentoringSkillGapRequired = 5;
+    public int MentoringSkillGapRequired {
+        get => _mentoringSkillGapRequired;
+        set { if (value != _mentoringSkillGapRequired) { var o = _mentoringSkillGapRequired; _mentoringSkillGapRequired = value; OnParameterChanged?.Invoke("MentoringSkillGapRequired", o, value); } }
+    }
+
+    private float _visibleAttributeXPThreshold = 3.0f;
+    public float VisibleAttributeXPThreshold {
+        get => _visibleAttributeXPThreshold;
+        set { if (value != _visibleAttributeXPThreshold) { var o = _visibleAttributeXPThreshold; _visibleAttributeXPThreshold = value; OnParameterChanged?.Invoke("VisibleAttributeXPThreshold", o, value); } }
+    }
+
+    private float _visibleAttributeBaseXPPerTrigger = 0.03f;
+    public float VisibleAttributeBaseXPPerTrigger {
+        get => _visibleAttributeBaseXPPerTrigger;
+        set { if (value != _visibleAttributeBaseXPPerTrigger) { var o = _visibleAttributeBaseXPPerTrigger; _visibleAttributeBaseXPPerTrigger = value; OnParameterChanged?.Invoke("VisibleAttributeBaseXPPerTrigger", o, value); } }
+    }
+
+    private float _founderXPMultiplier = 1.05f;
+    public float FounderXPMultiplier {
+        get => _founderXPMultiplier;
+        set { if (value != _founderXPMultiplier) { var o = _founderXPMultiplier; _founderXPMultiplier = value; OnParameterChanged?.Invoke("FounderXPMultiplier", o, value); } }
+    }
+
     // ── Product Work Rate ───────────────────────────────────────────────────────
     private float _teamOverheadPerMember = 0.04f;
     public float TeamOverheadPerMember {
@@ -1378,7 +1517,29 @@ public class TuningConfig
             { "ProductPhaseXPPerDay",                 ProductPhaseXPPerDay },
             { "ProductPhaseMisfitXPRate",             ProductPhaseMisfitXPRate },
             { "ProductPhaseNativeXPRate",             ProductPhaseNativeXPRate },
-            { "PopularityConvergenceRate",            PopularityConvergenceRate },
+            { "LearningRateLowMultiplier",            LearningRateLowMultiplier },
+            { "LearningRateBelowAvgMultiplier",       LearningRateBelowAvgMultiplier },
+            { "LearningRateAvgMultiplier",            LearningRateAvgMultiplier },
+            { "LearningRateAboveAvgMultiplier",       LearningRateAboveAvgMultiplier },
+            { "LearningRateHighMultiplier",           LearningRateHighMultiplier },
+            { "MoraleLowXPMultiplier",                MoraleLowXPMultiplier },
+            { "MoraleBelowAvgXPMultiplier",           MoraleBelowAvgXPMultiplier },
+            { "MoraleAvgXPMultiplier",                MoraleAvgXPMultiplier },
+            { "MoraleAboveAvgXPMultiplier",           MoraleAboveAvgXPMultiplier },
+            { "MoraleHighXPMultiplier",               MoraleHighXPMultiplier },
+            { "RoleFitPoorMultiplier",                RoleFitPoorMultiplier },
+            { "RoleFitBelowAvgMultiplier",            RoleFitBelowAvgMultiplier },
+            { "RoleFitAvgMultiplier",                 RoleFitAvgMultiplier },
+            { "RoleFitGoodMultiplier",                RoleFitGoodMultiplier },
+            { "RoleFitExcellentMultiplier",           RoleFitExcellentMultiplier },
+            { "MentoringAvgBonus",                    MentoringAvgBonus },
+            { "MentoringGoodBonus",                   MentoringGoodBonus },
+            { "MentoringExceptionalBonus",            MentoringExceptionalBonus },
+            { "MentoringMaxBonus",                    MentoringMaxBonus },
+            { "MentoringSkillGapRequired",            MentoringSkillGapRequired },
+            { "VisibleAttributeXPThreshold",          VisibleAttributeXPThreshold },
+            { "VisibleAttributeBaseXPPerTrigger",     VisibleAttributeBaseXPPerTrigger },
+            { "FounderXPMultiplier",                  FounderXPMultiplier },            { "PopularityConvergenceRate",            PopularityConvergenceRate },
             { "MinGrowthStageDays",                   MinGrowthStageDays },
             { "MinPlateauStageDays",                  MinPlateauStageDays },
             { "MoraleLowRecoveryThreshold",           MoraleLowRecoveryThreshold },

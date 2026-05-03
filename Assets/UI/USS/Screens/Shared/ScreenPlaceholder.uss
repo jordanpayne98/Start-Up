@@ -1,0 +1,53 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ScreenPlaceholder styles — Page 33 §16
+   Depends on: tokens.uss
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.placeholder-container {
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: var(--space-8);
+    background-color: var(--color-bg-panel);
+    border-radius: var(--radius-12);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    max-width: 400px;
+    padding: var(--space-32);
+    align-self: center;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.placeholder-icon {
+    font-size: var(--font-size-3xl);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-16);
+}
+
+.placeholder-title {
+    font-size: var(--font-size-2xl);
+    color: var(--color-text-secondary);
+    -unity-font-style: bold;
+}
+
+.placeholder-message {
+    font-size: var(--font-size-md);
+    color: var(--color-text-muted);
+    margin-top: var(--space-8);
+    -unity-text-align: upper-center;
+}
+
+.placeholder-badge {
+    background-color: var(--color-accent-soft);
+    color: var(--color-text-accent);
+    border-radius: var(--radius-pill);
+    padding-left: var(--space-12);
+    padding-right: var(--space-12);
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-4);
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-12);
+    -unity-font-style: bold;
+}

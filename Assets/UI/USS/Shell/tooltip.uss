@@ -1,0 +1,134 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Tooltip Layer and Tooltip Content Styles — Page 30 / Page 31 / Page 28
+   Depends on: tokens.uss (loaded globally via MainGameShell.uxml)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tooltip Layer ───────────────────────────────────────────────────────── */
+
+#tooltip-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: none;
+    pointer-events: none;
+}
+
+/* ── Tooltip Container ───────────────────────────────────────────────────── */
+
+.tooltip {
+    position: absolute;
+    background-color: var(--color-bg-tooltip);
+    border-width: 1px;
+    border-color: var(--color-border-strong);
+    border-radius: var(--radius-6);
+    flex-direction: column;
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+    padding-left: var(--space-10);
+    padding-right: var(--space-10);
+    max-width: 320px;
+    min-width: 200px;
+    pointer-events: none;
+}
+
+/* ── Tooltip Title ───────────────────────────────────────────────────────── */
+
+.tooltip-title {
+    font-size: var(--font-size-sm);
+    -unity-font-style: bold;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-4);
+    pointer-events: none;
+}
+
+/* ── Tooltip Body ────────────────────────────────────────────────────────── */
+
+.tooltip-body {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-8);
+    white-space: normal;
+    pointer-events: none;
+}
+
+.tooltip-body:last-child {
+    margin-bottom: 0;
+}
+
+/* ── Tooltip Stat Rows (legacy support) ──────────────────────────────────── */
+
+.tooltip__divider {
+    height: 1px;
+    background-color: var(--color-divider);
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.tooltip__stat-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 18px;
+    pointer-events: none;
+}
+
+.tooltip__stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    flex-grow: 1;
+    pointer-events: none;
+}
+
+.tooltip__stat-value {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+    margin-left: var(--space-8);
+    pointer-events: none;
+}
+
+/* Row style variants */
+.tooltip__stat-row--header .tooltip__stat-label {
+    color: var(--color-text-muted);
+    -unity-font-style: bold;
+    font-size: var(--font-size-micro);
+}
+
+.tooltip__stat-row--unlocked .tooltip__stat-value {
+    color: var(--color-text-success);
+}
+
+.tooltip__stat-row--locked .tooltip__stat-label,
+.tooltip__stat-row--locked .tooltip__stat-value {
+    color: var(--color-text-disabled);
+}
+
+/* ── Tooltip Calc Block ──────────────────────────────────────────────────── */
+
+.tooltip-calc {
+    margin-top: var(--space-8);
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-4);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    pointer-events: none;
+}
+
+/* ── Tooltip Learn More Link ─────────────────────────────────────────────── */
+
+.tooltip-link {
+    color: var(--color-text-accent);
+    font-size: var(--font-size-sm);
+    margin-top: var(--space-4);
+    pointer-events: none;
+}
+
+/* ── Visibility toggle ───────────────────────────────────────────────────── */
+
+.tooltip--visible {
+    display: flex;
+}

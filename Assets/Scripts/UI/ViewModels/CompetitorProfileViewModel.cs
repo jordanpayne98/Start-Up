@@ -101,11 +101,13 @@ public class CompetitorProfileViewModel : IViewModel
         Id = id;
     }
 
-    public void Refresh(IReadOnlyGameState state) {
-        if (state == null) return;
-        var snapshot = state as GameStateSnapshot;
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
         if (snapshot == null) return;
         Refresh(Id, snapshot);
+        IsDirty = true;
     }
 
     public void Refresh(CompetitorId id, GameStateSnapshot snapshot) {

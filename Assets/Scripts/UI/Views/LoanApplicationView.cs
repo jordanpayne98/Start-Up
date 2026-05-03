@@ -32,7 +32,7 @@ public class LoanApplicationView : IGameView
     private Button _previewButton;
     private Button _submitButton;
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
 
         // ── Header ───────────────────────────────────────────────────────────────

@@ -10,8 +10,8 @@ using UnityEngine.UIElements;
 /// </summary>
 public class EmployeeDetailModalView : IGameView
 {
-    private readonly ICommandDispatcher _dispatcher;
-    private readonly IModalPresenter    _modal;
+    private ICommandDispatcher _dispatcher;
+    private IModalPresenter    _modal;
 
     private VisualTreeAsset _asset;
     private EmployeeDetailModalViewModel _vm;
@@ -157,11 +157,7 @@ public class EmployeeDetailModalView : IGameView
 
     // ── Constructor ───────────────────────────────────────────────────────────
 
-    public EmployeeDetailModalView(ICommandDispatcher dispatcher, IModalPresenter modal)
-    {
-        _dispatcher = dispatcher;
-        _modal      = modal;
-    }
+    public EmployeeDetailModalView() { }
 
     /// <summary>Called by WindowManager before Initialize to inject the UXML template asset.</summary>
     public void SetAsset(VisualTreeAsset asset)
@@ -171,9 +167,11 @@ public class EmployeeDetailModalView : IGameView
 
     // ── IGameView ─────────────────────────────────────────────────────────────
 
-    public void Initialize(VisualElement root)
+    public void Initialize(VisualElement root, UIServices services)
     {
-        _root = root;
+        _dispatcher = services?.Commands;
+        _modal      = services?.Modals;
+        _root       = root;
 
         // Clone the UXML template into the provided root
         if (_asset != null)

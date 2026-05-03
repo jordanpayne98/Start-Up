@@ -19,6 +19,10 @@ MonoBehaviour:
   StrengthAttributes: 0300000000000000
   WeakAttributes: 02000000
   HiddenTendencies: 0600000002000000
+  HiddenAttributeModifiers: 01000000000000000200000000000000ffffffff0000000003000000
+  BoostAttributes: 0300000000000000
+  BoostAmount: 2
+  PenaltyAmount: 2
   BestPairing: "Independent or Disciplined \u2014 covers solo output gap"
   RiskWarning: Lower solo focus. May defer decisions or slow execution without a
     strong partner.

@@ -1,6 +1,7 @@
 public enum ScreenId
 {
     // Dashboard
+    Dashboard,
     DashboardInbox,
     DashboardCalendar,
     DashboardReputation,

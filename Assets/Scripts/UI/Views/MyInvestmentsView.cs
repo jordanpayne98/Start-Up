@@ -22,7 +22,7 @@ public class MyInvestmentsView : IGameView
         _dispatcher = dispatcher;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
 
         var title = new Label("My Investments");

@@ -107,12 +107,14 @@ public class ProductsBrowserViewModel : IViewModel
         ApplyFilterAndSort();
     }
 
-    public void Refresh(IReadOnlyGameState state) {
-        if (state == null) return;
-        var snapshot = state as GameStateSnapshot;
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
         if (snapshot == null) return;
         Refresh(snapshot.ProductStateRef, snapshot.CompetitorState, snapshot.MarketStateRef,
                 snapshot.CompanyName, snapshot.CurrentTick);
+        IsDirty = true;
     }
 
     public void Refresh(ProductState productState, CompetitorState compState, MarketState marketState,

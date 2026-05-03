@@ -53,7 +53,7 @@ public class RenewalView : IGameView
         _modal      = modal;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         if (_initialized) return;
         _initialized = true;
         _root = root;

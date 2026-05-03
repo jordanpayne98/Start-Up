@@ -1,0 +1,19 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Dividers (shared layout utilities)
+   Depends on: tokens.uss
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.divider {
+    height: 1px;
+    background-color: var(--color-divider);
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-8);
+}
+
+.divider--vertical {
+    width: 1px;
+    height: 100%;
+    background-color: var(--color-divider);
+    margin-left: var(--space-8);
+    margin-right: var(--space-8);
+}

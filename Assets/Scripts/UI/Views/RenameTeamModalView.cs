@@ -20,7 +20,7 @@ public class RenameTeamModalView : IGameView
         _currentName = currentName;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
         _root.AddToClassList("rename-team-modal");
 

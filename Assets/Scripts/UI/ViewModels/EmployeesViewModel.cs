@@ -43,7 +43,11 @@ public class EmployeesViewModel : IViewModel
         SortEmployees();
     }
 
-    public void Refresh(IReadOnlyGameState state) {
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) {
+        IReadOnlyGameState state = snapshot;
         if (state == null) return;
 
         _employees.Clear();

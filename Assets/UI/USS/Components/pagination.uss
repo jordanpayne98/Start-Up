@@ -1,0 +1,65 @@
+/* ── Pagination Component (Page 28 density + Page 30 contracts) ─────────── */
+
+.pagination {
+    flex-direction: row;
+    align-items: center;
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+    padding-left: var(--space-16);
+    padding-right: var(--space-16);
+    border-top-width: 1px;
+    border-top-color: var(--color-divider);
+    height: var(--row-height-compact);
+    flex-shrink: 0;
+}
+
+.pagination__range {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+}
+
+.pagination__pages {
+    flex-direction: row;
+    align-items: center;
+}
+
+.pagination__btn {
+    margin-left: var(--space-2);
+    margin-right: var(--space-2);
+}
+
+.pagination__page-number {
+    min-width: 28px;
+    height: var(--btn-height-sm);
+    border-radius: var(--radius-4);
+    font-size: var(--font-size-xs);
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+    transition: background-color 100ms ease-in-out;
+    margin-left: var(--space-2);
+    margin-right: var(--space-2);
+}
+
+.pagination__page-number:hover {
+    background-color: var(--color-bg-panel-hover);
+    color: var(--color-text-primary);
+}
+
+.pagination__page-number--active {
+    background-color: var(--color-bg-panel-selected);
+    color: var(--color-text-accent);
+    border-width: 1px;
+    border-color: var(--color-border-selected);
+}
+
+.pagination__rows-label {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    margin-right: var(--space-6);
+}
+
+.pagination__rows-select {
+    width: 80px;
+}

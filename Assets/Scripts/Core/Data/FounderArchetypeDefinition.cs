@@ -16,19 +16,40 @@ public class FounderArchetypeDefinition : ScriptableObject
     public string[] Risks;
     public string RecommendedPairing;
 
+    /// <summary>CA range when two founders are chosen (standard).</summary>
     public int CAMin;
     public int CAMax;
+    /// <summary>PA range when two founders are chosen (standard).</summary>
     public int PAMin;
     public int PAMax;
 
+    /// <summary>CA range when solo founder is chosen (higher than two-founder).</summary>
+    public int SoloCAMin;
+    public int SoloCAMax;
+    /// <summary>PA range when solo founder is chosen.</summary>
+    public int SoloPAMin;
+    public int SoloPAMax;
+
     /// <summary>Skills that receive bonus points during stat generation for this archetype.</summary>
     public SkillId[] SkillBiasProfile;
+
+    /// <summary>Primary skills for this archetype — highest allocation priority.</summary>
+    public SkillId[] PrimarySkillBiases;
+
+    /// <summary>Secondary skills for this archetype — moderate allocation priority.</summary>
+    public SkillId[] SecondarySkillBiases;
 
     /// <summary>
     /// Visible attribute biases for this archetype (e.g., Focus, WorkEthic, Initiative).
     /// Used during stat generation to weight attribute rolls.
     /// </summary>
     public VisibleAttributeId[] AttributeBias;
+
+    /// <summary>Hidden attributes biased high for this archetype (e.g., Consistency, LearningRate).</summary>
+    public HiddenAttributeId[] HiddenBias;
+
+    /// <summary>Visible attributes that may receive weakness penalties during generation.</summary>
+    public VisibleAttributeId[] WeaknessRiskAttributes;
 
     /// <summary>
     /// If true, this archetype requires a specific company background to unlock.

@@ -70,7 +70,7 @@ public class CompetitorProfileView : IGameView
         _dispatcher = dispatcher;
     }
 
-    public void Initialize(VisualElement root) {
+    public void Initialize(VisualElement root, UIServices services) {
         _root = root;
         _root.AddToClassList("competitor-detail-modal");
 

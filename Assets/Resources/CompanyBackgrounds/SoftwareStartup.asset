@@ -36,3 +36,15 @@ MonoBehaviour:
   ContractPoolBiasTags:
   - software
   - web
+  CandidatePoolBiasFamilies: 0000000004000000
+  CandidatePoolBiasWeights:
+  - 3
+  - 2
+  ContractPoolBiasCategories:
+  - software
+  - engineering
+  - tech
+  WelcomeMessage: Your engineering background gives you a head start. Focus on landing
+    software contracts and building a strong technical team.
+  HiringHint: Your founding team has limited Quality & Support coverage. Consider
+    hiring a QA Engineer to improve delivery confidence.

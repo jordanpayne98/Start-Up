@@ -22,7 +22,10 @@ public class ShowdownResultViewModel : IViewModel
         ChurnPenaltyDescription = "--";
     }
 
-    public void Refresh(IReadOnlyGameState state) { }
+    public bool IsDirty { get; private set; }
+    public void ClearDirty() => IsDirty = false;
+
+    public void Refresh(GameStateSnapshot snapshot) { IsDirty = true; }
 
     public void Refresh(ProductId winnerProductId, ProductId loserProductId,
         ProductState productState, CompetitorState compState, bool playerWon) {

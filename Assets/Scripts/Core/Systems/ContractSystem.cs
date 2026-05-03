@@ -469,7 +469,7 @@ public class ContractSystem : ISystem
                 var assignedTeam = _teamSystem.GetTeam(contract.AssignedTeamId.Value);
                 if (assignedTeam != null)
                 {
-                    SkillGrowthSystem.AwardSkillXP(contract, assignedTeam, _employeeSystem, _rng, _roleProfileTable, _abilitySystem, _tuning);
+                    SkillGrowthSystem.AwardSkillXP(contract, assignedTeam, _employeeSystem, _abilitySystem, _moraleSystem, _rng, _roleProfileTable, _tuning);
 
                     // Invalidate CA cache for all team members so star ratings update
                     var membersForEvent = new List<EmployeeId>(assignedTeam.members);

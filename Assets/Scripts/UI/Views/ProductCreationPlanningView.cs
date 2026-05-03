@@ -9,8 +9,8 @@ using UnityEngine.UIElements;
 /// </summary>
 public class ProductCreationPlanningView : IGameView
 {
-    private readonly ICommandDispatcher _dispatcher;
-    private readonly IModalPresenter _modal;
+    private ICommandDispatcher _dispatcher;
+    private IModalPresenter _modal;
 
     private VisualElement _root;
     private ProductCreationPlanningViewModel _viewModel;
@@ -175,17 +175,15 @@ public class ProductCreationPlanningView : IGameView
     // ── Team Slot Binding Cache ──────────────────────────────────────────────
     private readonly List<ProductSlotData> _teamSlotsListCache = new List<ProductSlotData>(4);
 
-    public ProductCreationPlanningView(ICommandDispatcher dispatcher, IModalPresenter modal)
-    {
-        _dispatcher = dispatcher;
-        _modal = modal;
-    }
+    public ProductCreationPlanningView() { }
 
     // ── IGameView ───────────────────────────────────────────────────────────
 
-    public void Initialize(VisualElement root)
+    public void Initialize(VisualElement root, UIServices services)
     {
-        _root = root;
+        _dispatcher = services?.Commands;
+        _modal      = services?.Modals;
+        _root       = root;
 
         // Load USS
         var uss = UnityEngine.Resources.Load<StyleSheet>(UssPath);

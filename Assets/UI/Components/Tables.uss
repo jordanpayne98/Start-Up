@@ -1,0 +1,68 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Tables / Rows — Page 30 + Page 31 §8.3
+   Depends on: tokens.uss
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.table {
+    flex-direction: column;
+    width: 100%;
+}
+
+.table-header {
+    flex-direction: row;
+    align-items: center;
+    height: var(--row-height-compact);
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-divider);
+}
+
+.table-header > Label {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    -unity-font-style: bold;
+    -unity-text-align: upper-left;
+}
+
+.table-row {
+    flex-direction: row;
+    align-items: center;
+    height: var(--row-height-compact);
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-divider);
+    transition: background-color 100ms ease-in-out;
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+}
+
+.table-row:hover {
+    background-color: var(--color-bg-panel-hover);
+}
+
+.table-row--selected {
+    background-color: var(--color-bg-panel-selected);
+    border-left-width: 2px;
+    border-left-color: var(--color-accent);
+}
+
+.table-row--warning {
+    background-color: var(--color-warning-soft);
+}
+
+.table-row--danger {
+    background-color: var(--color-danger-soft);
+}
+
+.table-row--standard {
+    height: var(--row-height-standard);
+}
+
+.table-cell {
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    flex-shrink: 0;
+}

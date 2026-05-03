@@ -18,6 +18,10 @@ MonoBehaviour:
   StrengthAttributes: 0100000004000000
   WeakAttributes: 02000000
   HiddenTendencies: 00000000
+  HiddenAttributeModifiers: 0300000001000000000000000000000000000000feffffff00000000
+  BoostAttributes: 0100000004000000
+  BoostAmount: 2
+  PenaltyAmount: 2
   BestPairing: "Disciplined or Calm \u2014 reduces scope creep risk"
   RiskWarning: Scope creep and inconsistent delivery unless paired with strong Coordination.
   SortOrder: 3

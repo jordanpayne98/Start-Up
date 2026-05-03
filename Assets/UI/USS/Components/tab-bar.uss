@@ -1,0 +1,15 @@
+/* ── Tab Bar Component (Page 30 Tabs contract) ───────────────────────────── */
+
+/* All base .tab-bar, .tab-item, .tab-item--active, .tab-item__count rules
+   are defined in components.uss — this file adds tab-bar-specific layout
+   overrides and any screen-level customisation anchors. */
+
+.tab-item__label {
+    color: inherit;
+    font-size: var(--font-size-sm);
+    -unity-font-style: normal;
+}
+
+.tab-item--active .tab-item__label {
+    -unity-font-style: bold;
+}

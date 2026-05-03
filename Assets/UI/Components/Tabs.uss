@@ -1,0 +1,102 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Tabs + Filter Bar — Page 30
+   Depends on: tokens.uss
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tab-bar {
+    flex-direction: row;
+    align-items: flex-end;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-divider);
+    height: var(--toolbar-height);
+}
+
+.tab-item {
+    flex-direction: row;
+    align-items: center;
+    padding-left: var(--space-16);
+    padding-right: var(--space-16);
+    height: 100%;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(0, 0, 0, 0);
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+    transition: color 150ms ease-in-out;
+}
+
+.tab-item:hover {
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-panel-hover);
+}
+
+.tab-item--active {
+    color: var(--color-text-accent);
+    border-bottom-color: var(--color-accent);
+    -unity-font-style: bold;
+}
+
+.tab-item--disabled {
+    color: var(--color-text-disabled);
+}
+
+.tab-item__count {
+    background-color: var(--color-bg-panel-raised);
+    border-radius: var(--radius-pill);
+    min-width: 18px;
+    height: 18px;
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+    font-size: var(--font-size-micro);
+    color: var(--color-text-secondary);
+    margin-left: var(--space-6);
+    align-items: center;
+    justify-content: center;
+}
+
+.tab-item--active .tab-item__count {
+    background-color: var(--color-accent-muted);
+    color: var(--color-text-accent);
+}
+
+/* ── Filter Bar ──────────────────────────────────────────────────────────── */
+
+.filter-bar {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-8);
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+    padding-left: var(--space-16);
+    padding-right: var(--space-16);
+    height: var(--toolbar-height);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-divider);
+}
+
+.filter-chip {
+    flex-direction: row;
+    align-items: center;
+    border-radius: var(--radius-4);
+    height: var(--btn-height-sm);
+    padding-left: var(--space-8);
+    padding-right: var(--space-6);
+    border-width: 1px;
+    border-color: var(--color-border-subtle);
+    background-color: var(--color-bg-panel-raised);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    cursor: url('/Assets/UI/Textures/Cursors/cursor-pointer.png') 0 0;
+    transition: background-color 150ms ease-in-out;
+}
+
+.filter-chip:hover {
+    background-color: var(--color-bg-panel-hover);
+    border-color: var(--color-border-hover);
+}
+
+.filter-chip--active {
+    border-color: var(--color-border-selected);
+    color: var(--color-text-accent);
+    background-color: var(--color-accent-muted);
+}

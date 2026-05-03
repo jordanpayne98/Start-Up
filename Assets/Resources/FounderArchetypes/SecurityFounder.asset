@@ -30,8 +30,16 @@ MonoBehaviour:
   CAMax: 95
   PAMin: 110
   PAMax: 145
+  SoloCAMin: 90
+  SoloCAMax: 115
+  SoloPAMin: 125
+  SoloPAMax: 160
   SkillBiasProfile: 030000000100000000000000
+  PrimarySkillBiases: 0300000000000000
+  SecondarySkillBiases: 0100000002000000
   AttributeBias: 020000000600000003000000
+  HiddenBias: 0500000003000000
+  WeaknessRiskAttributes: 0100000003000000
   IsGatedArchetype: 1
   GateCondition: Security Founder requires Enterprise Consultancy background.
   SortOrder: 19

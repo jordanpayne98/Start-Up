@@ -30,8 +30,16 @@ MonoBehaviour:
   CAMax: 95
   PAMin: 110
   PAMax: 145
+  SoloCAMin: 90
+  SoloCAMax: 115
+  SoloPAMin: 125
+  SoloPAMax: 160
   SkillBiasProfile: 0a000000080000000f00000009000000
+  PrimarySkillBiases: 0a00000008000000
+  SecondarySkillBiases: 0f00000009000000
   AttributeBias: 010000000300000007000000
+  HiddenBias: 0000000001000000
+  WeaknessRiskAttributes: 0600000002000000
   IsGatedArchetype: 0
   GateCondition: 
   SortOrder: 13

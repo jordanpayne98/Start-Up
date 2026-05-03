@@ -36,3 +36,15 @@ MonoBehaviour:
   ContractPoolBiasTags:
   - enterprise
   - consulting
+  CandidatePoolBiasFamilies: 0500000000000000
+  CandidatePoolBiasWeights:
+  - 3
+  - 2
+  ContractPoolBiasCategories:
+  - consulting
+  - enterprise
+  - engineering
+  WelcomeMessage: Your consultancy opens with strong commercial and technical credibility.
+    Use it to land high-value enterprise contracts early.
+  HiringHint: Consultancies need breadth. A Product Designer will help you scope
+    and pitch contracts more effectively to enterprise clients.

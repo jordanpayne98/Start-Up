@@ -11,16 +11,24 @@ public class ScreenRegistry
         CandidateDetailAsset = candidateDetailAsset;
         // --- Dashboard ---
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.DashboardInbox,
-            Category = NavCategory.Dashboard,
+            Id = ScreenId.Dashboard,
+            LegacyCategory = NavCategory.Dashboard,
+            DisplayName = "Dashboard",
+            UxmlPath = "Assets/UI/UXML/Screens/Dashboard/DashboardScreen.uxml",
+            ViewFactory = () => new DashboardView(),
+            ViewModelFactory = () => new DashboardViewModel()
+        });
+        RegisterScreen(new ScreenConfig {
+            Id = ScreenId.DashboardInbox,
+            LegacyCategory = NavCategory.Dashboard,
             DisplayName = "Inbox",
             UxmlPath = "Assets/UI/UXML/Screens/PortalInbox.uxml",
             ViewFactory = () => new InboxView(dispatcher, modal, nav),
             ViewModelFactory = () => new InboxViewModel()
         });
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.DashboardCalendar,
-            Category = NavCategory.Dashboard,
+            Id = ScreenId.DashboardCalendar,
+            LegacyCategory = NavCategory.Dashboard,
             DisplayName = "Calendar",
             UxmlPath = "Assets/UI/UXML/Screens/PortalCalendar.uxml",
             ViewFactory = () => new CalendarView(modal),
@@ -29,16 +37,16 @@ public class ScreenRegistry
 
         // --- Business: Finance ---
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.FinanceOverview,
-            Category = NavCategory.Finance,
+            Id = ScreenId.FinanceOverview,
+            LegacyCategory = NavCategory.Finance,
             DisplayName = "Financial Overview",
             UxmlPath = "Assets/UI/UXML/Screens/BusinessFinance.uxml",
             ViewFactory = () => new FinanceView(dispatcher, modal, tooltip),
             ViewModelFactory = () => new FinanceViewModel()
         });
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.FinanceStockInvestments,
-            Category = NavCategory.Finance,
+            Id = ScreenId.FinanceStockInvestments,
+            LegacyCategory = NavCategory.Finance,
             DisplayName = "Stock / Investments",
             UxmlPath = "Assets/UI/UXML/Screens/BusinessStockInvestments.uxml",
             ViewFactory = () => new StockInvestmentsView(dispatcher),
@@ -47,16 +55,16 @@ public class ScreenRegistry
 
         // --- Business: Finance > Market ---
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.MarketOverview,
-            Category = NavCategory.Market,
+            Id = ScreenId.MarketOverview,
+            LegacyCategory = NavCategory.Market,
             DisplayName = "Market Overview",
             UxmlPath = "Assets/UI/UXML/Screens/BusinessMarket.uxml",
             ViewFactory = () => new MarketView(dispatcher, tooltip),
             ViewModelFactory = () => new MarketViewModel()
         });
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.MarketProductsBrowser,
-            Category = NavCategory.Market,
+            Id = ScreenId.MarketProductsBrowser,
+            LegacyCategory = NavCategory.Market,
             DisplayName = "Products Browser",
             UxmlPath = "Assets/UI/UXML/Screens/BusinessProductsBrowser.uxml",
             ViewFactory = () => new ProductsBrowserView(modal, nav),
@@ -65,24 +73,24 @@ public class ScreenRegistry
 
         // --- Business: Operations ---
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.ProductionContracts,
-            Category = NavCategory.Production,
+            Id = ScreenId.ProductionContracts,
+            LegacyCategory = NavCategory.Production,
             DisplayName = "Contracts",
             UxmlPath = "Assets/UI/UXML/Screens/BusinessContracts.uxml",
             ViewFactory = () => new ContractsView(dispatcher, tooltip),
             ViewModelFactory = () => new ContractsOverviewViewModel()
         });
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.ProductionProductsInDev,
-            Category = NavCategory.Production,
+            Id = ScreenId.ProductionProductsInDev,
+            LegacyCategory = NavCategory.Production,
             DisplayName = "In Development",
             UxmlPath = "Assets/UI/UXML/Screens/BusinessProducts.uxml",
             ViewFactory = () => new ProductsView(dispatcher, modal, tooltip, ProductsViewMode.InDevelopment),
             ViewModelFactory = () => new ProductsViewModel()
         });
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.ProductionProductsLive,
-            Category = NavCategory.Production,
+            Id = ScreenId.ProductionProductsLive,
+            LegacyCategory = NavCategory.Production,
             DisplayName = "Live Products",
             UxmlPath = "Assets/UI/UXML/Screens/BusinessProducts.uxml",
             ViewFactory = () => new ProductsView(dispatcher, modal, tooltip, ProductsViewMode.Live),
@@ -91,24 +99,24 @@ public class ScreenRegistry
 
         // --- Business: Competitors ---
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.CompetitorsList,
-            Category = NavCategory.Competitors,
+            Id = ScreenId.CompetitorsList,
+            LegacyCategory = NavCategory.Competitors,
             DisplayName = "Competitor List",
             UxmlPath = "Assets/UI/UXML/Screens/BusinessCompetitorList.uxml",
             ViewFactory = () => new CompetitorListView(modal),
             ViewModelFactory = () => new CompetitorListViewModel()
         });
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.FinanceMyInvestments,
-            Category = NavCategory.Finance,
+            Id = ScreenId.FinanceMyInvestments,
+            LegacyCategory = NavCategory.Finance,
             DisplayName = "My Investments",
             UxmlPath = "Assets/UI/UXML/Screens/BusinessMyInvestments.uxml",
             ViewFactory = () => new MyInvestmentsView(dispatcher),
             ViewModelFactory = () => new MyInvestmentsViewModel()
         });
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.CompetitorsIndustryOverview,
-            Category = NavCategory.Competitors,
+            Id = ScreenId.CompetitorsIndustryOverview,
+            LegacyCategory = NavCategory.Competitors,
             DisplayName = "Industry Overview",
             UxmlPath = "Assets/UI/UXML/Screens/BusinessIndustryOverview.uxml",
             ViewFactory = () => new IndustryOverviewView(),
@@ -117,8 +125,8 @@ public class ScreenRegistry
 
         // --- Dashboard: Reputation ---
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.DashboardReputation,
-            Category = NavCategory.Dashboard,
+            Id = ScreenId.DashboardReputation,
+            LegacyCategory = NavCategory.Dashboard,
             DisplayName = "Reputation",
             UxmlPath = "Assets/UI/UXML/Screens/BusinessReputation.uxml",
             ViewFactory = () => new ReputationView(tooltip),
@@ -127,38 +135,38 @@ public class ScreenRegistry
 
         // --- HR Portal ---
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.HRPortalLanding,
-            Category = NavCategory.HR,
+            Id = ScreenId.HRPortalLanding,
+            LegacyCategory = NavCategory.HR,
             DisplayName = "HR Portal",
             UxmlPath = "Assets/UI/UXML/Screens/HRPortal.uxml",
             ViewFactory = () => new HRPortalLandingView(dispatcher, nav),
             ViewModelFactory = () => new HRPortalLandingViewModel()
         });
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.HREmployees,
-            Category = NavCategory.HR,
+            Id = ScreenId.HREmployees,
+            LegacyCategory = NavCategory.HR,
             DisplayName = "Employees",
             UxmlPath = "Assets/UI/UXML/Screens/HRPortal.uxml",
             ViewFactory = () => new EmployeesView(dispatcher, modal, nav),
             ViewModelFactory = () => new EmployeesViewModel()
         });
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.HRCandidates,
-            Category = NavCategory.HR,
+            Id = ScreenId.HRCandidates,
+            LegacyCategory = NavCategory.HR,
             DisplayName = "Candidates",
             ViewFactory = () => new CandidateMarketView(dispatcher, modal, nav, tooltip),
             ViewModelFactory = () => new CandidateMarketViewModel()
         });
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.HRAssignments,
-            Category = NavCategory.HR,
+            Id = ScreenId.HRAssignments,
+            LegacyCategory = NavCategory.HR,
             DisplayName = "Assignments",
             ViewFactory = () => new HRAssignmentsView(dispatcher, modal, nav, tooltip),
             ViewModelFactory = () => new HRAssignmentsViewModel()
         });
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.HRTeams,
-            Category = NavCategory.HR,
+            Id = ScreenId.HRTeams,
+            LegacyCategory = NavCategory.HR,
             DisplayName = "Teams",
             UxmlPath = "Assets/UI/UXML/Screens/HRPortal.uxml",
             ViewFactory = () => new TeamAssignmentView(dispatcher, modal, nav),
@@ -167,11 +175,11 @@ public class ScreenRegistry
 
         // --- Product Creation ---
         RegisterScreen(new ScreenConfig {
-            ScreenId = ScreenId.ProductCreationPlanning,
-            Category = NavCategory.Production,
+            Id = ScreenId.ProductCreationPlanning,
+            LegacyCategory = NavCategory.Production,
             DisplayName = "New Product",
             UxmlPath = "Assets/UI/UXML/Screens/ProductCreationPlanning.uxml",
-            ViewFactory = () => new ProductCreationPlanningView(dispatcher, modal),
+            ViewFactory = () => new ProductCreationPlanningView(),
             ViewModelFactory = () => new ProductCreationPlanningViewModel()
         });
 
@@ -179,7 +187,7 @@ public class ScreenRegistry
     }
 
     private void RegisterScreen(ScreenConfig config) {
-        _configs[config.ScreenId] = config;
+        _configs[config.Id] = config;
     }
 
     private void BuildNavigationTree() {
@@ -187,6 +195,7 @@ public class ScreenRegistry
 
         // Dashboard
         var dashboard = new NavNode { Id = "dashboard", Label = "Dashboard", Icon = "▦", Hotkey = "1" };
+        dashboard.AddChild(new NavNode { Id = "dashboard-home",       Label = "Overview",    ScreenId = ScreenId.Dashboard,          Hotkey = "O" });
         dashboard.AddChild(new NavNode { Id = "dashboard-inbox",      Label = "Inbox",      ScreenId = ScreenId.DashboardInbox,      Hotkey = "I" });
         dashboard.AddChild(new NavNode { Id = "dashboard-calendar",   Label = "Calendar",   ScreenId = ScreenId.DashboardCalendar,   Hotkey = "C" });
         dashboard.AddChild(new NavNode { Id = "dashboard-reputation", Label = "Reputation", ScreenId = ScreenId.DashboardReputation, Hotkey = "R" });
@@ -212,8 +221,9 @@ public class ScreenRegistry
         production.AddChild(new NavNode { Id = "production-contracts", Label = "Contracts", ScreenId = ScreenId.ProductionContracts, Hotkey = "C" });
 
         var productsGroup = new NavNode { Id = "production-products-group", Label = "Products", Icon = "", Hotkey = "P" };
-        productsGroup.AddChild(new NavNode { Id = "production-products-indev", Label = "In Development", ScreenId = ScreenId.ProductionProductsInDev });
-        productsGroup.AddChild(new NavNode { Id = "production-products-live",  Label = "Live Products",  ScreenId = ScreenId.ProductionProductsLive });
+        productsGroup.AddChild(new NavNode { Id = "production-products-indev", Label = "In Development",  ScreenId = ScreenId.ProductionProductsInDev });
+        productsGroup.AddChild(new NavNode { Id = "production-products-live",  Label = "Live Products",   ScreenId = ScreenId.ProductionProductsLive });
+        productsGroup.AddChild(new NavNode { Id = "production-new-product",    Label = "New Product",     ScreenId = ScreenId.ProductCreationPlanning, Hotkey = "N" });
         production.AddChild(productsGroup);
 
         root.AddChild(production);
